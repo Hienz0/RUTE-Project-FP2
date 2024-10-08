@@ -1,0 +1,154 @@
+.services {
+  background-image: url('../../assets/background.jpg'); /* Change the path to your image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Ensures the background stays in place when scrolling */
+  margin: 0;
+  padding: 0;
+ 
+}
+
+.custom-navbar {
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  z-index: 1040;
+}
+
+.custom-navbar .navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar .logo {
+  height: 25px;
+  margin-left: 20px;
+}
+
+.custom-navbar .ml-auto {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar .form-inline {
+  margin-right: 20px;
+}
+
+
+.custom-navbar .custom-profile {
+  margin-right: 20px;
+}
+
+.backTitle {
+  color: aliceblue;
+  padding-bottom: 20px;
+  
+}
+.quote {
+  background-color: rgba(128, 128, 128, 0.5);
+  color: aliceblue;
+  
+  padding-top: 20px;
+  padding-bottom: 10px;
+  font-style: italic;
+  font-size: 30px;
+  font-family: "Courier New", Courier, monospace;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-bottom: 50px;
+}
+
+.service-item {
+  box-shadow: 0px 5px 90px 0px color-mix(in srgb, var(--default-color), transparent 90%);
+  background-color: var(--contrast-color);
+  transition: all ease-in-out 0.4s;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white; /* Ensure text is readable against the background image */
+  background-color: rgba(0, 0, 0, 0.5); /* Fallback background color */
+  margin: 10px; /* Add margin to ensure gap between items */
+  width: 250px; /* Fixed width */
+  height: 250px; /* Fixed height */
+  box-sizing: border-box; /* Ensures padding is included in the width and height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+}
+
+.service-item-1 {
+  background-image: url('../../assets/akun.png');
+}
+
+.service-item-2 {
+  background-image: url('../../assets/provider.png');
+}
+
+.service-item .icon {
+  margin-bottom: 10px;
+}
+
+.service-item .icon i {
+  color: var(--accent-color);
+  font-size: 36px;
+  transition: 0.3s;
+}
+
+.title{
+  margin-top: 30px;
+}
+.subTitle{
+  margin-top: 30px;
+  margin-bottom: 30px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+h2 {
+  
+  text-align: center;
+  color: aliceblue;
+}
+
+h4 {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--heading-color); /* Adjust for readability */
+  text-align: center; /* Center the text */
+  margin-top: 15px; /* Space above the heading */
+  color: aliceblue;
+}
+
+.text-centerr {
+  line-height: 24px;
+  font-size: 14px;
+  color: var(--text-color); /* Adjust for readability */
+  margin-bottom: 0;
+  text-align: center; /* Center the text */
+  margin-top: 10px; /* Space above the paragraph */
+  color: aliceblue;
+}
+
+.service-item:hover {
+  transform: translateY(-10px);
+}
+
+.service-item:hover h4 {
+  color: var(--accent-color);
+}
+.container-footer{
+  margin-top: 80px;
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  z-index: 1040;
+  justify-content: center;
+}

@@ -1,0 +1,77 @@
+/* Custom header CSS / */
+.navbar {
+  background-color: rgba(255, 255, 255, 0.5); 
+  height: 80px; 
+  margin-left: 20px; 
+    margin-right: 20px; 
+}
+.navbar-brand img {
+  max-height: 35px; 
+}
+.navbar-nav .nav-link {
+  padding: 0.5rem 1.5rem; 
+}
+
+/* / Custom CSS our services */
+.service-card {
+  border: none;
+  background-color: whitesmoke;
+}
+.service-card:hover {
+  transform: translateY(-5px);
+}
+
+.manage {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 100%;
+}
+
+.carousel-inner img, .service-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.img-thumbnail {
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tourism-icons .list-inline-item {
+  margin-right: 45px; /* Adjust the margin as needed */
+}
+
+/* footer */
+footer {
+  background-color: #f8f9fa;
+  color: #495057;
+  padding: 20px 0;
+  text-align: center;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+/* body {
+  height: 100%;
+} */

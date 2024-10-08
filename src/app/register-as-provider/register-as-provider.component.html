@@ -1,0 +1,199 @@
+<!--Header-->
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+  <a class="navbar-brand" href="/dashboard">
+    <img src="../../assets/images/rute-logo-temp.png" alt="Logo" class="logo">
+  </a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Accomodation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Tour & Guide</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Restaurant</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Transportation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="">Itinerary Planning</a>
+      </li>
+      <li class="nav-item dropdown" id="navProfile">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <img src="../../assets/images/sample photo/1.jpeg" alt="Profile" class="rounded-circle"
+            style="width: 30px; height: 30px;">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+          <li *ngIf="currentUser"><span class="dropdown-item">{{ currentUser.name }}</span></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Customize User Profile</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-paint-brush"></i> Change Theme</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-key"></i> Reset Password</a></li>
+          <li *ngIf="currentUser.userType === 'user'"><a class="dropdown-item" href="/provider-registration"><i
+                class="fas fa-user-plus"></i> Register as Provider</a></li>
+          <li *ngIf="currentUser.userType !== 'user'"><a class="dropdown-item" href="/manage-services"><i
+                class="fas fa-exchange-alt"></i> Switch to Provider Mode</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div class="form-inline">
+    <select class="custom-select">
+      <option selected>EN</option>
+      <option>IND</option>
+    </select>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="background-image">
+    <!-- Sign up form for provider registration -->
+    <section class="signup">
+      <div class="container">
+        <div class="signup-content">
+          <div class="signup-form">
+            <h2 class="form-title">Register as Provider</h2>
+            <form (submit)="onSubmit()" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="business-type">
+                  <i class="zmdi zmdi-hotel"></i> <!-- You can replace this icon with an appropriate one -->
+                </label>
+                <select name="businessType" id="business-type" [(ngModel)]="businessType" required>
+                  <option value="" disabled selected>Select Business Type</option>
+                  <option value="Accommodation">Accommodation</option>
+                  <option value="TourGuide">Tour Guide</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Transportation">Transportation</option>
+                </select>
+              </div>
+
+              <!-- Subcategory selection, shown conditionally based on businessType -->
+              <div *ngIf="businessType === 'Accommodation' || businessType === 'Transportation'" class="form-group">
+                <label for="business-subcategory">
+                  <i class="zmdi zmdi-label"></i> <!-- You can replace this icon with an appropriate one -->
+                </label>
+                <select name="businessSubcategory" id="business-subcategory" [(ngModel)]="businessSubcategory" required>
+                  <option value="" disabled selected>Select Subcategory</option>
+                  <option *ngFor="let subcategory of subcategoryMap[businessType]" [value]="subcategory">{{ subcategory
+                    }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="business-name">
+                  <i class="zmdi zmdi-account material-icons-name"></i>
+                </label>
+                <input type="text" name="businessName" id="business-name" [(ngModel)]="businessName"
+                  placeholder="Business Name" required />
+              </div>
+              <div class="form-group">
+                <label for="business-location">
+                  <i class="zmdi zmdi-pin"></i>
+                </label>
+                <input type="text" name="businessLocation" id="business-location" [(ngModel)]="businessLocation"
+                  placeholder="Business Location" required />
+              </div>
+              <div class="form-group">
+                <label for="business-description">
+                  <i class="zmdi zmdi-file-text"></i>
+                </label>
+                <textarea name="businessDesc" id="business-description" [(ngModel)]="businessDesc"
+                  placeholder="Business Description" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="price">
+                  <i class="zmdi zmdi-money"></i>
+                </label>
+                <input type="number" name="price" id="price" [(ngModel)]="price" [placeholder]="getPricePlaceholder()"
+                  required />
+              </div>
+              <div class="form-group">
+                <p class="fileInput">Business License</p>
+                <label for="business-license-file">
+                  <i class="zmdi zmdi-collection-pdf"></i>
+                </label>
+                <input type="file" name="businessLicense" id="business-license-file"
+                  (change)="onFileChange($event, 'businessLicense')" required />
+              </div>
+              <div class="form-group">
+                <p class="fileInput">Image of Yourself</p>
+                <label for="image-self-file">
+                  <i class="zmdi zmdi-account-box"></i>
+                </label>
+                <input type="file" name="imageSelf" id="image-self-file" (change)="onFileChange($event, 'imageSelf')"
+                  required />
+              </div>
+              <div class="form-group">
+                <p class="fileInput">Image of Your Service (Minimum 3 images required)</p>
+                <label for="image-service-file">
+                  <i class="zmdi zmdi-camera"></i>
+                </label>
+                <input type="file" name="imageService" id="image-service-file"
+                  (change)="onFileChange($event, 'imageService')" multiple required />
+              </div>
+              <div class="form-group">
+                <input type="checkbox" name="agree-term" id="agree-term" class="agree-term" required />
+                <label for="agree-term" class="label-agree-term"><span><span></span></span>I agree to all
+                  statements in <a href="#" class="term-service">Terms of service</a></label>
+              </div>
+              <div class="form-group form-button">
+                <input type="submit" name="signup" id="signup" class="form-submit" value="Register" />
+              </div>
+
+              <div *ngIf="successMessage" class="alert alert-success">
+                {{ successMessage }}
+              </div>
+
+            </form>
+          </div>
+          <div class="containerPartner" >
+            <div class="row justify-content-center">
+              <div class="col-md-9">
+                <div class="card signup-card">
+                  <div class="card-body">
+                    <h2 class="card-title text-center">Become Our Partner</h2>
+                    <div class="text-center">
+                      <img src="../../assets/images/signup-image.jpg" alt="Sign Up Image" class="img-fluid rounded mb-4" style="max-width: 100%;">
+                    </div>
+                    <div class="benefits-description">
+                      <p>Partner with us in Ubud and enjoy exclusive benefits including:</p>
+                      <ul style="margin-top: 10px;">
+                        <li>Direct access to a growing market of tourists eager to explore Ubud's unique offerings.</li>
+                        <li>Collaborative promotional campaigns to increase your visibility.</li>
+                        <li>Comprehensive support and training tailored for Ubud's tourism sector.</li>
+                        <li>Insights and analytics to enhance your services and attract more customers.</li>
+                        <li>Opportunities to network with other top tourism professionals in Ubud.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+
+<!--Footer-->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <p>&copy; 2024 RUTE Company. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>

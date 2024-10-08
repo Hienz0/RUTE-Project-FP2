@@ -1,0 +1,21 @@
+/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, and also import other style files */
+
+  
+  
+.custom-snackbar-success {
+    background-color: #4caf50 !important; /* Green background */
+    color: white !important; /* White text */
+    margin-top: 80px !important; /* Adjust this value based on the height of your navbar */
+  }
+  .custom-snackbar-error {
+    background-color: #f44336 !important; /* Red background */
+    color: white !important; /* White text */
+    margin-top: 80px !important; /* Adjust this value based on the height of your navbar */
+  }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

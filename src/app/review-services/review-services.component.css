@@ -1,0 +1,309 @@
+/* Custom Navbar */
+
+
+
+/* Add any other existing CSS for the component here */
+
+
+.custom-navbar {
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  z-index: 1040;
+}
+
+.custom-navbar .navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar .logo {
+  height: 25px;
+  margin-left: 20px;
+}
+
+.custom-navbar .ml-auto {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar .form-inline {
+  margin-right: 20px;
+}
+
+.custom-navbar .custom-profile {
+  margin-right: 20px;
+}
+
+/* Custom CSS for Team Section */
+.team {
+  text-align: center;
+  background-image: url("../../assets/background.jpg");
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  margin: 0;
+}
+
+.quote {
+  background-color: rgba(128, 128, 128, 0.5);
+  color: aliceblue;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  font-style: italic;
+  font-size: 30px;
+  font-family: "Courier New", Courier, monospace;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-bottom: 60px;
+}
+
+.backTitle {
+  color: aliceblue;
+  padding-bottom: 20px;
+  margin-bottom: 50px;
+}
+
+.title {
+  top: 30px;
+  position: relative;
+  z-index: 1;
+  background-color: transparent;
+  padding-top: 30px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.team .team-cards {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping to multiple lines if needed */
+  justify-content: center; /* Center cards horizontally */
+  gap: 60px; /* Space between cards */
+  padding: 20px; /* Optional padding around the group of cards */
+}
+
+.team .col-xl-3 {
+  flex: 0 0 auto; /* Ensure columns don't shrink or grow */
+  width: 250px; /* Set a fixed width for each card */
+}
+
+.team .member {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  height: 250px;
+  width: 250px;
+  display: flex;
+  cursor: pointer;
+  border-radius: 30px;
+  background: white; /* Add background color for better visibility */
+}
+
+.team .member .member-info {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  transition: 0.2s;
+  color: aliceblue;
+}
+
+.team .member .member-info-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: bottom 0.4s;
+  align-items: center;
+}
+
+.team .member .member-info-content h4 {
+  font-weight: 700;
+  margin-bottom: 2px;
+  font-size: 18px;
+}
+
+.team .member .member-info-content span {
+  font-style: italic;
+  display: block;
+  font-size: 13px;
+}
+
+.team .member .social {
+  position: absolute;
+  left: -50px;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  transition: left ease-in-out 0.3s;
+  background: rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.team .member .social a {
+  transition: color 0.3s;
+  display: block;
+  color: var(--default-color);
+  margin-top: 15px;
+}
+
+.team .member .social a:hover {
+  color: var(--accent-color);
+}
+
+.team .member .social i {
+  font-size: 18px;
+  margin: 0 2px;
+}
+
+.team .member:hover .member-info {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.8) 20%, rgba(255, 255, 255, 0) 100%);
+  opacity: 1;
+  transition: 0.4s;
+}
+
+.team .member:hover .member-info-content {
+  bottom: 30px;
+  transition: bottom 0.4s;
+}
+
+.team .member:hover .social {
+  left: 0;
+  transition: left ease-in-out 0.3s;
+}
+
+/* Modal and Footer Styles */
+.modal-header {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-title {
+  font-family: "Arial", sans-serif;
+  font-size: 22px;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.imgProvider {
+  width: 200px;
+  height: 200px;
+}
+
+.imgProvider img {
+  max-width: 100%;
+}
+
+.textProvider {
+  margin-top: 10px;
+}
+
+.imgProof {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.imgProof img {
+  width: 150px;
+  height: 150px;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Modal for Large Image */
+#largeImageModal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  padding-top: 50px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+#largeImageModal img {
+  margin: auto;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+#largeImageModal .close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+#largeImageModal .close:hover,
+#largeImageModal .close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-content1 {
+  margin: auto;
+  display: flex;
+  width: 1000px;
+  height: 700px;
+}
+
+.buttonReview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonReview button:first-child {
+  margin-right: 10px;
+}
+
+.buttonReview button:last-child {
+  margin-left: 10px;
+}
+
+.modal-content {
+  overflow-y: auto;
+}
+
+.footerDistance {
+  margin-bottom: 30px;
+}
+
+.modal.show.d-block {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.container-footer {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  z-index: 1040;
+  justify-content: center;
+}

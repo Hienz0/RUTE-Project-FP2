@@ -1,0 +1,345 @@
+<!--Header-->
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+  <a class="navbar-brand" href="#">
+    <img src="../../assets/images/rute-logo-temp.png" alt="Logo" class="logo">
+  </a>
+  <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Accomodation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Tour & Guide</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Restaurant</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Transportation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/register">Sign Up</a>
+      </li>
+    </ul>
+  </div>
+  <div class="form-inline">
+    <select class="custom-select">
+      <option selected>EN</option>
+      <option>IND</option>
+    </select>
+  </div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+    aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</nav>
+
+<!--//content-->
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 content">
+      <img src="../../assets/images/tagline.png" alt="tagline" class="img-fluid">
+      <p>Explore Ubud like never before with RUTE. Discover hidden gems, book authentic experiences, and connect with
+        local guides easily. Your gateway to unforgettable adventures awaits!.</p>
+      <div class="container">
+        <div class="btn-container">
+          <button type="button" class="btn btn-warning btn-lg"><a href="/login">Get Started</a></button>
+          <button type="button" class="btn btn-danger btn-lg"><a class="nav-link" (click)="scrollToSection()">About
+              Us</a></button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 image">
+      <img src="../../assets/images/person.png" alt="Placeholder Image" class="img-fluid">
+    </div>
+  </div>
+
+  <!--explore section-->
+
+  <div class="explore-section">
+    <h1 class="explore-heading">Explore</h1>
+    <p class="quote">"Ubud is full of wonders waiting for you to discover."</p>
+  </div>
+
+
+
+  <!--Carousel-->
+
+  <div id="carouselExample" class="carousel slide mt-5" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/04.jpg" class="d-block w-100" alt="First slide">
+              <div class="image-overlay">First Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/2466724.jpg" class="d-block w-100" alt="Second slide">
+              <div class="image-overlay">Second Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/2466714.jpg" class="d-block w-100" alt="Third slide">
+              <div class="image-overlay">Third Image Label</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/45cb02cbd94da6e77b5162364a7d57e5.jpg" class="d-block w-100"
+                alt="Fourth slide">
+              <div class="image-overlay">Fourth Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/wp6300995.jpg" class="d-block w-100" alt="Fifth slide">
+              <div class="image-overlay">Fifth Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/best-villas-in-ubud-5.png" class="d-block w-100"
+                alt="Sixth slide">
+              <div class="image-overlay">Sixth Image Label</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/wp6301070.jpg" class="d-block w-100" alt="Seventh slide">
+              <div class="image-overlay">Seventh Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/2466724.jpg" class="d-block w-100" alt="Eighth slide">
+              <div class="image-overlay">Eighth Image Label</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="position-relative">
+              <img src="../../assets/images/sample image/2466680.jpg" class="d-block w-100" alt="Ninth slide">
+              <div class="image-overlay">Ninth Image Label</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
+
+
+
+
+  <!--carousel 2-->
+
+  <div id="carouselExampleCaptions" class="carousel slide">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+        aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+        aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+        aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active" id="carousel2">
+        <img src="../../assets/images/sample image/wp6301070.jpg" class="d-block w-100" alt="...">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>First slide label</h5>
+          <p>Some representative placeholder content for the first slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item" id="carousel2">
+        <img src="../../assets/images/sample image/best-villas-in-ubud-5.png" class="d-block w-100" alt="...">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Second slide label</h5>
+          <p>Some representative placeholder content for the second slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item" id="carousel2">
+        <img src="../../assets/images/sample image/2466714.jpg" class="d-block w-100" alt="...">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Third slide label</h5>
+          <p>Some representative placeholder content for the third slide.</p>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
+  <div class="page-divider"></div>
+
+  <!--About Us-->
+  <div class="container" id="aboutUs" #aboutUs>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card mt-5 border-1 shadow">
+          <div class="card-body text-center">
+            <i class="fas fa-globe-americas card-icon fa-3x mb-3 text-primary"></i>
+            <h1 class="card-title mb-4">About Us</h1>
+            <div class="d-flex justify-content-center mb-4">
+              <img src="../../assets/images/rute-logo.png" alt="RUTE Logo" class="logo-img img-fluid"
+                style="max-width: 200px;">
+            </div>
+            <p class="card-text">RUTE is a comprehensive web-based tourism platform tailored to meet the needs of the
+              local tourism ecosystem in Ubud, Bali. Our platform empowers local tourism service providers and bridges
+              the gap between them and global tourists.</p>
+            <p class="card-text">We offer centralized booking for accommodation, tour guides, restaurants, and
+              transportation services. Our goal is to enhance visibility and accessibility for local offerings while
+              promoting sustainable tourism practices.</p>
+            <p class="card-text">At RUTE, we are committed to creating a sense of community and collaboration among
+              local stakeholders. We empower them to thrive in the digital era while preserving Ubud's cultural and
+              environmental heritage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!--our services-->
+  <div class="container mt-5" id="our-services" #ourServices>
+    <h2 class="text-center mb-4">Our Services</h2>
+    <div class="row">
+      <div class="col-md-6 col-lg-3">
+        <div class="card service-card text-center p-4">
+          <div class="card-body">
+            <i class="fas fa-bed fa-3x mb-3"></i>
+            <h5 class="card-title">Accommodation</h5>
+            <p class="card-text">Find the perfect place to stay during your trip.</p>
+            <a href="#" class="btn btn-primary">Learn More</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card service-card text-center p-4">
+          <div class="card-body">
+            <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+            <h5 class="card-title">Tour & Guide</h5>
+            <p class="card-text">Discover amazing destinations with our expert guides.</p>
+            <a href="#" class="btn btn-primary">Learn More</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card service-card text-center p-4">
+          <div class="card-body">
+            <i class="fas fa-utensils fa-3x mb-3"></i>
+            <h5 class="card-title">Restaurant</h5>
+            <p class="card-text">Enjoy delicious meals at our recommended restaurants.</p>
+            <a href="#" class="btn btn-primary">Learn More</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card service-card text-center p-4">
+          <div class="card-body">
+            <i class="fas fa-bus fa-3x mb-3"></i>
+            <h5 class="card-title">Transportation</h5>
+            <p class="card-text">Get around easily with our transportation services.</p>
+            <a href="#" class="btn btn-primary">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Meet our team-->
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Meet Our Team</h2>
+
+    <div class="row">
+      <!-- Team Member 1 -->
+      <div class="col-md-4">
+        <div class="team-member text-center">
+          <img src="../../assets/images/sample photo/1.jpeg" alt="Team Member 1" class="img-fluid">
+          <h4>John Doe</h4>
+          <p class="text-muted">CEO & Founder</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis augue vel libero scelerisque posuere. In
+            hac habitasse platea dictumst.</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Member 2 -->
+      <div class="col-md-4">
+        <div class="team-member text-center">
+          <img src="../../assets/images/sample photo/2.jpg" alt="Team Member 2" class="img-fluid">
+          <h4>Jane Smith</h4>
+          <p class="text-muted">Marketing Manager</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis augue vel libero scelerisque posuere. In
+            hac habitasse platea dictumst.</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Member 3 -->
+      <div class="col-md-4">
+        <div class="team-member text-center">
+          <img src="../../assets/images/sample photo/3.jpg" alt="Team Member 3" class="img-fluid">
+          <h4>Michael Johnson</h4>
+          <p class="text-muted">Lead Developer</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis augue vel libero scelerisque posuere. In
+            hac habitasse platea dictumst.</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!--decore-->
+  <img src="../../assets/images/Decore1.png" class="sticky-image" alt="Sticky Image">
+  <img src="../../assets/images/Ellipse 8.png" class="custom-sticky-image" alt="Sticky Image">
+
+  <!--Footer-->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <p>&copy; 2024 RUTE Company. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>

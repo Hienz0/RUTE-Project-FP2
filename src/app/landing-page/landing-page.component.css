@@ -1,0 +1,385 @@
+ /* Custom CSS */
+ .content {
+    padding: 20px;
+  }
+  .image {
+    padding: 20px;
+  }
+  /* Adjustments for small screens */
+  @media (max-width: 768px) {
+    .content, .image {
+      padding: 10px;
+    }
+  }
+
+/* Custom CSS */
+.btn-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .btn-container .btn {
+    width: calc(50% - 5px); /* Adjust this value to your desired spacing */
+  }
+
+  .btn-container .btn-warning {
+    color: white; /* Set text color to white */
+  }
+
+  .carousel-item img {
+    border-radius: 10px; /* Adjust this value to change the roundness */
+    margin-top: 20px; /* Adjust this value to set the margin top */
+  }
+
+  .carousel-item {
+    height: 300px; /* Adjust this value to set the height of each item */
+  }
+  .carousel-item img {
+    border-radius: 10px; /* Adjust this value to change the roundness */
+    margin-top: 20px; /* Adjust this value to set the margin top */
+    height: 100%; /* Make all images fill the item height */
+  }
+
+
+
+  /* Custom header CSS */
+  .navbar {
+    background-color: rgba(255, 255, 255, 0.5); /* Transparent background */
+    height: 80px; /* Increased height */
+    margin-left: 20px; /* Add margin to the left */
+      margin-right: 20px; /* Add margin to the right */
+  }
+  .navbar-brand img {
+    max-height: 28px; /* Adjust logo height */
+  }
+  .navbar-nav .nav-link {
+    padding: 0.5rem 1.5rem; /* Adjust padding */
+  }
+
+  /* Custom CSS our services */
+  .service-card {
+    border: none;
+    background-color: transparent;
+  }
+  .service-card:hover {
+    transform: translateY(-5px);
+  }
+
+  /* Custom CSS our team */
+  .team-member {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  .team-member img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 20px;
+  }
+  .social-icons a {
+    color: #333;
+    margin-right: 10px;
+  }
+  .social-icons a:hover {
+    color: #007bff;
+  }
+
+  /* remove button color and underline */
+
+  .btn a {
+    color: inherit; /* Inherit color from parent */
+    text-decoration: none; /* Remove underline */
+  }
+
+
+  footer {
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 20px 0;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  }
+
+  
+
+  
+  .position-relative {
+    position: relative;
+  }
+
+  .image-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .position-relative:hover .image-overlay {
+    opacity: 1;
+  }
+  
+/* Custom CSS for carousel */
+.carousel-item img {
+  height: 200px; /* Set the initial height for all carousel images */
+  object-fit: cover; /* Ensure images cover the entire space */
+  transition: transform 0.3s ease-in-out; /* Add transition effect */
+}
+
+/* Apply zoom effect on hover */
+.carousel-item img:hover {
+  transform: scale(1.05); /* Scale up the image by 5% on hover */
+}
+
+/* Custom CSS for carousel with ID carousel2 */
+#carouselExampleCaptions #carousel2.carousel-item {
+  height: 600px; /* Set the height of carousel items with ID carousel2 */
+}
+
+/* Ensure images within carousel items cover the entire space */
+#carouselExampleCaptions #carousel2.carousel-item img {
+  height: 100%; /* Make the images fill the item height */
+  object-fit: cover; /* Ensure images cover the entire space */
+}
+
+
+.explore-section {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.explore-heading {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.quote {
+  font-style: italic;
+}
+
+
+
+
+
+/*about us*/
+
+.containerAboutUs {
+  margin: 20px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.logo-img {
+  max-width: 200px; /* Adjust the width as needed */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+
+.logo-img {
+  max-width: 200px; /* Adjust the width as needed */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.about-section {
+  text-align: center;
+  padding: 50px 0;
+  background-color: #f8f9fa; /* Light gray background */
+}
+
+
+.about-us-card {
+  /* border: none; */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.about-us-card:hover {
+  box-shadow: 0 8px 12px rgba(0,0,0,0.4);
+}
+
+.about-us-card .card-icon {
+  font-size: 3rem;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.about-us-card .card-body {
+  padding: 20px;
+}
+
+.sticky-image {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 800px; /* Adjust width as needed */
+  height: auto; /* Maintain aspect ratio */
+  z-index: -1; /* Ensure it's above other content */
+}
+
+.custom-sticky-image {
+  position: absolute;
+  top: 0;
+  left: 0; /* Adjusted to left */
+  width: 400px; /* Adjust width as needed */
+  height: auto; /* Maintain aspect ratio */
+  z-index: -1; /* Ensure it's above other content */
+}
+
+
+
+
+
+
+
+
+
+/*Make it responsive*/
+@media (max-width: 768px) {
+  .carousel-item {
+    height: 200px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sticky-image {
+    display: none;
+  }
+}
+
+
+
+
+
+/* Make the logo smaller on small screens */
+.logo {
+  max-width: 100px;
+}
+
+/* responsive navbar */
+
+@media (max-width: 992px) {
+  .navbar-brand {
+      margin-right: 0;
+  }
+
+  .navbar-collapse {
+      justify-content: flex-start;
+  }
+
+  .form-inline {
+      margin-top: 10px;
+      margin-left: auto;
+  }
+
+  .navbar-nav {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .nav-item {
+      margin-bottom: 10px;
+  }
+
+  .custom-select {
+      width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    position: fixed;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background-color: white !important;
+    z-index: 9999; /* Ensure it's above other content */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: adds a subtle shadow */
+  }
+  .navbar-collapse {
+    margin-top: 80px;
+      text-align: center;
+      z-index: 9999;
+    background-color: #f8f9fa; /* Example background color */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add drop shadow */
+    
+
+  }
+
+  .navbar-nav {
+      width: 100%;
+  }
+
+  .nav-item {
+      margin-bottom: 5px;
+  }
+
+  .form-inline {
+      margin-left: auto; /* Aligns the form to the right */
+      margin-right: 10px; /* Add margin between the language selector and the burger icon */
+  }
+
+  .custom-select {
+      margin-right: 10px; /* Adjusted to add spacing between selector and burger icon */
+  }
+
+  .dropdown-menu .dropdown-item {
+    background-color: #f8f9fa; /* Example background color */
+}
+
+/* CSS */
+.navbar-toggler {
+  position: fixed;
+  top: 15px; /* Adjust as needed */
+  right: 15px; /* Adjust as needed */
+  z-index: 9999; /* Ensure it's above other content */
+}
+
+/* CSS */
+.form-inline {
+  position: fixed;
+  top: 15px; /* Adjust as needed */
+  right: 80px; /* Adjust as needed */
+  z-index: 9999; /* Ensure it's above other content */
+}
+
+/* CSS */
+.navbar-brand {
+  position: fixed;
+  top: 15px; /* Adjust as needed */
+  left: 15px; /* Adjust as needed */
+  z-index: 9999; /* Ensure it's above other content */
+}
+
+.container {
+  margin-top: 80px;
+}
+
+}
+
+/* end of responsive navbar */
+
+
+

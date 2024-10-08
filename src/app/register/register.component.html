@@ -1,0 +1,129 @@
+<!--Header-->
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+  <a class="navbar-brand" href="#">
+    <img src="../../assets/images/rute-logo-temp.png" alt="Logo">
+  </a>
+  <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Accommodation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Tour & Guide</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Restaurant</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Transportation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login">Sign In</a>
+      </li>
+    </ul>
+  </div>
+  <div class="form-inline">
+    <select class="custom-select">
+      <option selected>EN</option>
+      <option>IND</option>
+    </select>
+  </div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+</nav>
+
+<div class="main">
+  <div class="background-image">
+    <!-- Sign up form -->
+    <section class="signup">
+      <div class="container">
+        <div class="signup-content">
+          <div class="signup-form">
+            <h2 class="form-title">Sign up</h2>
+            
+            <!-- Success message -->
+            <div *ngIf="successMessage" class="alert alert-success">
+              {{ successMessage }}
+            </div>
+
+            <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+              <div class="form-group">
+                <label for="name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                <input type="text" formControlName="name" id="name" placeholder="Your Name">
+              </div>
+              <div *ngIf="signupForm.get('name')?.invalid && (signupForm.get('name')?.dirty || signupForm.get('name')?.touched)" class="text-danger error-message">
+                <div *ngIf="signupForm.get('name')?.errors?.['required']">Name is required.</div>
+              </div>
+            
+              <div class="form-group">
+                <label for="email"><i class="zmdi zmdi-email"></i></label>
+                <input type="email" formControlName="email" id="email" placeholder="Your Email">
+              </div>
+              <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched" class="text-danger error-message">
+                <div *ngIf="signupForm.get('email')?.errors?.hasOwnProperty('required')">Email is required.</div>
+                <div *ngIf="signupForm.get('email')?.errors?.hasOwnProperty('email')">Invalid email format.</div>
+              </div>
+            
+              <div class="form-group">
+                <label for="password"><i class="zmdi zmdi-lock"></i></label>
+                <input type="password" formControlName="password" id="password" placeholder="Password">
+                <span class="toggle-password" (click)="togglePasswordVisibility()">
+                  <i class="zmdi" [ngClass]="{'zmdi-eye': !showPassword, 'zmdi-eye-off': showPassword}"></i>
+                </span>
+              </div>
+              <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="text-danger error-message">
+                <div *ngIf="signupForm.get('password')?.errors?.hasOwnProperty('required')">Password is required.</div>
+                <div *ngIf="signupForm.get('password')?.errors?.hasOwnProperty('minlength')">Password must be at least 8 characters long.</div>
+              </div>
+            
+              <div class="form-group">
+                <label for="repeatPassword"><i class="zmdi zmdi-lock"></i></label>
+                <input type="password" formControlName="repeatPassword" id="repeatPassword" placeholder="Repeat Password">
+                <span class="toggle-password" (click)="toggleRepeatPasswordVisibility()">
+                  <i class="zmdi" [ngClass]="{'zmdi-eye': !showRepeatPassword, 'zmdi-eye-off': showRepeatPassword}"></i>
+                </span>
+              </div>
+              <div *ngIf="signupForm.get('repeatPassword')?.invalid && signupForm.get('repeatPassword')?.touched" class="text-danger error-message">
+                <div *ngIf="signupForm.get('repeatPassword')?.errors?.hasOwnProperty('required')">Repeat Password is required.</div>
+              </div>
+            
+              <div class="form-group">
+                <input type="checkbox" formControlName="agreeTerm" id="agree-term" class="agree-term">
+                <label for="agree-term" class="label-agree-term"><span><span></span></span> I agree all statements in <a href="#" class="term-service">Terms of service</a></label>
+              </div>
+              <div *ngIf="signupForm.get('agreeTerm')?.invalid && signupForm.get('agreeTerm')?.touched" class="text-danger error-message">
+                <div *ngIf="signupForm.get('agreeTerm')?.errors?.hasOwnProperty('requiredTrue')">You must agree to the Terms of Service.</div>
+              </div>
+            
+              <div *ngIf="errorMessage" class="alert alert-danger">
+                {{ errorMessage }}
+              </div>
+            
+              <div class="form-group form-button">
+                <button type="submit" class="btn btn-primary" [disabled]="!signupForm.valid">Register</button>
+              </div>
+            </form>
+            
+          </div>
+          <div class="signup-image">
+            <figure><img src="../../assets/images/signup-image.jpg" alt="sign up image"></figure>
+            <a href="/login" class="signup-image-link">Already have an account? Log In</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<!--Footer-->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <p>&copy; 2024 RUTE Company. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,293 @@
+<!--Header-->
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+    <a class="navbar-brand" href="/dashboard">
+      <img src="../../assets/images/rute-logo-temp.png" alt="Logo" class="logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Accomodation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Tour & Guide</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Restaurant</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Transportation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="">Itinerary Planning</a>
+        </li>
+      </ul>
+    </div>
+    <div class="navbar-nav">
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <img src="../../assets/images/sample photo/1.jpeg" alt="Profile" class="rounded-circle"
+            style="width: 30px; height: 30px;">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+            <li *ngIf="currentUser"><span class="dropdown-item">{{ currentUser.name }}</span></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Customize User Profile</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-paint-brush"></i> Change Theme</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-key"></i> Reset Password</a></li>
+          <li><a class="dropdown-item" href="/provider-registration"><i class="fas fa-user-plus"></i> Register as
+              Provider</a></li>
+          <li><a class="dropdown-item" href="/dashboard"><i class="fas fa-exchange-alt"></i> Switch to Traveler Mode</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="form-inline">
+      <select class="custom-select">
+        <option selected>EN</option>
+        <option>IND</option>
+      </select>
+    </div>
+  </nav>
+
+<!-- Tourism Icons List -->
+<div class="text-center mt-4">
+    <ul class="list-inline tourism-icons">
+        <li class="list-inline-item">
+            <i class="fas fa-hotel"></i>
+            <span>Acommodation</span>
+        </li>
+        <li class="list-inline-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Tour and Guide</span>
+        </li>
+        <li class="list-inline-item">
+            <i class="fas fa-utensils"></i>
+            <span>Restaurant</span>
+        </li>
+        <li class="list-inline-item">
+            <i class="fas fa-car"></i>
+            <span>Transportation</span>
+        </li>
+    </ul>
+</div>
+
+<!-- Add New Service Button -->
+<div class="card my-3">
+    <div class="card-body">
+        <h5 class="card-title text-center">ADD YOUR SERVICES</h5>
+        <p class="card-text text-center">If you have a new product, add it here.</p>
+        <div class="text-center">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addServiceModal">
+                Add New Service
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1" role="dialog" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="resetForm()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="alert alert-warning" role="alert">
+                    {{ errorMessage }}
+                </div>
+                <div class="form-group">
+                    <label for="serviceName">Service Name</label>
+                    <input type="text" class="form-control" id="serviceName" [(ngModel)]="newServiceName">
+                </div>
+                <div class="form-group">
+                    <label for="serviceDescription">Service Description</label>
+                    <textarea class="form-control" id="serviceDescription" rows="3" [(ngModel)]="newServiceDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="servicePrice">Service Price</label>
+                    <input type="number" class="form-control" id="servicePrice" [(ngModel)]="newServicePrice">
+                </div>
+                <div class="form-group">
+                    <label for="serviceCategory">Services Category</label>
+                    <select class="form-control" id="serviceCategory" [(ngModel)]="newServiceCategory">
+                        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+                    </select>
+                </div>
+
+                <!-- Add a section for subcategory selection -->
+                <div *ngIf="newServiceCategory && subcategoryMap[newServiceCategory]">
+                    <div class="form-group">
+                    <label for="serviceSubcategory">Services Subcategory</label>
+                    <select class="form-control" id="serviceSubcategory" [(ngModel)]="newServiceSubcategory">
+                        <option *ngFor="let subcategory of subcategoryMap[newServiceCategory]" [value]="subcategory">{{ subcategory }}</option>
+                    </select>
+                    </div>
+                </div>
+
+                <!-- New Business License Field -->
+                <div class="form-group">
+                    <label for="businessLicense">Business License</label>
+                    <input type="file" class="form-control" id="businessLicense" (change)="onLicenseSelected($event)">
+                </div>
+                
+                <!-- New Location Field -->
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" [(ngModel)]="newServiceLocation">
+                </div>
+
+                <div class="form-group">
+                    <label for="serviceImages">Service Images (minimum 3)</label>
+                    <input type="file" class="form-control" id="serviceImages" (change)="onFileSelected($event)" multiple>
+                </div>
+                <div *ngIf="imagePreviews.length > 0">
+                    <h6>Uploaded Images:</h6>
+                    <div *ngFor="let image of imagePreviews; let i = index" class="d-flex align-items-center mb-2">
+                      <img [src]="image" alt="Service Image" class="img-thumbnail service-image me-2">
+                      <button type="button" class="btn btn-danger btn-sm" (click)="removeImageAdd(i)">Remove</button>
+                    </div>
+                  </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="resetForm()">Close</button>
+                <button type="button" class="btn btn-primary" (click)="addService()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services List -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="text-center mb-4">
+                <h4>Services List</h4>
+            </div>
+            <!-- Service Cards -->
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let service of services; let i = index">
+                    <div class="card mb-3">
+                        <div id="carousel{{i}}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div *ngFor="let image of service.productImages; let isFirst = first" [class.active]="isFirst" class="carousel-item">
+                                    <img [src]="getFullImagePath(image)" class="d-block w-100 service-image" alt="Service Image">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ service.productName }}</h5>
+                            <p class="card-text">{{ service.productDescription }}</p>
+                            <p class="card-text"><strong>Price:</strong> {{ service.productPrice | currency:'IDR':'symbol' }}</p>
+                            <p class="card-text"><strong>Category:</strong> {{ service.productCategory }}</p>
+                            <!-- Display subcategory only if it exists -->
+                            <ng-container *ngIf="service.productSubcategory">
+                                <p class="card-text"><strong>Type:</strong> {{ service.productSubcategory }}</p>
+                            </ng-container>
+                            <button type="button" class="btn btn-primary me-2" (click)="openEditModal(i)" data-bs-toggle="modal" [attr.data-bs-target]="'#editServiceModal'">Update</button>
+                            <button type="button" class="btn btn-danger" (click)="confirmDelete(i)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+
+<!-- Edit Service Modal -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editServiceModalLabel">Edit Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="resetForm()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="alert alert-warning" role="alert">
+                    {{ errorMessage }}
+                </div>
+                <div class="mb-3">
+                    <label for="editServiceName" class="form-label">Service Name</label>
+                    <input type="text" class="form-control" id="editServiceName" [(ngModel)]="newServiceName">
+                </div>
+                <div class="mb-3">
+                    <label for="editServiceDescription" class="form-label">Service Description</label>
+                    <textarea class="form-control" id="editServiceDescription" rows="3" [(ngModel)]="newServiceDescription"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="editServicePrice" class="form-label">Service Price</label>
+                    <input type="number" class="form-control" id="editServicePrice" [(ngModel)]="newServicePrice">
+                </div>
+                <!-- <div class="mb-3">
+                    <label for="editServiceCategory" class="form-label">Services Category</label>
+                    <select class="form-control" id="editServiceCategory" [(ngModel)]="newServiceCategory">
+                        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+                    </select>
+                </div>
+                <div class="mb-3" *ngIf="shouldDisplaySubcategoryDropdown()">
+                    <label for="editServiceSubcategory" class="form-label">Service Subcategory</label>
+                    <select class="form-control" id="editServiceSubcategory" [(ngModel)]="newServiceSubcategory">
+                      <option *ngFor="let subcategory of subcategoryMap[newServiceCategory]" [value]="subcategory">{{ subcategory }}</option>
+                    </select>
+                  </div> -->
+                  
+                <div class="mb-3">
+                    <label for="editServiceImages" class="form-label">Service Images (minimum 3)</label>
+                    <input type="file" class="form-control" id="editServiceImages" (change)="onFileSelected($event)" multiple>
+                </div>
+                <div *ngIf="existingServiceImages.length > 0">
+                    <h6>Existing Images:</h6>
+                    <div *ngFor="let image of existingServiceImages; let i = index" class="d-flex align-items-center mb-2">
+                        <img [src]="getFullImagePath(image)" alt="Service Image" class="img-thumbnail service-image me-2">
+                        <button type="button" class="btn btn-danger btn-sm" (click)="removeImage(i, true)">Remove</button>
+                    </div>
+                </div>
+                
+                <div *ngIf="imagePreviews.length > 0">
+                    <h6>Uploaded Images:</h6>
+                    <div *ngFor="let image of imagePreviews; let i = index" class="d-flex align-items-center mb-2">
+                        <img [src]="image" alt="Service Image" class="img-thumbnail service-image me-2">
+                        <button type="button" class="btn btn-danger btn-sm" (click)="removeImage(i, false)">Remove</button>
+                    </div>
+                </div>
+                
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="resetForm()">Close</button>
+                <button type="button" class="btn btn-primary" (click)="updateService()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Footer-->
+<footer>
+    <div class="footer-container">
+      <div class="row">
+        <div class="col-md-12">
+          <p>&copy; 2024 RUTE Company. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
