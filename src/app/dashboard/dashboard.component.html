@@ -31,7 +31,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                   <li *ngIf="currentUser"><span class="dropdown-item">{{ currentUser.name }}</span></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Customize User Profile</a></li>
+                  <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user"></i> Customize User Profile</a></li>
                   <li><a class="dropdown-item" href="#"><i class="fas fa-paint-brush"></i> Change Theme</a></li>
                   <li><a class="dropdown-item" href="#"><i class="fas fa-key"></i> Reset Password</a></li>
                   <li *ngIf="currentUser.userType === 'user'"><a class="dropdown-item" href="/provider-registration"><i class="fas fa-user-plus"></i> Register as Provider</a></li>

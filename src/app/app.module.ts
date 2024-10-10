@@ -22,6 +22,7 @@ import { ReviewServicesComponent } from './review-services/review-services.compo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SearchComponent } from './search/search.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
+import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { SearchResultsComponent } from './search-results/search-results.componen
     AdminDashboardComponent,
     ReviewServicesComponent,
     SearchComponent,
-    SearchResultsComponent
+    SearchResultsComponent,
+    CustomizeProfileComponent
   ],
   imports: [
     BrowserModule,

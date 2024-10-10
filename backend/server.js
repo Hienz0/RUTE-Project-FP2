@@ -57,6 +57,8 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
+    address: String,
+    contact: String,
     userType: { type: String, default: 'user' }  // Add userType with default value 'user'
   });
   
@@ -236,169 +238,6 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
 });
 
 
-// app.post('/register-provider', authMiddleware, upload.fields([{ name: 'businessLicense' }, { name: 'imageSelf' }, { name: 'imageService' }]), async (req, res) => {
-//   const { businessName, businessLocation, businessDesc } = req.body;
-//   const name = req.user.name;
-//   const email = req.user.email;
-
-//   try {
-//     const newProvider = new Provider({
-//       name,
-//       email,
-//       businessName,
-//       businessLocation,
-//       businessDesc,
-//       businessLicense: req.files['businessLicense'][0].path,
-//       imageSelf: req.files['imageSelf'][0].path,
-//       imageService: req.files['imageService'][0].path
-//     });
-
-//     await newProvider.save();
-//     res.status(201).json({ message: 'Provider registration submitted successfully.' });
-//   } catch (error) {
-//     console.error('Error registering provider:', error);
-//     res.status(500).json({ message: 'Error registering provider.', error });
-//   }
-// });
-
-
-
-///////////////////////////////////////////////
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////
-//   const PendingProviderSchema = new Schema({
-//     userId: {
-//         type: Schema.Types.ObjectId,
-//         ref: 'User',
-//         required: true
-//     },
-//     userName: {
-//         type: String,
-//         required: true
-//     },
-//     businessName: {
-//         type: String,
-//         required: true
-//     },
-//     businessLocation: {
-//         type: String,
-//         required: true
-//     },
-//     businessDescription: {
-//         type: String,
-//         required: true
-//     },
-//     businessLicenseFile: {
-//         type: String, // Store the file path or URL
-//         required: true
-//     }
-// }, {
-//     timestamps: true
-// });
-
-// const PendingProvider = mongoose.model('PendingProvider', PendingProviderSchema);
-
-
-
-
-
-
-
-
-// // Provider registration route
-// app.post('/register-provider', authMiddleware, async (req, res) => {
-//     const { businessName, businessLocation, businessDescription, businessLicenseFile } = req.body;
-//     const userId = req.user.userId;
-//     const userName = req.user.name;
-  
-//     console.log('Received provider registration:', {
-//       userId,
-//       userName,
-//       businessName,
-//       businessLocation,
-//       businessDescription,
-//       businessLicenseFile
-//     });
-  
-//     try {
-//       const newProvider = new PendingProvider({
-//         userId,
-//         userName,
-//         businessName,
-//         businessLocation,
-//         businessDescription,
-//         businessLicenseFile
-//       });
-  
-//       await newProvider.save();
-//       console.log('Provider registration saved:', newProvider);
-//       res.status(201).json({ message: 'Provider registration submitted successfully.' });
-//     } catch (error) {
-//       console.error('Error registering provider:', error);
-//       res.status(500).json({ message: 'Error registering provider.', error });
-//     }
-//   });
-
-
-
-
-
-
-
-  
-  // Signup route
-  // Signup route
-// app.post('/signup', async (req, res) => {
-//     const { name, email, password } = req.body;
-  
-//     // Basic validation
-//     if (!name || !email || !password) {
-//       return res.status(400).json({ message: 'All fields are required' });
-//     }
-  
-//     // Log the received data
-//     console.log('Received data:', { name, email, password });
-  
-//     // Save the new user to the database
-//     try {
-//       const newUser = new User({ name, email, password, userType: 'user' });
-//       await newUser.save();
-//       console.log('User saved to database:', newUser);
-//       res.status(201).json({ message: 'User created successfully' });
-//     } catch (error) {
-//       console.error('Error creating user:', error);
-//       res.status(500).json({ message: 'Error creating user', error });
-//     }
-//   });
-
-// Signup route
-// app.post('/signup', async (req, res) => {
-//   const { name, email, password } = req.body;
-
-//   // Basic validation
-//   if (!name || !email || !password) {
-//     return res.status(400).json({ message: 'All fields are required' });
-//   }
-
-//   // Log the received data
-//   console.log('Received data:', { name, email, password });
-
-//   try {
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // Save the new user to the database
-//     const newUser = new User({ name, email, password: hashedPassword, userType: 'user' });
-//     await newUser.save();
-//     console.log('User saved to database:', newUser);
-//     res.status(201).json({ message: 'User created successfully' });
-//   } catch (error) {
-//     console.error('Error creating user:', error);
-//     res.status(500).json({ message: 'Error creating user', error });
-//   }
-// });
 
 // Signup route for creating a new RUTE account
 app.post('/signup', async (req, res) => {
@@ -428,33 +267,6 @@ app.post('/signup', async (req, res) => {
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// Signin route
-// app.post('/signin', async (req, res) => {
-//     const { email, password } = req.body;
-  
-//     // Log the received login data
-//     console.log('Received login data:', { email, password });
-  
-//     // Find the user by email
-//     const user = await User.findOne({ email });
-  
-//     // Check if the user exists and the password is correct
-//     if (!user || user.password !== password) {
-//       return res.status(401).json({ message: 'Invalid email or password' });
-//     }
-  
-//     // Generate a token
-//     const token = generateToken(user);
-  
-//     // Include user details in the response
-//     const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType } };
-//     console.log('Sending response:', response); // Debugging response from server
-//     res.status(200).json(response);
-//   });
 
 // Signin route to validate the user who will log in
 app.post('/signin', async (req, res) => {
@@ -488,6 +300,68 @@ app.post('/signin', async (req, res) => {
 
   //yuda
 //yuda
+
+
+
+app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
+  try {
+    const { userId, name, address, contact, currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    // Cari pengguna berdasarkan userId
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update profil (jika ada perubahan)
+    if (name) user.name = name;
+    if (address) user.address = address;
+    if (contact) user.contact = contact;
+
+    // Jika foto profil diunggah
+    if (req.file) {
+      user.avatar = req.file.path;  // Simpan path foto di database
+    }
+
+    // Jika ingin mengganti password, lakukan validasi
+    if (currentPassword || newPassword || confirmNewPassword) {
+      // Pastikan semua kolom terkait password diberikan
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return res.status(400).json({ message: 'Please provide all password fields' });
+      }
+
+      // Periksa apakah currentPassword cocok dengan password lama
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+
+      // Pastikan newPassword dan confirmNewPassword cocok
+      if (newPassword !== confirmNewPassword) {
+        return res.status(400).json({ message: 'New password and confirm password do not match' });
+      }
+
+      // Hash password baru
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    // Simpan perubahan profil dan password (jika ada)
+    await user.save();
+    
+    if (name) {
+      await Provider.updateMany({ userId: userId }, { name: name });
+    }
+
+    res.status(200).json({ message: 'Profile and password updated successfully', user });
+
+  } catch (error) {
+    console.error('Error updating profile and password:', error);
+    res.status(500).json({ message: 'Error updating profile and password', error: error.message || error });
+  }
+});
+
+
 
 app.get('/pending-services', async (req, res) => {
   try {
@@ -833,6 +707,12 @@ try {
   res.status(500).json({ message: 'Error deleting service', error: error.message });
 }
 });
+
+
+
+
+//Customize Profile
+
 
 
 

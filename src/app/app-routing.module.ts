@@ -10,6 +10,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { ReviewServicesComponent } from './review-services/review-services.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
+import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -22,7 +23,8 @@ const routes: Routes = [
   {path: 'dashboard', component: DashboardComponent},
   {path: 'adminDashboard',component: AdminDashboardComponent },
   {path: 'reviewServices',component: ReviewServicesComponent},
-  { path: 'search-results', component: SearchResultsComponent }
+  { path: 'search-results', component: SearchResultsComponent },
+  {path:'customizeProfile', component: CustomizeProfileComponent}
 ];
 
 @NgModule({
