@@ -10,6 +10,8 @@ import { AuthService } from '../services/auth.service';
 export class SearchResultsComponent implements OnInit {
   searchTerm!: string;
   searchResults: any[] = [];
+  currentUser: any;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -23,6 +25,10 @@ export class SearchResultsComponent implements OnInit {
         console.log('search term 2" ', this.searchTerm);
         this.performSearch();
       }
+    });
+
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
     });
   }
 
