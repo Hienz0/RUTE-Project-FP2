@@ -63,6 +63,183 @@ const userSchema = new mongoose.Schema({
   const User = mongoose.model('User', userSchema);
 
 /////////////////////////////////////////////////////////
+// booking accomodation
+
+// Define the accommodation booking schema
+const bookingAccommodationSchema = new mongoose.Schema({
+    guestName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    accommodationType: {
+        type: String,
+        required: true,
+        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse']
+    },
+    numberOfGuests: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    checkInDate: {
+        type: Date,
+        required: true
+    },
+    checkOutDate: {
+        type: Date,
+        required: true
+    },
+    roomNumber: {
+        type: Number,
+        required: true
+    },
+    specialRequest: {
+        type: String,
+        trim: true
+    },
+    bookingStatus: {
+        type: String,
+        default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
+        enum: ['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut']
+    }
+}, { timestamps: true });
+
+// Create the Booking model
+const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchema);
+
+module.exports = Booking;
+
+
+
+// booking tour
+
+// Define the tour booking schema
+const bookingTourSchema = new mongoose.Schema({
+    customerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    tourName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    tourDate: {
+        type: Date,
+        required: true
+    },
+    numberOfParticipants: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    specialRequest: {
+        type: String,
+        trim: true
+    },
+    bookingStatus: {
+        type: String,
+        default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+        enum: ['Booked', 'Cancelled', 'Completed']
+    }
+}, { timestamps: true });
+
+// Create the Booking model
+const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
+
+module.exports = TourBooking;
+
+
+
+///////////
+// book transportation
+
+// Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
+const bookingVehicleSchema = new mongoose.Schema({
+    customerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    vehicleType: {
+        type: String,
+        required: true,
+        enum: ['Car', 'Motorcycle']  // Restrict to car or motorcycle
+    },
+    vehicleModel: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    licensePlate: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    withDriver: {
+        type: Boolean,
+        required: true,  // Indicates whether the vehicle is rented with a driver
+        default: false
+    },
+    driverName: {
+        type: String,
+        trim: true,
+        required: function () {
+            return this.withDriver === true; // Only required if `withDriver` is true
+        }
+    },
+    pickupLocation: {
+        type: String,
+        trim: true,
+        required: function () {
+            return this.withDriver === true; // Only required if `withDriver` is true
+        }
+    },
+    dropoffLocation: {
+        type: String,
+        trim: true,
+        required: function () {
+            return this.withDriver === true; // Only required if `withDriver` is true
+        }
+    },
+    vehiclePickupLocation: {
+        type: String,
+        trim: true,
+        required: function () {
+            return this.withDriver === false; // Only required if `withDriver` is false (rental)
+        }
+    },
+    pickupDate: {
+        type: Date,
+        required: true
+    },
+    dropoffDate: {
+        type: Date,
+        required: true
+    },
+    rentalDuration: {
+        type: Number,
+        required: true  // Duration in hours or days
+    },
+    specialRequest: {
+        type: String,
+        trim: true
+    },
+    bookingStatus: {
+        type: String,
+        default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+        enum: ['Booked', 'Cancelled', 'Completed']
+    }
+}, { timestamps: true });
+
+// Create the Booking model
+const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
+
+module.exports = VehicleBooking;
+
+// ///////////
 
 //add admin account
 
