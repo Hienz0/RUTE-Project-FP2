@@ -302,7 +302,7 @@ app.post('/signin', async (req, res) => {
 //yuda
 
 
-
+//Customize Profile
 app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
   try {
     const { userId, name, address, contact, currentPassword, newPassword, confirmNewPassword } = req.body;
@@ -711,7 +711,6 @@ try {
 
 
 
-//Customize Profile
 
 
 
