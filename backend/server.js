@@ -1038,6 +1038,32 @@ const serviceSchema = new mongoose.Schema({
 
 const Service = mongoose.model('Service', serviceSchema);
 
+// 
+// Route to get services with productCategory "Accommodation"
+app.get('/api/services/accommodation', async (req, res) => {
+  try {
+    const services = await Service.find({ productCategory: 'Accommodation' });
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching services' });
+  }
+});
+
+// Route to get a specific service by ID
+app.get('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    res.json(service);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching service details' });
+  }
+});
+
+// 
+
 // API routes for services
 // GET services - Only return services with status 'accepted'
 app.get('/api/services', authMiddleware, async (req, res) => {

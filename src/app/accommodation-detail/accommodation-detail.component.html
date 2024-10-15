@@ -1,0 +1,14 @@
+<div *ngIf="accommodationDetail">
+    <h2>{{ accommodationDetail.productName }}</h2>
+    <p>{{ accommodationDetail.productDescription }}</p>
+    <p><strong>Price:</strong> {{ accommodationDetail.productPrice | currency }}</p>
+    <p><strong>Location:</strong> {{ accommodationDetail.location }}</p>
+  
+    <div *ngIf="accommodationDetail.productImages?.length">
+      <h4>Images:</h4>
+      <div *ngFor="let image of accommodationDetail.productImages">
+        <img [src]="'http://localhost:3000/' + image" alt="{{ accommodationDetail.productName }}" />
+      </div>
+    </div>
+  </div>
+  
