@@ -301,6 +301,64 @@ app.post('/signin', async (req, res) => {
   //yuda
 //yuda
 
+const reviewSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who made the review
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true }, // Reference to the product being reviewed
+  rating: { type: Number, required: true, min: 1, max: 5 }, // Rating between 1 to 5 stars
+  comment: String, // Optional comment
+  createdAt: { type: Date, default: Date.now } // Timestamp for the review
+});
+
+const Review = mongoose.model('Review', reviewSchema);
+
+app.post('/add-review', async (req, res) => {
+ 
+    const { userId, productId, rating, comment } = req.body;
+  
+    // Validate the input
+    if (!userId || !productId || !rating) {
+      return res.status(400).json({ message: 'Missing required fields: userId, productId, or rating.' });
+    }
+  
+    try {
+      // // Check if the user has booked the product in any of the three booking types
+      // const accommodationBooking = await AccommodationBooking.findOne({ userId, productId, status: 'completed' });
+      // const tourGuideBooking = await TourGuideBooking.findOne({ userId, productId, status: 'completed' });
+      // const transportationBooking = await TransportationBooking.findOne({ userId, productId, status: 'completed' });
+  
+      // // If no booking found, restrict the review
+      // if (!accommodationBooking && !tourGuideBooking && !transportationBooking) {
+      //   return res.status(400).json({ message: 'You can only review products you have booked.' });
+      // }
+  
+      // Create the review
+      const review = new Review({ userId, productId, rating, comment });
+      await review.save();
+  
+      // Find the product (service) to update its average rating
+      const service = await Service.findById(productId);
+  
+      if (service) {
+        // Calculate new average rating
+        const newTotalReviews = service.totalReviews + 1;
+        const newAverageRating = ((service.averageRating * service.totalReviews) + rating) / newTotalReviews;
+  
+        // Update service with new rating and review count
+        service.averageRating = newAverageRating;
+        service.totalReviews = newTotalReviews;
+        await service.save();
+      }
+  
+      // Return success message
+      res.status(200).json({ message: 'Review added successfully and average rating updated' });
+  
+    } catch (error) {
+      console.error('Error:', error); // Log the actual error
+      res.status(500).json({ message: 'Error adding review', error });
+    }
+ 
+});
+
 
 //Customize Profile
 app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
@@ -735,7 +793,9 @@ const serviceSchema = new mongoose.Schema({
   providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Provider' },
   status: { type: String, default: 'pending' }, // Add status field with default value
   businessLicense: String, // New field for business license image
-  location: String // New field for location
+  location: String, // New field for location
+  averageRating: { type: Number, default: 0 }, // Store average rating for the product
+  totalReviews: { type: Number, default: 0 }   // Store the total number of reviews
 });
 
 const Service = mongoose.model('Service', serviceSchema);
