@@ -300,7 +300,88 @@ app.post('/signin', async (req, res) => {
 
   //yuda
 //yuda
+// book transportation
 
+// Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
+const bookingVehicleSchema = new mongoose.Schema({
+  customerName: {
+      type: String,
+      required: true,
+      trim: true
+  },
+  vehicleType: {
+      type: String,
+      required: true,
+      enum: ['Car', 'Motorcycle']  // Restrict to car or motorcycle
+  },
+  vehicleModel: {
+      type: String,
+      required: true,
+      trim: true
+  },
+  licensePlate: {
+      type: String,
+      required: true,
+      trim: true
+  },
+  withDriver: {
+      type: Boolean,
+      required: true,  // Indicates whether the vehicle is rented with a driver
+      default: false
+  },
+  driverName: {
+      type: String,
+      trim: true,
+      required: function () {
+          return this.withDriver === true; // Only required if `withDriver` is true
+      }
+  },
+  pickupLocation: {
+      type: String,
+      trim: true,
+      required: function () {
+          return this.withDriver === true; // Only required if `withDriver` is true
+      }
+  },
+  dropoffLocation: {
+      type: String,
+      trim: true,
+      required: function () {
+          return this.withDriver === true; // Only required if `withDriver` is true
+      }
+  },
+  vehiclePickupLocation: {
+      type: String,
+      trim: true,
+      required: function () {
+          return this.withDriver === false; // Only required if `withDriver` is false (rental)
+      }
+  },
+  pickupDate: {
+      type: Date,
+      required: true
+  },
+  dropoffDate: {
+      type: Date,
+      required: true
+  },
+  rentalDuration: {
+      type: Number,
+      required: true  // Duration in hours or days
+  },
+  specialRequest: {
+      type: String,
+      trim: true
+  },
+  bookingStatus: {
+      type: String,
+      default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+      enum: ['Booked', 'Cancelled', 'Completed']
+  }
+}, { timestamps: true });
+
+// Create the Booking model
+const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
 const reviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who made the review
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true }, // Reference to the product being reviewed
