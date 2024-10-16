@@ -75,7 +75,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
     accommodationType: {
         type: String,
         required: true,
-        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse']
+        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
     },
     numberOfGuests: {
         type: Number,
@@ -118,9 +118,11 @@ app.post('/api/bookings', async (req, res) => {
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {
+    console.error('Error details:', error); // Log error details for debugging
     res.status(400).json({ error: 'Error creating booking', details: error });
   }
 });
+
 // 
 
 

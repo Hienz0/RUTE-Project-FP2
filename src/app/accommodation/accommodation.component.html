@@ -1,26 +1,32 @@
-<div class="accommodation-list">
-    <h2>Accommodation Services</h2>
-  
-    <div *ngIf="accommodationServices.length === 0">
-      <p>No accommodation services found.</p>
-    </div>
-  
-    <div *ngIf="accommodationServices.length > 0">
-      <div
-        *ngFor="let service of accommodationServices"
-        class="service-card"
-        (click)="goToDetail(service._id)"
-      >
-      <!-- Click event above -->
-        <h3>{{ service.productName }}</h3>
-        <p>{{ service.productDescription }}</p>
-        <p><strong>Price:</strong> {{ service.productPrice | currency }}</p>
-        <p><strong>Location:</strong> {{ service.location }}</p>
-  
+<div class="container my-5">
+  <h2 class="text-center mb-5">Accommodation Services</h2>
+
+  <div *ngIf="accommodationServices.length === 0" class="text-center text-muted">
+    <p>No accommodation services found.</p>
+  </div>
+
+  <div *ngIf="accommodationServices.length > 0" class="row">
+    <div
+      *ngFor="let service of accommodationServices"
+      class="col-md-6 col-lg-4 mb-4"
+      (click)="goToDetail(service._id)"
+    >
+      <div class="card h-100 shadow-sm hover-shadow">
         <div *ngIf="service.productImages?.length">
-          <img [src]="'http://localhost:3000/' + service.productImages[0]" alt="{{ service.productName }}" />
+          <img
+            [src]="'http://localhost:3000/' + service.productImages[0]"
+            alt="{{ service.productName }}"
+            class="card-img-top img-fluid"
+            style="height: 300px; object-fit: cover;"
+          />
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">{{ service.productName }}</h3>
+          <p class="card-text">{{ service.productDescription }}</p>
+          <p><strong>Price:</strong> {{ service.productPrice | currency }}</p>
+          <p><strong>Location:</strong> {{ service.location }}</p>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
