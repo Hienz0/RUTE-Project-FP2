@@ -412,32 +412,34 @@ app.post('/add-review', async (req, res) => {
       //   return res.status(400).json({ message: 'You can only review products you have booked.' });
       // }
   
-      // Create the review
-      const review = new Review({ userId, productId, rating, comment });
-      await review.save();
-  
-      // Find the product (service) to update its average rating
-      const service = await Service.findById(productId);
-  
-      if (service) {
-        // Calculate new average rating
-        const newTotalReviews = service.totalReviews + 1;
-        const newAverageRating = ((service.averageRating * service.totalReviews) + rating) / newTotalReviews;
-  
-        // Update service with new rating and review count
-        service.averageRating = newAverageRating;
-        service.totalReviews = newTotalReviews;
-        await service.save();
-      }
-  
-      // Return success message
-      res.status(200).json({ message: 'Review added successfully and average rating updated' });
-  
-    } catch (error) {
-      console.error('Error:', error); // Log the actual error
-      res.status(500).json({ message: 'Error adding review', error });
+       // Create the review
+    const review = new Review({ userId, productId, rating, comment });
+    await review.save();
+
+    // Find the product (service) to update its average rating
+    const service = await Service.findById(productId);
+
+    if (service) {
+      // Calculate new average rating
+      const newTotalReviews = service.totalReviews + 1;
+      let newAverageRating = ((service.averageRating * service.totalReviews) + rating) / newTotalReviews;
+
+      // Round to 1 decimal place
+      newAverageRating = parseFloat(newAverageRating.toFixed(1));
+
+      // Update service with new rating and review count
+      service.averageRating = newAverageRating;
+      service.totalReviews = newTotalReviews;
+      await service.save();
     }
- 
+
+    // Return success message
+    res.status(200).json({ message: 'Review added successfully and average rating updated' });
+
+  } catch (error) {
+    console.error('Error:', error); // Log the actual error
+    res.status(500).json({ message: 'Error adding review', error });
+  }
 });
 
 
