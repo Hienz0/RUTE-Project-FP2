@@ -110,6 +110,19 @@ const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchem
 
 module.exports = Booking;
 
+// 
+// Route to handle booking accommodation
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const booking = new Booking(req.body);
+    await booking.save();
+    res.status(201).json(booking);
+  } catch (error) {
+    res.status(400).json({ error: 'Error creating booking', details: error });
+  }
+});
+// 
+
 
 
 // booking tour
