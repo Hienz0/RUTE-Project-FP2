@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicesService } from '../services/services.service';
+import { AuthService } from '../services/auth.service';
+
 
 @Component({
   selector: 'app-accommodation',
@@ -9,10 +11,15 @@ import { ServicesService } from '../services/services.service';
 })
 export class AccommodationComponent implements OnInit {
   accommodationServices: any[] = [];
+  currentUser: any;
 
-  constructor(private servicesService: ServicesService, private router: Router) {}
+  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
+    
     this.loadAccommodationServices();
   }
 

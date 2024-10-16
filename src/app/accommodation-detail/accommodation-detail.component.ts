@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service'; // Import the booking service
+import { AuthService } from '../services/auth.service';
+
 
 // Declare Swal globally
 declare var Swal: any;
@@ -11,6 +13,8 @@ declare var Swal: any;
   styleUrls: ['./accommodation-detail.component.css'],
 })
 export class AccommodationDetailComponent implements OnInit {
+  currentUser: any;
+
   serviceId: string | null = null;
   accommodationDetail: any = null;
   isModalOpen = false; // State for controlling modal visibility
@@ -27,14 +31,26 @@ export class AccommodationDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService,
-    private bookingService: BookingService // Inject the booking service
+    private bookingService: BookingService, // Inject the booking service
+    private authService: AuthService,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
+    
     this.serviceId = this.route.snapshot.paramMap.get('id');
     if (this.serviceId) {
       this.loadAccommodationDetail(this.serviceId);
     }
+
+        // Dynamically add Tailwind CDN script
+        const script = this.renderer.createElement('script');
+        script.src = 'https://cdn.tailwindcss.com';
+        script.id = 'tailwindScript';
+        this.renderer.appendChild(document.body, script);
   }
   
   loadAccommodationDetail(id: string): void {
