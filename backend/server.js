@@ -59,7 +59,11 @@ const userSchema = new mongoose.Schema({
     password: String,
     address: String,
     contact: String,
-    userType: { type: String, default: 'user' }  // Add userType with default value 'user'
+    userType: { type: String, default: 'user' },  // Add userType with default value 'user'
+    bookingHistory: [{
+      bookingType: { type: String, enum: ['transportation', 'accommodation', 'tour&guide'] },
+      bookingId: { type: mongoose.Schema.Types.ObjectId, refPath: 'bookingType' }  // Reference based on booking type
+    }]
   });
   
   const User = mongoose.model('User', userSchema);
@@ -312,62 +316,26 @@ const bookingVehicleSchema = new mongoose.Schema({
   vehicleType: {
       type: String,
       required: true,
-      enum: ['Car', 'Motorcycle']  // Restrict to car or motorcycle
   },
-  vehicleModel: {
-      type: String,
-      required: true,
-      trim: true
-  },
-  licensePlate: {
-      type: String,
-      required: true,
-      trim: true
-  },
-  withDriver: {
-      type: Boolean,
-      required: true,  // Indicates whether the vehicle is rented with a driver
-      default: false
-  },
-  driverName: {
+  vehicleDropoffLocation: {
       type: String,
       trim: true,
-      required: function () {
-          return this.withDriver === true; // Only required if `withDriver` is true
-      }
-  },
-  pickupLocation: {
-      type: String,
-      trim: true,
-      required: function () {
-          return this.withDriver === true; // Only required if `withDriver` is true
-      }
-  },
-  dropoffLocation: {
-      type: String,
-      trim: true,
-      required: function () {
-          return this.withDriver === true; // Only required if `withDriver` is true
-      }
   },
   vehiclePickupLocation: {
       type: String,
       trim: true,
-      required: function () {
-          return this.withDriver === false; // Only required if `withDriver` is false (rental)
-      }
-  },
-  pickupDate: {
-      type: Date,
-      required: true
-  },
-  dropoffDate: {
-      type: Date,
-      required: true
   },
   rentalDuration: {
       type: Number,
       required: true  // Duration in hours or days
+  },
+  pickupDate: {
+    type: Date, // Storing the pickup date
+    required: true
+  },
+  dropoffDate: {
+    type: Date, // Storing the dropoff date
+    required: true
   },
   specialRequest: {
       type: String,
@@ -382,6 +350,86 @@ const bookingVehicleSchema = new mongoose.Schema({
 
 // Create the Booking model
 const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
+
+// Book transportation endpoint
+app.post('/book-transportation', async (req, res) => {
+  const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
+
+  try {
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Find the service by serviceId
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    // Ensure that the service subcategory (vehicleType) exists
+    const vehicleType = service.productSubcategory;
+    if (!vehicleType) {
+      return res.status(400).json({ success: false, message: 'Vehicle type not available' });
+    }
+
+    // Check if pickupDate and dropoffDate are provided
+    if (!pickupDate || !dropoffDate) {
+      return res.status(400).json({ success: false, message: 'Pickup and Dropoff dates are required' });
+    }
+
+    // Convert pickupDate and dropoffDate to Date objects
+    const start = new Date(pickupDate);
+    const end = new Date(dropoffDate);
+
+    // Calculate rental duration in days
+    const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24)); // Difference in milliseconds, then convert to days
+
+    // Check if the duration is valid
+    if (rentalDuration <= 0) {
+      return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
+    }
+
+    // Create a new vehicle booking
+    const newBooking = new VehicleBooking({
+      customerName: user.name,  // Use the user's name as the customerName
+      vehicleType: vehicleType,
+      vehiclePickupLocation: pickupLocation,
+      vehicleDropoffLocation: dropoffLocation,
+      rentalDuration: rentalDuration,
+      pickupDate: start,    // Save the pickup date
+      dropoffDate: end,     // Save the dropoff date
+      specialRequest: specialRequest,
+      bookingStatus: 'Booked'
+    });
+
+    // Save the booking in the database
+    await newBooking.save();
+
+    // Save the booking reference in the user's booking history
+    user.bookingHistory.push({
+      bookingType: 'transportation',
+      bookingId: newBooking._id
+    });
+
+    await user.save();
+
+    // Respond with success
+    res.status(201).json({
+      success: true,
+      message: 'Transportation booked successfully!',
+      bookingDetails: newBooking
+    });
+
+  } catch (error) {
+    // Handle any errors
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+
 const reviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who made the review
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true }, // Reference to the product being reviewed
@@ -877,6 +925,7 @@ const serviceSchema = new mongoose.Schema({
   status: { type: String, default: 'pending' }, // Add status field with default value
   businessLicense: String, // New field for business license image
   location: String, // New field for location
+ 
   averageRating: { type: Number, default: 0 }, // Store average rating for the product
   totalReviews: { type: Number, default: 0 }   // Store the total number of reviews
 });
