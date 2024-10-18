@@ -1,7 +1,7 @@
 <div class="container mt-5">
     <div class="row">
       <div *ngFor="let service of services" class="col-md-4 mb-4">
-        <div class="card h-100">
+        <div class="card h-100" (click)="navigateToDetails(service._id)" style="cursor: pointer">
           <!-- Bootstrap Carousel for displaying images -->
           <div
             id="carousel{{ service._id }}"
@@ -69,10 +69,6 @@
             <p>
               <strong>Rating:</strong> {{ service.averageRating }} ({{ service.totalReviews }} reviews)
             </p>
-          </div>
-  
-          <div class="card-footer text-muted">
-            <button class="btn btn-primary">Book Now</button>
           </div>
         </div>
       </div>

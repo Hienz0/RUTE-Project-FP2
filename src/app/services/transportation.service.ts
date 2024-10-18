@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,15 @@ export class TransportationService {
     return this.http.get<any[]>(data);
   }
 
-  getTransporationServicesByID(transportID: number): Observable<any> {
+  getTransporationServicesByID(transportID: any): Observable<any> {
     return this.http.get(`${this.url}/transportationService/${transportID}`);
+  }
+  
+  // Method to book transportation
+  bookTransportation(bookingData: any): Observable<any> {
+   
+    return this.http.post<any>(`${this.url}/book-transportation`, bookingData);
+    
   }
   
 }

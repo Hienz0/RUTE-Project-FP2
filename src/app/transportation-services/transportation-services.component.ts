@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TransportationService } from '../services/transportation.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-transportation-services',
@@ -8,7 +9,7 @@ import { TransportationService } from '../services/transportation.service';
 })
 export class TransportationServicesComponent implements OnInit {
   services: any[] = [];
-  constructor(private service : TransportationService){}
+  constructor(private service : TransportationService, private router: Router){}
   ngOnInit(): void {
     this.service.getTransporationServices().subscribe(
       (data: any[]) => {
@@ -23,6 +24,11 @@ export class TransportationServicesComponent implements OnInit {
   getFullImagePath(image: string): string {
     // Assuming images are stored in the /uploads/ folder on the server
     return `http://localhost:3000/${image}`;
+  }
+
+  navigateToDetails(serviceId: string): void {
+    this.router.navigate(['/transportationDetail', serviceId]);
+  
   }
   
   
