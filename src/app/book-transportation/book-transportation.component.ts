@@ -29,12 +29,12 @@ export class BookTransportationComponent implements OnInit {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
+    
     // Get ID from route parameter
     const transportID = this.route.snapshot.paramMap.get('id');
-
     console.log('Transport ID from route:', transportID);
 
-    if (transportID !== null) {
+    if (transportID) {
       this.service.getTransporationServicesByID(transportID).subscribe(
         (data) => {
           this.transportationService = data;
@@ -56,10 +56,10 @@ export class BookTransportationComponent implements OnInit {
       return;
     }
 
+    // Construct bookingData with proper property names
     const bookingData = {
-      serviceId: this.transportationService.id,
-      userId: this.currentUser.id,
-      vehicleType: this.transportationService.vehicleType,
+      serviceId: this.transportationService._id || this.transportationService.id, // Make sure you're using the correct ID property
+      userId: this.currentUser.userId || this.currentUser.userId, // Adjust as needed based on your user object structure
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
       specialRequest: this.specialRequest,
@@ -67,9 +67,16 @@ export class BookTransportationComponent implements OnInit {
       dropoffLocation: this.dropoffLocation,
     };
 
+    // // Check for required fields before sending the request
+    // if (!bookingData.serviceId || !bookingData.userId || !bookingData.pickupDate || !bookingData.dropoffDate || !bookingData.pickupLocation || !bookingData.dropoffLocation) {
+    //   console.error('All fields must be filled out properly.');
+    //   return;
+    // }
+
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
+        // Optionally, navigate to a confirmation page or show a success message
       },
       (error) => {
         console.error('Error booking transportation:', error);

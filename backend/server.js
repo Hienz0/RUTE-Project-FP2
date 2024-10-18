@@ -383,84 +383,147 @@ app.get('/transportationService/:id', async (req, res) => {
 });
 
 
-app.post('/bookTransports', async (req, res) => {
-  // Log the incoming request
+// app.post('/bookTransports', async (req, res) => {
+//   // Log the incoming request
+//   console.log("Request received at /bookTransports");
+  
+//   const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
+//   console.log("Sdsdsdsd")
+//   console.log(serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation);
+//   try {
+//     // Find the user by userId
+//     const user = await User.findById(userId);
+//     console.log(userId)
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: 'User not found' });
+//     }
+
+//     // Find the service by serviceId
+//     const service = await Service.findById(serviceId);
+//     if (!service) {
+//       return res.status(404).json({ success: false, message: 'Service not found' });
+//     }
+
+//     // Ensure that the service subcategory (vehicleType) exists
+//     const vehicleType = service.productSubcategory;
+//     if (!vehicleType) {
+//       return res.status(400).json({ success: false, message: 'Vehicle type not available' });
+//     }
+
+//     // Check if pickupDate and dropoffDate are provided
+//     if (!pickupDate || !dropoffDate) {
+//       return res.status(400).json({ success: false, message: 'Pickup and Dropoff dates are required' });
+//     }
+
+//     // Convert pickupDate and dropoffDate to Date objects
+//     const start = new Date(pickupDate);
+//     const end = new Date(dropoffDate);
+
+//     // Calculate rental duration in days
+//     const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24)); // Difference in milliseconds, then convert to days
+
+//     // Check if the duration is valid
+//     if (rentalDuration <= 0) {
+//       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
+//     }
+
+//     // Create a new vehicle booking
+//     const newBooking = new VehicleBooking({
+//       customerName: user.name,  // Use the user's name as the customerName
+//       vehicleType: vehicleType,
+//       vehiclePickupLocation: pickupLocation,
+//       vehicleDropoffLocation: dropoffLocation,
+//       rentalDuration: rentalDuration,
+//       pickupDate: start,    // Save the pickup date
+//       dropoffDate: end,     // Save the dropoff date
+//       specialRequest: specialRequest,
+//       bookingStatus: 'Booked'
+//     });
+
+//     // Save the booking in the database
+//     await newBooking.save();
+
+//     // Save the booking reference in the user's booking history
+//     user.bookingHistory.push({
+//       bookingType: 'transportation',
+//       bookingId: newBooking._id
+//     });
+
+//     await user.save();
+
+//     // Respond with success
+//     res.status(201).json({
+//       success: true,
+//       message: 'Transportation booked successfully!',
+//       bookingDetails: newBooking
+//     });
+//     console.log("sdsddsd");
+//   } catch (error) {
+//     // Handle any errors
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// });
+
+app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
   
   const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
+  
+  console.log("Booking Data:", { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation });
 
   try {
-    // Find the user by userId
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Find the service by serviceId
     const service = await Service.findById(serviceId);
     if (!service) {
       return res.status(404).json({ success: false, message: 'Service not found' });
     }
 
-    // Ensure that the service subcategory (vehicleType) exists
     const vehicleType = service.productSubcategory;
     if (!vehicleType) {
       return res.status(400).json({ success: false, message: 'Vehicle type not available' });
     }
 
-    // Check if pickupDate and dropoffDate are provided
     if (!pickupDate || !dropoffDate) {
       return res.status(400).json({ success: false, message: 'Pickup and Dropoff dates are required' });
     }
 
-    // Convert pickupDate and dropoffDate to Date objects
     const start = new Date(pickupDate);
     const end = new Date(dropoffDate);
-
-    // Calculate rental duration in days
-    const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24)); // Difference in milliseconds, then convert to days
-
-    // Check if the duration is valid
+    const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24));
     if (rentalDuration <= 0) {
       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
     }
 
-    // Create a new vehicle booking
     const newBooking = new VehicleBooking({
-      customerName: user.name,  // Use the user's name as the customerName
-      vehicleType: vehicleType,
+      customerName: user.name,
+      vehicleType,
       vehiclePickupLocation: pickupLocation,
       vehicleDropoffLocation: dropoffLocation,
-      rentalDuration: rentalDuration,
-      pickupDate: start,    // Save the pickup date
-      dropoffDate: end,     // Save the dropoff date
-      specialRequest: specialRequest,
+      rentalDuration,
+      pickupDate: start,
+      dropoffDate: end,
+      specialRequest,
       bookingStatus: 'Booked'
     });
 
-    // Save the booking in the database
     await newBooking.save();
-
-    // Save the booking reference in the user's booking history
-    user.bookingHistory.push({
-      bookingType: 'transportation',
-      bookingId: newBooking._id
-    });
-
+    user.bookingHistory.push({ bookingType: 'transportation', bookingId: newBooking._id });
     await user.save();
 
-    // Respond with success
     res.status(201).json({
       success: true,
       message: 'Transportation booked successfully!',
       bookingDetails: newBooking
     });
-
   } catch (error) {
-    // Handle any errors
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 // Book transportation endpoint
 

@@ -6,6 +6,9 @@ import { Observable } from 'rxjs';
 })
 export class TransportationService {
   private url='http://localhost:3000';
+  private apiUrl = 'http://localhost:3000/api/bookTransports';
+
+
   constructor(private http: HttpClient) { }
 
   getTransporationServices(): Observable<any> {
@@ -18,8 +21,9 @@ export class TransportationService {
   }
   
   bookTransport(bookingData: any): Observable<any> {
-    
-    return this.http.post(`${this.url}/bookTransports`, bookingData);
+    console.log('Booking Data:', bookingData);
+    return this.http.post(this.apiUrl, bookingData, { headers: { 'Content-Type': 'application/json' } });
+
   }
   
   
