@@ -29,15 +29,12 @@ export class BookTransportationComponent implements OnInit {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
-    // Ambil ID dari parameter URL
+    // Get ID from route parameter
     const transportID = this.route.snapshot.paramMap.get('id');
 
-    // Log nilai transportID
     console.log('Transport ID from route:', transportID);
 
-    // Tidak perlu konversi ke number jika ID adalah string alfanumerik
     if (transportID !== null) {
-      // Langsung gunakan transportID dalam bentuk string
       this.service.getTransporationServicesByID(transportID).subscribe(
         (data) => {
           this.transportationService = data;
@@ -48,13 +45,12 @@ export class BookTransportationComponent implements OnInit {
         }
       );
     } else {
-      console.error('Product ID is null or invalid');
+      console.error('Transport ID is null or invalid');
     }
   }
 
   // Function to book transportation
-  // Submit the booking
-  onSubmit(): void {
+  bookTransport(): void {
     if (!this.currentUser || !this.transportationService) {
       console.error('User or transportation service is not available');
       return;
@@ -71,7 +67,7 @@ export class BookTransportationComponent implements OnInit {
       dropoffLocation: this.dropoffLocation,
     };
 
-    this.service.bookTransportation(bookingData).subscribe(
+    this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
       },
@@ -80,8 +76,8 @@ export class BookTransportationComponent implements OnInit {
       }
     );
   }
+
   getFullImagePath(image: string): string {
-    // Assuming images are stored in the /uploads/ folder on the server
     return `http://localhost:3000/${image}`;
   }
 }

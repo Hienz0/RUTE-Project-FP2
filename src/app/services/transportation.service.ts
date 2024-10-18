@@ -17,8 +17,9 @@ export class TransportationService {
     return this.http.get(`${this.url}/transportationService/${transportID}`);
   }
   
-  bookTransportation(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.url}/bookTransport`, bookingData);
+  bookTransport(bookingData: any): Observable<any> {
+    
+    return this.http.post(`${this.url}/bookTransports`, bookingData);
   }
   
   

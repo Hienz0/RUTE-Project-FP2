@@ -1,91 +1,91 @@
 <div class="container mt-5">
-    <!-- Loading state or error message -->
-    <div *ngIf="!transportationService">
-      <div class="alert alert-info text-center" role="alert">
-        Loading transportation service details...
-      </div>
-    </div>
-  
-    <!-- Transportation Service Details -->
-    <div *ngIf="transportationService" class="card">
-      <!-- Carousel for service images -->
-      <div *ngIf="transportationService.productImages && transportationService.productImages.length > 0" id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-          <!-- Loop through images -->
-          <div *ngFor="let image of transportationService.productImages; let i = index" class="carousel-item" [ngClass]="{ active: i === 0 }">
-            <img [src]="getFullImagePath(image)" class="d-block w-100" alt="Service Image" style="height: 400px; object-fit: cover;">
-          </div>
-        </div>
-  
-        <!-- Carousel controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
-  
-      <!-- If no images available -->
-      <div *ngIf="!transportationService.productImages || transportationService.productImages.length === 0" class="d-flex justify-content-center align-items-center bg-secondary" style="height: 400px;">
-        <p class="text-white">No Image Available</p>
-      </div>
-  
-      <!-- Card Body for Service Details -->
-      <div class="card-body">
-        <h3 class="card-title">{{ transportationService.productName }}</h3>
-        <p class="card-text">{{ transportationService.productDescription }}</p>
-        
-        <!-- Display Price -->
-        <p><strong>Price:</strong> {{ transportationService.productPrice | currency:'IDR':'symbol' }}</p>
-        
-        <!-- Display Vehicle Type -->
-        <p><strong>Vehicle Type:</strong> {{ transportationService.vehicleType }}</p>
-        
-        <!-- Display Location -->
-        <p><strong>Location:</strong> {{ transportationService.location }}</p>
-        
-        <!-- Display Rating -->
-        <p><strong>Rating:</strong> {{ transportationService.averageRating }} ({{ transportationService.totalReviews }} reviews)</p>
-      </div>
-    </div>
-  
-    <!-- Booking Form -->
-    <div class="card mt-4">
-      <div class="card-body">
-        <h5 class="card-title">Book This Transportation Service</h5>
-  
-        <form (ngSubmit)="onSubmit()">
-          <div class="mb-3">
-            <label for="pickupDate" class="form-label">Pickup Date</label>
-            <input type="date" id="pickupDate" [(ngModel)]="pickupDate" name="pickupDate" class="form-control" required>
-          </div>
-  
-          <div class="mb-3">
-            <label for="dropoffDate" class="form-label">Dropoff Date</label>
-            <input type="date" id="dropoffDate" [(ngModel)]="dropoffDate" name="dropoffDate" class="form-control" required>
-          </div>
-  
-          <div class="mb-3">
-            <label for="pickupLocation" class="form-label">Pickup Location</label>
-            <input type="text" id="pickupLocation" [(ngModel)]="pickupLocation" name="pickupLocation" class="form-control" placeholder="Enter pickup location" required>
-          </div>
-  
-          <div class="mb-3">
-            <label for="dropoffLocation" class="form-label">Dropoff Location</label>
-            <input type="text" id="dropoffLocation" [(ngModel)]="dropoffLocation" name="dropoffLocation" class="form-control" placeholder="Enter dropoff location" required>
-          </div>
-  
-          <div class="mb-3">
-            <label for="specialRequest" class="form-label">Special Request</label>
-            <textarea id="specialRequest" [(ngModel)]="specialRequest" name="specialRequest" class="form-control" placeholder="Any special request..."></textarea>
-          </div>
-  
-          <button type="submit" class="btn btn-primary">Submit Booking</button>
-        </form>
-      </div>
+  <!-- Loading state or error message -->
+  <div *ngIf="!transportationService">
+    <div class="alert alert-info text-center" role="alert">
+      Loading transportation service details...
     </div>
   </div>
-  
+
+  <!-- Transportation Service Details -->
+  <div *ngIf="transportationService" class="card">
+    <!-- Carousel for service images -->
+    <div *ngIf="transportationService.productImages && transportationService.productImages.length > 0" id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <!-- Loop through images -->
+        <div *ngFor="let image of transportationService.productImages; let i = index" class="carousel-item" [ngClass]="{ active: i === 0 }">
+          <img [src]="getFullImagePath(image)" class="d-block w-100" alt="Service Image" style="height: 400px; object-fit: cover;">
+        </div>
+      </div>
+
+      <!-- Carousel controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    <!-- If no images available -->
+    <div *ngIf="!transportationService.productImages || transportationService.productImages.length === 0" class="d-flex justify-content-center align-items-center bg-secondary" style="height: 400px;">
+      <p class="text-white">No Image Available</p>
+    </div>
+
+    <!-- Card Body for Service Details -->
+    <div class="card-body">
+      <h3 class="card-title">{{ transportationService.productName }}</h3>
+      <p class="card-text">{{ transportationService.productDescription }}</p>
+      
+      <!-- Display Price -->
+      <p><strong>Price:</strong> {{ transportationService.productPrice | currency:'IDR':'symbol' }}</p>
+      
+      <!-- Display Vehicle Type -->
+      <p><strong>Vehicle Type:</strong> {{ transportationService.vehicleType }}</p>
+      
+      <!-- Display Location -->
+      <p><strong>Location:</strong> {{ transportationService.location }}</p>
+      
+      <!-- Display Rating -->
+      <p><strong>Rating:</strong> {{ transportationService.averageRating }} ({{ transportationService.totalReviews }} reviews)</p>
+    </div>
+  </div>
+
+  <!-- Booking Form -->
+  <div class="card mt-4">
+    <div class="card-body">
+      <h5 class="card-title">Book This Transportation Service</h5>
+
+      <form>
+        <div class="mb-3">
+          <label for="pickupDate" class="form-label">Pickup Date</label>
+          <input type="date" id="pickupDate" [(ngModel)]="pickupDate" name="pickupDate" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="dropoffDate" class="form-label">Dropoff Date</label>
+          <input type="date" id="dropoffDate" [(ngModel)]="dropoffDate" name="dropoffDate" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="pickupLocation" class="form-label">Pickup Location</label>
+          <input type="text" id="pickupLocation" [(ngModel)]="pickupLocation" name="pickupLocation" class="form-control" placeholder="Enter pickup location" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="dropoffLocation" class="form-label">Dropoff Location</label>
+          <input type="text" id="dropoffLocation" [(ngModel)]="dropoffLocation" name="dropoffLocation" class="form-control" placeholder="Enter dropoff location" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="specialRequest" class="form-label">Special Request</label>
+          <textarea id="specialRequest" [(ngModel)]="specialRequest" name="specialRequest" class="form-control" placeholder="Any special request..."></textarea>
+        </div>
+
+        <!-- Trigger the bookTransport function directly with click -->
+        <button type="button" class="btn btn-primary" (click)="bookTransport()">Submit Booking</button>
+      </form>
+    </div>
+  </div>
+</div>

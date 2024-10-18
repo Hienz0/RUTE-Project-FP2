@@ -382,8 +382,11 @@ app.get('/transportationService/:id', async (req, res) => {
   }
 });
 
-// Book transportation endpoint
-app.post('/bookTransport', async (req, res) => {
+
+app.post('/bookTransports', async (req, res) => {
+  // Log the incoming request
+  console.log("Request received at /bookTransports");
+  
   const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
 
   try {
@@ -458,6 +461,9 @@ app.post('/bookTransport', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+// Book transportation endpoint
+
 
 
 
