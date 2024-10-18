@@ -11,6 +11,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { ReviewServicesComponent } from './review-services/review-services.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
 import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
+import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -24,7 +25,8 @@ const routes: Routes = [
   {path: 'adminDashboard',component: AdminDashboardComponent },
   {path: 'reviewServices',component: ReviewServicesComponent},
   { path: 'search-results', component: SearchResultsComponent },
-  {path:'customizeProfile', component: CustomizeProfileComponent}
+  {path:'customizeProfile', component: CustomizeProfileComponent},
+  {path: 'transportationServices', component: TransportationServicesComponent}
 ];
 
 @NgModule({

@@ -351,6 +351,37 @@ const bookingVehicleSchema = new mongoose.Schema({
 // Create the Booking model
 const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
 
+
+//get data service transportation
+app.get('/getTransportationServices', async (req, res) => {
+  try {
+    const transportation = await Service.find({ productCategory: "Transportation" });
+    res.json(transportation);
+  } catch (err) {
+    console.error('Error Get Data: ', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// get Transportation data by id
+app.get('/transportationService/:id', async (req, res) => {
+  try {
+    const transportId = req.params.id;
+
+    // Temukan layanan berdasarkan _id
+    const transportID = await Service.findById(transportId);
+
+    if (!transportID) {
+      return res.status(404).json({ message: 'Provider not found' });
+    }
+
+    res.json(transportID);
+  } catch (error) {
+    console.error('Error retrieving provider data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 // Book transportation endpoint
 app.post('/book-transportation', async (req, res) => {
   const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;

@@ -1,0 +1,81 @@
+<div class="container mt-5">
+    <div class="row">
+      <div *ngFor="let service of services" class="col-md-4 mb-4">
+        <div class="card h-100">
+          <!-- Bootstrap Carousel for displaying images -->
+          <div
+            id="carousel{{ service._id }}"
+            class="carousel slide"
+            data-bs-ride="carousel"
+          >
+            <div class="carousel-inner">
+              <div
+                *ngFor="let image of service.productImages; let i = index"
+                class="carousel-item"
+                [ngClass]="{ active: i === 0 }"
+              >
+                <!-- Display the image from the server -->
+                <img
+                  [src]="getFullImagePath(image)"
+                  class="d-block w-100"
+                  alt="Service Image"
+                  style="height: 200px; object-fit: cover"
+                />
+              </div>
+  
+              <!-- Fallback if no images are available -->
+              <div
+                *ngIf="service.productImages.length === 0"
+                class="carousel-item active"
+              >
+                <div
+                  class="d-flex justify-content-center align-items-center bg-secondary"
+                  style="height: 200px"
+                >
+                  <p class="text-white">No Image Available</p>
+                </div>
+              </div>
+            </div>
+  
+            <!-- Carousel Controls (next and previous buttons) -->
+            <button
+              class="carousel-control-prev"
+              type="button"
+              [attr.data-bs-target]="'#carousel' + service._id"
+              data-bs-slide="prev"
+            >
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button
+              class="carousel-control-next"
+              type="button"
+              [attr.data-bs-target]="'#carousel' + service._id"
+              data-bs-slide="next"
+            >
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+  
+          <!-- Card Body for Service Details -->
+          <div class="card-body">
+            <h5 class="card-title">{{ service.productName }}</h5>
+            <p class="card-text">{{ service.productDescription }}</p>
+            <p><strong>Price:</strong> {{ service.productPrice | currency:'IDR':'symbol' }}</p>
+            <p><strong>Category:</strong> {{ service.productCategory }}</p>
+            <p *ngIf="service.productSubcategory"><strong>Subcategory:</strong> {{ service.productSubcategory }}</p>
+            <p><strong>Location:</strong> {{ service.location }}</p>
+            <p>
+              <strong>Rating:</strong> {{ service.averageRating }} ({{ service.totalReviews }} reviews)
+            </p>
+          </div>
+  
+          <div class="card-footer text-muted">
+            <button class="btn btn-primary">Book Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

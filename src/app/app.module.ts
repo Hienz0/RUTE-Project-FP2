@@ -23,6 +23,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SearchComponent } from './search/search.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
 import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
+import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
+import { BookTransportationComponent } from './book-transportation/book-transportation.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { CustomizeProfileComponent } from './customize-profile/customize-profile
     ReviewServicesComponent,
     SearchComponent,
     SearchResultsComponent,
-    CustomizeProfileComponent
+    CustomizeProfileComponent,
+    TransportationServicesComponent,
+    BookTransportationComponent
   ],
   imports: [
     BrowserModule,
