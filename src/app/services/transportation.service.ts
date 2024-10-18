@@ -17,11 +17,9 @@ export class TransportationService {
     return this.http.get(`${this.url}/transportationService/${transportID}`);
   }
   
-  // Method to book transportation
   bookTransportation(bookingData: any): Observable<any> {
-   
-    return this.http.post<any>(`${this.url}/book-transportation`, bookingData);
-    
+    return this.http.post<any>(`${this.url}/bookTransport`, bookingData);
   }
+  
   
 }

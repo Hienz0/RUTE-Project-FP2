@@ -383,7 +383,7 @@ app.get('/transportationService/:id', async (req, res) => {
 });
 
 // Book transportation endpoint
-app.post('/book-transportation', async (req, res) => {
+app.post('/bookTransport', async (req, res) => {
   const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
 
   try {
