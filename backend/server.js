@@ -75,7 +75,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
     accommodationType: {
         type: String,
         required: true,
-        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse']
+        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
     },
     numberOfGuests: {
         type: Number,
@@ -109,6 +109,21 @@ const bookingAccommodationSchema = new mongoose.Schema({
 const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchema);
 
 module.exports = Booking;
+
+// 
+// Route to handle booking accommodation
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const booking = new Booking(req.body);
+    await booking.save();
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error('Error details:', error); // Log error details for debugging
+    res.status(400).json({ error: 'Error creating booking', details: error });
+  }
+});
+
+// 
 
 
 
@@ -1037,6 +1052,32 @@ const serviceSchema = new mongoose.Schema({
 });
 
 const Service = mongoose.model('Service', serviceSchema);
+
+// 
+// Route to get services with productCategory "Accommodation"
+app.get('/api/services/accommodation', async (req, res) => {
+  try {
+    const services = await Service.find({ productCategory: 'Accommodation' });
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching services' });
+  }
+});
+
+// Route to get a specific service by ID
+app.get('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    res.json(service);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching service details' });
+  }
+});
+
+// 
 
 // API routes for services
 // GET services - Only return services with status 'accepted'

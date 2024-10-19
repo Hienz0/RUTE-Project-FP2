@@ -10,6 +10,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { ReviewServicesComponent } from './review-services/review-services.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
+import { AccommodationComponent } from './accommodation/accommodation.component';
+import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -22,7 +24,10 @@ const routes: Routes = [
   {path: 'dashboard', component: DashboardComponent},
   {path: 'adminDashboard',component: AdminDashboardComponent },
   {path: 'reviewServices',component: ReviewServicesComponent},
-  { path: 'search-results', component: SearchResultsComponent }
+  {path: 'search-results', component: SearchResultsComponent },
+  {path: 'accommodation', component: AccommodationComponent },
+  { path: 'accommodation/:id', component: AccommodationDetailComponent }, // Route for details page
+  { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
 ];
 
 @NgModule({

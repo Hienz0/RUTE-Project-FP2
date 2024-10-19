@@ -4,7 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { RouterModule } from '@angular/router'; // Import RouterModule
 import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -22,6 +22,8 @@ import { ReviewServicesComponent } from './review-services/review-services.compo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SearchComponent } from './search/search.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
+import { AccommodationComponent } from './accommodation/accommodation.component';
+import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,9 @@ import { SearchResultsComponent } from './search-results/search-results.componen
     AdminDashboardComponent,
     ReviewServicesComponent,
     SearchComponent,
-    SearchResultsComponent
+    SearchResultsComponent,
+    AccommodationComponent,
+    AccommodationDetailComponent
   ],
   imports: [
     BrowserModule,
@@ -49,14 +53,16 @@ import { SearchResultsComponent } from './search-results/search-results.componen
     MatSnackBarModule, // Add comma here
     RouterModule.forRoot([
       { path: 'manage-services', component: ManageServicesComponent },
-      {path: 'register', component: RegisterComponent},
-  {path: 'login', component: LoginComponent},
-  {path: 'provider-registration', component: RegisterAsProviderComponent},
-  {path: 'landing-page', component: LandingPageComponent},
-  {path: '', redirectTo: 'landing-page', pathMatch: 'full'},
-  {path: 'dashboard', component: DashboardComponent},
-  {path: 'reviewProvider', component: ReviewRegisterComponent},
-  { path: 'search-results', component: SearchResultsComponent }
+      { path: 'register', component: RegisterComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'provider-registration', component: RegisterAsProviderComponent },
+      { path: 'landing-page', component: LandingPageComponent },
+      { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'reviewProvider', component: ReviewRegisterComponent },
+      { path: 'search-results', component: SearchResultsComponent },
+      { path: 'accommodation', component: AccommodationComponent }
+
     ]), BrowserAnimationsModule
   ],
   providers: [],
