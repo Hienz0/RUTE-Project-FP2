@@ -24,6 +24,7 @@ import { SearchComponent } from './search/search.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
 import { AccommodationComponent } from './accommodation/accommodation.component';
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
+import { TourGuideComponent } from './tour-guide/tour-guide.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { AccommodationDetailComponent } from './accommodation-detail/accommodati
     SearchComponent,
     SearchResultsComponent,
     AccommodationComponent,
-    AccommodationDetailComponent
+    AccommodationDetailComponent,
+    TourGuideComponent
   ],
   imports: [
     BrowserModule,

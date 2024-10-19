@@ -21,3 +21,5 @@ export class ServicesService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 }
+
+// Fetch service tour guide category
