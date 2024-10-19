@@ -12,6 +12,8 @@ import { ReviewServicesComponent } from './review-services/review-services.compo
 import { SearchResultsComponent } from './search-results/search-results.component';
 import { AccommodationComponent } from './accommodation/accommodation.component';
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
+import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-guide.component';
+import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -27,6 +29,8 @@ const routes: Routes = [
   {path: 'search-results', component: SearchResultsComponent },
   {path: 'accommodation', component: AccommodationComponent },
   { path: 'accommodation/:id', component: AccommodationDetailComponent }, // Route for details page
+  {path: 'booking-tour-guide', component: BookingTourGuideComponent},
+  { path: 'tour-guide/:id', component: BookingTourGuideDetailComponent},
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
 ];
 

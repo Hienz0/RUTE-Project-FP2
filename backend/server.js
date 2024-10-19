@@ -10,6 +10,7 @@ const path = require('path');
 const providerControll = require('./controller/provider');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { type } = require('os');
 
 const app = express();
 const PORT = 3000;
@@ -141,6 +142,13 @@ const bookingTourSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+
+    tourguideType: {
+      type: String,
+      required: true,
+      enum: ['With Driver', 'Tour Only']
+    },
+
     tourDate: {
         type: Date,
         required: true
@@ -166,6 +174,17 @@ const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
 
 module.exports = TourBooking;
 
+// Route to handle booking tour guide
+app.post('/api/services/tour-guide', async (req, res) => {
+  try {
+    const booking = new Booking(req.body);
+    await booking.save();
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error('Error details:', error); // Log error details for debugging
+    res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+  }
+});
 
 
 ///////////
@@ -1058,6 +1077,16 @@ const Service = mongoose.model('Service', serviceSchema);
 app.get('/api/services/accommodation', async (req, res) => {
   try {
     const services = await Service.find({ productCategory: 'Accommodation' });
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching services' });
+  }
+});
+
+// Route to get services with productCategory "tour guide"
+app.get('/api/services/tour-guide', async (req, res) => {
+  try {
+    const services = await Service.find({ productCategory: 'Tour Guide' });
     res.json(services);
   } catch (err) {
     res.status(500).json({ error: 'Error fetching services' });

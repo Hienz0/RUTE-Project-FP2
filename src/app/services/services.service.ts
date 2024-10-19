@@ -20,4 +20,13 @@ export class ServicesService {
   getAccommodationServiceById(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+
+  getTourGuideServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${'tour-guide'}`);
+  }
+
+  getTourGuideServiceById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
 }

@@ -4,30 +4,27 @@ import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service'; // Import the booking service
 import { AuthService } from '../services/auth.service';
 
-
-// Declare Swal globally
 declare var Swal: any;
 @Component({
-  selector: 'app-accommodation-detail',
-  templateUrl: './accommodation-detail.component.html',
-  styleUrls: ['./accommodation-detail.component.css'],
+  selector: 'app-booking-tour-guide-detail',
+  templateUrl: './booking-tour-guide-detail.component.html',
+  styleUrls: ['./booking-tour-guide-detail.component.css']
 })
-export class AccommodationDetailComponent implements OnInit {
+export class BookingTourGuideDetailComponent implements OnInit {
+
   currentUser: any;
 
   serviceId: string | null = null;
-  accommodationDetail: any = null;
-  
+  tourguideDetail: any = null;
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
-    guestName: '',
-    accommodationType: 'Hotel',
-    numberOfGuests: 1,
-    checkInDate: '',
-    checkOutDate: '',
-    roomNumber: null,
+    customerName: '',
+    tourguideType: 'With Guide',
+    numberOfParticipants: 1,
+    tourDate: '',
     specialRequest: '',
   };
+
 
   constructor(
     private route: ActivatedRoute,
@@ -44,7 +41,7 @@ export class AccommodationDetailComponent implements OnInit {
     
     this.serviceId = this.route.snapshot.paramMap.get('id');
     if (this.serviceId) {
-      this.loadAccommodationDetail(this.serviceId);
+      this.loadTourGuideDetail(this.serviceId);
     }
 
         // Dynamically add Tailwind CDN script
@@ -53,41 +50,38 @@ export class AccommodationDetailComponent implements OnInit {
         script.id = 'tailwindScript';
         this.renderer.appendChild(document.body, script);
   }
-  
-  loadAccommodationDetail(id: string): void {
+
+  loadTourGuideDetail(id: string): void {
     this.servicesService.getAccommodationServiceById(id).subscribe(
       (data) => {
-        this.accommodationDetail = data;
+        this.tourguideDetail = data;
         
         // Set the accommodationType in bookingDetails based on productSubcategory
-        this.bookingDetails.accommodationType = this.accommodationDetail.productSubcategory;
+        this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
       },
       (error) => {
         console.error('Error fetching accommodation detail', error);
       }
     );
   }
+
+    // Open the booking modal
+    openModal(): void {
+      this.isModalOpen = true;
+    }
   
+    // Close the booking modal
+    closeModal(): void {
+      this.isModalOpen = false;
+    }
 
-  // Open the booking modal
-  openModal(): void {
-    this.isModalOpen = true;
-  }
-
-  // Close the booking modal
-  closeModal(): void {
-    this.isModalOpen = false;
-  }
-
-
-  
-  // Submit the booking form
+      // Submit the booking form
   
   submitBooking(): void {
     // Check if all required fields are filled
-    if (!this.bookingDetails.guestName || !this.bookingDetails.accommodationType || 
-        !this.bookingDetails.numberOfGuests || !this.bookingDetails.checkInDate || 
-        !this.bookingDetails.checkOutDate || !this.bookingDetails.roomNumber) {
+    if (!this.bookingDetails.customerName || !this.bookingDetails.tourguideType || 
+        !this.bookingDetails.numberOfParticipants || !this.bookingDetails.tourDate || 
+        !this.bookingDetails.specialRequest) {
   
       // Display SweetAlert2 error popup if validation fails
       Swal.fire({
@@ -111,7 +105,7 @@ export class AccommodationDetailComponent implements OnInit {
         Swal.fire({
           icon: 'success',
           title: 'Booking Successful!',
-          text: 'Your accommodation has been booked successfully.',
+          text: 'Your tour or guide has been booked successfully.',
           confirmButtonColor: '#3085d6',
         });
   
@@ -130,6 +124,5 @@ export class AccommodationDetailComponent implements OnInit {
       }
     );
   }
-  
-  
+
 }
