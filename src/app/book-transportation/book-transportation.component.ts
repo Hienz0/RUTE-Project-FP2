@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet'; // Import Leaflet.js
+import axios from 'axios';  // Import axios for reverse geocoding
 
 @Component({
   selector: 'app-book-transportation',
@@ -19,6 +20,11 @@ export class BookTransportationComponent implements OnInit {
   pickupLocation: string = '';
   dropoffLocation: string = '';
   specialRequest: string = '';
+
+   // Reverse geocoded addresses
+   pickupAddress: string = '';
+   dropoffAddress: string = '';
+ 
 
   // Ubud, Bali coordinates
   defaultLat: number = -8.5069;
@@ -106,63 +112,77 @@ export class BookTransportationComponent implements OnInit {
     }).addTo(map);
   }
 
-  // Initialize the map for Pickup Location
-  initPickupMap(): void {
+   // Initialize Pickup Map
+   initPickupMap(): void {
     const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    // Custom icon for markers
     const customIcon = L.icon({
-      iconUrl: 'assets/location.png', // Correct path for pickup marker
-      iconSize: [35, 45], // Adjust size of the marker
-      iconAnchor: [17, 45], // Correct anchor point so that it pins correctly
+      iconUrl: 'assets/location.png',
+      iconSize: [35, 45],
+      iconAnchor: [17, 45],
     });
 
     const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
 
-    // Update the pickup location when the marker is dragged
     marker.on('dragend', (e: any) => {
       const latLng = e.target.getLatLng();
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');  // Call reverse geocoding
     });
 
-    // Capture click event and update the marker position
     map.on('click', (e: any) => {
       const latLng = e.latlng;
       marker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');  // Call reverse geocoding
     });
   }
 
-  // Initialize the map for Dropoff Location
+  // Initialize Dropoff Map
   initDropoffMap(): void {
     const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    // Custom icon for markers
     const customIcon = L.icon({
-      iconUrl: 'assets/location.png', // Correct path for dropoff marker
-      iconSize: [35, 45], // Adjust size of the marker
-      iconAnchor: [17, 45], // Correct anchor point so that it pins correctly
+      iconUrl: 'assets/location.png',
+      iconSize: [35, 45],
+      iconAnchor: [17, 45],
     });
 
     const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
 
-    // Update the dropoff location when the marker is dragged
     marker.on('dragend', (e: any) => {
       const latLng = e.target.getLatLng();
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');  // Call reverse geocoding
     });
 
-    // Capture click event and update the marker position
     map.on('click', (e: any) => {
       const latLng = e.latlng;
       marker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');  // Call reverse geocoding
+    });
+  }
+
+  // Reverse Geocoding to get the address from lat/lng
+  reverseGeocode(lat: number, lng: number, type: 'pickup' | 'dropoff'): void {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+    
+    axios.get(url).then((response) => {
+      const address = response.data.display_name;
+      if (type === 'pickup') {
+        this.pickupAddress = address;  // Set pickup address
+      } else {
+        this.dropoffAddress = address;  // Set dropoff address
+      }
+    }).catch((error) => {
+      console.error('Error during reverse geocoding:', error);
     });
   }
 

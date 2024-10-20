@@ -72,18 +72,19 @@
         </div>
 
      <!-- Pickup Location Map -->
-     <div class="mb-3">
-      <label for="pickupLocation" class="form-label">Pickup Location</label>
-      <div id="pickupMap" style="height: 400px;"></div>
-      <input type="text" id="pickupLocation" [(ngModel)]="pickupLocation" name="pickupLocation" class="form-control" placeholder="Click the map to select pickup location" readonly>
-    </div>
+<div class="mb-3">
+  <label for="pickupLocation" class="form-label">Pickup Location</label>
+  <div id="pickupMap" style="height: 400px;"></div>
+  <input type="text" id="pickupAddress" [(ngModel)]="pickupAddress" name="pickupAddress" class="form-control" placeholder="Pickup address" readonly>
+</div>
 
-    <!-- Dropoff Location Map -->
-    <div class="mb-3">
-      <label for="dropoffLocation" class="form-label">Dropoff Location</label>
-      <div id="dropoffMap" style="height: 400px;"></div>
-      <input type="text" id="dropoffLocation" [(ngModel)]="dropoffLocation" name="dropoffLocation" class="form-control" placeholder="Click the map to select dropoff location" readonly>
-    </div>
+<!-- Dropoff Location Map -->
+<div class="mb-3">
+  <label for="dropoffLocation" class="form-label">Dropoff Location</label>
+  <div id="dropoffMap" style="height: 400px;"></div>
+  <input type="text" id="dropoffAddress" [(ngModel)]="dropoffAddress" name="dropoffAddress" class="form-control" placeholder="Dropoff address" readonly>
+</div>
+
 
         <div class="mb-3">
           <label for="specialRequest" class="form-label">Special Request</label>
