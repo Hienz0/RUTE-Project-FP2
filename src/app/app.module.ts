@@ -24,6 +24,8 @@ import { SearchComponent } from './search/search.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
 import { AccommodationComponent } from './accommodation/accommodation.component';
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
+import { RestaurantComponent } from './restaurant/restaurant.component';
+import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +43,9 @@ import { AccommodationDetailComponent } from './accommodation-detail/accommodati
     SearchComponent,
     SearchResultsComponent,
     AccommodationComponent,
-    AccommodationDetailComponent
+    AccommodationDetailComponent,
+    RestaurantComponent,
+    RestaurantDetailComponent
   ],
   imports: [
     BrowserModule,
@@ -61,7 +65,9 @@ import { AccommodationDetailComponent } from './accommodation-detail/accommodati
       { path: 'dashboard', component: DashboardComponent },
       { path: 'reviewProvider', component: ReviewRegisterComponent },
       { path: 'search-results', component: SearchResultsComponent },
-      { path: 'accommodation', component: AccommodationComponent }
+      { path: 'accommodation', component: AccommodationComponent },
+      {path: 'restaurant', component: RestaurantComponent },
+      { path: 'restaurant-detail/:id', component: RestaurantDetailComponent }
 
     ]), BrowserAnimationsModule
   ],

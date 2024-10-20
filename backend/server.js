@@ -110,6 +110,35 @@ const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchem
 
 module.exports = Booking;
 
+
+// 
+
+// Fetch all restaurant services (where productCategory is "Restaurant")
+app.get('/api/services/restaurants', async (req, res) => {
+  try {
+    const restaurants = await Service.find({ productCategory: 'Restaurant' });
+    res.status(200).json(restaurants);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching restaurants', details: error });
+  }
+});
+
+// Fetch restaurant details by ID
+app.get('/api/services/restaurant/:id', async (req, res) => {
+  try {
+    const restaurant = await Service.findById(req.params.id);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+    res.status(200).json(restaurant);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching restaurant details', details: error });
+  }
+});
+
+
+// 
+
 // 
 // Route to handle booking accommodation
 app.post('/api/bookings', async (req, res) => {

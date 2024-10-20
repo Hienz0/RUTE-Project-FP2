@@ -20,4 +20,14 @@ export class ServicesService {
   getAccommodationServiceById(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+
+    // Fetch all restaurants
+    getRestaurants(): Observable<any[]> {
+      return this.http.get<any[]>(`${this.apiUrl}/restaurants`);
+    }
+  
+    // Fetch restaurant by ID
+    getRestaurantById(id: string): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/restaurant/${id}`);
+    }
 }
