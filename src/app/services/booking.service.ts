@@ -12,6 +12,10 @@ export class BookingService {
 
   // Send a booking request to the backend
   bookAccommodation(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}`, bookingData);
+    return this.http.post<any>(`${this.apiUrl}/${'accommodation'}`, bookingData);
+  }
+
+  bookTourGuide(bookingData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${'tour-guide'}`, bookingData);
   }
 }

@@ -113,7 +113,7 @@ module.exports = Booking;
 
 // 
 // Route to handle booking accommodation
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings/accommodation', async (req, res) => {
   try {
     const booking = new Booking(req.body);
     await booking.save();
@@ -146,7 +146,7 @@ const bookingTourSchema = new mongoose.Schema({
     tourguideType: {
       type: String,
       required: true,
-      enum: ['With Driver', 'Tour Only']
+      enum: ['With Guide', 'Tour Only']
     },
 
     tourDate: {
@@ -175,9 +175,9 @@ const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
 module.exports = TourBooking;
 
 // Route to handle booking tour guide
-app.post('/api/services/tour-guide', async (req, res) => {
+app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
-    const booking = new Booking(req.body);
+    const booking = new TourBooking(req.body);
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {

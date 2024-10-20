@@ -18,6 +18,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
   tourguideDetail: any = null;
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
+    tourName: '',
     customerName: '',
     tourguideType: 'With Guide',
     numberOfParticipants: 1,
@@ -52,9 +53,13 @@ export class BookingTourGuideDetailComponent implements OnInit {
   }
 
   loadTourGuideDetail(id: string): void {
-    this.servicesService.getAccommodationServiceById(id).subscribe(
+    this.servicesService.getTourGuideServiceById(id).subscribe(
       (data) => {
         this.tourguideDetail = data;
+
+        // Set the tourName in bookingDetails based on productName
+        this.bookingDetails.tourName = this.tourguideDetail.productName;
+        console.log(this.tourguideDetail.productName);
         
         // Set the accommodationType in bookingDetails based on productSubcategory
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
@@ -97,7 +102,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     console.log(this.bookingDetails);
   
     // Proceed with booking service if validation passes
-    this.bookingService.bookAccommodation(this.bookingDetails).subscribe(
+    this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
       (response) => {
         console.log('Booking successful', response);
   
