@@ -111,25 +111,14 @@ export class BookTransportationComponent implements OnInit {
     }).addTo(map);
   }
 
-  // Bounding box for Ubud, Bali
-  private ubudBounds = L.latLngBounds(
-    L.latLng(-8.5211, 115.2456), // Southwest corner
-    L.latLng(-8.4870, 115.2849)  // Northeast corner
-  );
 
-  // Initialize Pickup Map with bounds limitation and Ubud circle area
+// Initialize Pickup Map with bounds limitation based on Ubud circle area
 initPickupMap(): void {
   const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
-
-  // Restrict map view to Ubud bounds
-  map.setMaxBounds(this.ubudBounds);
-  map.on('drag', () => {
-    map.panInsideBounds(this.ubudBounds, { animate: false });
-  });
 
   const customIcon = L.icon({
     iconUrl: 'assets/location.png',
@@ -150,10 +139,13 @@ initPickupMap(): void {
 
   marker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
+    
+    // Calculate distance from center of the circle
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
 
-    // Ensure marker stays within bounds
-    if (!this.ubudBounds.contains(latLng)) {
-      const nearestPoint = this.ubudBounds.getCenter();
+    // Ensure marker stays within circle radius
+    if (distanceFromCenter > 3000) {
+      const nearestPoint = ubudCircle.getBounds().getCenter(); // Adjust to center if out of bounds
       marker.setLatLng(nearestPoint);
       this.pickupLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
       this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'pickup');
@@ -167,9 +159,12 @@ initPickupMap(): void {
 
   map.on('click', (e: any) => {
     const latLng = e.latlng;
+    
+    // Calculate distance from center of the circle
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
 
-    // Only allow clicking within bounds
-    if (this.ubudBounds.contains(latLng)) {
+    // Ensure the click is within the circle
+    if (distanceFromCenter <= 3000) {
       marker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
@@ -180,19 +175,13 @@ initPickupMap(): void {
   });
 }
 
-// Initialize Dropoff Map with bounds limitation and Ubud circle area
+// Similarly, apply the same logic to Dropoff Map
 initDropoffMap(): void {
   const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
-
-  // Restrict map view to Ubud bounds
-  map.setMaxBounds(this.ubudBounds);
-  map.on('drag', () => {
-    map.panInsideBounds(this.ubudBounds, { animate: false });
-  });
 
   const customIcon = L.icon({
     iconUrl: 'assets/location.png',
@@ -214,9 +203,12 @@ initDropoffMap(): void {
   marker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
 
-    // Ensure marker stays within bounds
-    if (!this.ubudBounds.contains(latLng)) {
-      const nearestPoint = this.ubudBounds.getCenter();
+    // Calculate distance from center of the circle
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
+
+    // Ensure marker stays within circle radius
+    if (distanceFromCenter > 3000) {
+      const nearestPoint = ubudCircle.getBounds().getCenter(); // Adjust to center if out of bounds
       marker.setLatLng(nearestPoint);
       this.dropoffLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
       this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'dropoff');
@@ -231,8 +223,11 @@ initDropoffMap(): void {
   map.on('click', (e: any) => {
     const latLng = e.latlng;
 
-    // Only allow clicking within bounds
-    if (this.ubudBounds.contains(latLng)) {
+    // Calculate distance from center of the circle
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
+
+    // Ensure the click is within the circle
+    if (distanceFromCenter <= 3000) {
       marker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
@@ -242,6 +237,7 @@ initDropoffMap(): void {
     }
   });
 }
+
 
 
   // Reverse Geocoding to get the address from lat/lng
