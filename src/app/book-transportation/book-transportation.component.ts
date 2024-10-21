@@ -21,10 +21,9 @@ export class BookTransportationComponent implements OnInit {
   dropoffLocation: string = '';
   specialRequest: string = '';
 
-   // Reverse geocoded addresses
-   pickupAddress: string = '';
-   dropoffAddress: string = '';
- 
+  // Reverse geocoded addresses
+  pickupAddress: string = '';
+  dropoffAddress: string = '';
 
   // Ubud, Bali coordinates
   defaultLat: number = -8.5069;
@@ -41,7 +40,7 @@ export class BookTransportationComponent implements OnInit {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
-    
+
     // Get ID from route parameter
     const transportID = this.route.snapshot.paramMap.get('id');
     console.log('Transport ID from route:', transportID);
@@ -112,68 +111,143 @@ export class BookTransportationComponent implements OnInit {
     }).addTo(map);
   }
 
-   // Initialize Pickup Map
-   initPickupMap(): void {
-    const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+  // Bounding box for Ubud, Bali
+  private ubudBounds = L.latLngBounds(
+    L.latLng(-8.5211, 115.2456), // Southwest corner
+    L.latLng(-8.4870, 115.2849)  // Northeast corner
+  );
 
-    const customIcon = L.icon({
-      iconUrl: 'assets/location.png',
-      iconSize: [35, 45],
-      iconAnchor: [17, 45],
-    });
+  // Initialize Pickup Map with bounds limitation and Ubud circle area
+initPickupMap(): void {
+  const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
-    const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(map);
 
-    marker.on('dragend', (e: any) => {
-      const latLng = e.target.getLatLng();
+  // Restrict map view to Ubud bounds
+  map.setMaxBounds(this.ubudBounds);
+  map.on('drag', () => {
+    map.panInsideBounds(this.ubudBounds, { animate: false });
+  });
+
+  const customIcon = L.icon({
+    iconUrl: 'assets/location.png',
+    iconSize: [35, 45],
+    iconAnchor: [17, 45],
+  });
+
+  // Add a circle to mark the Ubud area (3 km radius from the center)
+  const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
+  const ubudCircle = L.circle(ubudCenter, {
+    color: 'blue',
+    fillColor: '#add8e6',
+    fillOpacity: 0.2,
+    radius: 3000 // 3 km radius
+  }).addTo(map);
+
+  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+
+  marker.on('dragend', (e: any) => {
+    const latLng = e.target.getLatLng();
+
+    // Ensure marker stays within bounds
+    if (!this.ubudBounds.contains(latLng)) {
+      const nearestPoint = this.ubudBounds.getCenter();
+      marker.setLatLng(nearestPoint);
+      this.pickupLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
+      this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'pickup');
+      // Notify the user
+      window.alert('You can only select a point within the Ubud area.');
+    } else {
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');  // Call reverse geocoding
-    });
+      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
+    }
+  });
 
-    map.on('click', (e: any) => {
-      const latLng = e.latlng;
+  map.on('click', (e: any) => {
+    const latLng = e.latlng;
+
+    // Only allow clicking within bounds
+    if (this.ubudBounds.contains(latLng)) {
       marker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');  // Call reverse geocoding
-    });
-  }
+      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
+    } else {
+      // Notify the user
+      window.alert('You can only select a point within the Ubud area.');
+    }
+  });
+}
 
-  // Initialize Dropoff Map
-  initDropoffMap(): void {
-    const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+// Initialize Dropoff Map with bounds limitation and Ubud circle area
+initDropoffMap(): void {
+  const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
-    const customIcon = L.icon({
-      iconUrl: 'assets/location.png',
-      iconSize: [35, 45],
-      iconAnchor: [17, 45],
-    });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(map);
 
-    const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  // Restrict map view to Ubud bounds
+  map.setMaxBounds(this.ubudBounds);
+  map.on('drag', () => {
+    map.panInsideBounds(this.ubudBounds, { animate: false });
+  });
 
-    marker.on('dragend', (e: any) => {
-      const latLng = e.target.getLatLng();
+  const customIcon = L.icon({
+    iconUrl: 'assets/location.png',
+    iconSize: [35, 45],
+    iconAnchor: [17, 45],
+  });
+
+  // Add a circle to mark the Ubud area (3 km radius from the center)
+  const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
+  const ubudCircle = L.circle(ubudCenter, {
+    color: 'blue',
+    fillColor: '#add8e6',
+    fillOpacity: 0.2,
+    radius: 3000 // 3 km radius
+  }).addTo(map);
+
+  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+
+  marker.on('dragend', (e: any) => {
+    const latLng = e.target.getLatLng();
+
+    // Ensure marker stays within bounds
+    if (!this.ubudBounds.contains(latLng)) {
+      const nearestPoint = this.ubudBounds.getCenter();
+      marker.setLatLng(nearestPoint);
+      this.dropoffLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
+      this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'dropoff');
+      // Notify the user
+      window.alert('You can only select a point within the Ubud area.');
+    } else {
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');  // Call reverse geocoding
-    });
+      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
+    }
+  });
 
-    map.on('click', (e: any) => {
-      const latLng = e.latlng;
+  map.on('click', (e: any) => {
+    const latLng = e.latlng;
+
+    // Only allow clicking within bounds
+    if (this.ubudBounds.contains(latLng)) {
       marker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');  // Call reverse geocoding
-    });
-  }
+      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
+    } else {
+      // Notify the user
+      window.alert('You can only select a point within the Ubud area.');
+    }
+  });
+}
+
 
   // Reverse Geocoding to get the address from lat/lng
   reverseGeocode(lat: number, lng: number, type: 'pickup' | 'dropoff'): void {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-    
+
     axios.get(url).then((response) => {
       const address = response.data.display_name;
       if (type === 'pickup') {
@@ -182,10 +256,9 @@ export class BookTransportationComponent implements OnInit {
         this.dropoffAddress = address;  // Set dropoff address
       }
     }).catch((error) => {
-      console.error('Error during reverse geocoding:', error);
+      console.error('Error with reverse geocoding:', error);
     });
   }
-
   getFullImagePath(image: string): string {
     return `http://localhost:3000/${image}`;
   }
