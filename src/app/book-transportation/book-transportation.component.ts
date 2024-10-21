@@ -137,6 +137,7 @@ initPickupMap(): void {
   }).addTo(map);
 
   const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
 
@@ -176,6 +177,20 @@ initPickupMap(): void {
       window.alert('You can only select a point within the Ubud area.');
     }
   });
+
+  // Map click event to place marker within the bounds
+  map.on('click', (e: any) => {
+    const latLng = e.latlng;
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
+
+    if (distanceFromCenter <= 7000) {
+      marker.setLatLng(latLng);
+      this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
+    } else {
+      window.alert('You can only select a point within the Ubud area.');
+    }
+  });
 }
 
 // Initialize Dropoff Map with bounds limitation and search functionality
@@ -201,6 +216,7 @@ initDropoffMap(): void {
   }).addTo(map);
 
   const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
 
@@ -234,6 +250,20 @@ initDropoffMap(): void {
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
+      this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
+      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
+    } else {
+      window.alert('You can only select a point within the Ubud area.');
+    }
+  });
+
+  // Map click event to place marker within the bounds
+  map.on('click', (e: any) => {
+    const latLng = e.latlng;
+    const distanceFromCenter = map.distance(latLng, ubudCenter);
+
+    if (distanceFromCenter <= 7000) {
+      marker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
     } else {
