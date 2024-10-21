@@ -151,7 +151,16 @@ const bookingTourSchema = new mongoose.Schema({
 
     tourDate: {
         type: Date,
-        required: true
+        required: true,
+
+        validate: {
+          validator: function(value) {
+            const now = new Date();
+            return value >= now.setHours(0, 0, 0, 0);
+          },
+          message: 'Tour date must be in the future'
+      }
+
     },
     numberOfParticipants: {
         type: Number,
