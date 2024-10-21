@@ -4,6 +4,8 @@ import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet'; // Import Leaflet.js
 import axios from 'axios';  // Import axios for reverse geocoding
+import 'leaflet-search';  // Import Leaflet Search
+
 
 @Component({
   selector: 'app-book-transportation',
@@ -112,9 +114,8 @@ export class BookTransportationComponent implements OnInit {
   }
 
 
-// Initialize Pickup Map with bounds limitation based on Ubud circle area
+// Initialize Pickup Map with bounds limitation and search functionality
 initPickupMap(): void {
-  // Set initial center and zoom level
   const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -127,62 +128,58 @@ initPickupMap(): void {
     iconAnchor: [17, 45],
   });
 
-  // Add a circle to mark the Ubud area (7 km radius from the center)
   const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
   const ubudCircle = L.circle(ubudCenter, {
     color: 'blue',
     fillColor: '#add8e6',
     fillOpacity: 0.2,
-    radius: 7000 // 7 km radius to cover Ubud and surrounding villages
+    radius: 7000 // 7 km radius
   }).addTo(map);
 
+  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
 
-  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  // Add search control to map
+  const searchControl = new (L.Control as any).Search({
+    url: 'https://nominatim.openstreetmap.org/search?format=json&q={s}',
+    jsonpParam: 'json_callback',
+    propertyName: 'display_name',
+    propertyLoc: ['lat', 'lon'],
+    autoCollapse: true,
+    marker: false,
+    moveToLocation: (latlng: L.LatLng) => {
+      const distanceFromCenter = map.distance(latlng, ubudCenter); // Check distance from Ubud center
 
+      // Ensure the searched location is within 7 km radius
+      if (distanceFromCenter <= 7000) {
+        marker.setLatLng(latlng); // Set marker to new location
+        map.setView(latlng, 15);  // Zoom to new location
+        this.pickupLocation = `${latlng.lat}, ${latlng.lng}`;
+        this.reverseGeocode(latlng.lat, latlng.lng, 'pickup'); // Reverse geocode for address
+      } else {
+        // Notify the user that the location is outside Ubud area
+        window.alert('You can only select a point within the Ubud area.');
+      }
+    }
+  }).addTo(map);
+
+  // Marker drag and drop
   marker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
-
-    // Calculate distance from center of the circle
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
-    // Ensure marker stays within circle radius
-    if (distanceFromCenter > 7000) {
-      const nearestPoint = ubudCircle.getBounds().getCenter(); // Adjust to center if out of bounds
-      marker.setLatLng(nearestPoint);
-      this.pickupLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
-      this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'pickup');
-      // Notify the user
-      window.alert('You can only select a point within the Ubud area.');
-    } else {
-      this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
-    }
-  });
-
-  map.on('click', (e: any) => {
-    const latLng = e.latlng;
-
-    // Calculate distance from center of the circle
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
-
-    // Ensure the click is within the circle
     if (distanceFromCenter <= 7000) {
-      marker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
     } else {
-      // Notify the user
       window.alert('You can only select a point within the Ubud area.');
     }
   });
 }
 
-
-// Initialize Dropoff Map with bounds limitation based on Ubud circle area
+// Initialize Dropoff Map with bounds limitation and search functionality
 initDropoffMap(): void {
-  // Set initial center and zoom level
   const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -195,57 +192,56 @@ initDropoffMap(): void {
     iconAnchor: [17, 45],
   });
 
-  // Add a circle to mark the Ubud area (7 km radius from the center)
   const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
   const ubudCircle = L.circle(ubudCenter, {
     color: 'blue',
     fillColor: '#add8e6',
     fillOpacity: 0.2,
-    radius: 7000 // 7 km radius to cover Ubud and surrounding villages
+    radius: 7000 // 7 km radius
   }).addTo(map);
 
+  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
 
-  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  // Add search control to map
+  const searchControl = new (L.Control as any).Search({
+    url: 'https://nominatim.openstreetmap.org/search?format=json&q={s}',
+    jsonpParam: 'json_callback',
+    propertyName: 'display_name',
+    propertyLoc: ['lat', 'lon'],
+    autoCollapse: true,
+    marker: false,
+    moveToLocation: (latlng: L.LatLng) => {
+      const distanceFromCenter = map.distance(latlng, ubudCenter); // Check distance from Ubud center
 
+      // Ensure the searched location is within 7 km radius
+      if (distanceFromCenter <= 7000) {
+        marker.setLatLng(latlng); // Set marker to new location
+        map.setView(latlng, 15);  // Zoom to new location
+        this.dropoffLocation = `${latlng.lat}, ${latlng.lng}`;
+        this.reverseGeocode(latlng.lat, latlng.lng, 'dropoff'); // Reverse geocode for address
+      } else {
+        // Notify the user that the location is outside Ubud area
+        window.alert('You can only select a point within the Ubud area.');
+      }
+    }
+  }).addTo(map);
+
+  // Marker drag and drop
   marker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
-
-    // Calculate distance from center of the circle
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
-    // Ensure marker stays within circle radius
-    if (distanceFromCenter > 7000) {
-      const nearestPoint = ubudCircle.getBounds().getCenter(); // Adjust to center if out of bounds
-      marker.setLatLng(nearestPoint);
-      this.dropoffLocation = `${nearestPoint.lat}, ${nearestPoint.lng}`;
-      this.reverseGeocode(nearestPoint.lat, nearestPoint.lng, 'dropoff');
-      // Notify the user
-      window.alert('You can only select a point within the Ubud area.');
-    } else {
-      this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
-      this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
-    }
-  });
-
-  map.on('click', (e: any) => {
-    const latLng = e.latlng;
-
-    // Calculate distance from center of the circle
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
-
-    // Ensure the click is within the circle
     if (distanceFromCenter <= 7000) {
-      marker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
     } else {
-      // Notify the user
       window.alert('You can only select a point within the Ubud area.');
     }
   });
 }
+
 
 
 
