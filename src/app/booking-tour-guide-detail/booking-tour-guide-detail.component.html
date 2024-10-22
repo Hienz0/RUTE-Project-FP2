@@ -167,19 +167,6 @@
               />
             </div>
 
-            <!-- Tour Date
-          <div class="mb-4">
-            <label for="checkInDate" class="block text-sm font-medium text-gray-700">Tour Date</label>
-            <input
-              id="checkInDate"
-              type="date"
-              [(ngModel)]="bookingDetails.tourDate"
-              name="tourDate"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-              required
-            />
-          </div> -->
-
                   <!-- Tour Date -->
         <div class="mb-4">
           <label for="tourDate" class="block text-sm font-medium text-gray-700">Tour Date</label>
@@ -193,6 +180,17 @@
             required
           />
         </div>
+
+        <div>
+          <label for="pickupLocation">Pick-Up Location</label>
+          <input id="pickupLocation" type="text" value=" Ubud Palaces" readonly />
+        </div>
+        
+        <!-- Menampilkan Peta -->
+        <div id="map" style="height: 400px;"></div> <!-- Atur tinggi sesuai kebutuhan -->
+
+        <!-- <div id="map" style="height: 400px; width: 100%;"></div> -->
+        
   
             <!-- Special Request -->
             <div class="mb-4">

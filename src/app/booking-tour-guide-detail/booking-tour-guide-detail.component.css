@@ -905,4 +905,10 @@
 }
 }
 
+#map {
+  height: 400px; /* Atur tinggi sesuai kebutuhan */
+  width: 100%; /* Atur lebar sesuai kebutuhan */
+}
+
+
 /* end of responsive navbar */

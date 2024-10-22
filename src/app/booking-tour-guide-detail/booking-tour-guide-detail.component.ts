@@ -1,22 +1,25 @@
 import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
-import { BookingService } from '../services/booking.service'; // Import the booking service
+import { BookingService } from '../services/booking.service';
 import { AuthService } from '../services/auth.service';
 
 declare var Swal: any;
+import * as L from 'leaflet';
+
 @Component({
   selector: 'app-booking-tour-guide-detail',
   templateUrl: './booking-tour-guide-detail.component.html',
   styleUrls: ['./booking-tour-guide-detail.component.css']
 })
 export class BookingTourGuideDetailComponent implements OnInit {
-
+  
+  map: any;
   currentUser: any;
 
   serviceId: string | null = null;
   tourguideDetail: any = null;
-  isModalOpen = false; // State for controlling modal visibility
+  isModalOpen = false;
   bookingDetails = {
     tourName: '',
     customerName: '',
@@ -24,15 +27,15 @@ export class BookingTourGuideDetailComponent implements OnInit {
     numberOfParticipants: 1,
     tourDate: '',
     specialRequest: '',
+    pickupLocation: 'Ubud Palaces'
   };
 
-  currentDate: string = ''; // Define the currentDate property
-
+  currentDate: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService,
-    private bookingService: BookingService, // Inject the booking service
+    private bookingService: BookingService,
     private authService: AuthService,
     private renderer: Renderer2
   ) {}
@@ -40,9 +43,10 @@ export class BookingTourGuideDetailComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
+      // Hapus argumen di sini
+      // this.loadLeafletMap();
     });
     
-    // Initialize the currentDate with the current date in 'yyyy-MM-dd' format
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0];
     
@@ -51,169 +55,125 @@ export class BookingTourGuideDetailComponent implements OnInit {
       this.loadTourGuideDetail(this.serviceId);
     }
 
-        // Dynamically add Tailwind CDN script
-        const script = this.renderer.createElement('script');
-        script.src = 'https://cdn.tailwindcss.com';
-        script.id = 'tailwindScript';
-        this.renderer.appendChild(document.body, script);
+    // Menambahkan Tailwind CDN secara dinamis
+    const script = this.renderer.createElement('script');
+    script.src = 'https://cdn.tailwindcss.com';
+    script.id = 'tailwindScript';
+    this.renderer.appendChild(document.body, script);
   }
+
+  loadLeafletMap(): void {
+    console.log("Memuat peta...");
+    const mapElement = document.getElementById('map');
+    console.log("Map element:", mapElement); // Cek elemen map
+    if (mapElement) {
+        console.log("Elemen map ditemukan:", mapElement);
+        this.map = L.map(mapElement).setView([-8.509, 115.2605], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(this.map);
+
+        L.marker([-8.509, 115.2605]).addTo(this.map)
+            .bindPopup('Ubud Palaces')
+            .openPopup();
+    } else {
+        console.error("Elemen map tidak ditemukan.");
+    }
+}
+
 
   loadTourGuideDetail(id: string): void {
     this.servicesService.getTourGuideServiceById(id).subscribe(
       (data) => {
         this.tourguideDetail = data;
 
-        // Set the tourName in bookingDetails based on productName
         this.bookingDetails.tourName = this.tourguideDetail.productName;
         console.log(this.tourguideDetail.productName);
         
-        // Set the accommodationType in bookingDetails based on productSubcategory
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
+
+        // Pastikan memanggil loadLeafletMap di sini
+        this.loadLeafletMap();
       },
       (error) => {
-        console.error('Error fetching accommodation detail', error);
+        console.error('Error fetching tour detail', error);
       }
     );
   }
 
-    // Open the booking modal
-    openModal(): void {
-      this.isModalOpen = true;
-    }
-  
-    // Close the booking modal
-    closeModal(): void {
-      this.isModalOpen = false;
+  // Buka modal booking
+  openModal(): void {
+    this.isModalOpen = true;
+  }
+
+  // Tutup modal booking
+  closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+  submitBooking(): void {
+    const currentDate = new Date();
+    const tourDate = new Date(this.bookingDetails.tourDate);
+
+    // Log detail booking
+    console.log('Booking Details:', this.bookingDetails);
+
+    if (!this.bookingDetails.customerName || 
+        !this.bookingDetails.tourguideType || 
+        !this.bookingDetails.numberOfParticipants || 
+        !this.bookingDetails.tourDate) {
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Missing Fields',
+        text: 'Please fill in all the required fields.',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
     }
 
-      // Submit the booking form
-  
-      // submitBooking(): void {
-      //   const currentDate = new Date();
-      //   const tourDate = new Date(this.bookingDetails.tourDate);
-      
-      //   // Validate that all required fields are filled
-      //   if (!this.bookingDetails.customerName || 
-      //       !this.bookingDetails.tourguideType || 
-      //       !this.bookingDetails.numberOfParticipants || 
-      //       !this.bookingDetails.tourDate) {
-        
-      //     Swal.fire({
-      //       icon: 'error',
-      //       title: 'Missing Fields',
-      //       text: 'Please fill in all the required fields.',
-      //       confirmButtonColor: '#3085d6',
-      //     });
-      //     return;
-      //   }
-      
-      //   // Validate that tourDate is not in the past
-      //   if (tourDate <= currentDate) {
-      //     Swal.fire({
-      //       icon: 'error',
-      //       title: 'Invalid Date',
-      //       text: 'The tour date must be in the future.',
-      //       confirmButtonColor: '#3085d6',
-      //     });
-      //     return;
-      //   }
-      
-      //   // Log the booking data before sending it
-      //   console.log(this.bookingDetails);
-      
-      //   // Proceed with booking service if validation passes
-      //   this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
-      //     (response) => {
-      //       console.log('Booking successful', response);
-      
-      //       Swal.fire({
-      //         icon: 'success',
-      //         title: 'Booking Successful!',
-      //         text: 'Your tour or guide has been booked successfully.',
-      //         confirmButtonColor: '#3085d6',
-      //       });
-      
-      //       this.closeModal();
-      //     },
-      //     (error) => {
-      //       console.error('Error submitting booking', error);
-      
-      //       Swal.fire({
-      //         icon: 'error',
-      //         title: 'Booking Failed',
-      //         text: 'There was an error processing your booking. Please try again.',
-      //         confirmButtonColor: '#d33',
-      //       });
-      //     }
-      //   );
-      // }      
+    // Validasi bahwa tourDate tidak boleh di masa lalu
+    const normalizedCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    const normalizedTourDate = new Date(tourDate.getFullYear(), tourDate.getMonth(), tourDate.getDate());
 
-      submitBooking(): void {
-        const currentDate = new Date();
-        const tourDate = new Date(this.bookingDetails.tourDate);
-      
-        // Log the current booking details
-        console.log('Booking Details:', this.bookingDetails);
-      
-        // Validate that all required fields are filled
-        if (!this.bookingDetails.customerName || 
-            !this.bookingDetails.tourguideType || 
-            !this.bookingDetails.numberOfParticipants || 
-            !this.bookingDetails.tourDate) {
-      
-          Swal.fire({
-            icon: 'error',
-            title: 'Missing Fields',
-            text: 'Please fill in all the required fields.',
-            confirmButtonColor: '#3085d6',
-          });
-          return;
-        }
-      
-        // Validate that tourDate is today or in the future
-        const normalizedCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-        const normalizedTourDate = new Date(tourDate.getFullYear(), tourDate.getMonth(), tourDate.getDate());
-      
-        if (normalizedTourDate < normalizedCurrentDate) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Date',
-            text: 'The tour date cannot be in the past.',
-            confirmButtonColor: '#3085d6',
-          });
-          return;
-        }
-      
-        // Log the normalized dates to debug
-        console.log('Current Date:', normalizedCurrentDate);
-        console.log('Tour Date:', normalizedTourDate);
-      
-        // Proceed with booking service if validation passes
-        this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
-          (response) => {
-            console.log('Booking successful', response);
-      
-            Swal.fire({
-              icon: 'success',
-              title: 'Booking Successful!',
-              text: 'Your tour or guide has been booked successfully.',
-              confirmButtonColor: '#3085d6',
-            });
-      
-            this.closeModal();
-          },
-          (error) => {
-            console.error('Error submitting booking', error);
-      
-            Swal.fire({
-              icon: 'error',
-              title: 'Booking Failed',
-              text: 'There was an error processing your booking. Please try again.',
-              confirmButtonColor: '#d33',
-            });
-          }
-        );
+    if (normalizedTourDate < normalizedCurrentDate) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Date',
+        text: 'The tour date cannot be in the past.',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+
+    this.bookingDetails.pickupLocation = 'Ubud Palaces';
+
+    // Proses booking jika validasi lulus
+    this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
+      (response) => {
+        console.log('Booking successful', response);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Booking Successful!',
+          text: 'Your tour or guide has been booked successfully.',
+          confirmButtonColor: '#3085d6',
+        });
+
+        this.closeModal();
+      },
+      (error) => {
+        console.error('Error submitting booking', error);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Booking Failed',
+          text: 'There was an error processing your booking. Please try again.',
+          confirmButtonColor: '#d33',
+        });
       }
-      
-
+    );
+  }
 }

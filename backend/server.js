@@ -162,6 +162,18 @@ const bookingTourSchema = new mongoose.Schema({
       }
 
     },
+
+    pickupLocation: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function(value) {
+          return value === 'Ubud Palaces';
+        },
+        message: 'Pick-up location only at Ubud Palaces.'
+      }
+    },
+
     numberOfParticipants: {
         type: Number,
         required: true,
