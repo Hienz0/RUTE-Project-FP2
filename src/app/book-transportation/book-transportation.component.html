@@ -135,10 +135,14 @@
           />
         </div>
 
-        <!-- Pickup Location Map -->
+        <!-- Pickup Location -->
         <div class="mb-3">
           <label for="pickupLocation" class="form-label">Pickup Location</label>
+
+          <!-- Pickup Map -->
           <div id="pickupMap" style="height: 400px"></div>
+
+          <!-- Pickup Address Input -->
           <input
             type="text"
             id="pickupAddress"
@@ -148,14 +152,31 @@
             placeholder="Pickup address"
             readonly
           />
+
+          <!-- Use Service Location Checkbox -->
+          <div class="form-check mt-2">
+            <input
+              type="checkbox"
+              id="usePickupServiceLocation"
+              class="form-check-input"
+              (change)="useServiceLocation('pickup')"
+            />
+            <label for="usePickupServiceLocation" class="form-check-label"
+              >Use Service Location</label
+            >
+          </div>
         </div>
 
-        <!-- Dropoff Location Map -->
+        <!-- Dropoff Location -->
         <div class="mb-3">
           <label for="dropoffLocation" class="form-label"
             >Dropoff Location</label
           >
+
+          <!-- Dropoff Map -->
           <div id="dropoffMap" style="height: 400px"></div>
+
+          <!-- Dropoff Address Input -->
           <input
             type="text"
             id="dropoffAddress"
@@ -165,6 +186,19 @@
             placeholder="Dropoff address"
             readonly
           />
+
+          <!-- Use Service Location Checkbox -->
+          <div class="form-check mt-2">
+            <input
+              type="checkbox"
+              id="useDropoffServiceLocation"
+              class="form-check-input"
+              (change)="useServiceLocation('dropoff')"
+            />
+            <label for="useDropoffServiceLocation" class="form-check-label"
+              >Use Service Location</label
+            >
+          </div>
         </div>
 
         <div class="mb-3">

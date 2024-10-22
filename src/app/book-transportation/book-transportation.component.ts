@@ -32,6 +32,9 @@ export class BookTransportationComponent implements OnInit {
   defaultLng: number = 115.2625;
   defaultZoom: number = 13;
 
+  pickupMarker: any; // Declare pickup marker globally
+  dropoffMarker: any; // Declare dropoff marker globally
+
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
@@ -150,7 +153,7 @@ initPickupMap(): void {
     radius: 7000 // 7 km radius
   }).addTo(map);
 
-  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  this.pickupMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
 
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
@@ -168,7 +171,7 @@ initPickupMap(): void {
 
       // Ensure the searched location is within 7 km radius
       if (distanceFromCenter <= 7000) {
-        marker.setLatLng(latlng); // Set marker to new location
+        this.pickupMarker.setLatLng(latlng); // Set marker to new location
         map.setView(latlng, 15);  // Zoom to new location
         this.pickupLocation = `${latlng.lat}, ${latlng.lng}`;
         this.reverseGeocode(latlng.lat, latlng.lng, 'pickup'); // Reverse geocode for address
@@ -180,7 +183,7 @@ initPickupMap(): void {
   }).addTo(map);
 
   // Marker drag and drop
-  marker.on('dragend', (e: any) => {
+  this.pickupMarker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
@@ -198,7 +201,7 @@ initPickupMap(): void {
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
-      marker.setLatLng(latLng);
+      this.pickupMarker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
     } else {
@@ -229,7 +232,7 @@ initDropoffMap(): void {
     radius: 7000 // 7 km radius
   }).addTo(map);
 
-  const marker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  this.dropoffMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
 
   // Adjust map view to fit the circle bounds
   map.fitBounds(ubudCircle.getBounds());
@@ -247,7 +250,7 @@ initDropoffMap(): void {
 
       // Ensure the searched location is within 7 km radius
       if (distanceFromCenter <= 7000) {
-        marker.setLatLng(latlng); // Set marker to new location
+        this.dropoffMarker.setLatLng(latlng); // Set marker to new location
         map.setView(latlng, 15);  // Zoom to new location
         this.dropoffLocation = `${latlng.lat}, ${latlng.lng}`;
         this.reverseGeocode(latlng.lat, latlng.lng, 'dropoff'); // Reverse geocode for address
@@ -259,7 +262,7 @@ initDropoffMap(): void {
   }).addTo(map);
 
   // Marker drag and drop
-  marker.on('dragend', (e: any) => {
+  this.dropoffMarker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
@@ -277,7 +280,7 @@ initDropoffMap(): void {
     const distanceFromCenter = map.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
-      marker.setLatLng(latLng);
+      this.dropoffMarker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
     } else {
@@ -286,6 +289,51 @@ initDropoffMap(): void {
   });
 }
 
+useServiceLocation(type: 'pickup' | 'dropoff'): void {
+  const location = this.transportationService.location.split(',').map(Number);
+  const latitude = location[0];
+  const longitude = location[1];
+
+  if (type === 'pickup') {
+    const usePickupServiceLocation = (document.getElementById('usePickupServiceLocation') as HTMLInputElement).checked;
+    if (usePickupServiceLocation) {
+      // Set the pickup location from the service
+      this.pickupLocation = `${latitude}, ${longitude}`;
+      this.reverseGeocode(latitude, longitude, 'pickup');
+      
+      // Move the pickup marker to the service location
+      if (this.pickupMarker) {
+        this.pickupMarker.setLatLng([latitude, longitude]);
+      }
+    }
+  } else if (type === 'dropoff') {
+    const useDropoffServiceLocation = (document.getElementById('useDropoffServiceLocation') as HTMLInputElement).checked;
+    if (useDropoffServiceLocation) {
+      // Set the dropoff location from the service
+      this.dropoffLocation = `${latitude}, ${longitude}`;
+      this.reverseGeocode(latitude, longitude, 'dropoff');
+      
+      // Move the dropoff marker to the service location
+      if (this.dropoffMarker) {
+        this.dropoffMarker.setLatLng([latitude, longitude]);
+      }
+    }
+  }
+}
+
+
+// Helper function to update the map location
+updateMapLocation(mapId: string, latitude: number, longitude: number): void {
+  const map = L.map(mapId);
+  const customIcon = L.icon({
+    iconUrl: 'assets/location.png',
+    iconSize: [35, 45],
+    iconAnchor: [17, 45],
+  });
+
+  map.setView([latitude, longitude], 15); // Set map to new coordinates
+  L.marker([latitude, longitude], { icon: customIcon }).addTo(map); // Add marker
+}
 
 
 
