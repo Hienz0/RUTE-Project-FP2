@@ -100,18 +100,32 @@ export class BookTransportationComponent implements OnInit {
     );
   }
 
-  // Initialize the general Leaflet map
-  initMap(): void {
-    const latitude = this.transportationService.latitude || -6.1751; // Default latitude (Jakarta)
-    const longitude = this.transportationService.longitude || 106.8650; // Default longitude (Jakarta)
-    const zoomLevel = 13; // Example zoom level
+ // Initialize the general Leaflet map with a marker and location details
+initMap(): void {
+  // Parse the location string from transportationService (e.g., "-8.527369055545698, 115.2438408136368")
+  const location = this.transportationService.location.split(',').map(Number);
+  const latitude = location[0] || -6.1751; // Default latitude (Jakarta)
+  const longitude = location[1] || 106.8650; // Default longitude (Jakarta)
+  const zoomLevel = 15; // Example zoom level
 
-    const map = L.map('map').setView([latitude, longitude], zoomLevel); // General map
+  const map = L.map('map').setView([latitude, longitude], zoomLevel);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-  }
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(map);
+
+  const customIcon = L.icon({
+    iconUrl: 'assets/location.png',
+    iconSize: [35, 45],
+    iconAnchor: [17, 45],
+  });
+
+  // Add marker at the transportation service location
+  const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
+
+  // Use the existing reverseGeocode function to get the address and display it
+  this.reverseGeocode(latitude, longitude, 'location'); // Assuming it's similar to the pickup, adjust if needed
+}
 
 
 // Initialize Pickup Map with bounds limitation and search functionality
@@ -278,20 +292,25 @@ initDropoffMap(): void {
 
 
   // Reverse Geocoding to get the address from lat/lng
-  reverseGeocode(lat: number, lng: number, type: 'pickup' | 'dropoff'): void {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+reverseGeocode(lat: number, lng: number, type: 'pickup' | 'dropoff' | 'location'): void {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
 
-    axios.get(url).then((response) => {
-      const address = response.data.display_name;
-      if (type === 'pickup') {
-        this.pickupAddress = address;  // Set pickup address
-      } else {
-        this.dropoffAddress = address;  // Set dropoff address
-      }
-    }).catch((error) => {
-      console.error('Error with reverse geocoding:', error);
-    });
-  }
+  axios.get(url).then((response) => {
+    const address = response.data.display_name;
+    
+    if (type === 'pickup') {
+      this.pickupAddress = address;  // Set pickup address
+    } else if (type === 'dropoff') {
+      this.dropoffAddress = address;  // Set dropoff address
+    } else if (type === 'location') {
+      // Update the UI for the location address
+      document.getElementById('location-address')!.textContent = address;
+    }
+  }).catch((error) => {
+    console.error('Error with reverse geocoding:', error);
+  });
+}
+
   getFullImagePath(image: string): string {
     return `http://localhost:3000/${image}`;
   }
