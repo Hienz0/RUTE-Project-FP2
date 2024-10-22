@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-register-as-provider',
@@ -19,6 +20,7 @@ export class RegisterAsProviderComponent {
   imageService: File[] = [];
   successMessage: string = '';
   currentUser: any;
+  businessCoordinates: { lat: number, lng: number } | null = null;
 
   subcategoryMap: any = {
     Accommodation: ['Villas', 'Guest Houses', 'Homestays', 'Hostels'],
@@ -34,7 +36,32 @@ export class RegisterAsProviderComponent {
       this.currentUser = user;
       console.log('Current user in dashboard:', user); // Debugging current user in the dashboard
     });
+    this.initializeMap();
   }
+
+  initializeMap() {
+    const map = L.map('map').setView([-8.5069, 115.2624], 13); // Example coordinates (Ubud, Bali)
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+    
+
+    const marker = L.marker([0, 0]).addTo(map);
+
+    // Listen for map click event to place the marker and set coordinates
+    map.on('click', (e: any) => {
+      const { lat, lng } = e.latlng;
+      marker.setLatLng([lat, lng]); // Update marker position
+      this.businessCoordinates = { lat, lng }; // Save coordinates
+    });
+
+      // Ensure the map resizes correctly when the window is resized
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 0);
+  }
+
 
   onFileChange(event: any, field: string) {
     if (event.target.files.length > 0) {
@@ -69,6 +96,7 @@ export class RegisterAsProviderComponent {
       formData.append('businessSubcategory', this.businessSubcategory);
       formData.append('businessName', this.businessName);
       formData.append('businessLocation', this.businessLocation);
+      formData.append('businessCoordinates', JSON.stringify(this.businessCoordinates));
       formData.append('businessDesc', this.businessDesc);
       formData.append('price', this.price.toString());
       formData.append('businessLicense', this.businessLicense);

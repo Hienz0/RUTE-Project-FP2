@@ -340,6 +340,11 @@ const ProviderSchema = new mongoose.Schema({
 
     businessLocation: {type: String},
 
+    businessCoordinates: { 
+      type: { type: String, default: 'Point' }, 
+      coordinates: [Number] // [longitude, latitude]
+    },
+
     businessDesc: {type: String},
 
     price: { type: Number },
@@ -359,6 +364,9 @@ const ProviderSchema = new mongoose.Schema({
 ProviderSchema.plugin(autoIncrement, {inc_field : 'providerID'});
 // Create the model using the schema
 Provider = mongoose.model('Provider', ProviderSchema);
+
+
+ProviderSchema.index({ businessCoordinates: '2dsphere' });
 
 
 /////////////////
@@ -415,7 +423,7 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
   { name: 'imageSelf', maxCount: 1 },
   { name: 'imageService', maxCount: 10 }
 ]), async (req, res) => {
-  const { businessType, businessSubcategory, businessName, businessLocation, businessDesc, price } = req.body;
+  const { businessType, businessSubcategory, businessName, businessLocation, businessDesc, price, businessCoordinates } = req.body;
   const { userId, name, email } = req.user;
   console.log('bbbbbbb : ', req.user);
 
@@ -432,6 +440,10 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
       businessType,
       businessName,
       businessLocation,
+      businessCoordinates: {
+        type: 'Point',
+        coordinates: JSON.parse(businessCoordinates)
+      },
       businessDesc,
       price: Number(price),
       businessLicense: req.files['businessLicense'][0].path,

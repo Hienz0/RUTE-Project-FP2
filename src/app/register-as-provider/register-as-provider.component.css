@@ -884,3 +884,15 @@ footer {
   margin: 0 auto;
   padding: 20px;
 }
+
+#map {
+  height: 400px; /* Set the height you prefer */
+  width: 100%;   /* Ensure it takes up the full width */
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  #map {
+    height: 300px; /* Adjust map height for smaller screens */
+  }
+}
