@@ -905,10 +905,13 @@
 }
 }
 
+@import "~leaflet/dist/leaflet.css";
+
 #map {
-  height: 400px; /* Atur tinggi sesuai kebutuhan */
-  width: 100%; /* Atur lebar sesuai kebutuhan */
+    height: 400px; /* Adjust height as needed */
+    width: 100%;   /* Optional: adjust width as needed */
 }
+
 
 
 /* end of responsive navbar */
