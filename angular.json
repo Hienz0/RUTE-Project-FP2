@@ -28,7 +28,8 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
                "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css",
-               "node_modules/leaflet-search/dist/leaflet-search.min.css"
+               "node_modules/leaflet-search/dist/leaflet-search.min.css",
+               "node_modules/flatpickr/dist/flatpickr.min.css"
             ],
             "scripts": ["node_modules/leaflet-search/dist/leaflet-search.min.js"]
           },

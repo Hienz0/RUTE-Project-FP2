@@ -7,7 +7,6 @@ import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
 import flatpickr from 'flatpickr';
 
-
 @Component({
   selector: 'app-book-transportation',
   templateUrl: './book-transportation.component.html',
@@ -23,7 +22,6 @@ export class BookTransportationComponent implements OnInit {
   pickupLocation: string = '';
   dropoffLocation: string = '';
   specialRequest: string = '';
-  bookedDates: { pickupDate: string; dropoffDate: string }[] = [];
 
   // Reverse geocoded addresses
   pickupAddress: string = '';
@@ -39,6 +37,8 @@ export class BookTransportationComponent implements OnInit {
 
   pickupMap: any; // Declare pickup map globally
   dropoffMap: any; // Declare dropoff map globally
+
+  bookedDates: string[] = []; // Store booked dates as flat strings (YYYY-MM-DD)
 
   constructor(
     private route: ActivatedRoute,
@@ -79,9 +79,109 @@ export class BookTransportationComponent implements OnInit {
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
+    this.fetchBookedDates();
+
+    
     
   }
 
+  fetchBookedDates(): void {
+    this.service.getBookedDates().subscribe(
+      (response: any) => {
+        if (
+          response &&
+          response.success &&
+          Array.isArray(response.bookedDates)
+        ) {
+          // Extract bookedDates from the response object
+          this.bookedDates = this.flattenBookedDates(response.bookedDates);
+        } else {
+          console.warn('Unexpected response format:', response);
+          this.bookedDates = [];
+        }
+        // Call initDatePickers after fetching the booked dates
+        this.initDatePickers();
+      },
+      (error) => {
+        console.error('Error fetching booked dates:', error);
+        this.bookedDates = []; // Set to empty array in case of an error
+        this.initDatePickers();
+      }
+    );
+  }
+
+  flattenBookedDates(
+    data: { pickupDate: string; dropoffDate: string }[]
+  ): string[] {
+    const dates: string[] = [];
+    data.forEach((booking) => {
+      const start = new Date(booking.pickupDate);
+      const end = new Date(booking.dropoffDate);
+      let currentDate = new Date(start);
+
+      while (currentDate <= end) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+    return dates;
+  }
+
+  initDatePickers(): void {
+    const disabledDates = this.bookedDates;
+    console.log('Disabled Dates:', disabledDates); // Debug log
+  
+    // Initialize Flatpickr for the pickup date
+    flatpickr('#pickupDate', {
+      disable: disabledDates,
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+      onChange: (selectedDates, dateStr) => {
+        this.pickupDate = dateStr; // Store the selected pickup date
+        if (this.isDateRangeInvalid(this.pickupDate, this.dropoffDate, disabledDates)) {
+          alert('Selected range includes one or more booked dates. Please choose different dates.');
+        }
+      }
+    });
+  
+    // Initialize Flatpickr for the dropoff date
+    flatpickr('#dropoffDate', {
+      disable: disabledDates,
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+      onChange: (selectedDates, dateStr) => {
+        this.dropoffDate = dateStr; // Store the selected dropoff date
+        if (this.isDateRangeInvalid(this.pickupDate, this.dropoffDate, disabledDates)) {
+          alert('Selected range includes one or more booked dates. Please choose different dates.');
+        }
+      }
+    });
+  }
+  
+  isDateRangeInvalid(pickupDate: string, dropoffDate: string, disabledDates: string[]): boolean {
+    if (!pickupDate || !dropoffDate) return false;
+  
+    const pickup = new Date(pickupDate);
+    const dropoff = new Date(dropoffDate);
+  
+    // Loop through the disabledDates and check if any fall within the selected range
+    return disabledDates.some(disabledDate => {
+      const booked = new Date(disabledDate);
+      return booked >= pickup && booked <= dropoff;
+    });
+  }
+
+  // Method to open pickup calendar manually
+  openPickupCalendar() {
+    const input = document.getElementById('pickupDate') as HTMLInputElement;
+    input.focus(); // Trigger the calendar to open when the icon is clicked
+  }
+
+  // Method to open dropoff calendar manually
+  openDropoffCalendar() {
+    const input = document.getElementById('dropoffDate') as HTMLInputElement;
+    input.focus(); // Trigger the calendar to open when the icon is clicked
+  }
 
   // Function to book transportation
   bookTransport(): void {
@@ -104,7 +204,7 @@ export class BookTransportationComponent implements OnInit {
 
     const bookingData = {
       serviceId:
-      this.transportationService._id || this.transportationService.id,
+        this.transportationService._id || this.transportationService.id,
       userId: this.currentUser.userId || this.currentUser.userId,
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
@@ -116,6 +216,7 @@ export class BookTransportationComponent implements OnInit {
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
+        this.fetchBookedDates();
       },
       (error) => {
         console.error('Error booking transportation:', error);
@@ -154,7 +255,6 @@ export class BookTransportationComponent implements OnInit {
 
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
-
     if (this.pickupMap) {
       return; // If it's already initialized, do nothing
     }
@@ -245,7 +345,6 @@ export class BookTransportationComponent implements OnInit {
 
   // Initialize Dropoff Map with bounds limitation and search functionality
   initDropoffMap(): void {
-
     if (this.dropoffMap) {
       return; // If it's already initialized, do nothing
     }

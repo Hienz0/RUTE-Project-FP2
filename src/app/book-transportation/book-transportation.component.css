@@ -8,4 +8,14 @@
     border: 1px solid #ccc;
   }
   
+  .calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 35px;
+    cursor: pointer;
+  }
+  
+  .calendar-icon i {
+    font-size: 1.2em;
+  }
   

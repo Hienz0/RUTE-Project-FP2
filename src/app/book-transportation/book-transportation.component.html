@@ -112,44 +112,55 @@
 
       <form>
         <!-- Pickup Date -->
-        <div class="mb-3">
+        <div class="mb-3 position-relative">
           <label for="pickupDate" class="form-label">
             Pickup Date <span style="color: red">*</span>
           </label>
           <input
-            type="date"
+            type="text"
             id="pickupDate"
             [(ngModel)]="pickupDate"
             name="pickupDate"
             class="form-control"
+            readonly
+            (focus)="openPickupCalendar()"
             required
           />
+          <span class="calendar-icon" (click)="openPickupCalendar()">
+            <i class="fa fa-calendar"></i>
+            <!-- Atau icon sesuai kebutuhan -->
+          </span>
         </div>
-      
+
         <!-- Dropoff Date -->
-        <div class="mb-3">
+        <div class="mb-3 position-relative">
           <label for="dropoffDate" class="form-label">
             Dropoff Date <span style="color: red">*</span>
           </label>
           <input
-            type="date"
+            type="text"
             id="dropoffDate"
             [(ngModel)]="dropoffDate"
             name="dropoffDate"
             class="form-control"
+            readonly
+            (focus)="openDropoffCalendar()"
             required
           />
+          <span class="calendar-icon" (click)="openDropoffCalendar()">
+            <i class="fa fa-calendar"></i>
+          </span>
         </div>
-      
+
         <!-- Pickup Location -->
         <div class="mb-3">
           <label for="pickupLocation" class="form-label">
             Pickup Location <span style="color: red">*</span>
           </label>
-      
+
           <!-- Pickup Map -->
           <div id="pickupMap" style="height: 400px"></div>
-      
+
           <!-- Pickup Address Input -->
           <input
             type="text"
@@ -161,7 +172,7 @@
             readonly
             required
           />
-      
+
           <!-- Use Service Location Checkbox -->
           <div class="form-check mt-2">
             <input
@@ -175,16 +186,16 @@
             </label>
           </div>
         </div>
-      
+
         <!-- Dropoff Location -->
         <div class="mb-3">
           <label for="dropoffLocation" class="form-label">
             Dropoff Location <span style="color: red">*</span>
           </label>
-      
+
           <!-- Dropoff Map -->
           <div id="dropoffMap" style="height: 400px"></div>
-      
+
           <!-- Dropoff Address Input -->
           <input
             type="text"
@@ -196,7 +207,7 @@
             readonly
             required
           />
-      
+
           <!-- Use Service Location Checkbox -->
           <div class="form-check mt-2">
             <input
@@ -210,7 +221,7 @@
             </label>
           </div>
         </div>
-      
+
         <!-- Special Request -->
         <div class="mb-3">
           <label for="specialRequest" class="form-label">Special Request</label>
@@ -222,13 +233,12 @@
             placeholder="Any special request..."
           ></textarea>
         </div>
-      
+
         <!-- Submit Button -->
         <button type="button" class="btn btn-primary" (click)="bookTransport()">
           Submit Booking
         </button>
       </form>
-      
     </div>
   </div>
 </div>
