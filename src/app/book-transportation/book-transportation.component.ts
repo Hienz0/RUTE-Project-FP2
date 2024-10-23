@@ -149,6 +149,11 @@ export class BookTransportationComponent implements OnInit {
 
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
+
+    if (this.pickupMap) {
+      return; // If it's already initialized, do nothing
+    }
+
     this.pickupMap = L.map('pickupMap').setView(
       [this.defaultLat, this.defaultLng],
       this.defaultZoom
@@ -235,6 +240,11 @@ export class BookTransportationComponent implements OnInit {
 
   // Initialize Dropoff Map with bounds limitation and search functionality
   initDropoffMap(): void {
+
+    if (this.dropoffMap) {
+      return; // If it's already initialized, do nothing
+    }
+
     this.dropoffMap = L.map('dropoffMap').setView(
       [this.defaultLat, this.defaultLng],
       this.defaultZoom
