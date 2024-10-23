@@ -104,7 +104,7 @@ export class BookTransportationComponent implements OnInit {
 
     const bookingData = {
       serviceId:
-        this.transportationService._id || this.transportationService.id,
+      this.transportationService._id || this.transportationService.id,
       userId: this.currentUser.userId || this.currentUser.userId,
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
