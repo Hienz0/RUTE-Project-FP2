@@ -1,8 +1,10 @@
-import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2, AfterViewInit, ViewChild, ElementRef  } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service'; // Import the booking service
 import { AuthService } from '../services/auth.service';
+import * as L from 'leaflet';
+
 
 
 // Declare Swal globally
@@ -12,7 +14,7 @@ declare var Swal: any;
   templateUrl: './accommodation-detail.component.html',
   styleUrls: ['./accommodation-detail.component.css'],
 })
-export class AccommodationDetailComponent implements OnInit {
+export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   currentUser: any;
 
   serviceId: string | null = null;
@@ -27,6 +29,9 @@ export class AccommodationDetailComponent implements OnInit {
     roomNumber: null,
     specialRequest: '',
   };
+
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
+  map: L.Map | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -52,6 +57,16 @@ export class AccommodationDetailComponent implements OnInit {
         script.id = 'tailwindScript';
         this.renderer.appendChild(document.body, script);
   }
+
+  ngAfterViewInit(): void {
+    console.log('ngAfterViewInit called');
+    if (this.mapContainer) {
+      console.log('Map container available');
+      this.initMap();
+    } else {
+      console.error('Map container not available');
+    }
+  }
   
   loadAccommodationDetail(id: string): void {
     this.servicesService.getAccommodationServiceById(id).subscribe(
@@ -60,11 +75,32 @@ export class AccommodationDetailComponent implements OnInit {
         
         // Set the accommodationType in bookingDetails based on productSubcategory
         this.bookingDetails.accommodationType = this.accommodationDetail.productSubcategory;
+        if (this.map && this.accommodationDetail.businessCoordinates) {
+          // Update map center with restaurant coordinates
+          const { coordinates } = this.accommodationDetail.businessCoordinates;
+          this.map.setView([coordinates[1], coordinates[0]], 16); // Center on restaurant with zoom level 16
+          L.marker([coordinates[1], coordinates[0]]).addTo(this.map); // Add a marker to the restaurant location
+        }
       },
       (error) => {
         console.error('Error fetching accommodation detail', error);
       }
     );
+  }
+
+  initMap(): void {
+    console.log('map called');
+    // Initialize the map with placeholder coordinates
+    this.map = L.map(this.mapContainer.nativeElement).setView([-8.5069, 115.2624], 13); // Placeholder or default location
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(this.map);
+    
+    // Ensure the map resizes correctly after initialization
+    setTimeout(() => {
+      this.map?.invalidateSize();
+    }, 0);
   }
   
 

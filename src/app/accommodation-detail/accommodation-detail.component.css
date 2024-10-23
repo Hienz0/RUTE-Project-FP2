@@ -906,3 +906,11 @@
 }
 
 /* end of responsive navbar */
+
+
+#map {
+  height: 400px;   /* Ensure the map has a defined height */
+  width: 60%;      /* Define the width of the map */
+  margin: 0 auto;  /* Center the map horizontally */
+  margin-bottom: 20px;
+}
