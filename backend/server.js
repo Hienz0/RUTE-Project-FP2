@@ -428,6 +428,18 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
   console.log('bbbbbbb : ', req.user);
 
   try {
+    // Parse the businessCoordinates safely
+    let coordinates;
+    try {
+      coordinates = JSON.parse(businessCoordinates); // Parse the object
+    } catch (err) {
+      return res.status(400).json({ message: 'Invalid coordinates format' });
+    }
+    
+    // Check if lat and lng exist in the parsed coordinates
+    if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
+      return res.status(400).json({ message: 'Invalid coordinates provided' });
+    }
 
     const imageServiceFiles = req.files['imageService'];
     
@@ -442,7 +454,7 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
       businessLocation,
       businessCoordinates: {
         type: 'Point',
-        coordinates: JSON.parse(businessCoordinates)
+        coordinates: [coordinates.lng, coordinates.lat] // MongoDB expects [lng, lat]
       },
       businessDesc,
       price: Number(price),
@@ -860,8 +872,13 @@ app.put('/approve/:providerID', async (req, res) => {
       providerId: providerData._id,
       status: 'accepted', // Optional: set the status to approved or any other status
       businessLicense: providerData.businessLicense,
-      location: providerData.businessLocation
+      location: providerData.businessLocation,
+      businessCoordinates: {
+        type: 'Point',
+        coordinates: providerData.businessCoordinates.coordinates // Use the array directly
+      }
     });
+    
 
     await newService.save();
 
@@ -1089,8 +1106,13 @@ const serviceSchema = new mongoose.Schema({
   providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Provider' },
   status: { type: String, default: 'pending' }, // Add status field with default value
   businessLicense: String, // New field for business license image
-  location: String // New field for location
+  location: String, // New field for location
+  businessCoordinates: {
+    type: { type: String, default: 'Point' },
+    coordinates: { type: [Number], required: true }, // [lng, lat] format
+  }
 });
+
 
 const Service = mongoose.model('Service', serviceSchema);
 
