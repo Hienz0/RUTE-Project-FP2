@@ -35,6 +35,9 @@ export class BookTransportationComponent implements OnInit {
   pickupMarker: any; // Declare pickup marker globally
   dropoffMarker: any; // Declare dropoff marker globally
 
+  pickupMap: any; // Declare pickup map globally
+  dropoffMap: any; // Declare dropoff map globally
+
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
@@ -133,11 +136,11 @@ initMap(): void {
 
 // Initialize Pickup Map with bounds limitation and search functionality
 initPickupMap(): void {
-  const map = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
+  this.pickupMap = L.map('pickupMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
-  }).addTo(map);
+  }).addTo(this.pickupMap);
 
   const customIcon = L.icon({
     iconUrl: 'assets/location.png',
@@ -151,12 +154,12 @@ initPickupMap(): void {
     fillColor: '#add8e6',
     fillOpacity: 0.2,
     radius: 7000 // 7 km radius
-  }).addTo(map);
+  }).addTo(this.pickupMap);
 
-  this.pickupMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  this.pickupMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(this.pickupMap);
 
   // Adjust map view to fit the circle bounds
-  map.fitBounds(ubudCircle.getBounds());
+  this.pickupMap.fitBounds(ubudCircle.getBounds());
 
   // Add search control to map
   const searchControl = new (L.Control as any).Search({
@@ -167,12 +170,12 @@ initPickupMap(): void {
     autoCollapse: true,
     marker: false,
     moveToLocation: (latlng: L.LatLng) => {
-      const distanceFromCenter = map.distance(latlng, ubudCenter); // Check distance from Ubud center
+      const distanceFromCenter = this.pickupMap.distance(latlng, ubudCenter); // Check distance from Ubud center
 
       // Ensure the searched location is within 7 km radius
       if (distanceFromCenter <= 7000) {
         this.pickupMarker.setLatLng(latlng); // Set marker to new location
-        map.setView(latlng, 15);  // Zoom to new location
+        this.pickupMap.setView(latlng, 15);  // Zoom to new location
         this.pickupLocation = `${latlng.lat}, ${latlng.lng}`;
         this.reverseGeocode(latlng.lat, latlng.lng, 'pickup'); // Reverse geocode for address
       } else {
@@ -180,12 +183,12 @@ initPickupMap(): void {
         window.alert('You can only select a point within the Ubud area.');
       }
     }
-  }).addTo(map);
+  }).addTo(this.pickupMap);
 
   // Marker drag and drop
   this.pickupMarker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
+    const distanceFromCenter = this.pickupMap.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
@@ -196,14 +199,15 @@ initPickupMap(): void {
   });
 
   // Map click event to place marker within the bounds
-  map.on('click', (e: any) => {
+  this.pickupMap.on('click', (e: any) => {
     const latLng = e.latlng;
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
+    const distanceFromCenter = this.pickupMap.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
       this.pickupMarker.setLatLng(latLng);
       this.pickupLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'pickup');
+      this.pickupMap.setView([latLng.lat, latLng.lng], 15); // Adjust zoom level if necessary
     } else {
       window.alert('You can only select a point within the Ubud area.');
     }
@@ -212,11 +216,11 @@ initPickupMap(): void {
 
 // Initialize Dropoff Map with bounds limitation and search functionality
 initDropoffMap(): void {
-  const map = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
+  this.dropoffMap = L.map('dropoffMap').setView([this.defaultLat, this.defaultLng], this.defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
-  }).addTo(map);
+  }).addTo(this.dropoffMap);
 
   const customIcon = L.icon({
     iconUrl: 'assets/location.png',
@@ -230,12 +234,12 @@ initDropoffMap(): void {
     fillColor: '#add8e6',
     fillOpacity: 0.2,
     radius: 7000 // 7 km radius
-  }).addTo(map);
+  }).addTo(this.dropoffMap);
 
-  this.dropoffMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(map);
+  this.dropoffMarker = L.marker([this.defaultLat, this.defaultLng], { icon: customIcon, draggable: true }).addTo(this.dropoffMap);
 
   // Adjust map view to fit the circle bounds
-  map.fitBounds(ubudCircle.getBounds());
+  this.dropoffMap.fitBounds(ubudCircle.getBounds());
 
   // Add search control to map
   const searchControl = new (L.Control as any).Search({
@@ -246,12 +250,12 @@ initDropoffMap(): void {
     autoCollapse: true,
     marker: false,
     moveToLocation: (latlng: L.LatLng) => {
-      const distanceFromCenter = map.distance(latlng, ubudCenter); // Check distance from Ubud center
+      const distanceFromCenter = this.dropoffMap.distance(latlng, ubudCenter); // Check distance from Ubud center
 
       // Ensure the searched location is within 7 km radius
       if (distanceFromCenter <= 7000) {
         this.dropoffMarker.setLatLng(latlng); // Set marker to new location
-        map.setView(latlng, 15);  // Zoom to new location
+        this.dropoffMap.setView(latlng, 15);  // Zoom to new location
         this.dropoffLocation = `${latlng.lat}, ${latlng.lng}`;
         this.reverseGeocode(latlng.lat, latlng.lng, 'dropoff'); // Reverse geocode for address
       } else {
@@ -259,12 +263,12 @@ initDropoffMap(): void {
         window.alert('You can only select a point within the Ubud area.');
       }
     }
-  }).addTo(map);
+  }).addTo(this.dropoffMap);
 
   // Marker drag and drop
   this.dropoffMarker.on('dragend', (e: any) => {
     const latLng = e.target.getLatLng();
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
+    const distanceFromCenter = this.dropoffMap.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
@@ -275,14 +279,15 @@ initDropoffMap(): void {
   });
 
   // Map click event to place marker within the bounds
-  map.on('click', (e: any) => {
+  this.dropoffMap.on('click', (e: any) => {
     const latLng = e.latlng;
-    const distanceFromCenter = map.distance(latLng, ubudCenter);
+    const distanceFromCenter = this.dropoffMap.distance(latLng, ubudCenter);
 
     if (distanceFromCenter <= 7000) {
       this.dropoffMarker.setLatLng(latLng);
       this.dropoffLocation = `${latLng.lat}, ${latLng.lng}`;
       this.reverseGeocode(latLng.lat, latLng.lng, 'dropoff');
+      this.dropoffMap.setView([latLng.lat, latLng.lng], 15); // Adjust zoom level if necessary
     } else {
       window.alert('You can only select a point within the Ubud area.');
     }
@@ -304,6 +309,9 @@ useServiceLocation(type: 'pickup' | 'dropoff'): void {
       // Move the pickup marker to the service location
       if (this.pickupMarker) {
         this.pickupMarker.setLatLng([latitude, longitude]);
+
+        // Move the map to center on the new marker location
+        this.pickupMap.setView([latitude, longitude], 15); // Adjust zoom level if necessary
       }
     }
   } else if (type === 'dropoff') {
@@ -316,10 +324,14 @@ useServiceLocation(type: 'pickup' | 'dropoff'): void {
       // Move the dropoff marker to the service location
       if (this.dropoffMarker) {
         this.dropoffMarker.setLatLng([latitude, longitude]);
+
+        // Move the map to center on the new marker location
+        this.dropoffMap.setView([latitude, longitude], 15); // Adjust zoom level if necessary
       }
     }
   }
 }
+
 
 
 // Helper function to update the map location
