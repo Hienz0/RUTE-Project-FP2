@@ -1,19 +1,19 @@
-import { Component, OnInit, OnDestroy, Renderer2, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service';
 import { AuthService } from '../services/auth.service';
+import * as L from 'leaflet';
 
 declare var Swal: any;
-import * as L from 'leaflet';
 
 @Component({
   selector: 'app-booking-tour-guide-detail',
   templateUrl: './booking-tour-guide-detail.component.html',
   styleUrls: ['./booking-tour-guide-detail.component.css']
 })
-export class BookingTourGuideDetailComponent implements OnInit {
-  
+export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef; // Reference to the map container
   map: any;
   currentUser: any;
@@ -62,29 +62,23 @@ export class BookingTourGuideDetailComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    // Initialize map only if the tourguideDetail is loaded
-    if (this.tourguideDetail) {
-      this.initMap();
-    }
+    // This is intentionally left empty. The map will be initialized after the detail is loaded.
   }
-  
 
-  initMap(): void {
-    const latitude = -8.409518; // Your desired latitude
-    const longitude = 115.188919; // Your desired longitude
+  initMap(latitude: number, longitude: number): void {
     const zoomLevel = 13; // Adjust the zoom level as needed
 
-    // Create the map instance
-    this.map = L.map('map').setView([latitude, longitude], zoomLevel); // Use the correct ID
+    // Create the map instance with dynamic latitude and longitude
+    this.map = L.map(this.mapContainer.nativeElement).setView([latitude, longitude], zoomLevel); 
 
     // Add a tile layer (using OpenStreetMap tiles)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(this.map);
 
-    // Optional: Add a marker
+    // Optional: Add a marker at the given location
     const marker = L.marker([latitude, longitude]).addTo(this.map);
-    marker.bindPopup('Your Popup Text').openPopup();
+    marker.bindPopup('Tour Pickup Location').openPopup();
   }
 
   loadTourGuideDetail(id: string): void {
@@ -94,9 +88,19 @@ export class BookingTourGuideDetailComponent implements OnInit {
         this.bookingDetails.tourName = this.tourguideDetail.productName;
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
 
-        // Uncomment if you need to call this again (remove if duplicate logic)
-        // this.loadLeafletMap();
-        this.initMap();
+        // Log the loaded details for debugging
+        console.log('Tour Guide Detail:', this.tourguideDetail);
+
+        // Initialize the map only after the detail is loaded
+        const latitude = this.tourguideDetail.latitude || -8.409518; // Fallback to default
+        const longitude = this.tourguideDetail.longitude || 115.188919; // Fallback to default
+
+        // Check if mapContainer is available before initializing the map
+        if (this.mapContainer && this.mapContainer.nativeElement) {
+          this.initMap(latitude, longitude); // Initialize the map
+        } else {
+          console.error('Map container not found');
+        }
       },
       (error) => {
         console.error('Error fetching tour detail', error);
@@ -172,5 +176,11 @@ export class BookingTourGuideDetailComponent implements OnInit {
         });
       }
     );
+  }
+
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.remove(); // Clean up the map instance to avoid memory leaks
+    }
   }
 }

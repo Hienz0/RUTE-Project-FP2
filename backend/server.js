@@ -174,6 +174,18 @@ const bookingTourSchema = new mongoose.Schema({
       }
     },
 
+    // Add latitude and longitude fields to store location dynamically
+    latitude: {
+      type: Number,
+      required: true,
+      default: -8.409518,  // Default value for Ubud Palaces
+    },
+    longitude: {
+      type: Number,
+      required: true,
+      default: 115.188919,  // Default value for Ubud Palaces
+    },
+
     numberOfParticipants: {
         type: Number,
         required: true,
@@ -198,7 +210,13 @@ module.exports = TourBooking;
 // Route to handle booking tour guide
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
-    const booking = new TourBooking(req.body);
+    const bookingData = {
+      ...req.body,
+      latitude: req.body.latitude || -8.409518,  // Default to Ubud Palaces if not provided
+      longitude: req.body.longitude || 115.188919  // Default to Ubud Palaces if not provided
+    };
+
+    const booking = new TourBooking(bookingData);
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {
@@ -206,6 +224,17 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
   }
 });
+
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//     const booking = new TourBooking(req.body);
+//     await booking.save();
+//     res.status(201).json(booking);
+//   } catch (error) {
+//     console.error('Error details:', error); // Log error details for debugging
+//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+//   }
+// });
 
 
 ///////////
