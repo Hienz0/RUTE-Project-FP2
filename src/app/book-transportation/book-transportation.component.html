@@ -111,8 +111,11 @@
       <h5 class="card-title">Book This Transportation Service</h5>
 
       <form>
+        <!-- Pickup Date -->
         <div class="mb-3">
-          <label for="pickupDate" class="form-label">Pickup Date</label>
+          <label for="pickupDate" class="form-label">
+            Pickup Date <span style="color: red">*</span>
+          </label>
           <input
             type="date"
             id="pickupDate"
@@ -122,9 +125,12 @@
             required
           />
         </div>
-
+      
+        <!-- Dropoff Date -->
         <div class="mb-3">
-          <label for="dropoffDate" class="form-label">Dropoff Date</label>
+          <label for="dropoffDate" class="form-label">
+            Dropoff Date <span style="color: red">*</span>
+          </label>
           <input
             type="date"
             id="dropoffDate"
@@ -134,14 +140,16 @@
             required
           />
         </div>
-
+      
         <!-- Pickup Location -->
         <div class="mb-3">
-          <label for="pickupLocation" class="form-label">Pickup Location</label>
-
+          <label for="pickupLocation" class="form-label">
+            Pickup Location <span style="color: red">*</span>
+          </label>
+      
           <!-- Pickup Map -->
           <div id="pickupMap" style="height: 400px"></div>
-
+      
           <!-- Pickup Address Input -->
           <input
             type="text"
@@ -151,8 +159,9 @@
             class="form-control"
             placeholder="Pickup address"
             readonly
+            required
           />
-
+      
           <!-- Use Service Location Checkbox -->
           <div class="form-check mt-2">
             <input
@@ -161,21 +170,21 @@
               class="form-check-input"
               (change)="useServiceLocation('pickup')"
             />
-            <label for="usePickupServiceLocation" class="form-check-label"
-              >Use Service Location</label
-            >
+            <label for="usePickupServiceLocation" class="form-check-label">
+              Use Service Location
+            </label>
           </div>
         </div>
-
+      
         <!-- Dropoff Location -->
         <div class="mb-3">
-          <label for="dropoffLocation" class="form-label"
-            >Dropoff Location</label
-          >
-
+          <label for="dropoffLocation" class="form-label">
+            Dropoff Location <span style="color: red">*</span>
+          </label>
+      
           <!-- Dropoff Map -->
           <div id="dropoffMap" style="height: 400px"></div>
-
+      
           <!-- Dropoff Address Input -->
           <input
             type="text"
@@ -185,8 +194,9 @@
             class="form-control"
             placeholder="Dropoff address"
             readonly
+            required
           />
-
+      
           <!-- Use Service Location Checkbox -->
           <div class="form-check mt-2">
             <input
@@ -195,12 +205,13 @@
               class="form-check-input"
               (change)="useServiceLocation('dropoff')"
             />
-            <label for="useDropoffServiceLocation" class="form-check-label"
-              >Use Service Location</label
-            >
+            <label for="useDropoffServiceLocation" class="form-check-label">
+              Use Service Location
+            </label>
           </div>
         </div>
-
+      
+        <!-- Special Request -->
         <div class="mb-3">
           <label for="specialRequest" class="form-label">Special Request</label>
           <textarea
@@ -211,11 +222,13 @@
             placeholder="Any special request..."
           ></textarea>
         </div>
-
+      
+        <!-- Submit Button -->
         <button type="button" class="btn btn-primary" (click)="bookTransport()">
           Submit Booking
         </button>
       </form>
+      
     </div>
   </div>
 </div>
