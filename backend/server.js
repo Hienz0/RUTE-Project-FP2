@@ -464,6 +464,7 @@ app.get('/transportationService/:id', async (req, res) => {
 //   }
 // });
 
+// Route untuk booking transportasi
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
   
@@ -493,11 +494,39 @@ app.post('/api/bookTransports', async (req, res) => {
 
     const start = new Date(pickupDate);
     const end = new Date(dropoffDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set waktu ke 00:00 untuk mengecek hanya berdasarkan tanggal
+
+    // Cek apakah tanggal pickup lebih awal dari hari ini
+    if (start < today) {
+      return res.status(400).json({
+        success: false,
+        message: 'Booking for past dates is not allowed'
+      });
+    }
+
     const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24));
     if (rentalDuration <= 0) {
       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
     }
 
+    // Cek apakah ada booking lain di rentang tanggal yang dipilih
+    const existingBooking = await VehicleBooking.findOne({
+      vehicleType: service.productSubcategory,
+      $or: [
+        { pickupDate: { $lte: end, $gte: start } },
+        { dropoffDate: { $lte: end, $gte: start } }
+      ]
+    });
+
+    if (existingBooking) {
+      return res.status(400).json({
+        success: false,
+        message: 'The selected dates are already booked for this service.'
+      });
+    }
+
+    // Buat booking baru jika tidak ada konflik
     const newBooking = new VehicleBooking({
       customerName: user.name,
       vehicleType,
@@ -511,6 +540,8 @@ app.post('/api/bookTransports', async (req, res) => {
     });
 
     await newBooking.save();
+
+    // Tambahkan booking ke history pengguna
     user.bookingHistory.push({ bookingType: 'transportation', bookingId: newBooking._id });
     await user.save();
 
@@ -523,6 +554,20 @@ app.post('/api/bookTransports', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+app.get('/api/bookedDates', async (req, res) => {
+  const bookings = await VehicleBooking.find({}, 'pickupDate dropoffDate');
+  const bookedDates = bookings.map(booking => ({
+    pickupDate: booking.pickupDate,
+    dropoffDate: booking.dropoffDate
+  }));
+
+  res.status(200).json({
+    success: true,
+    bookedDates
+  });
+});
+
 
 
 // Book transportation endpoint

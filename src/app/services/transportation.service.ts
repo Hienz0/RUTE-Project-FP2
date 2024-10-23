@@ -25,6 +25,12 @@ export class TransportationService {
     return this.http.post(this.apiUrl, bookingData, { headers: { 'Content-Type': 'application/json' } });
 
   }
+
+   // Fungsi untuk mendapatkan tanggal yang sudah dibooking
+   getBookedDates(): Observable<any> {
+    const data = `${this.url}/api/bookedDates`;
+    return this.http.get<any[]>(data);
+  }
   
   
 }

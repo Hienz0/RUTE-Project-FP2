@@ -5,6 +5,8 @@ import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet'; // Import Leaflet.js
 import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
+import flatpickr from 'flatpickr';
+
 
 @Component({
   selector: 'app-book-transportation',
@@ -21,6 +23,7 @@ export class BookTransportationComponent implements OnInit {
   pickupLocation: string = '';
   dropoffLocation: string = '';
   specialRequest: string = '';
+  bookedDates: { pickupDate: string; dropoffDate: string }[] = [];
 
   // Reverse geocoded addresses
   pickupAddress: string = '';
@@ -76,7 +79,9 @@ export class BookTransportationComponent implements OnInit {
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
+    
   }
+
 
   // Function to book transportation
   bookTransport(): void {
