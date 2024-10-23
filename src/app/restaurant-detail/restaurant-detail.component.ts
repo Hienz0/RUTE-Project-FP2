@@ -34,45 +34,49 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    // Initialize the map after the view is initialized and the map container is available
-    if (this.mapContainer) {
-      this.initMap();
-    }
+ngAfterViewInit(): void {
+  console.log('ngAfterViewInit called');
+  if (this.mapContainer) {
+    console.log('Map container available');
+    this.initMap();
+  } else {
+    console.error('Map container not available');
   }
+}
 
-  loadRestaurantDetails(id: string): void {
-    this.servicesService.getRestaurantById(id).subscribe(
-      (data) => {
-        this.restaurant = data;
-        if (this.map && this.restaurant.businessCoordinates) {
-          // Update map center with restaurant coordinates
-          const { coordinates } = this.restaurant.businessCoordinates;
-          this.map.setView([coordinates[1], coordinates[0]], 13);
-          L.marker([coordinates[1], coordinates[0]]).addTo(this.map);
-        }
-      },
-      (error) => {
-        console.error('Error fetching restaurant details', error);
+
+loadRestaurantDetails(id: string): void {
+  this.servicesService.getRestaurantById(id).subscribe(
+    (data) => {
+      this.restaurant = data;
+      if (this.map && this.restaurant.businessCoordinates) {
+        // Update map center with restaurant coordinates
+        const { coordinates } = this.restaurant.businessCoordinates;
+        this.map.setView([coordinates[1], coordinates[0]], 16); // Center on restaurant with zoom level 16
+        L.marker([coordinates[1], coordinates[0]]).addTo(this.map); // Add a marker to the restaurant location
       }
-    );
-  }
+    },
+    (error) => {
+      console.error('Error fetching restaurant details', error);
+    }
+  );
+}
+
 
   initMap(): void {
-    this.map = L.map(this.mapContainer.nativeElement).setView([-8.5069, 115.2624], 13); // Default view
-  
+    console.log('map called');
+    // Initialize the map with placeholder coordinates
+    this.map = L.map(this.mapContainer.nativeElement).setView([-8.5069, 115.2624], 13); // Placeholder or default location
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
-  
-    this.map.on('load', () => {
-      console.log('Map loaded successfully');
-    });
-  
+    
     // Ensure the map resizes correctly after initialization
     setTimeout(() => {
       this.map?.invalidateSize();
     }, 0);
   }
+  
   
 }
