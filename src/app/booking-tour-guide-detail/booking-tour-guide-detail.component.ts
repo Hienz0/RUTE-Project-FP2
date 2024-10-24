@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Renderer2, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2, ViewChild, ElementRef, AfterViewInit, Input} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service';
@@ -19,7 +19,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
   currentUser: any;
   serviceId: string | null = null;
   tourguideDetail: any = null;
-  isModalOpen = false;
+  @Input() isModalOpen = false;
+  isMapInitialized = false;  // Track whether the map is initialized
   bookingDetails = {
     tourName: '',
     customerName: '',
@@ -27,7 +28,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     numberOfParticipants: 1,
     tourDate: '',
     specialRequest: '',
-    pickupLocation: 'Ubud Palaces'
+    pickupLocation: ''
   };
 
   currentDate: string = '';
@@ -45,7 +46,6 @@ export class BookingTourGuideDetailComponent implements OnInit {
       this.currentUser = user;
     });
 
-    // Date validation
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0];
 
@@ -61,31 +61,51 @@ export class BookingTourGuideDetailComponent implements OnInit {
     this.renderer.appendChild(document.body, script);
   }
 
-  ngAfterViewInit(): void {
-    // Initialize map only if the tourguideDetail is loaded
-    if (this.tourguideDetail) {
+  ngAfterViewChecked(): void {
+    // Map initialization happens only after the container is available and once it has not been initialized before
+    if (this.mapContainer && !this.isMapInitialized) {
       this.initMap();
     }
   }
-  
 
-  initMap(): void {
-    const latitude = -8.409518; // Your desired latitude
-    const longitude = 115.188919; // Your desired longitude
-    const zoomLevel = 13; // Adjust the zoom level as needed
+  initMap(latitude: number = -8.519, longitude: number = 115.263): void {
+    if (!this.mapContainer || !this.mapContainer.nativeElement) {
+      console.error('Map container reference is undefined');
+      return;
+    }
 
-    // Create the map instance
-    this.map = L.map('map').setView([latitude, longitude], zoomLevel); // Use the correct ID
+    const zoomLevel = 15;
 
-    // Add a tile layer (using OpenStreetMap tiles)
+    // Buat instance peta dan set view ke latitude dan longitude
+    this.map = L.map(this.mapContainer.nativeElement, {
+      center: [latitude, longitude], 
+      zoom: zoomLevel,
+    });
+
+    // Tambahkan tile layer (menggunakan OpenStreetMap tiles)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(this.map);
 
-    // Optional: Add a marker
+    // Tambahkan marker untuk lokasi pickup
     const marker = L.marker([latitude, longitude]).addTo(this.map);
-    marker.bindPopup('Your Popup Text').openPopup();
+    marker.bindPopup('Pickup Location').openPopup();
+
+    // Pastikan peta fokus kembali pada marker setelah marker ditambahkan
+    this.map.setView([latitude, longitude], zoomLevel);
+
+    // Simpan latitude dan longitude ke dalam bookingDetails.pickupLocation
+    this.bookingDetails.pickupLocation = `${latitude}, ${longitude}`;
+    console.log(this.bookingDetails.pickupLocation);
+
+    this.isMapInitialized = true; // Pastikan peta hanya diinisialisasi sekali
   }
+
+
+  
+  
+  
+  
 
   loadTourGuideDetail(id: string): void {
     this.servicesService.getTourGuideServiceById(id).subscribe(
@@ -93,16 +113,14 @@ export class BookingTourGuideDetailComponent implements OnInit {
         this.tourguideDetail = data;
         this.bookingDetails.tourName = this.tourguideDetail.productName;
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
-
-        // Uncomment if you need to call this again (remove if duplicate logic)
-        // this.loadLeafletMap();
-        this.initMap();
+        this.initMap(); // Try initializing the map again after loading data
       },
       (error) => {
         console.error('Error fetching tour detail', error);
       }
     );
   }
+
 
   openModal(): void {
     this.isModalOpen = true;
@@ -148,7 +166,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
       return;
     }
 
-    this.bookingDetails.pickupLocation = 'Ubud Palaces';
+    
 
     // Process booking if validation passes
     this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
