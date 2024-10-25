@@ -53,14 +53,14 @@
   <!-- Accommodation Title and Description -->
   <div class="row">
     <div class="col-12 text-center">
-      <h1 class="display-4">{{ accommodationDetail.productName }}</h1>
+      <h1 class="display-4 fw-bold">{{ accommodationDetail.productName }}</h1>
       <p class="lead text-muted">{{ accommodationDetail.productDescription }}</p>
     </div>
   </div>
 
   <!-- Carousel for Accommodation Images -->
   <div *ngIf="accommodationDetail.productImages?.length" class="row my-5">
-    <div id="accommodationCarousel" class="carousel slide col-12 col-md-8 offset-md-2" data-bs-ride="carousel">
+    <div id="accommodationCarousel" class="carousel slide col-12 col-md-8 offset-md-2 shadow-lg rounded overflow-hidden" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div
           *ngFor="let image of accommodationDetail.productImages; let isFirst = first"
@@ -87,157 +87,156 @@
   </div>
 
   <!-- Price and Location -->
-  <div class="row text-center">
+  <div class="row text-center mb-4">
     <div class="col-12">
-      <p><strong>Price:</strong> {{ accommodationDetail.productPrice | currency }}</p>
-      <p><strong>Location:</strong> {{ accommodationDetail.location }}</p>
+      <p class="h5"><strong>Price:</strong> {{ accommodationDetail.productPrice | currency }}</p>
+      <p class="h5"><strong>Location:</strong> {{ accommodationDetail.location }}</p>
     </div>
   </div>
 
-<!-- Booking Section -->
-<div class="row mt-5">
-  <div class="col-12 text-center">
-    <button class="btn btn-primary" (click)="openModal()">
-      Book Now
-    </button>
+  <!-- Booking Button -->
+  <div class="row mt-5">
+    <div class="col-12 text-center">
+      <button class="btn btn-primary btn-lg" (click)="openModal()">
+        Book Now
+      </button>
+    </div>
   </div>
-</div>
 
-<!-- Dark Background Overlay -->
-<div class="modal-backdrop fade show" *ngIf="isModalOpen" style="background-color: rgba(0, 0, 0, 0.7);"></div>
+  <!-- Booking Modal -->
+  <div *ngIf="isModalOpen">
+    <div class="modal-backdrop fade show" style="background-color: rgba(0, 0, 0, 0.7);"></div>
+    <div class="modal show d-block" tabindex="-1" role="dialog" style="z-index: 1055;">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+          <!-- Modal Header -->
+          <div class="modal-header bg-primary text-white rounded-top">
+            <!-- <h3 class="modal-title text-center mx-auto display-6">Book Accommodation</h3> -->
+            <h3 class="modal-title text-center mx-auto display-6">{{ accommodationDetail.productName }}</h3>
+            
 
-<!-- Booking Modal -->
-<div class="modal show d-block" tabindex="-1" role="dialog" *ngIf="isModalOpen" style="z-index: 1055;">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content border-0 shadow-lg rounded-lg overflow-hidden">
 
-      <!-- Modal Header -->
-      <div class="modal-header bg-primary text-white rounded-top">
-        <h5 class="modal-title mx-auto">Book Accommodation</h5>
-        <button type="button" class="close text-white" (click)="closeModal()" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="modal-body p-4">
-        <form (submit)="submitBooking()">
-          <!-- Guest Name -->
-          <div class="form-group">
-            <label for="guestName">Guest Name</label>
-            <input
-              id="guestName"
-              type="text"
-              [(ngModel)]="bookingDetails.guestName"
-              name="guestName"
-              placeholder="Enter your name"
-              class="form-control"
-              required
-            />
+            <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Close"></button>
           </div>
 
-          <!-- Accommodation Type -->
-          <div class="form-group">
-            <label for="accommodationType">Accommodation Type</label>
-            <select
-              id="accommodationType"
-              [(ngModel)]="bookingDetails.accommodationType"
-              name="accommodationType"
-              class="form-control"
-              required
-            >
-              <option [value]="accommodationDetail.productSubcategory">
-                {{ accommodationDetail.productSubcategory }}
-              </option>
-            </select>
-          </div>
+          <!-- Modal Body -->
+          <div class="modal-body p-4">
+            <form (submit)="submitBooking()">
+              <!-- Guest Name -->
+              <div class="mb-3">
+                <label for="guestName" class="form-label">Guest Name</label>
+                <input
+                  id="guestName"
+                  type="text"
+                  [(ngModel)]="bookingDetails.guestName"
+                  name="guestName"
+                  class="form-control"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
 
-          <!-- Number of Guests -->
-          <div class="form-group">
-            <label for="numberOfGuests">Number of Guests</label>
-            <input
-              id="numberOfGuests"
-              type="number"
-              [(ngModel)]="bookingDetails.numberOfGuests"
-              name="numberOfGuests"
-              min="1"
-              placeholder="Enter number of guests"
-              class="form-control"
-              required
-            />
-          </div>
+              <!-- Accommodation Type -->
+              <div class="mb-3">
+                <label for="accommodationType" class="form-label">Accommodation Type</label>
+                <select
+                  id="accommodationType"
+                  [(ngModel)]="bookingDetails.accommodationType"
+                  name="accommodationType"
+                  class="form-select"
+                  required
+                >
+                  <option [value]="accommodationDetail.productSubcategory">
+                    {{ accommodationDetail.productSubcategory }}
+                  </option>
+                </select>
+              </div>
 
-          <!-- Check-in Date -->
-          <div class="form-group">
-            <label for="checkInDate">Check-in Date</label>
-            <input
-              id="checkInDate"
-              type="date"
-              [(ngModel)]="bookingDetails.checkInDate"
-              name="checkInDate"
-              class="form-control"
-              required
-            />
-          </div>
+              <!-- Number of Guests -->
+              <div class="mb-3">
+                <label for="numberOfGuests" class="form-label">Number of Guests</label>
+                <input
+                  id="numberOfGuests"
+                  type="number"
+                  [(ngModel)]="bookingDetails.numberOfGuests"
+                  name="numberOfGuests"
+                  min="1"
+                  class="form-control"
+                  placeholder="Enter number of guests"
+                  required
+                />
+              </div>
 
-          <!-- Check-out Date -->
-          <div class="form-group">
-            <label for="checkOutDate">Check-out Date</label>
-            <input
-              id="checkOutDate"
-              type="date"
-              [(ngModel)]="bookingDetails.checkOutDate"
-              name="checkOutDate"
-              class="form-control"
-              required
-            />
-          </div>
+              <!-- Check-in Date -->
+              <div class="mb-3">
+                <label for="checkInDate" class="form-label">Check-in Date</label>
+                <input
+                  id="checkInDate"
+                  type="date"
+                  [(ngModel)]="bookingDetails.checkInDate"
+                  name="checkInDate"
+                  class="form-control"
+                  required
+                />
+              </div>
 
-          <!-- Room Number -->
-          <div class="form-group">
-            <label for="roomNumber">Room Number</label>
-            <input
-              id="roomNumber"
-              type="number"
-              [(ngModel)]="bookingDetails.roomNumber"
-              name="roomNumber"
-              placeholder="Enter room number"
-              class="form-control"
-              required
-            />
-          </div>
+              <!-- Check-out Date -->
+              <div class="mb-3">
+                <label for="checkOutDate" class="form-label">Check-out Date</label>
+                <input
+                  id="checkOutDate"
+                  type="date"
+                  [(ngModel)]="bookingDetails.checkOutDate"
+                  name="checkOutDate"
+                  class="form-control"
+                  required
+                />
+              </div>
 
-          <!-- Special Request -->
-          <div class="form-group">
-            <label for="specialRequest">Special Request</label>
-            <textarea
-              id="specialRequest"
-              [(ngModel)]="bookingDetails.specialRequest"
-              name="specialRequest"
-              placeholder="Enter any special requests"
-              class="form-control"
-              rows="3"
-            ></textarea>
-          </div>
+              <!-- Room Number -->
+              <div class="mb-3">
+                <label for="roomNumber" class="form-label">Room Number</label>
+                <input
+                  id="roomNumber"
+                  type="number"
+                  [(ngModel)]="bookingDetails.roomNumber"
+                  name="roomNumber"
+                  class="form-control"
+                  placeholder="Enter room number"
+                  required
+                />
+              </div>
 
-          <!-- Modal Actions -->
-          <div class="d-flex justify-content-end mt-3">
-            <button type="submit" class="btn btn-primary mr-2">
-              Book Now
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">
-              Cancel
-            </button>
+              <!-- Special Request -->
+              <div class="mb-3">
+                <label for="specialRequest" class="form-label">Special Request</label>
+                <textarea
+                  id="specialRequest"
+                  [(ngModel)]="bookingDetails.specialRequest"
+                  name="specialRequest"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Enter any special requests"
+                ></textarea>
+              </div>
+
+              <!-- Modal Actions -->
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  Book Now
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal()">
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-
-
-</div>
 
     <!-- Map Section -->
     <div class="row mt-4">
