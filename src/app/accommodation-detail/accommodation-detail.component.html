@@ -94,55 +94,56 @@
     </div>
   </div>
 
-  <!-- Booking Section -->
-  <div class="row mt-5">
-    <div class="col-12 text-center">
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" (click)="openModal()">
-        Book Now
-      </button>
-    </div>
+<!-- Booking Section -->
+<div class="row mt-5">
+  <div class="col-12 text-center">
+    <button class="btn btn-primary" (click)="openModal()">
+      Book Now
+    </button>
   </div>
+</div>
+
+<!-- Dark Background Overlay -->
+<div class="modal-backdrop fade show" *ngIf="isModalOpen" style="background-color: rgba(0, 0, 0, 0.7);"></div>
 
 <!-- Booking Modal -->
-<div class="fixed z-10 inset-0 overflow-y-auto" *ngIf="isModalOpen">
-  <div class="flex items-center justify-center min-h-screen px-4">
-    <!-- Background Overlay -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+<div class="modal show d-block" tabindex="-1" role="dialog" *ngIf="isModalOpen" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg rounded-lg overflow-hidden">
 
-    <!-- Modal Container -->
-    <div class="relative bg-white rounded-lg shadow-lg overflow-hidden transform transition-all sm:max-w-lg w-full">
       <!-- Modal Header -->
-      <div class="bg-blue-500 p-5">
-        <h3 class="text-lg leading-6 font-semibold text-white text-center">
-          Book Accommodation
-        </h3>
+      <div class="modal-header bg-primary text-white rounded-top">
+        <h5 class="modal-title mx-auto">Book Accommodation</h5>
+        <button type="button" class="close text-white" (click)="closeModal()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
-      <!-- Modal Content -->
-      <div class="px-6 py-5">
+      <!-- Modal Body -->
+      <div class="modal-body p-4">
         <form (submit)="submitBooking()">
           <!-- Guest Name -->
-          <div class="mb-4">
-            <label for="guestName" class="block text-sm font-medium text-gray-700">Guest Name</label>
+          <div class="form-group">
+            <label for="guestName">Guest Name</label>
             <input
               id="guestName"
               type="text"
               [(ngModel)]="bookingDetails.guestName"
               name="guestName"
               placeholder="Enter your name"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             />
           </div>
 
           <!-- Accommodation Type -->
-          <div class="mb-4">
-            <label for="accommodationType" class="block text-sm font-medium text-gray-700">Accommodation Type</label>
+          <div class="form-group">
+            <label for="accommodationType">Accommodation Type</label>
             <select
               id="accommodationType"
               [(ngModel)]="bookingDetails.accommodationType"
               name="accommodationType"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             >
               <option [value]="accommodationDetail.productSubcategory">
@@ -152,8 +153,8 @@
           </div>
 
           <!-- Number of Guests -->
-          <div class="mb-4">
-            <label for="numberOfGuests" class="block text-sm font-medium text-gray-700">Number of Guests</label>
+          <div class="form-group">
+            <label for="numberOfGuests">Number of Guests</label>
             <input
               id="numberOfGuests"
               type="number"
@@ -161,70 +162,70 @@
               name="numberOfGuests"
               min="1"
               placeholder="Enter number of guests"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             />
           </div>
 
           <!-- Check-in Date -->
-          <div class="mb-4">
-            <label for="checkInDate" class="block text-sm font-medium text-gray-700">Check-in Date</label>
+          <div class="form-group">
+            <label for="checkInDate">Check-in Date</label>
             <input
               id="checkInDate"
               type="date"
               [(ngModel)]="bookingDetails.checkInDate"
               name="checkInDate"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             />
           </div>
 
           <!-- Check-out Date -->
-          <div class="mb-4">
-            <label for="checkOutDate" class="block text-sm font-medium text-gray-700">Check-out Date</label>
+          <div class="form-group">
+            <label for="checkOutDate">Check-out Date</label>
             <input
               id="checkOutDate"
               type="date"
               [(ngModel)]="bookingDetails.checkOutDate"
               name="checkOutDate"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             />
           </div>
 
           <!-- Room Number -->
-          <div class="mb-4">
-            <label for="roomNumber" class="block text-sm font-medium text-gray-700">Room Number</label>
+          <div class="form-group">
+            <label for="roomNumber">Room Number</label>
             <input
               id="roomNumber"
               type="number"
               [(ngModel)]="bookingDetails.roomNumber"
               name="roomNumber"
               placeholder="Enter room number"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               required
             />
           </div>
 
           <!-- Special Request -->
-          <div class="mb-4">
-            <label for="specialRequest" class="block text-sm font-medium text-gray-700">Special Request</label>
+          <div class="form-group">
+            <label for="specialRequest">Special Request</label>
             <textarea
               id="specialRequest"
               [(ngModel)]="bookingDetails.specialRequest"
               name="specialRequest"
               placeholder="Enter any special requests"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              class="form-control"
               rows="3"
             ></textarea>
           </div>
 
           <!-- Modal Actions -->
-          <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+          <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary mr-2">
               Book Now
             </button>
-            <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm" (click)="closeModal()">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">
               Cancel
             </button>
           </div>
@@ -233,6 +234,8 @@
     </div>
   </div>
 </div>
+
+
 
 </div>
 

@@ -102,7 +102,18 @@ const bookingAccommodationSchema = new mongoose.Schema({
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
         enum: ['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut']
-    }
+    },
+
+    serviceId: { // Add serviceId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true
+  },
+  userId: { // Add userId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  }
 }, { timestamps: true });
 
 // Create the Booking model
@@ -141,9 +152,14 @@ app.get('/api/services/restaurant/:id', async (req, res) => {
 
 // 
 // Route to handle booking accommodation
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings/accommodation', async (req, res) => {
   try {
-    const booking = new Booking(req.body);
+    const bookingData = {
+      ...req.body,
+      serviceId: req.body.serviceId, // Make sure these are passed from the client side
+      userId: req.body.userId       // or set here if you have access to current user
+    };
+    const booking = new Booking(bookingData);
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {

@@ -44,6 +44,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
+      this.bookingDetails.guestName = user?.name || '';
     });
     
     this.serviceId = this.route.snapshot.paramMap.get('id');
@@ -51,11 +52,11 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       this.loadAccommodationDetail(this.serviceId);
     }
 
-        // Dynamically add Tailwind CDN script
-        const script = this.renderer.createElement('script');
-        script.src = 'https://cdn.tailwindcss.com';
-        script.id = 'tailwindScript';
-        this.renderer.appendChild(document.body, script);
+        // // Dynamically add Tailwind CDN script
+        // const script = this.renderer.createElement('script');
+        // script.src = 'https://cdn.tailwindcss.com';
+        // script.id = 'tailwindScript';
+        // this.renderer.appendChild(document.body, script);
   }
 
   ngAfterViewInit(): void {
@@ -119,6 +120,9 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   // Submit the booking form
   
   submitBooking(): void {
+      // Get today's date in 'yyyy-mm-dd' format to compare
+  const today = new Date().toISOString().split('T')[0];
+
     // Check if all required fields are filled
     if (!this.bookingDetails.guestName || !this.bookingDetails.accommodationType || 
         !this.bookingDetails.numberOfGuests || !this.bookingDetails.checkInDate || 
@@ -133,12 +137,40 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       });
       return; // Stop the submission process if validation fails
     }
+
+      // Check if check-in date is in the past
+  if (this.bookingDetails.checkInDate < today) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Check-in Date',
+      text: 'Check-in date cannot be in the past.',
+      confirmButtonColor: '#d33',
+    });
+    return; // Stop submission if check-in date is invalid
+  }
+
+    // Check if check-out date is earlier than check-in date
+    if (this.bookingDetails.checkOutDate < this.bookingDetails.checkInDate) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Check-out Date',
+        text: 'Check-out date cannot be earlier than the check-in date.',
+        confirmButtonColor: '#d33',
+      });
+      return;
+    }
+
+    const bookingData = {
+      ...this.bookingDetails,
+      serviceId: this.serviceId,
+      userId: this.currentUser?.userId // Assuming the user object has an 'id' property
+    };
   
     // Log the booking data before sending it
     console.log(this.bookingDetails);
   
     // Proceed with booking service if validation passes
-    this.bookingService.bookAccommodation(this.bookingDetails).subscribe(
+    this.bookingService.bookAccommodation(bookingData).subscribe(
       (response) => {
         console.log('Booking successful', response);
   
