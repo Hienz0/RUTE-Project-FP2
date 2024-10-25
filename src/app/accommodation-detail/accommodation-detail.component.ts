@@ -160,34 +160,43 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    
+
+   // Check room availability
+   this.bookingService.checkRoomAvailability(
+    this.serviceId!,
+    this.bookingDetails.roomNumber!,
+    this.bookingDetails.checkInDate,
+    this.bookingDetails.checkOutDate
+  ).subscribe((isAvailable: boolean) => {
+    if (!isAvailable) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Room Unavailable',
+        text: 'The selected room is already booked for the chosen dates. Please choose different dates or a different room.',
+        confirmButtonColor: '#d33',
+      });
+      return;
+    }
+
+    // If room is available, proceed with booking
     const bookingData = {
       ...this.bookingDetails,
       serviceId: this.serviceId,
-      userId: this.currentUser?.userId // Assuming the user object has an 'id' property
+      userId: this.currentUser?.userId,
     };
-  
-    // Log the booking data before sending it
-    console.log(this.bookingDetails);
-  
-    // Proceed with booking service if validation passes
+
     this.bookingService.bookAccommodation(bookingData).subscribe(
       (response) => {
-        console.log('Booking successful', response);
-  
-        // Display success message with SweetAlert2
         Swal.fire({
           icon: 'success',
           title: 'Booking Successful!',
           text: 'Your accommodation has been booked successfully.',
           confirmButtonColor: '#3085d6',
         });
-  
-        this.closeModal(); // Close the modal after successful booking
+        this.closeModal();
       },
       (error) => {
-        console.error('Error submitting booking', error);
-  
-        // Display error message with SweetAlert2 in case of server-side failure
         Swal.fire({
           icon: 'error',
           title: 'Booking Failed',
@@ -196,7 +205,9 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         });
       }
     );
-  }
-  
+  }, (error) => {
+    console.error('Error checking room availability', error);
+  });
+}
   
 }

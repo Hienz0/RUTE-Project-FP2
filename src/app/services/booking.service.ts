@@ -14,4 +14,11 @@ export class BookingService {
   bookAccommodation(bookingData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${'accommodation'}`, bookingData);
   }
+
+    // Check if the room is available for the specified date range
+    checkRoomAvailability(serviceId: string, roomNumber: number, checkInDate: string, checkOutDate: string): Observable<boolean> {
+      return this.http.get<boolean>(`${this.apiUrl}/${'check-availability'}`, {
+        params: { serviceId, roomNumber: roomNumber.toString(), checkInDate, checkOutDate }
+      });
+    }
 }

@@ -168,6 +168,64 @@ app.post('/api/bookings/accommodation', async (req, res) => {
   }
 });
 
+// Route to check room availability for specific dates
+// app.get('/api/bookings/check-availability', async (req, res) => {  // Add missing "/"
+//   try {
+//     const { serviceId, roomNumber, checkInDate, checkOutDate } = req.query;
+
+//     // Find overlapping bookings for the specified room and dates
+//     const overlappingBookings = await Booking.find({
+//       serviceId,
+//       roomNumber,
+//       $or: [
+//         { checkInDate: { $lt: new Date(checkOutDate) }, checkOutDate: { $gt: new Date(checkInDate) } }
+//       ]
+//     });
+
+//     // If overlapping bookings exist, room is unavailable
+//     const isAvailable = overlappingBookings.length === 0;
+//     res.status(200).json(isAvailable);
+//   } catch (error) {
+//     console.error('Error checking room availability:', error);
+//     res.status(500).json({ message: 'Error checking room availability' });
+//   }
+// });
+
+// Route to check room availability for specific dates
+app.get('/api/bookings/check-availability', async (req, res) => {  
+  try {
+    const { serviceId, roomNumber, checkInDate, checkOutDate } = req.query;
+
+    // Convert dates from string to Date objects for accurate comparisons
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+
+    // Find overlapping bookings for the specified room and dates, allowing for a one-day gap
+    const overlappingBookings = await Booking.find({
+      serviceId,
+      roomNumber,
+      $or: [
+        { 
+          checkInDate: { $lt: checkOut },
+          checkOutDate: { $gt: checkIn }
+        },
+        { 
+          checkOutDate: checkIn // Block same-day check-in by matching checkIn date to existing checkOut date
+        }
+      ]
+    });
+
+    // If overlapping bookings exist, room is unavailable
+    const isAvailable = overlappingBookings.length === 0;
+    res.status(200).json(isAvailable);
+  } catch (error) {
+    console.error('Error checking room availability:', error);
+    res.status(500).json({ message: 'Error checking room availability' });
+  }
+});
+
+
+
 // 
 
 
