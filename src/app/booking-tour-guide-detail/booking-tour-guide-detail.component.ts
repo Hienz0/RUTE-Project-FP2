@@ -68,9 +68,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
     }
   }
 
-  initMap(latitude: number = -8.519, longitude: number = 115.263): void {
+  initMap(latitude: number = -8.506534, longitude: number = 115.262588): void {
     if (!this.mapContainer || !this.mapContainer.nativeElement) {
-      console.error('Map container reference is undefined');
       return;
     }
   
@@ -90,10 +89,17 @@ export class BookingTourGuideDetailComponent implements OnInit {
     });
     L.marker([latitude, longitude], { icon: defaultIcon }).addTo(this.map).bindPopup('Pickup Location').openPopup();
   
-    this.map.setView([latitude, longitude], zoomLevel);
+    // Force the map to recenter after rendering is complete
+    setTimeout(() => {
+      this.map.invalidateSize();
+      this.map.setView([latitude, longitude], zoomLevel);
+    }, 100);
+  
     this.bookingDetails.pickupLocation = `${latitude}, ${longitude}`;
     this.isMapInitialized = true;
   }
+  
+  
   
   
 
