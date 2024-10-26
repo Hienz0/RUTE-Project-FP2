@@ -73,37 +73,27 @@ export class BookingTourGuideDetailComponent implements OnInit {
       console.error('Map container reference is undefined');
       return;
     }
-
+  
     const zoomLevel = 15;
-
-    // Buat instance peta dan set view ke latitude dan longitude
     this.map = L.map(this.mapContainer.nativeElement, {
       center: [latitude, longitude], 
       zoom: zoomLevel,
     });
-
-    // Tambahkan tile layer (menggunakan OpenStreetMap tiles)
+  
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(this.map);
-
-    // Tambahkan marker untuk lokasi pickup
-    const marker = L.marker([latitude, longitude]).addTo(this.map);
-    marker.bindPopup('Pickup Location').openPopup();
-
-    // Pastikan peta fokus kembali pada marker setelah marker ditambahkan
+  
+    const defaultIcon = L.icon({
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+    });
+    L.marker([latitude, longitude], { icon: defaultIcon }).addTo(this.map).bindPopup('Pickup Location').openPopup();
+  
     this.map.setView([latitude, longitude], zoomLevel);
-
-    // Simpan latitude dan longitude ke dalam bookingDetails.pickupLocation
     this.bookingDetails.pickupLocation = `${latitude}, ${longitude}`;
-    console.log(this.bookingDetails.pickupLocation);
-
-    this.isMapInitialized = true; // Pastikan peta hanya diinisialisasi sekali
+    this.isMapInitialized = true;
   }
-
-
-  
-  
   
   
 
