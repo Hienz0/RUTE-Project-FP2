@@ -28,11 +28,16 @@ interface Accommodation {
 })
 export class ManageAccommodationComponent implements OnInit {
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
+  @ViewChild('imageModal') imageModal!: ElementRef;
+  @ViewChild('fileInput') fileInput!: ElementRef;
+  selectedImage: File | null = null;
+  previewUrl: string | null = null;
   isEditing = false;
   amenitiesList: string[] = ['Wi-Fi', 'TV', 'Mini-bar', 'Air Conditioning', 'Breakfast Included'];
   selectedAmenities: string[] = [];
   customAmenity = '';
   selectedRoomTypeIndex: number | null = null;
+  isModalOpen: boolean = false;
   accommodation: Accommodation = {
     name: '',
     description: '',
@@ -97,6 +102,7 @@ export class ManageAccommodationComponent implements OnInit {
     this.selectedAmenities = [...this.accommodation.roomTypes[index].amenities];
     this.amenitiesModal.nativeElement.classList.add('show');
     this.amenitiesModal.nativeElement.style.display = 'block';
+    this.isModalOpen = true;
   }
 
   closeAmenitiesModal(): void {
@@ -105,6 +111,7 @@ export class ManageAccommodationComponent implements OnInit {
     // Hide the modal
     this.amenitiesModal.nativeElement.classList.remove('show');
     this.amenitiesModal.nativeElement.style.display = 'none';
+    this.isModalOpen = false;
   }
   
 
@@ -125,6 +132,7 @@ export class ManageAccommodationComponent implements OnInit {
     }
     // Close modal after saving
     this.closeAmenitiesModal();
+    this.isModalOpen = false;
   }
   
   
@@ -153,6 +161,68 @@ toggleAmenitySelection(amenity: string, event: Event): void {
 
 
 
+  // Open the Image Upload Modal
+  openImageModal() {
+    this.imageModal.nativeElement.classList.add('show');
+    this.imageModal.nativeElement.style.display = 'block';
+    this.isModalOpen = true;
+  }
 
+  // Close the Image Upload Modal
+  closeImageModal() {
+    this.imageModal.nativeElement.classList.remove('show');
+    this.imageModal.nativeElement.style.display = 'none';
+    this.selectedImage = null;
+    this.previewUrl = null; // Reset preview on close
+    this.isModalOpen = false;
+  }
+
+  // Trigger file input on click
+  triggerFileInput() {
+    this.fileInput.nativeElement.click();
+  }
+
+  // Handle File Selection
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedImage = file;
+      this.previewImage(file);
+    }
+  }
+
+  // Handle Drag Over Event
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  // Handle File Drop Event
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    const file = event.dataTransfer?.files[0];
+    if (file) {
+      this.selectedImage = file;
+      this.previewImage(file);
+    }
+  }
+
+  // Preview the selected image
+  previewImage(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Upload Image Function
+  uploadImage() {
+    if (this.selectedImage) {
+      // Handle image upload logic here
+      console.log('Uploading image:', this.selectedImage);
+      this.closeImageModal();
+      this.isModalOpen = false;
+    }
+  }
 
 }
