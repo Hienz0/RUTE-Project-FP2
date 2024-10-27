@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 
@@ -10,6 +10,7 @@ interface RoomType {
   name: string;
   price: number;
   rooms: Room[];
+  amenities: string[];
 }
 
 interface Accommodation {
@@ -26,13 +27,18 @@ interface Accommodation {
   styleUrls: ['./manage-accommodation.component.css'],
 })
 export class ManageAccommodationComponent implements OnInit {
+  @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   isEditing = false;
+  amenitiesList: string[] = ['Wi-Fi', 'TV', 'Mini-bar', 'Air Conditioning', 'Breakfast Included'];
+  selectedAmenities: string[] = [];
+  customAmenity = '';
+  selectedRoomTypeIndex: number | null = null;
   accommodation: Accommodation = {
     name: '',
     description: '',
     imageUrl: '',
     location: '',
-    roomTypes: []
+    roomTypes: [],
   };
 
   constructor(
@@ -49,7 +55,7 @@ export class ManageAccommodationComponent implements OnInit {
           description: data.productDescription,
           imageUrl: data.productImages[0] || '',
           location: data.location,
-          roomTypes: data.roomTypes || []
+          roomTypes: data.roomTypes || [],
         };
       });
     }
@@ -65,7 +71,7 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   addRoomType() {
-    this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [] });
+    this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [], amenities: [] });
   }
 
   addRoom(roomType: RoomType) {
@@ -85,4 +91,67 @@ export class ManageAccommodationComponent implements OnInit {
   removeRoom(roomType: RoomType, roomIndex: number) {
     roomType.rooms.splice(roomIndex, 1);
   }
+
+  openAmenitiesModal(index: number): void {
+    this.selectedRoomTypeIndex = index;
+    this.selectedAmenities = [...this.accommodation.roomTypes[index].amenities];
+    this.amenitiesModal.nativeElement.classList.add('show');
+    this.amenitiesModal.nativeElement.style.display = 'block';
+  }
+
+  closeAmenitiesModal(): void {
+    // Reset the selectedRoomTypeIndex to null if necessary
+    this.selectedRoomTypeIndex = null;
+    // Hide the modal
+    this.amenitiesModal.nativeElement.classList.remove('show');
+    this.amenitiesModal.nativeElement.style.display = 'none';
+  }
+  
+
+  addCustomAmenity(): void {
+    if (this.customAmenity && !this.selectedAmenities.includes(this.customAmenity)) {
+      this.selectedAmenities.push(this.customAmenity);
+      this.customAmenity = '';
+    }
+  }
+
+  saveAmenities(): void {
+    if (this.selectedRoomTypeIndex !== null) {
+      // Save selected amenities to the room type at the selected index
+      this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+    }
+    // Close modal after saving
+    this.closeAmenitiesModal();
+  }
+  
+
+  // Checks if an amenity is already selected for the current room type
+isAmenitySelected(amenity: string): boolean {
+  if (this.selectedRoomTypeIndex !== null) {
+    return this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities.includes(amenity);
+  }
+  return false;
+}
+
+// Toggles the selection of an amenity for the current room type
+toggleAmenitySelection(amenity: string, event: Event): void {
+  const isChecked = (event.target as HTMLInputElement).checked;
+
+  if (this.selectedRoomTypeIndex !== null) {
+    const amenities = this.selectedAmenities;
+    if (isChecked && !amenities.includes(amenity)) {
+      amenities.push(amenity);
+    } else if (!isChecked && amenities.includes(amenity)) {
+      const index = amenities.indexOf(amenity);
+      if (index > -1) {
+        amenities.splice(index, 1);
+      }
+    }
+  }
+}
+
+
+
+
+
 }
