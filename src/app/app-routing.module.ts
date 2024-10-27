@@ -14,6 +14,7 @@ import { AccommodationComponent } from './accommodation/accommodation.component'
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
+import { ManageAccommodationComponent } from './manage-accommodation/manage-accommodation.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -31,7 +32,8 @@ const routes: Routes = [
   { path: 'accommodation/:id', component: AccommodationDetailComponent }, // Route for details page
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
   {path: 'restaurant', component: RestaurantComponent },
-  { path: 'restaurant-detail/:id', component: RestaurantDetailComponent }
+  { path: 'restaurant-detail/:id', component: RestaurantDetailComponent },
+  {path: 'manage-accommodation', component: ManageAccommodationComponent}
 ];
 
 @NgModule({

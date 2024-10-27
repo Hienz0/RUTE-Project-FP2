@@ -26,6 +26,7 @@ import { AccommodationComponent } from './accommodation/accommodation.component'
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
+import { ManageAccommodationComponent } from './manage-accommodation/manage-accommodation.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail
     AccommodationComponent,
     AccommodationDetailComponent,
     RestaurantComponent,
-    RestaurantDetailComponent
+    RestaurantDetailComponent,
+    ManageAccommodationComponent
   ],
   imports: [
     BrowserModule,
