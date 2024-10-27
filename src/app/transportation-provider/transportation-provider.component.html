@@ -1,0 +1,36 @@
+<div class="container mt-5">
+    <div class="row">
+      <div *ngFor="let provider of services" class="col-md-4 mb-4">
+        <div class="card h-100" (click)="navigateToDetails(provider.userId)" style="cursor: pointer">
+          
+          <!-- Display the image directly without a carousel -->
+          <div *ngIf="provider.image; else noImage">
+            <img
+              [src]="getFullImagePath(provider.image)"
+              class="d-block w-100"
+              alt="Provider Image"
+              style="height: 200px; object-fit: cover"
+            />
+          </div>
+  
+          <!-- Fallback if no images are available -->
+          <ng-template #noImage>
+            <div class="d-flex justify-content-center align-items-center bg-secondary" style="height: 200px">
+              <p class="text-white">No Image Available</p>
+            </div>
+          </ng-template>
+  
+          <!-- Card Body for Provider Details -->
+          <div class="card-body">
+            <h5 class="card-title">{{ provider.name }}</h5>
+            <p class="card-text"><strong>Business:</strong> {{ provider.businessName }}</p>
+            <p class="card-text"><strong>Description:</strong> {{ provider.businessDesc }}</p>
+            <p class="card-text"><strong>Location:</strong> {{ provider.businessLocation }}</p>
+            <p class="card-text"><strong>Price:</strong> {{ provider.price | currency:'IDR':'symbol' }}</p>
+            <p class="card-text"><strong>Status:</strong> {{ provider.status }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

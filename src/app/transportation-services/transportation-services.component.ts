@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TransportationService } from '../services/transportation.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-transportation-services',
@@ -9,17 +9,25 @@ import { Router } from '@angular/router';
 })
 export class TransportationServicesComponent implements OnInit {
   services: any[] = [];
-  constructor(private service : TransportationService, private router: Router){}
+  constructor(private service : TransportationService, private router: Router, private route: ActivatedRoute){}
   ngOnInit(): void {
-    this.service.getTransporationServices().subscribe(
-      (data: any[]) => {
-        this.services = data;
-      },
-      (error) => {
-        console.error('Error fetching services', error);
-      }
-    );
+    const transportID = this.route.snapshot.paramMap.get('id');
+    console.log('Transport ID from route:', transportID);
+    if (transportID) {
+      this.service.getTransportationService(transportID).subscribe(
+        (data) => {
+          this.services = data;
+          console.log(data);
+        },
+        (error) => {
+          console.error('Error fetching transportation service:', error);
+        }
+      );
+    } else {
+      console.error('Transport ID is null or invalid');
+    }
   }
+
 
   getFullImagePath(image: string): string {
     // Assuming images are stored in the /uploads/ folder on the server

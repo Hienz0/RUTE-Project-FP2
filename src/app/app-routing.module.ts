@@ -13,6 +13,7 @@ import { SearchResultsComponent } from './search-results/search-results.componen
 import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
 import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
+import { TransportationProviderComponent } from './transportation-provider/transportation-provider.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -27,7 +28,8 @@ const routes: Routes = [
   {path: 'reviewServices',component: ReviewServicesComponent},
   { path: 'search-results', component: SearchResultsComponent },
   {path:'customizeProfile', component: CustomizeProfileComponent},
-  {path: 'transportationServices', component: TransportationServicesComponent},
+  {path:'transportationProvider', component: TransportationProviderComponent},
+  {path: 'transportationService/:id', component: TransportationServicesComponent},
   {path:'transportationDetail/:id', component: BookTransportationComponent}
 ];
 
