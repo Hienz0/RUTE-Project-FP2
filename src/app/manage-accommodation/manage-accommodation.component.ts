@@ -109,14 +109,17 @@ export class ManageAccommodationComponent implements OnInit {
   
 
   addCustomAmenity(): void {
-    if (this.customAmenity && !this.selectedAmenities.includes(this.customAmenity)) {
+    if (this.customAmenity && !this.amenitiesList.includes(this.customAmenity)) {
+      // Add the custom amenity to the list and mark it as selected
+      this.amenitiesList.push(this.customAmenity);
       this.selectedAmenities.push(this.customAmenity);
-      this.customAmenity = '';
+      this.customAmenity = ''; // Clear the input field
     }
   }
+  
 
   saveAmenities(): void {
-    if (this.selectedRoomTypeIndex !== null) {
+    if (this.selectedRoomTypeIndex !== null && this.accommodation.roomTypes[this.selectedRoomTypeIndex]) {
       // Save selected amenities to the room type at the selected index
       this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
     }
@@ -124,14 +127,12 @@ export class ManageAccommodationComponent implements OnInit {
     this.closeAmenitiesModal();
   }
   
+  
 
   // Checks if an amenity is already selected for the current room type
-isAmenitySelected(amenity: string): boolean {
-  if (this.selectedRoomTypeIndex !== null) {
-    return this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities.includes(amenity);
+  isAmenitySelected(amenity: string): boolean {
+    return this.selectedAmenities.includes(amenity);
   }
-  return false;
-}
 
 // Toggles the selection of an amenity for the current room type
 toggleAmenitySelection(amenity: string, event: Event): void {
