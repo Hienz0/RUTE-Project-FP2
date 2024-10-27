@@ -200,8 +200,13 @@
                             <ng-container *ngIf="service.productSubcategory">
                                 <p class="card-text"><strong>Type:</strong> {{ service.productSubcategory }}</p>
                             </ng-container>
-                            <button type="button" class="btn btn-primary me-2" (click)="openEditModal(i)" data-bs-toggle="modal" [attr.data-bs-target]="'#editServiceModal'">Update</button>
+                            <button type="button" class="btn btn-success me-2" (click)="navigateToService(service)">
+                                Manage Service
+                              </button>
+                              <button *ngIf="false" type="button" class="btn btn-primary me-2" (click)="openEditModal(i)" data-bs-toggle="modal" [attr.data-bs-target]="'#editServiceModal'">Update</button>
+
                             <button type="button" class="btn btn-danger" (click)="confirmDelete(i)">Delete</button>
+
                         </div>
                     </div>
                 </div>

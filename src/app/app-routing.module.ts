@@ -33,7 +33,7 @@ const routes: Routes = [
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
   {path: 'restaurant', component: RestaurantComponent },
   { path: 'restaurant-detail/:id', component: RestaurantDetailComponent },
-  {path: 'manage-accommodation', component: ManageAccommodationComponent}
+  { path: 'manage-accommodation/:serviceId', component: ManageAccommodationComponent },
 ];
 
 @NgModule({

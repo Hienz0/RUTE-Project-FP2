@@ -20,44 +20,19 @@
           <form>
             <div class="form-group mb-3">
               <label for="accommodationName"><i class="fas fa-building icon"></i> Name</label>
-              <input
-                type="text"
-                class="form-control"
-                id="accommodationName"
-                [(ngModel)]="accommodation.name"
-                name="name"
-                required
-              />
+              <input type="text" class="form-control" id="accommodationName" [(ngModel)]="accommodation.name" name="name" required />
             </div>
             <div class="form-group mb-3">
               <label for="accommodationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
-              <textarea
-                class="form-control"
-                id="accommodationDescription"
-                [(ngModel)]="accommodation.description"
-                name="description"
-                rows="3"
-              ></textarea>
+              <textarea class="form-control" id="accommodationDescription" [(ngModel)]="accommodation.description" name="description" rows="3"></textarea>
             </div>
             <div class="form-group mb-3">
               <label for="accommodationImage"><i class="fas fa-image icon"></i> Image URL</label>
-              <input
-                type="text"
-                class="form-control"
-                id="accommodationImage"
-                [(ngModel)]="accommodation.imageUrl"
-                name="imageUrl"
-              />
+              <input type="text" class="form-control" id="accommodationImage" [(ngModel)]="accommodation.imageUrl" name="imageUrl" />
             </div>
             <div class="form-group mb-3">
               <label for="accommodationLocation"><i class="fas fa-map-marker-alt icon"></i> Location</label>
-              <input
-                type="text"
-                class="form-control"
-                id="accommodationLocation"
-                [(ngModel)]="accommodation.location"
-                name="location"
-              />
+              <input type="text" class="form-control" id="accommodationLocation" [(ngModel)]="accommodation.location" name="location" />
             </div>
             <button class="btn btn-primary mt-3" (click)="saveAccommodation()">
               <i class="fas fa-save"></i> Save
@@ -77,38 +52,30 @@
         </button>
         
         <div *ngFor="let roomType of accommodation.roomTypes; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
-          <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
+            <button class="btn btn-danger btn-sm" (click)="removeRoomType(i)"><i class="fas fa-trash-alt"></i> Delete</button>
+          </div>
+          
           <div class="form-group mb-2">
             <label for="roomTypeName"><i class="fas fa-bed icon"></i> Room Type Name</label>
-            <input
-              type="text"
-              class="form-control"
-              [(ngModel)]="roomType.name"
-              placeholder="Enter room type name"
-            />
+            <input type="text" class="form-control" [(ngModel)]="roomType.name" placeholder="Enter room type name" />
           </div>
           <div class="form-group mb-2">
             <label for="roomTypePrice"><i class="fas fa-dollar-sign icon"></i> Price</label>
-            <input
-              type="number"
-              class="form-control"
-              [(ngModel)]="roomType.price"
-              placeholder="Enter price for this room type"
-            />
+            <input type="number" class="form-control" [(ngModel)]="roomType.price" placeholder="Enter price for this room type" />
           </div>
           <button class="btn btn-secondary mt-3 mb-3" (click)="addRoom(roomType)">
             <i class="fas fa-plus"></i> Add Room
           </button>
   
           <!-- Rooms Section within Room Type, with additional padding and indentation -->
-          <div *ngFor="let room of roomType.rooms; let j = index" class="ml-4 pl-4 border-left mt-2" style="background-color: #f8f9fa; padding-left: 1rem;">
-            <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}:</label>
-            <input
-              type="text"
-              class="form-control mb-2"
-              [(ngModel)]="room.number"
-              placeholder="Room Number / Name"
-            />
+          <div *ngFor="let room of roomType.rooms; let j = index" class="border-left pl-4 mt-2" style="background-color: #f8f9fa;">
+            <div class="d-flex justify-content-between align-items-center">
+              <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
+              <button class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)"><i class="fas fa-trash-alt"></i> Delete</button>
+            </div>
+            <input type="text" class="form-control mb-2" [(ngModel)]="room.number" placeholder="Room Number / Name" />
           </div>
         </div>
       </div>
