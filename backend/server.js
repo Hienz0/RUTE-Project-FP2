@@ -325,6 +325,18 @@ const transportationSchema = new mongoose.Schema({
 
 const Transportation = mongoose.model('Transportation', transportationSchema);
 
+
+app.get('/transportationService', async (req, res) => {
+  try {
+    const transportation = await Transportation.find();
+    res.json(transportation);
+  } catch (error) {
+    console.error('Error retrieving transportation data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 // get Transportation data by id
 app.get('/transportationService/:id', async (req, res) => {
   try {
