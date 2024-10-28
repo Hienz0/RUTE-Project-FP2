@@ -14,6 +14,7 @@ import { CustomizeProfileComponent } from './customize-profile/customize-profile
 import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
 import { TransportationProviderComponent } from './transportation-provider/transportation-provider.component';
+import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -30,6 +31,7 @@ const routes: Routes = [
   {path:'customizeProfile', component: CustomizeProfileComponent},
   {path:'transportationProvider', component: TransportationProviderComponent},
   {path: 'transportationService/:id', component: TransportationServicesComponent},
+  {path:'manageTransportation/:id', component: ManageTransportationComponent},
   {path:'transportationDetail/:id', component: BookTransportationComponent}
 ];
 

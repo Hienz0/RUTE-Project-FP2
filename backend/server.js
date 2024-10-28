@@ -305,6 +305,88 @@ app.post('/signin', async (req, res) => {
   //yuda
 //yuda
 // book transportation
+const transportationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  productName: { type: String, required: true },
+  productDescription: { type: String },
+  productImages: [{ type: String }],
+  productCategory: { type: String, required: true },
+  productSubcategory: [
+    {
+      type: { type: String, enum: ['car', 'motorcycle'], required: true },
+      quantity: { type: Number, required: true },
+      price: { type: Number, required: true }
+    }
+  ],
+  location: { type: String },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Transportation = mongoose.model('Transportation', transportationSchema);
+
+// get Transportation data by id
+app.get('/transportationService/:id', async (req, res) => {
+  try {
+    const transportId = req.params.id;
+
+    // Temukan layanan berdasarkan _id
+    const transportID = await Service.findById(transportId);
+
+    if (!transportID) {
+      return res.status(404).json({ message: 'Provider not found' });
+    }
+
+    res.json(transportID);
+  } catch (error) {
+    console.error('Error retrieving provider data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.post('/manage/transportation', async (req, res) => {
+  try {
+    const { userId, serviceId, productSubcategory } = req.body;
+
+    // Verify the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Find the service by ID
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    // Prepare transportation data using service details and user ID
+    const transportationData = {
+      userId: user._id,
+      productName: service.productName,
+      productDescription: service.productDescription,
+      productImages: service.productImages,
+      productCategory: service.productCategory,
+      location: service.location,
+      serviceId: service._id,
+      productSubcategory: productSubcategory // Expecting quantity and price for each type
+    };
+
+    // Create and save the transportation entry
+    const newTransportation = new Transportation(transportationData);
+    await newTransportation.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Transportation entry created successfully',
+      data: newTransportation
+    });
+  } catch (error) {
+    console.error('Error creating transportation entry:', error);
+    res.status(500).json({ success: false, message: 'Failed to create transportation entry' });
+  }
+});
+
 
 // Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
 const bookingVehicleSchema = new mongoose.Schema({
@@ -356,80 +438,6 @@ const bookingVehicleSchema = new mongoose.Schema({
 const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
 
 
-
-// Route untuk mendapatkan data provider unik berdasarkan kategori "Transportation" pada Service
-app.get('/providers/transportation', async (req, res) => {
-  try {
-    const providers = await Service.aggregate([
-      // Filter hanya untuk data dengan kategori "Transportation"
-      { $match: { productCategory: 'Transportation' } },
-      
-      // Lakukan join dengan koleksi "Provider" berdasarkan userId
-      {
-        $lookup: {
-          from: 'providers',                   // Nama koleksi Provider dalam MongoDB
-          localField: 'userId',                // Field pada Service
-          foreignField: 'userId',              // Field pada Provider
-          as: 'providerData'                   // Alias untuk hasil join
-        }
-      },
-      
-      // Unwind array hasil join untuk mengonversi menjadi objek tunggal
-      { $unwind: "$providerData" },
-      
-      // Group by userId untuk memastikan hanya satu entri per userId
-      {
-        $group: {
-          _id: "$userId",
-          providerData: { $first: "$providerData" } // Ambil hanya satu instance per userId
-        }
-      },
-
-      // Proyeksi data yang relevan dari Provider
-      {
-        $project: {
-          _id: 0,
-          userId: "$_id",
-          providerID: "$providerData.providerID",
-          name: "$providerData.name",
-          businessName: "$providerData.businessName",
-          businessLocation: "$providerData.businessLocation",
-          businessDesc: "$providerData.businessDesc",
-          price: "$providerData.price",
-          status: "$providerData.status",
-          image: "$providerData.imageSelf"
-        }
-      }
-    ]);
-
-    res.status(200).json(providers);
-  } catch (error) {
-    console.error("Error fetching transportation providers:", error);
-    res.status(500).json({ error: 'An error occurred while fetching transportation providers' });
-  }
-});
-
-
-
-
-
-// Route untuk mendapatkan data service transportation berdasarkan userId sebagai route parameter
-app.get('/getTransportationServices/:id', async (req, res) => {
-  const { id: userId } = req.params;
-
-  try {
-    // Find transportation services based on the provided userId and category
-    const transportation = await Service.find({
-      productCategory: "Transportation",
-      userId: userId
-    });
-
-    res.status(200).json(transportation);
-  } catch (err) {
-    console.error('Error fetching transportation services:', err);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 
 // get Transportation data by id

@@ -26,6 +26,7 @@ import { CustomizeProfileComponent } from './customize-profile/customize-profile
 import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
 import { TransportationProviderComponent } from './transportation-provider/transportation-provider.component';
+import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { TransportationProviderComponent } from './transportation-provider/trans
     CustomizeProfileComponent,
     TransportationServicesComponent,
     BookTransportationComponent,
-    TransportationProviderComponent
+    TransportationProviderComponent,
+    ManageTransportationComponent
   ],
   imports: [
     BrowserModule,
