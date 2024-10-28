@@ -84,8 +84,26 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   publishAccommodation() {
-    console.log('Accommodation published:', this.accommodation);
+    const serviceId = this.route.snapshot.paramMap.get('serviceId');
+    if (serviceId) {
+      const accommodationData = { ...this.accommodation, serviceId };
+      this.servicesService.publishAccommodation(accommodationData).subscribe({
+        next: (response) => {
+          console.log('Accommodation published successfully:', response);
+          alert('Accommodation published successfully!');
+        },
+        error: (error) => {
+          console.error('Error publishing accommodation:', error);
+          alert('Failed to publish accommodation. Please try again.');
+        }
+      });
+    } else {
+      alert('Service ID is missing');
+    }
   }
+  
+  
+  
 
   // Method to remove a room type by index
   removeRoomType(index: number) {
@@ -224,5 +242,7 @@ toggleAmenitySelection(amenity: string, event: Event): void {
       this.isModalOpen = false;
     }
   }
+
+  
 
 }

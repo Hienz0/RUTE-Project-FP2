@@ -228,6 +228,47 @@ app.get('/api/bookings/check-availability', async (req, res) => {
 
 // 
 
+// manage accommodation
+
+const roomSchema = new mongoose.Schema({
+  number: { type: String, required: true }
+});
+
+const roomTypeSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  rooms: [roomSchema],
+  amenities: [String]
+});
+
+// const accommodationSchema = new mongoose.Schema({
+//   serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
+//   roomTypes: [roomTypeSchema],
+//   amenitiesList: [String]
+// });
+const accommodationSchema = new mongoose.Schema({
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
+  roomTypes: [roomTypeSchema],
+});
+
+
+module.exports = mongoose.model('Accommodation', accommodationSchema);
+// Model Definition
+const Accommodation = mongoose.model('Accommodation', accommodationSchema);
+
+
+// POST route to publish accommodation
+app.post('/api/services/accommodations', async (req, res) => {
+  console.log('Received accommodation data:', req.body); // Add this line for debugging
+  try {
+    const accommodation = new Accommodation(req.body);
+    const savedAccommodation = await accommodation.save();
+    res.status(201).json(savedAccommodation);
+  } catch (error) {
+    console.error('Error saving accommodation:', error); // Log error for troubleshooting
+    res.status(500).json({ error: 'Failed to publish accommodation' });
+  }
+});
 
 
 // booking tour
