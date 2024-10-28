@@ -2,6 +2,9 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 
+
+declare const Swal: any;
+
 interface Room {
   number: string;
 }
@@ -11,6 +14,7 @@ interface RoomType {
   price: number;
   rooms: Room[];
   amenities: string[];
+  images: string[];
 }
 
 interface Accommodation {
@@ -30,8 +34,8 @@ export class ManageAccommodationComponent implements OnInit {
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   @ViewChild('imageModal') imageModal!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
-  selectedImage: File | null = null;
-  previewUrl: string | null = null;
+  selectedImages: File[] = [];
+  previewUrls: string[] = [];
   isEditing = false;
   amenitiesList: string[] = ['Wi-Fi', 'TV', 'Mini-bar', 'Air Conditioning', 'Breakfast Included'];
   selectedAmenities: string[] = [];
@@ -76,7 +80,7 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   addRoomType() {
-    this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [], amenities: [] });
+    this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [], amenities: [], images: [] });
   }
 
   addRoom(roomType: RoomType) {
@@ -179,8 +183,9 @@ toggleAmenitySelection(amenity: string, event: Event): void {
 
 
 
-  // Open the Image Upload Modal
-  openImageModal() {
+   // Open the Image Upload Modal
+   openImageModal(index: number) {
+    this.selectedRoomTypeIndex = index;
     this.imageModal.nativeElement.classList.add('show');
     this.imageModal.nativeElement.style.display = 'block';
     this.isModalOpen = true;
@@ -190,8 +195,9 @@ toggleAmenitySelection(amenity: string, event: Event): void {
   closeImageModal() {
     this.imageModal.nativeElement.classList.remove('show');
     this.imageModal.nativeElement.style.display = 'none';
-    this.selectedImage = null;
-    this.previewUrl = null; // Reset preview on close
+    this.selectedImages = [];
+    this.previewUrls = [];
+    this.selectedRoomTypeIndex = null;
     this.isModalOpen = false;
   }
 
@@ -200,13 +206,25 @@ toggleAmenitySelection(amenity: string, event: Event): void {
     this.fileInput.nativeElement.click();
   }
 
-  // Handle File Selection
-  onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.selectedImage = file;
-      this.previewImage(file);
+  // Handle multiple file selections
+  onFilesSelected(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    if (files) {
+      this.selectedImages = Array.from(files);
+      this.previewUrls = [];
+      for (let file of this.selectedImages) {
+        this.previewImage(file);
+      }
     }
+  }
+
+  // Preview each selected image
+  previewImage(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewUrls.push(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   }
 
   // Handle Drag Over Event
@@ -217,32 +235,95 @@ toggleAmenitySelection(amenity: string, event: Event): void {
   // Handle File Drop Event
   onDrop(event: DragEvent) {
     event.preventDefault();
-    const file = event.dataTransfer?.files[0];
-    if (file) {
-      this.selectedImage = file;
-      this.previewImage(file);
+    if (event.dataTransfer?.files) {
+      this.selectedImages = Array.from(event.dataTransfer.files);
+      this.previewUrls = [];
+      for (let file of this.selectedImages) {
+        this.previewImage(file);
+      }
     }
   }
 
-  // Preview the selected image
-  previewImage(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.previewUrl = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
+  // Upload all selected images
+  uploadImages() {
+    if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
+      const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+      roomType.images.push(...this.previewUrls); // Add preview URLs as image links
 
-  // Upload Image Function
-  uploadImage() {
-    if (this.selectedImage) {
-      // Handle image upload logic here
-      console.log('Uploading image:', this.selectedImage);
+      // Clear selections and close modal
       this.closeImageModal();
-      this.isModalOpen = false;
     }
+  }
+
+  isImagePreviewOpen: boolean = false;
+  previewImageUrl: string = '';
+
+  showImagePreview(imageUrl: string): void {
+    this.previewImageUrl = imageUrl;
+    this.isImagePreviewOpen = true;
+  }
+
+  closeImagePreview(): void {
+    this.isImagePreviewOpen = false;
+    this.previewImageUrl = '';
   }
 
   
+    // Confirm removal of an image with SweetAlert2
+    removeImage(roomType: RoomType, imageUrl: string): void {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to remove this image?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+      }).then((result: any) => { // Explicitly typing result as any
+        if (result.isConfirmed) {
+          const index = roomType.images.indexOf(imageUrl);
+          if (index > -1) {
+            roomType.images.splice(index, 1); // Remove the image from the array
+            Swal.fire('Deleted!', 'Your image has been deleted.', 'success');
+          }
+        }
+      });
+    }
+
+    confirmRemoveImage(imageUrl: string, roomTypeIndex: number): void {
+      // Get the current room type based on the selected index
+      const roomType = this.accommodation.roomTypes[roomTypeIndex];
+    
+      // Ensure roomType is defined
+      if (!roomType) {
+        Swal.fire('Error!', 'Room type not found.', 'error');
+        return;
+      }
+    
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to remove this image?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+      }).then((result: any) => { // Explicitly typing result as any
+        if (result.isConfirmed) {
+          const index = roomType.images.indexOf(imageUrl); // Find the index of the image
+          if (index > -1) {
+            roomType.images.splice(index, 1); // Remove the image from the array
+            Swal.fire('Deleted!', 'Your image has been deleted.', 'success');
+          } else {
+            // Optional: Inform the user if the image wasn't found
+            Swal.fire('Error!', 'Image not found.', 'error');
+          }
+        }
+      });
+    }
+    
+    
+    
+    
 
 }
