@@ -207,16 +207,23 @@ toggleAmenitySelection(amenity: string, event: Event): void {
   }
 
   // Handle multiple file selections
-  onFilesSelected(event: Event) {
-    const files = (event.target as HTMLInputElement).files;
-    if (files) {
-      this.selectedImages = Array.from(files);
-      this.previewUrls = [];
-      for (let file of this.selectedImages) {
-        this.previewImage(file);
-      }
+// Handle multiple file selections
+onFilesSelected(event: Event) {
+  const files = (event.target as HTMLInputElement).files;
+  if (files && this.selectedRoomTypeIndex !== null) {
+    const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+    if (roomType.images.length + files.length > 10) {
+      Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+      return;
+    }
+
+    this.selectedImages = Array.from(files);
+    this.previewUrls = [];
+    for (let file of this.selectedImages) {
+      this.previewImage(file);
     }
   }
+}
 
   // Preview each selected image
   previewImage(file: File) {
@@ -245,15 +252,23 @@ toggleAmenitySelection(amenity: string, event: Event): void {
   }
 
   // Upload all selected images
-  uploadImages() {
-    if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
-      const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
-      roomType.images.push(...this.previewUrls); // Add preview URLs as image links
-
-      // Clear selections and close modal
-      this.closeImageModal();
+// Upload all selected images
+uploadImages() {
+  if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
+    const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+    
+    // Check if adding these images exceeds the 10-image limit
+    if (roomType.images.length + this.previewUrls.length > 10) {
+      Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+      return;
     }
+
+    roomType.images.push(...this.previewUrls); // Add preview URLs as image links
+
+    // Clear selections and close modal
+    this.closeImageModal();
   }
+}
 
   isImagePreviewOpen: boolean = false;
   previewImageUrl: string = '';

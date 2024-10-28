@@ -52,6 +52,32 @@ function generateToken(user) {
 
 
 
+/////////////////
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function(req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+const upload = multer({ 
+  storage: storage,
+  limits: { 
+    fieldSize: 1024 * 1024 * 100 // 100MB for field values in bytes
+  } 
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+
+////////////////////////////////////
+
+
+
 // Define user schema and model
 const userSchema = new mongoose.Schema({
     name: String,
@@ -241,11 +267,6 @@ const roomTypeSchema = new mongoose.Schema({
   amenities: [String]
 });
 
-// const accommodationSchema = new mongoose.Schema({
-//   serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
-//   roomTypes: [roomTypeSchema],
-//   amenitiesList: [String]
-// });
 const accommodationSchema = new mongoose.Schema({
   serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
   roomTypes: [roomTypeSchema],
@@ -484,29 +505,7 @@ Provider = mongoose.model('Provider', ProviderSchema);
 ProviderSchema.index({ businessCoordinates: '2dsphere' });
 
 
-/////////////////
 
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function(req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-const upload = multer({ 
-  storage: storage,
-  limits: { 
-    fieldSize: 1024 * 1024 * 100 // 100MB for field values in bytes
-  } 
-});
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
-
-////////////////////////////////////
 
 
 // Middleware to verify JWT
