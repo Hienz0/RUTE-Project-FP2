@@ -325,18 +325,6 @@ const transportationSchema = new mongoose.Schema({
 
 const Transportation = mongoose.model('Transportation', transportationSchema);
 
-
-app.get('/transportationService', async (req, res) => {
-  try {
-    const transportation = await Transportation.find();
-    res.json(transportation);
-  } catch (error) {
-    console.error('Error retrieving transportation data:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
-
-
 // get Transportation data by id
 app.get('/transportationService/:id', async (req, res) => {
   try {
@@ -437,7 +425,15 @@ app.post('/manage/transportation', async (req, res) => {
   }
 });
 
-
+app.get('/transportationService', async (req, res) => {
+  try {
+    const transportation = await Transportation.find();
+    res.json(transportation);
+  } catch (error) {
+    console.error('Error retrieving transportation data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 
 
@@ -489,28 +485,6 @@ const bookingVehicleSchema = new mongoose.Schema({
 
 // Create the Booking model
 const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
-
-
-
-
-// get Transportation data by id
-app.get('/transportationService/:id', async (req, res) => {
-  try {
-    const transportId = req.params.id;
-
-    // Temukan layanan berdasarkan _id
-    const transportID = await Service.findById(transportId);
-
-    if (!transportID) {
-      return res.status(404).json({ message: 'Provider not found' });
-    }
-
-    res.json(transportID);
-  } catch (error) {
-    console.error('Error retrieving provider data:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 
 // Route untuk booking transportasi
