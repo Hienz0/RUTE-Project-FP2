@@ -347,6 +347,7 @@ app.get('/transportationService/:id', async (req, res) => {
 app.post('/manage/transportation', async (req, res) => {
   try {
     const { userId, serviceId, productSubcategory } = req.body;
+    let { productName, productDescription, productImages, location } = req.body;
 
     // Verify the user exists
     const user = await User.findById(userId);
@@ -360,32 +361,72 @@ app.post('/manage/transportation', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Service not found' });
     }
 
-    // Prepare transportation data using service details and user ID
+    // Use service data as defaults if optional fields are not provided
+    productName = productName || service.productName;
+    productDescription = productDescription || service.productDescription;
+    productImages = productImages || service.productImages;
+    location = location || service.location;
+
+    // Prepare transportation data with final values
     const transportationData = {
       userId: user._id,
-      productName: service.productName,
-      productDescription: service.productDescription,
-      productImages: service.productImages,
+      productName: productName,
+      productDescription: productDescription,
+      productImages: productImages,
       productCategory: service.productCategory,
-      location: service.location,
+      location: location,
       serviceId: service._id,
-      productSubcategory: productSubcategory // Expecting quantity and price for each type
+      productSubcategory: productSubcategory
     };
 
-    // Create and save the transportation entry
-    const newTransportation = new Transportation(transportationData);
-    await newTransportation.save();
+    // Check if a transportation entry with the same serviceId already exists
+    let transportation = await Transportation.findOne({ serviceId: service._id });
 
-    res.status(201).json({
-      success: true,
-      message: 'Transportation entry created successfully',
-      data: newTransportation
-    });
+    if (transportation) {
+      // Update existing transportation document
+      Object.assign(transportation, transportationData);
+      await transportation.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Transportation entry updated successfully',
+        data: transportation
+      });
+    } else {
+      // Create and save a new transportation entry
+      const newTransportation = new Transportation(transportationData);
+      await newTransportation.save();
+
+      res.status(201).json({
+        success: true,
+        message: 'Transportation entry created successfully',
+        data: newTransportation
+      });
+    }
+
+    // Update the service document if there are any changes
+    if (
+      productName !== service.productName ||
+      productDescription !== service.productDescription ||
+      JSON.stringify(productImages) !== JSON.stringify(service.productImages) ||
+      location !== service.location
+    ) {
+      service.productName = productName;
+      service.productDescription = productDescription;
+      service.productImages = productImages;
+      service.location = location;
+      service.status = "published";
+      await service.save();
+    }
+
   } catch (error) {
-    console.error('Error creating transportation entry:', error);
-    res.status(500).json({ success: false, message: 'Failed to create transportation entry' });
+    console.error('Error creating or updating transportation entry:', error);
+    res.status(500).json({ success: false, message: 'Failed to create or update transportation entry' });
   }
 });
+
+
+
 
 
 // Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
