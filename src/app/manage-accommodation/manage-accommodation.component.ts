@@ -410,18 +410,13 @@ uploadImages() {
 
     
     
-    toggleEditMode(index: number) {
-      if (this.accommodation.roomTypes && this.accommodation.roomTypes[index]) {
-        this.accommodation.roomTypes[index].isEditing = !this.accommodation.roomTypes[index].isEditing;
-      } else {
-        console.error(`Room type at index ${index} does not exist or roomTypes array is undefined.`);
-      }
+    toggleEditMode() {
+      this.isEditing = !this.isEditing;
     }
     
-    
-    saveChanges(index: number) {
+    saveChanges() {
       console.log('Accommodation saved:', this.accommodation);
-      this.toggleEditMode(index); // Pass the index to toggle edit mode
+      this.toggleEditMode();
     }
     
     
