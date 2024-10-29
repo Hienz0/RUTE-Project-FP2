@@ -264,7 +264,8 @@ const roomTypeSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   rooms: [roomSchema],
-  amenities: [String]
+  amenities: [String],
+  images: [String]
 });
 
 const accommodationSchema = new mongoose.Schema({
@@ -279,17 +280,29 @@ const Accommodation = mongoose.model('Accommodation', accommodationSchema);
 
 
 // POST route to publish accommodation
-app.post('/api/services/accommodations', async (req, res) => {
-  console.log('Received accommodation data:', req.body); // Add this line for debugging
+const uploadMultiple = upload.array('images', 10); // Limit to 10 images per room type
+
+app.post('/api/services/accommodations', upload.array('images', 10), async (req, res) => {
   try {
-    const accommodation = new Accommodation(req.body);
+    const roomTypes = req.body.roomTypes.map((roomType, index) => {
+      const parsedRoomType = JSON.parse(roomType);
+      const images = req.files
+        .filter((file) => file.fieldname === 'images') // Filter for all images
+        .map((file) => `/uploads/${file.filename}`);
+      return { ...parsedRoomType, images };
+    });
+
+    const accommodationData = { ...req.body, roomTypes };
+    const accommodation = new Accommodation(accommodationData);
     const savedAccommodation = await accommodation.save();
+
     res.status(201).json(savedAccommodation);
   } catch (error) {
-    console.error('Error saving accommodation:', error); // Log error for troubleshooting
     res.status(500).json({ error: 'Failed to publish accommodation' });
   }
 });
+
+
 
 
 // booking tour

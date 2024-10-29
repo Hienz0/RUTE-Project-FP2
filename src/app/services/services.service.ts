@@ -31,7 +31,8 @@ export class ServicesService {
       return this.http.get<any>(`${this.apiUrl}/restaurant/${id}`);
     }
 
-    publishAccommodation(accommodation: any): Observable<any> {
-      return this.http.post<any>(`${this.apiUrl}/accommodations`, accommodation);
+    publishAccommodation(accommodationData: FormData): Observable<any> {
+      return this.http.post<any>(`${this.apiUrl}/accommodations`, accommodationData);
     }
+    
 }

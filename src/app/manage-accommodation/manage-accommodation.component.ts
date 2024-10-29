@@ -88,23 +88,41 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   publishAccommodation() {
+    const formData = new FormData();
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
-    if (serviceId) {
-      const accommodationData = { ...this.accommodation, serviceId };
-      this.servicesService.publishAccommodation(accommodationData).subscribe({
-        next: (response) => {
-          console.log('Accommodation published successfully:', response);
-          alert('Accommodation published successfully!');
-        },
-        error: (error) => {
-          console.error('Error publishing accommodation:', error);
-          alert('Failed to publish accommodation. Please try again.');
+    if (serviceId) formData.append('serviceId', serviceId);
+  
+    this.accommodation.roomTypes.forEach((roomType, index) => {
+      formData.append(`roomTypes[${index}]`, JSON.stringify({
+        name: roomType.name,
+        price: roomType.price,
+        amenities: roomType.amenities,
+        rooms: roomType.rooms,
+      }));
+      roomType.images.forEach((imageBase64, imageIndex) => {
+        const file = this.base64ToFile(imageBase64, `image_${index}_${imageIndex}.png`);
+        if (file) { // Ensure that file is not null
+          console.log(`Room Type Index: ${index}, Image Index: ${imageIndex}, Image File:`, file);
+          formData.append('images', file); // Now safe to append
+        } else {
+          console.error(`Failed to convert image at index ${imageIndex} to file.`);
         }
       });
-    } else {
-      alert('Service ID is missing');
-    }
+      
+    });
+  
+    this.servicesService.publishAccommodation(formData).subscribe({
+      next: (response) => {
+        Swal.fire('Success', 'Accommodation published successfully!', 'success');
+      },
+      error: (error) => {
+        Swal.fire('Error', 'Failed to publish accommodation.', 'error');
+      }
+    });
   }
+  
+  
+  
   
   
   
@@ -337,6 +355,29 @@ uploadImages() {
       });
     }
     
+    base64ToFile(base64String: string, fileName: string): File | null {
+      const arr = base64String.split(',');
+      
+      // Extract mime type
+      const mimeMatch = arr[0].match(/:(.*?);/);
+      
+      // Check if mimeMatch is not null
+      if (!mimeMatch || mimeMatch.length < 2) {
+        console.error('Invalid Base64 string:', base64String);
+        return null; // Return null or handle the error as appropriate
+      }
+    
+      const mime = mimeMatch[1]; // Now we can safely access [1]
+      const byteString = atob(arr[1]); // Decode base64 string
+      const ab = new ArrayBuffer(byteString.length); // Create a buffer
+      const ia = new Uint8Array(ab); // Create an unsigned integer array
+    
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i); // Fill the array with bytes
+      }
+    
+      return new File([ab], fileName, { type: mime }); // Return a new File object
+    }
     
     
     
