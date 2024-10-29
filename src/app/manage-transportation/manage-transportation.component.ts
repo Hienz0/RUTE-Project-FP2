@@ -20,6 +20,10 @@ export class ManageTransportationComponent implements OnInit {
   productImages: string = '';
   location: string = '';
   newProductSubCategory: any[] = []; // New variable for productSubCategory
+  // Add this property to hold the existing or editable productSubcategory items
+  displayedProductSubCategories: any[] = [];
+
+  
 
   constructor(
     private fb: FormBuilder,
@@ -39,10 +43,16 @@ export class ManageTransportationComponent implements OnInit {
       this.service.getTransporationServicesByID(this.transportID).subscribe(
         (response) => {
           this.transportationData = response || {};
-          this.productName = this.transportationData.productName;
-          this.productDescription = this.transportationData.productDescription;
-          this.productImages = this.transportationData.productImages;
-          this.location = this.transportationData.location;
+          this.productName = this.transportationData.serviceDetails.productName;
+          this.productDescription = this.transportationData.serviceDetails.productDescription;
+          this.productImages = this.transportationData.serviceDetails.productImages;
+          this.location = this.transportationData.serviceDetails.location;
+          console.log('Transportation data:', this.transportationData);
+           // Load existing productSubcategory entries if they exist
+           if (this.transportationData.transportationData.productSubcategory) {
+            this.displayedProductSubCategories = this.transportationData.transportationData.productSubcategory;
+            console.log('Existing productSubcategory entries:', this.displayedProductSubCategories);
+          }
         },
         (error) => console.error('Error fetching transportation data:', error)
       );
@@ -66,13 +76,17 @@ export class ManageTransportationComponent implements OnInit {
   }
   
 
-  removeVehicleType(index: number): void {
-    this.newProductSubCategory.splice(index, 1);
+  removeVehicleType(index: number, existing: boolean = false): void {
+    if (existing) {
+      this.displayedProductSubCategories.splice(index, 1);
+    } else {
+      this.newProductSubCategory.splice(index, 1);
+    }
   }
 
   saveTransportation(): void {
     this.transportationData = {
-      serviceId: this.transportationData._id || this.transportationData.id,
+      serviceId: this.transportationData.serviceDetails._id || this.transportationData.serviceDetails.id,
       productName: this.productName,
       productDescription: this.productDescription,
       productImages: this.productImages,
@@ -92,7 +106,7 @@ export class ManageTransportationComponent implements OnInit {
     }
 
     const publishData = {
-      serviceId: this.transportationData._id || this.transportationData.id,
+      serviceId: this.transportationData.serviceDetails._id || this.transportationData.serviceDetails.id,
       userId: this.currentUser.userId,
       productName: this.productName,
       productDescription: this.productDescription,

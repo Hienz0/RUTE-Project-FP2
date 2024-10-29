@@ -327,23 +327,39 @@ const transportationSchema = new mongoose.Schema({
 const Transportation = mongoose.model('Transportation', transportationSchema);
 
 // get Transportation data by id
+// Get Transportation data by id including productSubcategory details
 app.get('/transportationService/:id', async (req, res) => {
   try {
     const transportId = req.params.id;
 
-    // Temukan layanan berdasarkan _id
-    const transportID = await Service.findById(transportId);
-
-    if (!transportID) {
+    // Find the Service by _id
+    const service = await Service.findById(transportId);
+    if (!service) {
       return res.status(404).json({ message: 'Provider not found' });
     }
 
-    res.json(transportID);
+    // Find Transportation documents that match the serviceId
+    const transportationData = await Transportation.findOne({ serviceId: transportId }).exec();
+
+    if (!transportationData) {
+      return res.status(404).json({ message: 'Transportation data not found for the specified serviceId' });
+    }
+
+    // Combine service data with transportation productSubcategory details
+    res.json({
+      serviceDetails: service,
+      transportationData: {
+      
+        productSubcategory: transportationData.productSubcategory,
+        
+      }
+    });
   } catch (error) {
     console.error('Error retrieving provider data:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 app.post('/manage/transportation', async (req, res) => {
   try {
@@ -373,17 +389,29 @@ app.post('/manage/transportation', async (req, res) => {
     // Prepare transportation data with final values
     const transportationData = {
       userId: user._id,
-      productName: productName,
-      productDescription: productDescription,
-      productImages: productImages,
+      productName,
+      productDescription,
+      productImages,
       productCategory: service.productCategory,
-      location: location,
+      location,
       serviceId: service._id,
-      productSubcategory: productSubCategory
+      productSubcategory: []  // Start with an empty array to add unique entries
     };
 
     // Check if a transportation entry with the same serviceId already exists
     let transportation = await Transportation.findOne({ serviceId: service._id });
+
+    // If transportation entry exists, copy its existing productSubCategories
+    if (transportation) {
+      transportationData.productSubcategory = transportation.productSubcategory;
+    }
+
+    // Add each productSubCategory only if it doesn't already exist by ID
+    productSubCategory.forEach((newSubCategory) => {
+      if (!transportationData.productSubcategory.some(existing => existing.id === newSubCategory.id)) {
+        transportationData.productSubcategory.push(newSubCategory);
+      }
+    });
 
     if (transportation) {
       // Update existing transportation document
@@ -427,6 +455,7 @@ app.post('/manage/transportation', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to create or update transportation entry' });
   }
 });
+
 
 app.get('/transportationService', async (req, res) => {
   try {
