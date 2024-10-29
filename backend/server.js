@@ -366,30 +366,30 @@ app.post('/manage/transportation', async (req, res) => {
     const { userId, serviceId, productSubCategory } = req.body;
     let { productName, productDescription, productImages, location } = req.body;
 
-    console.log(req.body);
+    console.log('Request Data:', req.body);
 
-    // Verify the user exists
+    // Verifikasi apakah user ada
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
     }
 
-    // Find the service by ID
+    // Cari service berdasarkan ID
     const service = await Service.findById(serviceId);
     if (!service) {
-      return res.status(404).json({ success: false, message: 'Service not found' });
+      return res.status(404).json({ success: false, message: 'Service tidak ditemukan' });
     }
 
-    // Use service data as defaults if optional fields are not provided
+    // Gunakan data service sebagai default jika field opsional tidak diisi
     productName = productName || service.productName;
     productDescription = productDescription || service.productDescription;
     productImages = productImages || service.productImages;
     location = location || service.location;
 
-    // Check if a transportation entry with the same serviceId already exists
+    // Cek apakah transportation dengan serviceId ini sudah ada
     let transportation = await Transportation.findOne({ serviceId: service._id });
 
-    // Prepare transportation data with final values
+    // Siapkan data transportation
     const transportationData = {
       userId: user._id,
       productName,
@@ -398,52 +398,56 @@ app.post('/manage/transportation', async (req, res) => {
       productCategory: service.productCategory,
       location,
       serviceId: service._id,
-      productSubcategory: transportation ? transportation.productSubcategory : [] // Existing subcategories if transportation exists
+      productSubcategory: transportation ? transportation.productSubcategory : [],
     };
 
-    // Update, add, or delete each productSubCategory based on _id
-    productSubCategory.forEach((newSubCategory) => {
-      const existingSubCategoryIndex = transportationData.productSubcategory.findIndex(
+
+    console.log('Transportation Data:', productSubCategory);
+
+    // Proses update, add, atau delete pada productSubCategory
+    for (const newSubCategory of productSubCategory) {
+      const existingIndex = transportationData.productSubcategory.findIndex(
         (existing) => existing._id?.toString() === newSubCategory._id?.toString()
       );
 
       if (newSubCategory.action === 'delete') {
-        // Remove subcategory if action is delete
-        if (existingSubCategoryIndex !== -1) {
-          transportationData.productSubcategory.splice(existingSubCategoryIndex, 1);
+        // Hapus subkategori menggunakan splice jika ditemukan
+        if (existingIndex !== -1) {
+          transportationData.productSubcategory.splice(existingIndex, 1);
         }
-      } else if (existingSubCategoryIndex !== -1) {
-        // Update existing subcategory if action is update or add
-        transportationData.productSubcategory[existingSubCategoryIndex] = newSubCategory;
+      } else if (existingIndex !== -1) {
+        // Update subkategori jika sudah ada
+        transportationData.productSubcategory[existingIndex] = newSubCategory;
       } else {
-        // Add new subcategory if it doesn't have an _id
+        // Tambahkan subkategori baru
         transportationData.productSubcategory.push(newSubCategory);
       }
-    });
+    }
 
     if (transportation) {
-      // Update existing transportation document
+      // Update dokumen transportation yang sudah ada
       Object.assign(transportation, transportationData);
+      transportation.markModified('productSubcategory'); // Tandai array sebagai berubah
       await transportation.save();
 
       res.status(200).json({
         success: true,
-        message: 'Transportation entry updated successfully',
-        data: transportation
+        message: 'Transportation berhasil diperbarui',
+        data: transportation,
       });
     } else {
-      // Create and save a new transportation entry
+      // Buat dan simpan transportation baru
       const newTransportation = new Transportation(transportationData);
       await newTransportation.save();
 
       res.status(201).json({
         success: true,
-        message: 'Transportation entry created successfully',
-        data: newTransportation
+        message: 'Transportation berhasil dibuat',
+        data: newTransportation,
       });
     }
 
-    // Update the service document if there are any changes
+    // Update dokumen service jika ada perubahan
     if (
       productName !== service.productName ||
       productDescription !== service.productDescription ||
@@ -454,15 +458,15 @@ app.post('/manage/transportation', async (req, res) => {
       service.productDescription = productDescription;
       service.productImages = productImages;
       service.location = location;
-      service.status = "published";
+      service.status = 'published';
       await service.save();
     }
-
   } catch (error) {
-    console.error('Error creating or updating transportation entry:', error);
-    res.status(500).json({ success: false, message: 'Failed to create or update transportation entry' });
+    console.error('Error mengelola transportation:', error);
+    res.status(500).json({ success: false, message: 'Gagal mengelola transportation' });
   }
 });
+
 
 
 

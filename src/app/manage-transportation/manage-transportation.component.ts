@@ -22,6 +22,7 @@ export class ManageTransportationComponent implements OnInit {
   newProductSubCategory: any[] = []; // New variable for productSubCategory
   // Add this property to hold the existing or editable productSubcategory items
   displayedProductSubCategories: any[] = [];
+  deletedProductSubCategories: any[] = []; // Array untuk menyimpan subkategori yang dihapus
 
   
 
@@ -79,15 +80,25 @@ export class ManageTransportationComponent implements OnInit {
   removeVehicleType(index: number, existing: boolean = false): void {
     if (existing) {
       if (this.displayedProductSubCategories[index]) {
-        this.displayedProductSubCategories[index].action = "delete";
-        this.displayedProductSubCategories.splice(index, 1); // Hapus dari array setelah menandai
+        // Tandai dengan 'delete' dan pindahkan ke deletedProductSubCategories
+        const deletedSubCategory = { 
+          ...this.displayedProductSubCategories[index], 
+          action: 'delete' 
+        };
+        this.deletedProductSubCategories.push(deletedSubCategory);
+        this.displayedProductSubCategories.splice(index, 1); // Hapus dari tampilan
       } else {
         console.error('Error: Invalid index for displayedProductSubCategories');
       }
     } else {
       if (this.newProductSubCategory[index]) {
-        this.newProductSubCategory[index].action = "delete";
-        this.newProductSubCategory.splice(index, 1); // Hapus dari array setelah menandai
+        // Tandai dengan 'delete' dan pindahkan ke deletedProductSubCategories
+        const deletedSubCategory = { 
+          ...this.newProductSubCategory[index], 
+          action: 'delete' 
+        };
+        this.deletedProductSubCategories.push(deletedSubCategory);
+        this.newProductSubCategory.splice(index, 1); // Hapus dari tampilan
       } else {
         console.error('Error: Invalid index for newProductSubCategory');
       }
@@ -123,25 +134,32 @@ export class ManageTransportationComponent implements OnInit {
       console.error('User not available');
       return;
     }
-
-    // Gabungkan semua subkategori, termasuk yang baru dan yang perlu dihapus
+  
+    // Gabungkan semua subkategori: aktif dan dihapus
     const allProductSubCategories = [
-      ...this.displayedProductSubCategories,
-      ...this.newProductSubCategory
+      ...this.displayedProductSubCategories.map((sub) => ({
+        ...sub,
+        action: sub.action || 'update',
+      })),
+      ...this.newProductSubCategory.map((sub) => ({
+        ...sub,
+        action: 'add',
+      })),
+      ...this.deletedProductSubCategories, // Sertakan subkategori yang dihapus
     ];
-
+  
     const publishData = {
-      serviceId: this.transportationData.serviceDetails._id || this.transportationData.serviceDetails.id,
+      serviceId: this.transportationData.serviceDetails?._id || this.transportationData.serviceDetails?.id,
       userId: this.currentUser.userId,
       productName: this.productName,
       productDescription: this.productDescription,
       productImages: this.productImages,
       location: this.location,
-      productSubCategory: allProductSubCategories
+      productSubCategory: allProductSubCategories, // Kirim semua subkategori
     };
-
+  
     console.log('Publish data:', publishData);
-
+  
     this.service.saveTransportation(publishData).subscribe(
       (response) => {
         console.log('Transportation published successfully:', response);
@@ -152,7 +170,10 @@ export class ManageTransportationComponent implements OnInit {
         this.message = 'Failed to publish transportation';
       }
     );
-}
+  }
+  
+  
+  
 
   
 }
