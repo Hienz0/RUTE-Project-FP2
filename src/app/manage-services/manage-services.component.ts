@@ -363,5 +363,8 @@ export class ManageServicesComponent implements OnInit {
       if (service.productCategory === 'Accommodation') {
         this.router.navigate([`/manage-accommodation/${service._id}`]);
       }
+      if (service.productCategory === 'Transportation') {
+        this.router.navigate([`/manageTransportation/${service._id}`]);
+      }
     }
 }

@@ -1,7 +1,7 @@
 <div class="container mt-5">
     <div class="row">
       <div *ngFor="let service of services" class="col-md-4 mb-4">
-        <div class="card h-100" (click)="navigateToDetails(service._id)" style="cursor: pointer">
+        <div class="card h-100" (click)="navigateToDetails(service.serviceId)" style="cursor: pointer">
           <!-- Bootstrap Carousel for displaying images -->
           <div
             id="carousel{{ service._id }}"

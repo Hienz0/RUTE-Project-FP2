@@ -11,10 +11,8 @@ export class TransportationServicesComponent implements OnInit {
   services: any[] = [];
   constructor(private service : TransportationService, private router: Router, private route: ActivatedRoute){}
   ngOnInit(): void {
-    const transportID = this.route.snapshot.paramMap.get('id');
-    console.log('Transport ID from route:', transportID);
-    if (transportID) {
-      this.service.getTransportationService(transportID).subscribe(
+
+      this.service.getTransportationService().subscribe(
         (data) => {
           this.services = data;
           console.log(data);
@@ -23,9 +21,7 @@ export class TransportationServicesComponent implements OnInit {
           console.error('Error fetching transportation service:', error);
         }
       );
-    } else {
-      console.error('Transport ID is null or invalid');
-    }
+   
   }
 
 
