@@ -10,14 +10,16 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./manage-transportation.component.css']
 })
 export class ManageTransportationComponent implements OnInit {
-  transportationForm: FormGroup;
   message: string = '';
   currentUser: any;
-  transportationData: any = {
-    productSubCategory: []
-  };
+  transportationData: any = {}; // Adjusted to no longer use form data directly
   transportID: string | null = null;
   isEditing: boolean = false;
+  productName: string = '';
+  productDescription: string = '';
+  productImages: string = '';
+  location: string = '';
+  newProductSubCategory: any[] = []; // New variable for productSubCategory
 
   constructor(
     private fb: FormBuilder,
@@ -25,32 +27,24 @@ export class ManageTransportationComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService
   ) {
-    this.transportationForm = this.fb.group({
-      userId: ['', Validators.required],
-      serviceId: ['', Validators.required],
-      productName: [''],
-      productDescription: [''],
-      productImages: [''],
-      location: [''],
-      productSubCategor: this.fb.array([]) // Array untuk menyimpan kategori kendaraan
-    });
+    
   }
 
   ngOnInit(): void {
-    // Get the logged-in user
+    // Fetch user and initialize transportation data here if necessary
     this.currentUser = this.authService.currentUserValue;
     this.transportID = this.route.snapshot.paramMap.get('id');
-  
+
     if (this.transportID) {
       this.service.getTransporationServicesByID(this.transportID).subscribe(
         (response) => {
-          this.transportationData = response || {}; // Pastikan response ada
-          this.transportationData.productSubCategory = this.transportationData.productSubCategory || []; // Pastikan productSubCategory array
-          this.transportationForm.patchValue(this.transportationData); // Isi form dengan data dari server
+          this.transportationData = response || {};
+          this.productName = this.transportationData.productName;
+          this.productDescription = this.transportationData.productDescription;
+          this.productImages = this.transportationData.productImages;
+          this.location = this.transportationData.location;
         },
-        (error) => {
-          console.error('Error fetching transportation data:', error);
-        }
+        (error) => console.error('Error fetching transportation data:', error)
       );
     }
   }
@@ -63,11 +57,7 @@ export class ManageTransportationComponent implements OnInit {
   }
 
   addVehicleType(): void {
-    if (!Array.isArray(this.transportationData.productSubCategory)) {
-      this.transportationData.productSubCategory = [];
-    }
-  
-    this.transportationData.productSubCategory.push({
+    this.newProductSubCategory.push({
       name: '',
       category: '',
       quantity: 0,
@@ -77,17 +67,23 @@ export class ManageTransportationComponent implements OnInit {
   
 
   removeVehicleType(index: number): void {
-    this.transportationData.productSubCategory.splice(index, 1);
+    this.newProductSubCategory.splice(index, 1);
   }
 
   saveTransportation(): void {
     this.transportationData = {
-      ...this.transportationForm.value,
-      productSubCategory: this.transportationData.productSubCategory
+      serviceId: this.transportationData._id || this.transportationData.id,
+      productName: this.productName,
+      productDescription: this.productDescription,
+      productImages: this.productImages,
+      location: this.location,
+     
     };
+    
     console.log('Transportation data saved to variable:', this.transportationData);
     alert('Transportation data saved locally.');
-  }
+}
+
 
   publishTransportation(): void {
     if (!this.currentUser) {
@@ -95,28 +91,33 @@ export class ManageTransportationComponent implements OnInit {
       return;
     }
 
-    
-
     const publishData = {
-      ...this.transportationData,
-      userId: this.currentUser.userId,
       serviceId: this.transportationData._id || this.transportationData.id,
+      userId: this.currentUser.userId,
+      productName: this.productName,
+      productDescription: this.productDescription,
+      productImages: this.productImages,
+      location: this.location,
+      productSubCategory: this.newProductSubCategory // Use the new variable here
     };
 
-    // Send data to server for publishing
+    console.log('Publish data:', publishData);
+
     this.service.saveTransportation(publishData).subscribe(
       (response) => {
         console.log('Transportation published successfully:', response);
         this.message = 'Transportation published successfully';
+
       },
       (error) => {
-        console.error('Error publishing transportation:', error);
+        console.error('Error publishing transportation:', );
         this.message = 'Failed to publish transportation';
       }
     );
   }
+}
 
   
-}
+
 
 

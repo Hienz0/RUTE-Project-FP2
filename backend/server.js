@@ -313,6 +313,7 @@ const transportationSchema = new mongoose.Schema({
   productCategory: { type: String, required: true },
   productSubcategory: [
     {
+      name: {type: String},
       type: { type: String, enum: ['car', 'motorcycle', 'bycycle'] },
       quantity: { type: Number  },
       price: { type: Number  }
@@ -346,7 +347,7 @@ app.get('/transportationService/:id', async (req, res) => {
 
 app.post('/manage/transportation', async (req, res) => {
   try {
-    const { userId, serviceId, productSubcategory } = req.body;
+    const { userId, serviceId, productSubCategory } = req.body;
     let { productName, productDescription, productImages, location } = req.body;
 
     console.log(req.body);
@@ -378,7 +379,7 @@ app.post('/manage/transportation', async (req, res) => {
       productCategory: service.productCategory,
       location: location,
       serviceId: service._id,
-      productSubcategory: productSubcategory
+      productSubcategory: productSubCategory
     };
 
     // Check if a transportation entry with the same serviceId already exists
