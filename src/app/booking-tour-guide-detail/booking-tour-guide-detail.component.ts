@@ -44,7 +44,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
-      // console.log("Current User:", this.currentUser);
+      console.log(this.currentUser);
     });
 
     const today = new Date();
@@ -169,6 +169,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
       serviceId: this.serviceId,          // Include serviceId
       userId: this.currentUser?._id        // Include userId from the current user
     };
+
+    console.log(bookingData)
   
     this.bookingService.bookTourGuide(bookingData).subscribe(
       (response) => {
