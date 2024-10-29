@@ -313,9 +313,9 @@ const transportationSchema = new mongoose.Schema({
   productCategory: { type: String, required: true },
   productSubcategory: [
     {
-      type: { type: String, enum: ['car', 'motorcycle'], required: true },
-      quantity: { type: Number, required: true },
-      price: { type: Number, required: true }
+      type: { type: String, enum: ['car', 'motorcycle', 'bycycle'] },
+      quantity: { type: Number  },
+      price: { type: Number  }
     }
   ],
   location: { type: String },
@@ -348,6 +348,8 @@ app.post('/manage/transportation', async (req, res) => {
   try {
     const { userId, serviceId, productSubcategory } = req.body;
     let { productName, productDescription, productImages, location } = req.body;
+
+    console.log(req.body);
 
     // Verify the user exists
     const user = await User.findById(userId);
