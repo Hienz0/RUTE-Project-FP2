@@ -44,6 +44,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
+      // console.log("Current User:", this.currentUser);
     });
 
     const today = new Date();
@@ -129,16 +130,16 @@ export class BookingTourGuideDetailComponent implements OnInit {
   submitBooking(): void {
     const currentDate = new Date();
     const tourDate = new Date(this.bookingDetails.tourDate);
-
+  
     // Log booking details
     console.log('Booking Details:', this.bookingDetails);
-
+  
     // Validate fields
     if (!this.bookingDetails.customerName || 
         !this.bookingDetails.tourguideType || 
         !this.bookingDetails.numberOfParticipants || 
         !this.bookingDetails.tourDate) {
-
+  
       Swal.fire({
         icon: 'error',
         title: 'Missing Fields',
@@ -147,11 +148,11 @@ export class BookingTourGuideDetailComponent implements OnInit {
       });
       return;
     }
-
+  
     // Validate tour date
     const normalizedCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
     const normalizedTourDate = new Date(tourDate.getFullYear(), tourDate.getMonth(), tourDate.getDate());
-
+  
     if (normalizedTourDate < normalizedCurrentDate) {
       Swal.fire({
         icon: 'error',
@@ -161,11 +162,15 @@ export class BookingTourGuideDetailComponent implements OnInit {
       });
       return;
     }
-
-    
-
+  
     // Process booking if validation passes
-    this.bookingService.bookTourGuide(this.bookingDetails).subscribe(
+    const bookingData = {
+      ...this.bookingDetails,
+      serviceId: this.serviceId,          // Include serviceId
+      userId: this.currentUser?._id        // Include userId from the current user
+    };
+  
+    this.bookingService.bookTourGuide(bookingData).subscribe(
       (response) => {
         console.log('Booking successful', response);
         Swal.fire({
@@ -186,5 +191,5 @@ export class BookingTourGuideDetailComponent implements OnInit {
         });
       }
     );
-  }
+  }  
 }

@@ -182,7 +182,18 @@ const bookingTourSchema = new mongoose.Schema({
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
         enum: ['Booked', 'Cancelled', 'Completed']
-    }
+    },
+    serviceId: { // Add serviceId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true
+  },
+  userId: { // Add userId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  }
+
 }, { timestamps: true });
 
 // Create the Booking model
@@ -191,16 +202,33 @@ const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
 module.exports = TourBooking;
 
 // Route to handle booking tour guide
+
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
-    const booking = new TourBooking(req.body);
+    const bookingData = {
+      ...req.body,
+      serviceId: req.body.serviceId, // Make sure these are passed from the client side
+      userId: req.body.userId       // or set here if you have access to current user
+    };
+    const booking = new TourBooking(bookingData);
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {
     console.error('Error details:', error); // Log error details for debugging
-    res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+    res.status(400).json({ error: 'Error creating booking', details: error });
   }
 });
+
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//     const booking = new TourBooking(req.body);
+//     await booking.save();
+//     res.status(201).json(booking);
+//   } catch (error) {
+//     console.error('Error details:', error); // Log error details for debugging
+//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+//   }
+// });
 
 
 ///////////
