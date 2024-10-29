@@ -15,6 +15,7 @@ interface RoomType {
   rooms: Room[];
   amenities: string[];
   images: string[];
+  isEditing?: boolean;
 }
 
 interface Accommodation {
@@ -66,7 +67,7 @@ export class ManageAccommodationComponent implements OnInit {
           description: data.productDescription,
           imageUrl: data.productImages[0] || '',
           location: data.location,
-          roomTypes: data.roomTypes || [],
+          roomTypes: data.roomTypes || [], // Ensure roomTypes is an array
         };
       });
     }
@@ -80,13 +81,20 @@ loadAccommodationDetail(id: string): void {
   this.servicesService.getAccommodationDetailsById(id).subscribe(
     (data) => {
       console.log('Accommodation Details:', data);
-      this.accommodationDetail = Array.isArray(data) ? data : [data]; // Ensures it's an array
+      this.accommodationDetail = Array.isArray(data) ? data as Accommodation[] : [data] as Accommodation[]; // Ensures it's an array
+      this.accommodationDetail.forEach((accommodation: Accommodation) => {
+        accommodation.roomTypes.forEach((roomType: RoomType) => {
+          roomType.isEditing = false;
+        });
+      });
     },
     (error) => {
       console.error('Error fetching accommodation details', error);
     }
   );
 }
+
+
 
   
   
@@ -399,6 +407,23 @@ uploadImages() {
     
       return new File([ab], fileName, { type: mime }); // Return a new File object
     }
+
+    
+    
+    toggleEditMode(index: number) {
+      if (this.accommodation.roomTypes && this.accommodation.roomTypes[index]) {
+        this.accommodation.roomTypes[index].isEditing = !this.accommodation.roomTypes[index].isEditing;
+      } else {
+        console.error(`Room type at index ${index} does not exist or roomTypes array is undefined.`);
+      }
+    }
+    
+    
+    saveChanges(index: number) {
+      console.log('Accommodation saved:', this.accommodation);
+      this.toggleEditMode(index); // Pass the index to toggle edit mode
+    }
+    
     
     
     
