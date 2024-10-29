@@ -386,6 +386,9 @@ app.post('/manage/transportation', async (req, res) => {
     productImages = productImages || service.productImages;
     location = location || service.location;
 
+    // Check if a transportation entry with the same serviceId already exists
+    let transportation = await Transportation.findOne({ serviceId: service._id });
+
     // Prepare transportation data with final values
     const transportationData = {
       userId: user._id,
@@ -395,20 +398,25 @@ app.post('/manage/transportation', async (req, res) => {
       productCategory: service.productCategory,
       location,
       serviceId: service._id,
-      productSubcategory: []  // Start with an empty array to add unique entries
+      productSubcategory: transportation ? transportation.productSubcategory : [] // Existing subcategories if transportation exists
     };
 
-    // Check if a transportation entry with the same serviceId already exists
-    let transportation = await Transportation.findOne({ serviceId: service._id });
-
-    // If transportation entry exists, copy its existing productSubCategories
-    if (transportation) {
-      transportationData.productSubcategory = transportation.productSubcategory;
-    }
-
-    // Add each productSubCategory only if it doesn't already exist by ID
+    // Update, add, or delete each productSubCategory based on _id
     productSubCategory.forEach((newSubCategory) => {
-      if (!transportationData.productSubcategory.some(existing => existing.id === newSubCategory.id)) {
+      const existingSubCategoryIndex = transportationData.productSubcategory.findIndex(
+        (existing) => existing._id?.toString() === newSubCategory._id?.toString()
+      );
+
+      if (newSubCategory.action === 'delete') {
+        // Remove subcategory if action is delete
+        if (existingSubCategoryIndex !== -1) {
+          transportationData.productSubcategory.splice(existingSubCategoryIndex, 1);
+        }
+      } else if (existingSubCategoryIndex !== -1) {
+        // Update existing subcategory if action is update or add
+        transportationData.productSubcategory[existingSubCategoryIndex] = newSubCategory;
+      } else {
+        // Add new subcategory if it doesn't have an _id
         transportationData.productSubcategory.push(newSubCategory);
       }
     });
@@ -455,6 +463,10 @@ app.post('/manage/transportation', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to create or update transportation entry' });
   }
 });
+
+
+
+
 
 
 app.get('/transportationService', async (req, res) => {
@@ -1142,7 +1154,7 @@ const Service = mongoose.model('Service', serviceSchema);
 // GET services - Only return services with status 'accepted'
 app.get('/api/services', authMiddleware, async (req, res) => {
   try {
-    const services = await Service.find({ userId: req.user.userId, status: 'accepted' });
+    const services = await Service.find({ userId: req.user.userId, status:  {$in: ['accepted', 'published'] }  });
     res.json(services);
   } catch (err) {
     res.status(500).send(err);

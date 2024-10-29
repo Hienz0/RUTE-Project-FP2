@@ -78,11 +78,27 @@ export class ManageTransportationComponent implements OnInit {
 
   removeVehicleType(index: number, existing: boolean = false): void {
     if (existing) {
-      this.displayedProductSubCategories.splice(index, 1);
+      if (this.displayedProductSubCategories[index]) {
+        this.displayedProductSubCategories[index].action = "delete";
+        this.displayedProductSubCategories.splice(index, 1); // Hapus dari array setelah menandai
+      } else {
+        console.error('Error: Invalid index for displayedProductSubCategories');
+      }
     } else {
-      this.newProductSubCategory.splice(index, 1);
+      if (this.newProductSubCategory[index]) {
+        this.newProductSubCategory[index].action = "delete";
+        this.newProductSubCategory.splice(index, 1); // Hapus dari array setelah menandai
+      } else {
+        console.error('Error: Invalid index for newProductSubCategory');
+      }
     }
   }
+  
+  
+
+
+  
+
 
   saveTransportation(): void {
     // Preserve the existing serviceDetails if it already exists
@@ -108,6 +124,12 @@ export class ManageTransportationComponent implements OnInit {
       return;
     }
 
+    // Gabungkan semua subkategori, termasuk yang baru dan yang perlu dihapus
+    const allProductSubCategories = [
+      ...this.displayedProductSubCategories,
+      ...this.newProductSubCategory
+    ];
+
     const publishData = {
       serviceId: this.transportationData.serviceDetails._id || this.transportationData.serviceDetails.id,
       userId: this.currentUser.userId,
@@ -115,7 +137,7 @@ export class ManageTransportationComponent implements OnInit {
       productDescription: this.productDescription,
       productImages: this.productImages,
       location: this.location,
-      productSubCategory: this.newProductSubCategory // Use the new variable here
+      productSubCategory: allProductSubCategories
     };
 
     console.log('Publish data:', publishData);
@@ -124,14 +146,15 @@ export class ManageTransportationComponent implements OnInit {
       (response) => {
         console.log('Transportation published successfully:', response);
         this.message = 'Transportation published successfully';
-
       },
       (error) => {
-        console.error('Error publishing transportation:', );
+        console.error('Error publishing transportation:', error);
         this.message = 'Failed to publish transportation';
       }
     );
-  }
+}
+
+  
 }
 
   

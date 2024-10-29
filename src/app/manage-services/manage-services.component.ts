@@ -47,7 +47,13 @@ export class ManageServicesComponent implements OnInit {
     this.manageService.getServices().subscribe(
       (data) => {
         console.log('Backend response:', data); // Log backend response
-        this.services = data.filter(service => service.status === 'accepted'); // Ensure only 'accepted' services are loaded
+
+        // Filter services to include only those with 'accepted' or 'published' status
+        this.services = data.filter(service => 
+          service.status === 'accepted' || service.status === 'published'
+        );
+
+        // Fetch images for each filtered service
         this.services.forEach((service, index) => {
           this.fetchImagesForService(service, index);
         });
@@ -57,6 +63,7 @@ export class ManageServicesComponent implements OnInit {
       }
     );
   }
+
 
   fetchImagesForService(service: any, index: number): void {
     // Assuming each service has a property 'productImages' which contains image paths
