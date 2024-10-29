@@ -410,13 +410,13 @@ uploadImages() {
 
     
     
-    toggleEditMode() {
-      this.isEditing = !this.isEditing;
+    toggleEditMode(roomType: RoomType): void {
+      roomType.isEditing = !roomType.isEditing;
     }
     
-    saveChanges() {
-      console.log('Accommodation saved:', this.accommodation);
-      this.toggleEditMode();
+    saveChanges(roomType: RoomType): void {
+      console.log('Room Type saved:', roomType);
+      roomType.isEditing = false;
     }
     
     

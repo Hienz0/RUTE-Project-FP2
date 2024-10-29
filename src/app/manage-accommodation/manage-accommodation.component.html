@@ -51,25 +51,26 @@
   <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
     <div class="card-body">
       <h3><i class="fas fa-door-closed icon"></i> Room Types</h3>
-      <div *ngIf="accommodationDetail && accommodationDetail.length > 0; else loading">
+      <div *ngIf="accommodationDetail && accommodationDetail.length > 0;">
         <div *ngFor="let accommodation of accommodationDetail">
           <div *ngFor="let roomType of accommodation.roomTypes; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
-      
+    
             <!-- Room Type Header with Edit, Save, and Cancel Buttons -->
             <div class="d-flex justify-content-between align-items-center">
+              <!-- <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5> -->
               <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
               
               <!-- Edit Button -->
-              <button *ngIf="!isEditing" class="btn btn-primary btn-sm" (click)="toggleEditMode()">
+              <button *ngIf="!roomType.isEditing" class="btn btn-primary btn-sm" (click)="toggleEditMode(roomType)">
                 <i class="fas fa-edit"></i> Edit
               </button>
       
               <!-- Save and Cancel Buttons -->
-              <div *ngIf="isEditing">
-                <button class="btn btn-success btn-sm me-2" (click)="saveChanges()">
+              <div *ngIf="roomType.isEditing">
+                <button class="btn btn-success btn-sm me-2" (click)="saveChanges(roomType)">
                   <i class="fas fa-save"></i> Save
                 </button>
-                <button class="btn btn-secondary btn-sm" (click)="toggleEditMode()">
+                <button class="btn btn-secondary btn-sm" (click)="toggleEditMode(roomType)">
                   <i class="fas fa-times"></i> Cancel
                 </button>
               </div>
@@ -78,13 +79,13 @@
             <!-- Room Type Name Input -->
             <div class="form-group mb-2">
               <label for="roomTypeName"><i class="fas fa-bed icon"></i> Room Type Name</label>
-              <input type="text" class="form-control" [(ngModel)]="roomType.name" placeholder="Enter room type name" [disabled]="!isEditing" />
+              <input type="text" class="form-control" [(ngModel)]="roomType.name" placeholder="Enter room type name" [disabled]="!roomType.isEditing" />
             </div>
       
             <!-- Price Input -->
             <div class="form-group mb-2">
               <label for="roomTypePrice"><i class="fas fa-dollar-sign icon"></i> Price</label>
-              <input type="number" class="form-control" [(ngModel)]="roomType.price" placeholder="Enter price for this room type" [disabled]="!isEditing" />
+              <input type="number" class="form-control" [(ngModel)]="roomType.price" placeholder="Enter price for this room type" [disabled]="!roomType.isEditing" />
             </div>
       
             <!-- Selected Amenities Display -->
@@ -101,7 +102,7 @@
               <div class="d-flex flex-wrap">
                 <div *ngFor="let image of roomType.images" class="position-relative m-1">
                   <img [src]="image" alt="Room Image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" (click)="showImagePreview(image)">
-                  <button *ngIf="isEditing" class="btn btn-danger btn-sm position-absolute" style="top: 0; right: 0; border-radius: 50%; width: 30px; height: 30px;" (click)="confirmRemoveImage(image, i)">
+                  <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm position-absolute" style="top: 0; right: 0; border-radius: 50%; width: 30px; height: 30px;" (click)="confirmRemoveImage(image, i)">
                     &times;
                   </button>
                 </div>
@@ -110,13 +111,13 @@
       
             <!-- Action Buttons for Amenities, Rooms, and Images -->
             <div class="d-flex justify-content-start mt-3">
-              <button class="btn btn-secondary me-1" (click)="openAmenitiesModal(i)" [disabled]="!isEditing">
+              <button class="btn btn-secondary me-1" (click)="openAmenitiesModal(i)" [disabled]="!roomType.isEditing">
                 <i class="fas fa-concierge-bell"></i> Select Amenities
               </button>
-              <button class="btn btn-secondary me-1" (click)="addRoom(roomType)" [disabled]="!isEditing">
+              <button class="btn btn-secondary me-1" (click)="addRoom(roomType)" [disabled]="!roomType.isEditing">
                 <i class="fas fa-plus"></i> Add Room
               </button>
-              <button class="btn btn-secondary" (click)="openImageModal(i)" [disabled]="!isEditing">
+              <button class="btn btn-secondary" (click)="openImageModal(i)" [disabled]="!roomType.isEditing">
                 <i class="fas fa-image"></i> Add Image
               </button>
             </div>
@@ -125,15 +126,14 @@
             <div *ngFor="let room of roomType.rooms; let j = index" class="border-left pl-4 mt-2" style="background-color: #f8f9fa;">
               <div class="d-flex justify-content-between align-items-center">
                 <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
-                <button *ngIf="isEditing" class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)">
+                <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)">
                   <i class="fas fa-trash-alt"></i> Delete
                 </button>
               </div>
-              <input type="text" class="form-control mb-2" [(ngModel)]="room.number" placeholder="Room Number / Name" [disabled]="!isEditing" />
+              <input type="text" class="form-control" [(ngModel)]="room.number" [disabled]="!roomType.isEditing" />
             </div>
           </div>
         </div>
-      </div>
 
       
       
