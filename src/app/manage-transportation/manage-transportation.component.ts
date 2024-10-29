@@ -85,18 +85,21 @@ export class ManageTransportationComponent implements OnInit {
   }
 
   saveTransportation(): void {
+    // Preserve the existing serviceDetails if it already exists
     this.transportationData = {
-      serviceId: this.transportationData.serviceDetails._id || this.transportationData.serviceDetails.id,
+      ...this.transportationData,
+      serviceId: this.transportationData.serviceDetails?.id || this.transportationData.serviceDetails?._id,
       productName: this.productName,
       productDescription: this.productDescription,
       productImages: this.productImages,
       location: this.location,
-     
     };
     
     console.log('Transportation data saved to variable:', this.transportationData);
     alert('Transportation data saved locally.');
-}
+    this.isEditing;
+  }
+  
 
 
   publishTransportation(): void {
