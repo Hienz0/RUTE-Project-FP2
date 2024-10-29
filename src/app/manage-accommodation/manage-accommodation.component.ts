@@ -31,6 +31,7 @@ interface Accommodation {
   styleUrls: ['./manage-accommodation.component.css'],
 })
 export class ManageAccommodationComponent implements OnInit {
+  accommodationDetail: any = null; // Add this line
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   @ViewChild('imageModal') imageModal!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -57,6 +58,7 @@ export class ManageAccommodationComponent implements OnInit {
 
   ngOnInit(): void {
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
+    console.log('Service ID:', serviceId); // Log the serviceId
     if (serviceId) {
       this.servicesService.getAccommodationServiceById(serviceId).subscribe((data) => {
         this.accommodation = {
@@ -68,7 +70,26 @@ export class ManageAccommodationComponent implements OnInit {
         };
       });
     }
+    if (serviceId !== null) {
+      this.loadAccommodationDetail(serviceId);
+    }
   }
+
+// Method in Component
+loadAccommodationDetail(id: string): void {
+  this.servicesService.getAccommodationDetailsById(id).subscribe(
+    (data) => {
+      console.log('Accommodation Details:', data);
+      this.accommodationDetail = Array.isArray(data) ? data : [data]; // Ensures it's an array
+    },
+    (error) => {
+      console.error('Error fetching accommodation details', error);
+    }
+  );
+}
+
+  
+  
 
   toggleEdit() {
     this.isEditing = !this.isEditing;

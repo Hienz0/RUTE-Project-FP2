@@ -51,6 +51,44 @@
   <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
     <div class="card-body">
       <h3><i class="fas fa-door-closed icon"></i> Room Types</h3>
+      <div *ngIf="accommodationDetail && accommodationDetail.length > 0; else loading">
+        <div *ngFor="let accommodation of accommodationDetail">
+      
+          <div *ngFor="let roomType of accommodation.roomTypes; let i = index" class="border p-3 mt-3 rounded">
+            <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }} - {{ roomType.name }}</h5>
+            <p>Price: {{ roomType.price | currency }}</p>
+            
+            <!-- Display amenities -->
+            <div *ngIf="roomType.amenities?.length">
+              <strong>Amenities:</strong>
+              <ul>
+                <li *ngFor="let amenity of roomType.amenities">{{ amenity }}</li>
+              </ul>
+            </div>
+      
+            <!-- Display rooms -->
+            <div *ngIf="roomType.rooms?.length">
+              <strong>Rooms:</strong>
+              <ul>
+                <li *ngFor="let room of roomType.rooms">{{ room.number }}</li>
+              </ul>
+            </div>
+      
+            <!-- Display images -->
+            <div *ngIf="roomType.images?.length">
+              <strong>Images:</strong>
+              <div *ngFor="let image of roomType.images" class="mt-2">
+                <img [src]="image" alt="Room Image" style="width: 100px; height: 100px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #loading>
+        <p>Loading accommodations...</p>
+      </ng-template>
+      
       <button class="btn btn-secondary mt-3" (click)="addRoomType()">
         <i class="fas fa-plus-circle"></i> Add Room Type
       </button>

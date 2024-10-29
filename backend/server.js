@@ -302,6 +302,22 @@ app.post('/api/services/accommodations', upload.array('images', 10), async (req,
   }
 });
 
+// Accommodation Controller
+// Get accommodation by serviceId
+app.get('/api/accommodation/service/:serviceId', async (req, res) => {
+  try {
+    const accommodations = await Accommodation.find({ serviceId: req.params.serviceId });
+    if (!accommodations.length) {
+      return res.status(404).json({ message: 'No accommodations found' });
+    }
+    res.json(accommodations); // Send an array of accommodations
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
+
 
 
 
