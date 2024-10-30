@@ -204,7 +204,7 @@ export class BookTransportationComponent implements OnInit {
 
     const bookingData = {
       serviceId:
-        this.transportationService._id || this.transportationService.id,
+        this.transportationService.serviceDetails._id || this.transportationService.serviceDetails.id,
       userId: this.currentUser.userId || this.currentUser.userId,
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
@@ -227,7 +227,7 @@ export class BookTransportationComponent implements OnInit {
   // Initialize the general Leaflet map with a marker and location details
   initMap(): void {
     // Parse the location string from transportationService (e.g., "-8.527369055545698, 115.2438408136368")
-    const location = this.transportationService.location.split(',').map(Number);
+    const location = this.transportationService.serviceDetails.location.split(',').map(Number);
     const latitude = location[0] || -6.1751; // Default latitude (Jakarta)
     const longitude = location[1] || 106.865; // Default longitude (Jakarta)
     const zoomLevel = 15; // Example zoom level
@@ -434,7 +434,7 @@ export class BookTransportationComponent implements OnInit {
   }
 
   useServiceLocation(type: 'pickup' | 'dropoff'): void {
-    const location = this.transportationService.location.split(',').map(Number);
+    const location = this.transportationService.serviceDetails.location.split(',').map(Number);
     const latitude = location[0];
     const longitude = location[1];
 

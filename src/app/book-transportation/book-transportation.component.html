@@ -11,8 +11,8 @@
     <!-- Carousel for service images -->
     <div
       *ngIf="
-        transportationService.productImages &&
-        transportationService.productImages.length > 0
+        transportationService.serviceDetails.productImages &&
+        transportationService.serviceDetails.productImages.length > 0
       "
       id="carouselExample"
       class="carousel slide"
@@ -22,7 +22,7 @@
         <!-- Loop through images -->
         <div
           *ngFor="
-            let image of transportationService.productImages;
+            let image of transportationService.serviceDetails.productImages;
             let i = index
           "
           class="carousel-item"
@@ -61,8 +61,8 @@
     <!-- If no images available -->
     <div
       *ngIf="
-        !transportationService.productImages ||
-        transportationService.productImages.length === 0
+        !transportationService.serviceDetails.productImages ||
+        transportationService.serviceDetails.productImages.length === 0
       "
       class="d-flex justify-content-center align-items-center bg-secondary"
       style="height: 400px"
@@ -72,8 +72,8 @@
 
     <!-- Card Body for Service Details -->
     <div class="card-body">
-      <h3 class="card-title">{{ transportationService.productName }}</h3>
-      <p class="card-text">{{ transportationService.productDescription }}</p>
+      <h3 class="card-title">{{ transportationService.serviceDetails.productName }}</h3>
+      <p class="card-text">{{ transportationService.serviceDetails.productDescription }}</p>
 
       <!-- Display Price -->
       <p>
