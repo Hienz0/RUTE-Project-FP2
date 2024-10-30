@@ -166,13 +166,42 @@ loadAccommodationDetail(id: string): void {
     roomType.rooms.splice(roomIndex, 1);
   }
 
-  openAmenitiesModal(index: number): void {
+  openAmenitiesModal(index: number, isEditing = false): void {
     this.selectedRoomTypeIndex = index;
-    this.selectedAmenities = [...this.accommodation.roomTypes[index].amenities];
+    this.isEditing = isEditing; // Use isEditing instead of isEditingMode
+    if (isEditing) {
+      this.selectedAmenities = [...this.accommodationDetail[0].roomTypes[index].amenities];
+      console.log('Editing room type with index:', index);
+      console.log('Selected amenities:', this.selectedAmenities);
+    } else {
+      this.selectedAmenities = [...this.accommodation.roomTypes[index].amenities];
+    }
     this.amenitiesModal.nativeElement.classList.add('show');
     this.amenitiesModal.nativeElement.style.display = 'block';
     this.isModalOpen = true;
   }
+
+
+  openEditAmenitiesModal(accommodationIndex: number, roomTypeIndex: number, isEditing = false): void {
+    this.selectedRoomTypeIndex = roomTypeIndex; // Keep track of the room type index
+    this.isEditing = isEditing; // Toggle editing state
+
+    if (isEditing) {
+        // Get the selected amenities for the room type being edited
+        this.selectedAmenities = [...this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex].amenities];
+        console.log('Editing room type with index:', roomTypeIndex);
+        console.log('Selected amenities:', this.selectedAmenities);
+    } else {
+        // Get the selected amenities for the room type in view mode
+        this.selectedAmenities = [...this.accommodation.roomTypes[roomTypeIndex].amenities];
+    }
+
+    // Open the amenities modal
+    this.amenitiesModal.nativeElement.classList.add('show');
+    this.amenitiesModal.nativeElement.style.display = 'block';
+    this.isModalOpen = true;
+}
+
 
   closeAmenitiesModal(): void {
     // Reset the selectedRoomTypeIndex to null if necessary
@@ -195,11 +224,13 @@ loadAccommodationDetail(id: string): void {
   
 
   saveAmenities(): void {
-    if (this.selectedRoomTypeIndex !== null && this.accommodation.roomTypes[this.selectedRoomTypeIndex]) {
-      // Save selected amenities to the room type at the selected index
-      this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+    if (this.selectedRoomTypeIndex !== null) {
+      if (this.isEditing) {
+        this.accommodationDetail[0].roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+      } else {
+        this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+      }
     }
-    // Close modal after saving
     this.closeAmenitiesModal();
     this.isModalOpen = false;
   }
