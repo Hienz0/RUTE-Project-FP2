@@ -224,6 +224,12 @@ export class BookTransportationComponent implements OnInit {
     );
   }
 
+  getUniqueSubcategories(service: any): string {
+    if (!service?.productSubcategory) return '';
+    
+    return Array.from(new Set(service.productSubcategory.map((sub: any) => sub.type))).join(', ');
+  }
+
   // Initialize the general Leaflet map with a marker and location details
   initMap(): void {
     // Parse the location string from transportationService (e.g., "-8.527369055545698, 115.2438408136368")

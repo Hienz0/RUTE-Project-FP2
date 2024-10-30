@@ -473,10 +473,38 @@ app.post('/manage/transportation', async (req, res) => {
 
 
 
-app.get('/transportationService', async (req, res) => {
+app.get('/transportationService', async (req, res) => { 
   try {
-    const transportation = await Transportation.find();
-    res.json(transportation);
+    const transportationData = await Transportation.aggregate([
+      {
+        $lookup: {
+          from: 'services', // Name of the Service collection in MongoDB
+          localField: 'serviceId',
+          foreignField: '_id',
+          as: 'serviceDetails'
+        }
+      },
+      {
+        $unwind: '$serviceDetails' // Unwind to simplify accessing serviceDetails
+      },
+      {
+        $project: {
+          userId: 1,
+          productName: 1,
+          productDescription: 1,
+          productImages: 1,
+          productCategory: 1,
+          productSubcategory: 1,
+          location: 1,
+          createdAt: 1,
+          serviceId: 1,
+          averageRating: '$serviceDetails.averageRating', // Map average rating
+          totalReviews: '$serviceDetails.totalReviews'    // Map total reviews
+        }
+      }
+    ]);
+
+    res.json(transportationData);
   } catch (error) {
     console.error('Error retrieving transportation data:', error);
     res.status(500).json({ message: 'Internal Server Error' });

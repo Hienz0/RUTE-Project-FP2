@@ -72,20 +72,31 @@
 
     <!-- Card Body for Service Details -->
     <div class="card-body">
-      <h3 class="card-title">{{ transportationService.serviceDetails.productName }}</h3>
-      <p class="card-text">{{ transportationService.serviceDetails.productDescription }}</p>
-
-      <!-- Display Price -->
-      <p>
-        <strong>Price:</strong>
-        {{ transportationService.productPrice | currency : "IDR" : "symbol" }}
+      <h3 class="card-title">
+        {{ transportationService.serviceDetails.productName }}
+      </h3>
+      <p class="card-text">
+        {{ transportationService.serviceDetails.productDescription }}
       </p>
 
-      <!-- Display Vehicle Type -->
-      <p>
-        <strong>Vehicle Type:</strong>
-        {{ transportationService.productSubcategory }}
-      </p>
+      <!-- Display Vehicle Types -->
+      <p><strong>Vehicle Types:</strong></p>
+      <ul>
+        <li
+          *ngFor="
+            let subcategory of transportationService.transportationData
+              .productSubcategory
+          "
+        >
+          <p><strong>Vehicle Name:</strong> {{ subcategory.name }}</p>
+          <p><strong>Vehicle Type:</strong> {{ subcategory.type }}</p>
+          <p><strong>Quantity:</strong> {{ subcategory.quantity }}</p>
+          <p>
+            <strong>Price:</strong>
+            {{ subcategory.price | currency : "IDR" : "symbol" }}
+          </p>
+        </li>
+      </ul>
 
       <p>
         <strong>Location: </strong>
