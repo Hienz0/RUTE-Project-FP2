@@ -71,28 +71,34 @@ export class ManageAccommodationComponent implements OnInit {
         };
       });
     }
+  
     if (serviceId !== null) {
       this.loadAccommodationDetail(serviceId);
     }
   }
-
-// Method in Component
-loadAccommodationDetail(id: string): void {
-  this.servicesService.getAccommodationDetailsById(id).subscribe(
-    (data) => {
-      console.log('Accommodation Details:', data);
-      this.accommodationDetail = Array.isArray(data) ? data as Accommodation[] : [data] as Accommodation[]; // Ensures it's an array
-      this.accommodationDetail.forEach((accommodation: Accommodation) => {
-        accommodation.roomTypes.forEach((roomType: RoomType) => {
-          roomType.isEditing = false;
+  
+  // Method to load accommodation details
+  loadAccommodationDetail(id: string): void {
+    this.servicesService.getAccommodationDetailsById(id).subscribe(
+      (data) => {
+        console.log('Accommodation Details:', data);
+        this.accommodationDetail = Array.isArray(data) ? data as Accommodation[] : [data] as Accommodation[];
+  
+        // Set a default index if needed
+        this.selectedAccommodationIndex = this.accommodationDetail.length > 0 ? 0 : null;
+  
+        // Initialize editing states
+        this.accommodationDetail.forEach((accommodation: Accommodation) => {
+          accommodation.roomTypes.forEach((roomType: RoomType) => {
+            roomType.isEditing = false;
+          });
         });
-      });
-    },
-    (error) => {
-      console.error('Error fetching accommodation details', error);
-    }
-  );
-}
+      },
+      (error) => {
+        console.error('Error fetching accommodation details', error);
+      }
+    );
+  }
 
 
 
@@ -286,15 +292,29 @@ toggleAmenitySelection(amenity: string, event: Event): void {
 
   // Handle multiple file selections
 // Handle multiple file selections
+// In your component class
+selectedAccommodationIndex: number | null = null;
+
+// Method to handle file selection
+// Modify onFilesSelected to check that accommodationDetail is populated
 onFilesSelected(event: Event) {
   const files = (event.target as HTMLInputElement).files;
-  if (files && this.selectedRoomTypeIndex !== null) {
-    const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+  if (files && this.selectedRoomTypeIndex !== null && this.accommodationDetail && this.selectedAccommodationIndex !== null) {
+    const accommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+    const roomType = accommodation?.roomTypes[this.selectedRoomTypeIndex];
+
+    if (!roomType) {
+      console.warn('Room type not found');
+      return;
+    }
+
+    // Check the image count limit
     if (roomType.images.length + files.length > 10) {
       Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
       return;
     }
 
+    // Proceed with file selection and preview
     this.selectedImages = Array.from(files);
     this.previewUrls = [];
     for (let file of this.selectedImages) {
@@ -302,6 +322,8 @@ onFilesSelected(event: Event) {
     }
   }
 }
+
+
 
   // Preview each selected image
   previewImage(file: File) {
