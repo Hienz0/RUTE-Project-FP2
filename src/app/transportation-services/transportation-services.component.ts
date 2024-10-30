@@ -34,6 +34,14 @@ export class TransportationServicesComponent implements OnInit {
     this.router.navigate(['/transportationDetail', serviceId]);
   
   }
+
+ // transportation-services.component.ts
+ getUniqueSubcategories(service: any): string {
+  if (!service?.productSubcategory) return '';
+  
+  return Array.from(new Set(service.productSubcategory.map((sub: any) => sub.type))).join(', ');
+}
+
   
   
 }

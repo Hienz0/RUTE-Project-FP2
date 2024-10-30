@@ -62,10 +62,10 @@
           <div class="card-body">
             <h5 class="card-title">{{ service.productName }}</h5>
             <p class="card-text">{{ service.productDescription }}</p>
-            <p><strong>Price:</strong> {{ service.productPrice | currency:'IDR':'symbol' }}</p>
             <p><strong>Category:</strong> {{ service.productCategory }}</p>
-            <p *ngIf="service.productSubcategory"><strong>Subcategory:</strong> {{ service.productSubcategory }}</p>
-            <p><strong>Location:</strong> {{ service.location }}</p>
+            <div *ngIf="service.productSubcategory?.length > 0">
+              <p><strong>Vehicle Avalaible: </strong> {{ getUniqueSubcategories(service) }}</p>
+            </div>
             <p>
               <strong>Rating:</strong> {{ service.averageRating }} ({{ service.totalReviews }} reviews)
             </p>
