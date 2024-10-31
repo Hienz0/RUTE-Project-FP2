@@ -520,14 +520,34 @@ const bookingVehicleSchema = new mongoose.Schema({
       required: true,
       trim: true
   },
-  vehicleService: {
-    type: String,
-    required: true,
-},
-  vehicleType: {
-      type: String,
-      required: true,
-  },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
+
+  vehicleBooking: [
+    {
+      name: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      quantity: {
+        type: Number,
+        required: true
+      },
+      selectedVehicleType:{
+        type: String,
+        required: true
+      },
+      pricePerVehicle: {
+        type: Number,
+        required: true
+      },
+      totalPrice: {
+        type: Number,
+        required: true
+      }
+    }
+  ],
   vehicleDropoffLocation: {
       type: String,
       trim: true,
@@ -589,9 +609,29 @@ app.get('/transportationsDetails/:serviceId', async (req, res) => {
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
   
-  const { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation } = req.body;
+  const {
+    serviceId,
+    userId,
+    pickupDate,
+    dropoffDate,
+    vehicleBooking,
+    specialRequest,
+    pickupLocation,
+    dropoffLocation,
+    totalBookingPrice
+  } = req.body;
   
-  console.log("Booking Data:", { serviceId, userId, pickupDate, dropoffDate, specialRequest, pickupLocation, dropoffLocation });
+  console.log("Booking Data:", {
+    serviceId,
+    userId,
+    pickupDate,
+    dropoffDate,
+    specialRequest,
+    pickupLocation,
+    dropoffLocation,
+    totalBookingPrice,
+    vehicleBooking
+  });
 
   try {
     const user = await User.findById(userId);
@@ -600,20 +640,11 @@ app.post('/api/bookTransports', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const service = await Service.findById(serviceId);
+    const service = await Transportation.findOne({ serviceId: serviceId });
+
     if (!service) {
       console.log("Service not found");
       return res.status(404).json({ success: false, message: 'Service not found' });
-    }
-
-    const vehicleType = service.productSubcategory;
-    if (!vehicleType) {
-      return res.status(400).json({ success: false, message: 'Vehicle type not available' });
-    }
-
-    const vehicleService = service._id;
-    if (!vehicleService) {
-      return res.status(400).json({ success: false, message: 'Vehicle type not available' });
     }
 
     if (!pickupDate || !dropoffDate) {
@@ -623,9 +654,9 @@ app.post('/api/bookTransports', async (req, res) => {
     const start = new Date(pickupDate);
     const end = new Date(dropoffDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set waktu ke 00:00 untuk mengecek hanya berdasarkan tanggal
+    today.setHours(0, 0, 0, 0); // Set time to 00:00 for date-only validation
 
-    // Cek apakah tanggal pickup lebih awal dari hari ini
+    // Check if the pickup date is in the past
     if (start < today) {
       return res.status(400).json({
         success: false,
@@ -634,13 +665,13 @@ app.post('/api/bookTransports', async (req, res) => {
     }
 
     const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24));
-    // if (rentalDuration <= 0) {
-    //   return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
-    // }
+    if (rentalDuration <= 0) {
+      return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
+    }
 
-    // Cek apakah ada booking lain di rentang tanggal yang dipilih
+    // Check for any existing bookings that overlap with the selected dates
     const existingBooking = await VehicleBooking.findOne({
-      vehicleType: service.productSubcategory,
+      'vehicleBooking.selectedVehicleType': { $in: vehicleBooking.map(v => v.selectedVehicleType) },
       $or: [
         { pickupDate: { $lte: end, $gte: start } },
         { dropoffDate: { $lte: end, $gte: start } }
@@ -654,23 +685,25 @@ app.post('/api/bookTransports', async (req, res) => {
       });
     }
 
-    // Buat booking baru jika tidak ada konflik
+    // Create new booking with provided data
     const newBooking = new VehicleBooking({
       customerName: user.name,
-      vehicleType,
-      vehicleService,
+      userId,
+      serviceId,
+      vehicleBooking,
       vehiclePickupLocation: pickupLocation,
       vehicleDropoffLocation: dropoffLocation,
       rentalDuration,
       pickupDate: start,
       dropoffDate: end,
       specialRequest,
-      bookingStatus: 'Booked'
+      bookingStatus: 'Booked',
+      totalBookingPrice
     });
 
     await newBooking.save();
 
-    // Tambahkan booking ke history pengguna
+    // Add the booking to the user's booking history
     user.bookingHistory.push({ bookingType: 'transportation', bookingId: newBooking._id });
     await user.save();
 
@@ -680,9 +713,11 @@ app.post('/api/bookTransports', async (req, res) => {
       bookingDetails: newBooking
     });
   } catch (error) {
+    console.error('Error creating booking:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 app.get('/api/bookedDates', async (req, res) => {
   const bookings = await VehicleBooking.find({}, 'pickupDate dropoffDate');
