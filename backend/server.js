@@ -563,6 +563,28 @@ const bookingVehicleSchema = new mongoose.Schema({
 const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
 
 
+app.get('/transportationsDetails/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    
+    // Find a single transportation document matching the serviceId
+    const transportationData = await Transportation.findOne({ serviceId });
+
+    if (!transportationData) {
+      return res.status(404).json({ message: 'Transportation data not found for this service' });
+    }
+
+    res.json(transportationData);
+  } catch (error) {
+    console.error('Error retrieving transportation details:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
 // Route untuk booking transportasi
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
@@ -574,11 +596,13 @@ app.post('/api/bookTransports', async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
+      console.log("User not found");
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     const service = await Service.findById(serviceId);
     if (!service) {
+      console.log("Service not found");
       return res.status(404).json({ success: false, message: 'Service not found' });
     }
 

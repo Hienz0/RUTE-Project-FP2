@@ -11,8 +11,8 @@
     <!-- Carousel for service images -->
     <div
       *ngIf="
-        transportationService.serviceDetails.productImages &&
-        transportationService.serviceDetails.productImages.length > 0
+        transportationService.productImages &&
+        transportationService.productImages.length > 0
       "
       id="carouselExample"
       class="carousel slide"
@@ -22,7 +22,7 @@
         <!-- Loop through images -->
         <div
           *ngFor="
-            let image of transportationService.serviceDetails.productImages;
+            let image of transportationService.productImages;
             let i = index
           "
           class="carousel-item"
@@ -61,8 +61,8 @@
     <!-- If no images available -->
     <div
       *ngIf="
-        !transportationService.serviceDetails.productImages ||
-        transportationService.serviceDetails.productImages.length === 0
+        !transportationService.productImages ||
+        transportationService.productImages.length === 0
       "
       class="d-flex justify-content-center align-items-center bg-secondary"
       style="height: 400px"
@@ -73,10 +73,10 @@
     <!-- Card Body for Service Details -->
     <div class="card-body">
       <h3 class="card-title">
-        {{ transportationService.serviceDetails.productName }}
+        {{ transportationService.productName }}
       </h3>
       <p class="card-text">
-        {{ transportationService.serviceDetails.productDescription }}
+        {{ transportationService.productDescription }}
       </p>
 
       <!-- Display Vehicle Types -->
@@ -84,8 +84,7 @@
       <ul>
         <li
           *ngFor="
-            let subcategory of transportationService.transportationData
-              .productSubcategory
+            let subcategory of transportationService.productSubcategory
           "
         >
           <p><strong>Vehicle Name:</strong> {{ subcategory.name }}</p>
@@ -106,13 +105,13 @@
       <div class="map-container" id="map"></div>
       <!-- Map added here -->
 
-      <!-- Display Rating -->
+      <!-- Display Rating
       <p>
         <strong>Rating:</strong> {{ transportationService.averageRating }} ({{
           transportationService.totalReviews
         }}
         reviews)
-      </p>
+      </p> -->
     </div>
   </div>
 

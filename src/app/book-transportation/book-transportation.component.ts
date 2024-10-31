@@ -56,10 +56,10 @@ export class BookTransportationComponent implements OnInit {
     console.log('Transport ID from route:', transportID);
 
     if (transportID) {
-      this.service.getTransporationServicesByID(transportID).subscribe(
+      this.service.getTransporationDetailsByID(transportID).subscribe(
         (data) => {
           this.transportationService = data;
-          console.log(data);
+          console.log("data",data);
 
           // Initialize the maps after transportation service is fetched
           setTimeout(() => {
@@ -204,15 +204,17 @@ export class BookTransportationComponent implements OnInit {
 
     const bookingData = {
       serviceId:
-        this.transportationService.serviceDetails._id || this.transportationService.serviceDetails.id,
+        this.transportationService.serviceId ,
       userId: this.currentUser.userId || this.currentUser.userId,
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
       specialRequest: this.specialRequest,
       pickupLocation: this.pickupLocation,
       dropoffLocation: this.dropoffLocation,
+      
     };
 
+    console.log(bookingData)
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
@@ -233,12 +235,13 @@ export class BookTransportationComponent implements OnInit {
   // Initialize the general Leaflet map with a marker and location details
   initMap(): void {
     // Parse the location string from transportationService (e.g., "-8.527369055545698, 115.2438408136368")
-    const location = this.transportationService.serviceDetails.location.split(',').map(Number);
+    const location = this.transportationService.location.split(',').map(Number);
     const latitude = location[0] || -6.1751; // Default latitude (Jakarta)
     const longitude = location[1] || 106.865; // Default longitude (Jakarta)
-    const zoomLevel = 15; // Example zoom level
+    const zoomLevel = 16; // Example zoom level
 
-    const map = L.map('map').setView([latitude, longitude], zoomLevel);
+    // Initialize the map with scrollWheelZoom disabled
+    const map = L.map('map', { scrollWheelZoom: false }).setView([latitude, longitude], zoomLevel);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
@@ -251,13 +254,12 @@ export class BookTransportationComponent implements OnInit {
     });
 
     // Add marker at the transportation service location
-    const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(
-      map
-    );
+    const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
 
     // Use the existing reverseGeocode function to get the address and display it
     this.reverseGeocode(latitude, longitude, 'location'); // Assuming it's similar to the pickup, adjust if needed
-  }
+}
+
 
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
@@ -440,7 +442,7 @@ export class BookTransportationComponent implements OnInit {
   }
 
   useServiceLocation(type: 'pickup' | 'dropoff'): void {
-    const location = this.transportationService.serviceDetails.location.split(',').map(Number);
+    const location = this.transportationService.location.split(',').map(Number);
     const latitude = location[0];
     const longitude = location[1];
 
