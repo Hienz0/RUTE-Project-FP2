@@ -189,24 +189,21 @@ export class ManageAccommodationComponent implements OnInit {
 
 
   openEditAmenitiesModal(accommodationIndex: number, roomTypeIndex: number, isEditing = false): void {
-    this.selectedRoomTypeIndex = roomTypeIndex; // Keep track of the room type index
-    this.isEditing = isEditing; // Toggle editing state
-
+    this.selectedAccommodationIndex = accommodationIndex; // Store accommodation index
+    this.selectedRoomTypeIndex = roomTypeIndex;
+    this.isEditing = isEditing;
+  
     if (isEditing) {
-        // Get the selected amenities for the room type being edited
-        this.selectedAmenities = [...this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex].amenities];
-        console.log('Editing room type with index:', roomTypeIndex);
-        console.log('Selected amenities:', this.selectedAmenities);
+      this.selectedAmenities = [...this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex].amenities];
     } else {
-        // Get the selected amenities for the room type in view mode
-        this.selectedAmenities = [...this.accommodation.roomTypes[roomTypeIndex].amenities];
+      this.selectedAmenities = [...this.accommodation.roomTypes[roomTypeIndex].amenities];
     }
-
-    // Open the amenities modal
+  
     this.amenitiesModal.nativeElement.classList.add('show');
     this.amenitiesModal.nativeElement.style.display = 'block';
     this.isModalOpen = true;
-}
+  }
+  
 
 
   closeAmenitiesModal(): void {
@@ -231,15 +228,26 @@ export class ManageAccommodationComponent implements OnInit {
 
   saveAmenities(): void {
     if (this.selectedRoomTypeIndex !== null) {
-      if (this.isEditing) {
-        this.accommodationDetail[0].roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+      if (this.isEditing && this.selectedAccommodationIndex !== null) {
+        const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+        if (targetAccommodation && targetAccommodation.roomTypes && targetAccommodation.roomTypes[this.selectedRoomTypeIndex]) {
+          targetAccommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+        } else {
+          console.error("Accommodation or room type not found for editing.");
+        }
       } else {
-        this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+        if (this.accommodation && this.accommodation.roomTypes && this.accommodation.roomTypes[this.selectedRoomTypeIndex]) {
+          this.accommodation.roomTypes[this.selectedRoomTypeIndex].amenities = [...this.selectedAmenities];
+        } else {
+          console.error("Accommodation or room type not found for adding.");
+        }
       }
     }
     this.closeAmenitiesModal();
     this.isModalOpen = false;
   }
+  
+  
   
   
 
