@@ -43,10 +43,13 @@ export class BookTransportationComponent implements OnInit {
   selectedVehicleTypes: any[] = [];
   vehicleQuantities: { [key: string]: number } = {};
   totalBookingPrice: number = 0;
+  numDays: number =1;
   // Inisialisasi individualPrices sebagai objek kosong
   individualPrices: { [key: string]: number } = {};
   quantityWarnings: { [key: string]: string } = {};
   individualPricesPerDay: { [key: string]: number } = {};
+
+  vehicleBooking: Array<{ name: string; quantity: number; pricePerVehicle: number; totalPrice: number; selectedVehicleType: string }> = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -210,61 +213,74 @@ export class BookTransportationComponent implements OnInit {
 
   onVehicleTypeChange(event: any, subcategory: any) {
     if (event.target.checked) {
-      this.selectedVehicleTypes.push(subcategory);
-      this.vehicleQuantities[subcategory.name] = 1; // Kuantitas default
+        this.selectedVehicleTypes.push(subcategory);
+        this.vehicleQuantities[subcategory.name] = 1; // Default quantity
+
+        // Add to vehicleBooking
+        this.vehicleBooking.push({
+            name: subcategory.name,
+            quantity: 1,
+            pricePerVehicle: subcategory.price,
+            totalPrice: subcategory.price * (this.numDays || 1),
+            selectedVehicleType:subcategory.type
+        });
     } else {
-      this.selectedVehicleTypes = this.selectedVehicleTypes.filter(
-        (type) => type.name !== subcategory.name
-      );
-      delete this.vehicleQuantities[subcategory.name];
-      delete this.individualPrices[subcategory.name];
+        this.selectedVehicleTypes = this.selectedVehicleTypes.filter(
+            (type) => type.name !== subcategory.name
+        );
+        delete this.vehicleQuantities[subcategory.name];
+        delete this.individualPrices[subcategory.name];
+
+        // Remove from vehicleBooking
+        this.vehicleBooking = this.vehicleBooking.filter(
+            (vehicle) => vehicle.name !== subcategory.name
+        );
     }
     this.calculateTotalPrice();
-  }
+}
 
-  // Fungsi untuk menghitung harga total berdasarkan hari, harga per hari, dan kuantitas
-  calculateTotalPrice() {
+calculateTotalPrice() {
     const pickup = new Date(this.pickupDate);
     const dropoff = new Date(this.dropoffDate);
 
-    // Hitung jumlah hari antara pickupDate dan dropoffDate
-    const days = Math.floor(
-      (dropoff.getTime() - pickup.getTime()) / (1000 * 3600 * 24)
-    );
-    const numDays = days > 0 ? days : 1; // Minimum 1 hari jika range tidak valid
+    // Calculate the number of days between pickupDate and dropoffDate
+    const days = Math.floor((dropoff.getTime() - pickup.getTime()) / (1000 * 3600 * 24));
+    const numDays = days > 0 ? days : 1;
 
-    // Kalkulasi total harga dengan memasukkan kuantitas, harga per hari, dan jumlah hari
-    this.totalBookingPrice = this.selectedVehicleTypes.reduce(
-      (total, subcategory) => {
+    // Calculate total price including quantity, price per day, and number of days
+    this.totalBookingPrice = this.selectedVehicleTypes.reduce((total, subcategory) => {
         const quantity = this.vehicleQuantities[subcategory.name] || 0;
-        const pricePerDay = subcategory.price; // Harga per hari
+        const pricePerDay = subcategory.price;
         const totalDatPrice = pricePerDay * numDays;
         const totalPrice = pricePerDay * numDays * quantity;
 
-        this.individualPricesPerDay[subcategory.name] = totalDatPrice; // Set harga per hari per kendaraan
-        this.individualPrices[subcategory.name] = totalPrice; // Set harga total untuk durasi hari
+        this.individualPricesPerDay[subcategory.name] = totalDatPrice;
+        this.individualPrices[subcategory.name] = totalPrice;
+
+        // Update vehicleBooking
+        const vehicle = this.vehicleBooking.find(v => v.name === subcategory.name);
+        if (vehicle) {
+            vehicle.quantity = quantity;
+            vehicle.pricePerVehicle = totalDatPrice;
+            vehicle.totalPrice = totalPrice;
+        }
 
         return total + totalPrice;
-      },
-      0
-    );
-  }
+    }, 0);
+}
 
-  // Fungsi saat input kuantitas berubah, memastikan stok cukup dan menghitung ulang harga
-  onQuantityInput(subcategory: any) {
+onQuantityInput(subcategory: any) {
     const maxQuantity = subcategory.quantity;
     const currentQuantity = this.vehicleQuantities[subcategory.name];
 
     if (currentQuantity > maxQuantity) {
-      this.quantityWarnings[
-        subcategory.name
-      ] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
+        this.quantityWarnings[subcategory.name] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
     } else {
-      delete this.quantityWarnings[subcategory.name];
+        delete this.quantityWarnings[subcategory.name];
     }
 
-    this.calculateTotalPrice(); // Update total harga
-  }
+    this.calculateTotalPrice();
+}
 
   // Fungsi untuk menghitung ulang harga saat tanggal berubah
   onDateChange() {
@@ -298,6 +314,8 @@ export class BookTransportationComponent implements OnInit {
       specialRequest: this.specialRequest,
       pickupLocation: this.pickupLocation,
       dropoffLocation: this.dropoffLocation,
+      vehicleBooking: this.vehicleBooking,         // Add vehicle details
+        totalBookingPrice: this.totalBookingPrice     // Add total price
     };
 
     console.log(bookingData);
