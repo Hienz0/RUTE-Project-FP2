@@ -103,18 +103,22 @@
             <div *ngIf="roomType.images && roomType.images.length > 0" class="mt-3">
               <strong>Uploaded Images:</strong>
               <div class="d-flex flex-wrap">
-                <div *ngFor="let image of roomType.images" class="position-relative m-1">
-                  <img [src]="'http://localhost:3000' + image" alt="Room Image" class="img-thumbnail"
-                    style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
-                    (click)="showImagePreview('http://localhost:3000' + image)">
-                  <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm position-absolute"
-                    style="top: 0; right: 0; border-radius: 50%; width: 30px; height: 30px;"
-                    (click)="confirmRemoveImage(image, i)">
+                <div *ngFor="let image of roomType.images; let i = index" class="position-relative m-1">
+                  <img [src]="image.startsWith('/upload') ? 'http://localhost:3000' + image : image"
+                       alt="Room Image"
+                       class="img-thumbnail"
+                       style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                       (click)="showImagePreview(image.startsWith('/upload') ? 'http://localhost:3000' + image : image)">
+                  <button *ngIf="roomType.isEditing"
+                          class="btn btn-danger btn-sm position-absolute"
+                          style="top: 0; right: 0; border-radius: 50%; width: 30px; height: 30px;"
+                          (click)="removeExistingImage(accommodationIndex, i, true, image)">
                     &times;
                   </button>
                 </div>
               </div>
             </div>
+            
 
 
             <!-- Action Buttons for Amenities, Rooms, and Images -->

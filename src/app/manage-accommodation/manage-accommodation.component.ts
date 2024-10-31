@@ -445,6 +445,41 @@ uploadImages(): void {
       });
     }
 
+    removeExistingImage(accommodationIndex: number, roomTypeIndex: number, isEditing = false, imageUrl: string): void {  
+      const accommodation = this.accommodationDetail?.[accommodationIndex];
+      console.log('Selected accommodation:', accommodation);
+    
+      const roomType = accommodation?.roomTypes?.[roomTypeIndex];
+      console.log('Selected room type:', roomType);
+    
+      if (!roomType || !roomType.images) {
+        console.error('RoomType or images array not found.');
+        return;
+      }
+    
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to remove this image?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+      }).then((result: any) => { 
+        if (result.isConfirmed) {
+          const imageIndex = roomType.images.indexOf(imageUrl);
+          if (imageIndex > -1) {
+            roomType.images.splice(imageIndex, 1);
+            Swal.fire('Deleted!', 'Your image has been deleted.', 'success');
+          } else {
+            console.warn('Image URL not found in roomType images array.');
+          }
+        }
+      });
+    }
+    
+    
+
     confirmRemoveImage(imageUrl: string, roomTypeIndex: number): void {
       // Get the current room type based on the selected index
       const roomType = this.accommodation.roomTypes[roomTypeIndex];
