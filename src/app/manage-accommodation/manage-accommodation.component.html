@@ -125,9 +125,10 @@
               <button class="btn btn-secondary me-1" (click)="addRoom(roomType)" [disabled]="!roomType.isEditing">
                 <i class="fas fa-plus"></i> Add Room
               </button>
-              <button class="btn btn-secondary" (click)="openImageModal(i)" [disabled]="!roomType.isEditing">
+              <button class="btn btn-secondary" (click)="openEditImageModal(accommodationIndex, i, true)" [disabled]="!roomType.isEditing">
                 <i class="fas fa-image"></i> Add Image
-              </button>
+            </button>
+                      
             </div>
 
             <!-- Rooms Display within Room Type -->

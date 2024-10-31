@@ -283,6 +283,16 @@ toggleAmenitySelection(amenity: string, event: Event): void {
     this.isModalOpen = true;
   }
 
+  openEditImageModal(accommodationIndex: number, roomTypeIndex: number, isEditing = false): void {
+    this.selectedAccommodationIndex = accommodationIndex;
+    this.selectedRoomTypeIndex = roomTypeIndex;
+    this.isEditing = isEditing;
+    this.imageModal.nativeElement.classList.add('show');
+    this.imageModal.nativeElement.style.display = 'block';
+    this.isModalOpen = true;
+}
+
+
   // Close the Image Upload Modal
   closeImageModal() {
     this.imageModal.nativeElement.classList.remove('show');
@@ -361,22 +371,44 @@ onFilesSelected(event: Event) {
 
   // Upload all selected images
 // Upload all selected images
-uploadImages() {
-  if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
-    const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
-    
-    // Check if adding these images exceeds the 10-image limit
-    if (roomType.images.length + this.previewUrls.length > 10) {
-      Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
-      return;
+uploadImages(): void {
+  console.log("Selected Accommodation Index:", this.selectedAccommodationIndex);
+  console.log("Selected Room Type Index:", this.selectedRoomTypeIndex);
+
+  if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null && this.selectedAccommodationIndex !== null) {
+    let roomType;
+
+    // Check if editing existing accommodation or working on a new one
+    if (this.isEditing) {
+      const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+      roomType = targetAccommodation?.roomTypes[this.selectedRoomTypeIndex];
+    } else {
+      roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
     }
 
-    roomType.images.push(...this.previewUrls); // Add preview URLs as image links
+    // Check if roomType exists, and initialize images if needed
+    if (roomType) {
+      if (!roomType.images) {
+        roomType.images = [];
+      }
 
-    // Clear selections and close modal
-    this.closeImageModal();
+      if (roomType.images.length + this.previewUrls.length > 10) {
+        Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+        return;
+      }
+
+      roomType.images.push(...this.previewUrls); 
+      this.closeImageModal();
+    } else {
+      console.error("Room type not found.");
+    }
+  } else {
+    console.error("Selected images or room type index not properly set.");
   }
 }
+
+
+
 
   isImagePreviewOpen: boolean = false;
   previewImageUrl: string = '';
