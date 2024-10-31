@@ -520,6 +520,7 @@ const bookingVehicleSchema = new mongoose.Schema({
       required: true,
       trim: true
   },
+  productName: {type: String, required: true},
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
 
@@ -688,6 +689,7 @@ app.post('/api/bookTransports', async (req, res) => {
     // Create new booking with provided data
     const newBooking = new VehicleBooking({
       customerName: user.name,
+      productName: service.productName,
       userId,
       serviceId,
       vehicleBooking,

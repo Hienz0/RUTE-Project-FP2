@@ -315,7 +315,7 @@ onQuantityInput(subcategory: any) {
       pickupLocation: this.pickupLocation,
       dropoffLocation: this.dropoffLocation,
       vehicleBooking: this.vehicleBooking,         // Add vehicle details
-        totalBookingPrice: this.totalBookingPrice     // Add total price
+      totalBookingPrice: this.totalBookingPrice     // Add total price
     };
 
     console.log(bookingData);
