@@ -83,9 +83,7 @@
       <p><strong>Vehicle Types:</strong></p>
       <ul>
         <li
-          *ngFor="
-            let subcategory of transportationService.productSubcategory
-          "
+          *ngFor="let subcategory of transportationService.productSubcategory"
         >
           <p><strong>Vehicle Name:</strong> {{ subcategory.name }}</p>
           <p><strong>Vehicle Type:</strong> {{ subcategory.type }}</p>
@@ -134,6 +132,7 @@
             class="form-control"
             readonly
             (focus)="openPickupCalendar()"
+            (change)="onDateChange()"
             required
           />
           <span class="calendar-icon" (click)="openPickupCalendar()">
@@ -155,11 +154,86 @@
             class="form-control"
             readonly
             (focus)="openDropoffCalendar()"
+            (change)="onDateChange()"
             required
           />
           <span class="calendar-icon" (click)="openDropoffCalendar()">
             <i class="fa fa-calendar"></i>
           </span>
+        </div>
+        
+        <!-- Pilihan Tipe Kendaraan -->
+        <div class="mb-3">
+          <label class="form-label"
+            ><strong>Pilih Tipe Kendaraan</strong></label
+          >
+          <div
+            *ngFor="
+              let subcategory of transportationService?.productSubcategory
+            "
+          >
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [value]="subcategory"
+                (change)="onVehicleTypeChange($event, subcategory)"
+                [id]="'vehicleType' + subcategory.name"
+              />
+              <label
+                class="form-check-label"
+                [for]="'vehicleType' + subcategory.name"
+              >
+                {{ subcategory.name }} - {{ subcategory.type }} (Tersedia:
+                {{ subcategory.quantity }})
+              </label>
+            </div>
+
+            <div *ngIf="selectedVehicleTypes.includes(subcategory)" class="mb-3">
+              <label class="form-label" [for]="'vehicleQuantity' + subcategory.name">
+                Kuantitas
+              </label>
+              <input
+                type="number"
+                min="1"
+                [max]="subcategory.quantity"
+                [(ngModel)]="vehicleQuantities[subcategory.name]"
+                (input)="onQuantityInput(subcategory)"
+                class="form-control"
+                [id]="'vehicleQuantity' + subcategory.name"
+                placeholder="Masukkan kuantitas"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            
+              <!-- Harga per Hari untuk Kendaraan -->
+              <p class="mt-2">
+                <strong>Harga per kendaraan untuk {{ subcategory.name }}:</strong>
+                {{ individualPricesPerDay[subcategory.name] | currency : "IDR" : "symbol" }}
+              </p>
+            
+              <!-- Total Harga untuk Kendaraan Berdasarkan Hari -->
+              <p class="mt-2">
+                <strong>Total Harga untuk {{ subcategory.name }}:</strong>
+                {{
+                  individualPrices[subcategory.name]
+                    | currency : "IDR" : "symbol"
+                }}
+              </p>
+            
+              <!-- Pesan Peringatan jika Kuantitas Melebihi Stok -->
+              <p *ngIf="quantityWarnings[subcategory.name]" class="text-danger">
+                {{ quantityWarnings[subcategory.name] }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Harga Booking Keseluruhan -->
+        <div class="mb-3">
+          <p>
+            <strong>Total Harga Keseluruhan:</strong>
+            {{ totalBookingPrice | currency : "IDR" : "symbol" }}
+          </p>
         </div>
 
         <!-- Pickup Location -->

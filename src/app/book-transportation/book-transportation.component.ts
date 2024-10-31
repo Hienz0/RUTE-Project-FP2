@@ -40,6 +40,14 @@ export class BookTransportationComponent implements OnInit {
 
   bookedDates: string[] = []; // Store booked dates as flat strings (YYYY-MM-DD)
 
+  selectedVehicleTypes: any[] = [];
+  vehicleQuantities: { [key: string]: number } = {};
+  totalBookingPrice: number = 0;
+  // Inisialisasi individualPrices sebagai objek kosong
+  individualPrices: { [key: string]: number } = {};
+  quantityWarnings: { [key: string]: string } = {};
+  individualPricesPerDay: { [key: string]: number } = {};
+
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
@@ -59,7 +67,7 @@ export class BookTransportationComponent implements OnInit {
       this.service.getTransporationDetailsByID(transportID).subscribe(
         (data) => {
           this.transportationService = data;
-          console.log("data",data);
+          console.log('data', data);
 
           // Initialize the maps after transportation service is fetched
           setTimeout(() => {
@@ -80,9 +88,6 @@ export class BookTransportationComponent implements OnInit {
     this.initPickupMap();
     this.initDropoffMap();
     this.fetchBookedDates();
-
-    
-    
   }
 
   fetchBookedDates(): void {
@@ -130,7 +135,7 @@ export class BookTransportationComponent implements OnInit {
   initDatePickers(): void {
     const disabledDates = this.bookedDates;
     console.log('Disabled Dates:', disabledDates); // Debug log
-  
+
     // Initialize Flatpickr for the pickup date
     flatpickr('#pickupDate', {
       disable: disabledDates,
@@ -138,12 +143,20 @@ export class BookTransportationComponent implements OnInit {
       minDate: 'today',
       onChange: (selectedDates, dateStr) => {
         this.pickupDate = dateStr; // Store the selected pickup date
-        if (this.isDateRangeInvalid(this.pickupDate, this.dropoffDate, disabledDates)) {
-          alert('Selected range includes one or more booked dates. Please choose different dates.');
+        if (
+          this.isDateRangeInvalid(
+            this.pickupDate,
+            this.dropoffDate,
+            disabledDates
+          )
+        ) {
+          alert(
+            'Selected range includes one or more booked dates. Please choose different dates.'
+          );
         }
-      }
+      },
     });
-  
+
     // Initialize Flatpickr for the dropoff date
     flatpickr('#dropoffDate', {
       disable: disabledDates,
@@ -151,21 +164,33 @@ export class BookTransportationComponent implements OnInit {
       minDate: 'today',
       onChange: (selectedDates, dateStr) => {
         this.dropoffDate = dateStr; // Store the selected dropoff date
-        if (this.isDateRangeInvalid(this.pickupDate, this.dropoffDate, disabledDates)) {
-          alert('Selected range includes one or more booked dates. Please choose different dates.');
+        if (
+          this.isDateRangeInvalid(
+            this.pickupDate,
+            this.dropoffDate,
+            disabledDates
+          )
+        ) {
+          alert(
+            'Selected range includes one or more booked dates. Please choose different dates.'
+          );
         }
-      }
+      },
     });
   }
-  
-  isDateRangeInvalid(pickupDate: string, dropoffDate: string, disabledDates: string[]): boolean {
+
+  isDateRangeInvalid(
+    pickupDate: string,
+    dropoffDate: string,
+    disabledDates: string[]
+  ): boolean {
     if (!pickupDate || !dropoffDate) return false;
-  
+
     const pickup = new Date(pickupDate);
     const dropoff = new Date(dropoffDate);
-  
+
     // Loop through the disabledDates and check if any fall within the selected range
-    return disabledDates.some(disabledDate => {
+    return disabledDates.some((disabledDate) => {
       const booked = new Date(disabledDate);
       return booked >= pickup && booked <= dropoff;
     });
@@ -181,6 +206,69 @@ export class BookTransportationComponent implements OnInit {
   openDropoffCalendar() {
     const input = document.getElementById('dropoffDate') as HTMLInputElement;
     input.focus(); // Trigger the calendar to open when the icon is clicked
+  }
+
+  onVehicleTypeChange(event: any, subcategory: any) {
+    if (event.target.checked) {
+      this.selectedVehicleTypes.push(subcategory);
+      this.vehicleQuantities[subcategory.name] = 1; // Kuantitas default
+    } else {
+      this.selectedVehicleTypes = this.selectedVehicleTypes.filter(
+        (type) => type.name !== subcategory.name
+      );
+      delete this.vehicleQuantities[subcategory.name];
+      delete this.individualPrices[subcategory.name];
+    }
+    this.calculateTotalPrice();
+  }
+
+  // Fungsi untuk menghitung harga total berdasarkan hari, harga per hari, dan kuantitas
+  calculateTotalPrice() {
+    const pickup = new Date(this.pickupDate);
+    const dropoff = new Date(this.dropoffDate);
+
+    // Hitung jumlah hari antara pickupDate dan dropoffDate
+    const days = Math.floor(
+      (dropoff.getTime() - pickup.getTime()) / (1000 * 3600 * 24)
+    );
+    const numDays = days > 0 ? days : 1; // Minimum 1 hari jika range tidak valid
+
+    // Kalkulasi total harga dengan memasukkan kuantitas, harga per hari, dan jumlah hari
+    this.totalBookingPrice = this.selectedVehicleTypes.reduce(
+      (total, subcategory) => {
+        const quantity = this.vehicleQuantities[subcategory.name] || 0;
+        const pricePerDay = subcategory.price; // Harga per hari
+        const totalDatPrice = pricePerDay * numDays;
+        const totalPrice = pricePerDay * numDays * quantity;
+
+        this.individualPricesPerDay[subcategory.name] = totalDatPrice; // Set harga per hari per kendaraan
+        this.individualPrices[subcategory.name] = totalPrice; // Set harga total untuk durasi hari
+
+        return total + totalPrice;
+      },
+      0
+    );
+  }
+
+  // Fungsi saat input kuantitas berubah, memastikan stok cukup dan menghitung ulang harga
+  onQuantityInput(subcategory: any) {
+    const maxQuantity = subcategory.quantity;
+    const currentQuantity = this.vehicleQuantities[subcategory.name];
+
+    if (currentQuantity > maxQuantity) {
+      this.quantityWarnings[
+        subcategory.name
+      ] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
+    } else {
+      delete this.quantityWarnings[subcategory.name];
+    }
+
+    this.calculateTotalPrice(); // Update total harga
+  }
+
+  // Fungsi untuk menghitung ulang harga saat tanggal berubah
+  onDateChange() {
+    this.calculateTotalPrice();
   }
 
   // Function to book transportation
@@ -203,18 +291,16 @@ export class BookTransportationComponent implements OnInit {
     }
 
     const bookingData = {
-      serviceId:
-        this.transportationService.serviceId ,
+      serviceId: this.transportationService.serviceId,
       userId: this.currentUser.userId || this.currentUser.userId,
       pickupDate: this.pickupDate,
       dropoffDate: this.dropoffDate,
       specialRequest: this.specialRequest,
       pickupLocation: this.pickupLocation,
       dropoffLocation: this.dropoffLocation,
-      
     };
 
-    console.log(bookingData)
+    console.log(bookingData);
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
@@ -228,8 +314,10 @@ export class BookTransportationComponent implements OnInit {
 
   getUniqueSubcategories(service: any): string {
     if (!service?.productSubcategory) return '';
-    
-    return Array.from(new Set(service.productSubcategory.map((sub: any) => sub.type))).join(', ');
+
+    return Array.from(
+      new Set(service.productSubcategory.map((sub: any) => sub.type))
+    ).join(', ');
   }
 
   // Initialize the general Leaflet map with a marker and location details
@@ -241,7 +329,10 @@ export class BookTransportationComponent implements OnInit {
     const zoomLevel = 16; // Example zoom level
 
     // Initialize the map with scrollWheelZoom disabled
-    const map = L.map('map', { scrollWheelZoom: false }).setView([latitude, longitude], zoomLevel);
+    const map = L.map('map', { scrollWheelZoom: false }).setView(
+      [latitude, longitude],
+      zoomLevel
+    );
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
@@ -254,12 +345,13 @@ export class BookTransportationComponent implements OnInit {
     });
 
     // Add marker at the transportation service location
-    const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
+    const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(
+      map
+    );
 
     // Use the existing reverseGeocode function to get the address and display it
     this.reverseGeocode(latitude, longitude, 'location'); // Assuming it's similar to the pickup, adjust if needed
-}
-
+  }
 
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
