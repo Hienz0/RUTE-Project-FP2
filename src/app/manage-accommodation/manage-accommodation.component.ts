@@ -61,6 +61,7 @@ export class ManageAccommodationComponent implements OnInit {
   ngOnInit(): void {
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
     console.log('Service ID:', serviceId); // Log the serviceId
+    
     if (serviceId) {
       this.servicesService.getAccommodationServiceById(serviceId).subscribe((data) => {
         this.accommodation = {
