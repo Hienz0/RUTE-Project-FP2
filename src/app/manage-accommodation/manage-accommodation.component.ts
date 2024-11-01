@@ -36,6 +36,7 @@ export class ManageAccommodationComponent implements OnInit {
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   @ViewChild('imageModal') imageModal!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  originalAccommodationDetail: Accommodation[] = [];
   selectedImages: File[] = [];
   previewUrls: string[] = [];
   isEditing = false;
@@ -93,6 +94,9 @@ export class ManageAccommodationComponent implements OnInit {
             roomType.isEditing = false;
           });
         });
+
+              // Deep copy of accommodationDetail to store original data
+      this.originalAccommodationDetail = JSON.parse(JSON.stringify(this.accommodationDetail));
       },
       (error) => {
         console.error('Error fetching accommodation details', error);
@@ -538,15 +542,39 @@ uploadImages(): void {
 
     
     
-    toggleEditMode(roomType: RoomType): void {
+    toggleEditMode(accommodationIndex: number, roomTypeIndex: number): void {
+      const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
+    
+      if (!roomType.isEditing) {
+        // Entering edit mode: no action needed for storing data here since it's already stored in originalAccommodationDetail
+      } else {
+        // Exiting edit mode with Cancel: revert changes by restoring from originalAccommodationDetail
+        const originalRoomType = this.originalAccommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
+        this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex] = { ...originalRoomType };
+      }
+    
+      // Toggle edit mode
       roomType.isEditing = !roomType.isEditing;
     }
     
-    saveChanges(roomType: RoomType): void {
+    
+    saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
+      const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
+    
+      // Here, you would include any save logic you have, such as updating the backend
       console.log('Room Type saved:', roomType);
+    
+      // Exit edit mode after saving
       roomType.isEditing = false;
     }
     
+    
+    
+
+
+    logAllData(): void {
+      console.log('Accommodation Detail:', this.accommodationDetail);
+    }
     
     
     
