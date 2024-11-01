@@ -687,5 +687,10 @@ removeImageService(index: number) {
   this.accommodation.productImages.splice(index, 1);
 }
 
+isBase64Image(image: string): boolean {
+  return image.startsWith('data:image/');
+}
+
+
 
 }
