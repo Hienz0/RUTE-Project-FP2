@@ -37,8 +37,8 @@ export class TransportationService {
   }
 
   // Fungsi untuk mendapatkan tanggal yang sudah dibooking
-  getBookedDates(): Observable<any> {
-    const data = `${this.url}/api/bookedDates`;
+  getBookedDates(serviceId: any): Observable<any> {
+    const data = `${this.url}/api/bookedDates/${serviceId}`;
     return this.http.get<any[]>(data);
   }
 }

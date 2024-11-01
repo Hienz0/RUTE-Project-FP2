@@ -61,23 +61,26 @@ export class BookTransportationComponent implements OnInit {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
-
+  
     // Get ID from route parameter
     const transportID = this.route.snapshot.paramMap.get('id');
     console.log('Transport ID from route:', transportID);
-
+  
     if (transportID) {
       this.service.getTransporationDetailsByID(transportID).subscribe(
         (data) => {
           this.transportationService = data;
           console.log('data', data);
-
+  
           // Initialize the maps after transportation service is fetched
           setTimeout(() => {
             this.initMap(); // General map initialization
             this.initPickupMap(); // Initialize the pickup map with marker
             this.initDropoffMap(); // Initialize the dropoff map with marker
           }, 0);
+  
+          // Fetch booked dates specific to this transportation service
+          this.fetchBookedDates(transportID);
         },
         (error) => {
           console.error('Error fetching transportation service:', error);
@@ -86,15 +89,14 @@ export class BookTransportationComponent implements OnInit {
     } else {
       console.error('Transport ID is null or invalid');
     }
-
+  
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
-    this.fetchBookedDates();
   }
-
-  fetchBookedDates(): void {
-    this.service.getBookedDates().subscribe(
+  
+  fetchBookedDates(transportID: string): void {
+    this.service.getBookedDates(transportID).subscribe(
       (response: any) => {
         if (
           response &&
@@ -117,6 +119,7 @@ export class BookTransportationComponent implements OnInit {
       }
     );
   }
+  
 
   flattenBookedDates(
     data: { pickupDate: string; dropoffDate: string }[]
@@ -322,7 +325,7 @@ onQuantityInput(subcategory: any) {
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
-        this.fetchBookedDates();
+        
       },
       (error) => {
         console.error('Error booking transportation:', error);

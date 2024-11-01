@@ -670,12 +670,21 @@ app.post('/api/bookTransports', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
     }
 
-    // Check for any existing bookings that overlap with the selected dates
+        // Check for any existing bookings that overlap with the selected dates and match the same serviceId
     const existingBooking = await VehicleBooking.findOne({
-      'vehicleBooking.selectedVehicleType': { $in: vehicleBooking.map(v => v.selectedVehicleType) },
+      serviceId: serviceId,
       $or: [
-        { pickupDate: { $lte: end, $gte: start } },
-        { dropoffDate: { $lte: end, $gte: start } }
+        // Check if the pickup or dropoff dates overlap with any existing booking's dates
+        {
+          pickupDate: { $lte: end, $gte: start }
+        },
+        {
+          dropoffDate: { $lte: end, $gte: start }
+        },
+        {
+          pickupDate: { $lte: start },
+          dropoffDate: { $gte: end }
+        }
       ]
     });
 
@@ -685,6 +694,7 @@ app.post('/api/bookTransports', async (req, res) => {
         message: 'The selected dates are already booked for this service.'
       });
     }
+
 
     // Create new booking with provided data
     const newBooking = new VehicleBooking({
@@ -721,18 +731,32 @@ app.post('/api/bookTransports', async (req, res) => {
 });
 
 
-app.get('/api/bookedDates', async (req, res) => {
-  const bookings = await VehicleBooking.find({}, 'pickupDate dropoffDate');
-  const bookedDates = bookings.map(booking => ({
-    pickupDate: booking.pickupDate,
-    dropoffDate: booking.dropoffDate
-  }));
+app.get('/api/bookedDates/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bookings = await VehicleBooking.find(
+      { serviceId: id }, 
+      'pickupDate dropoffDate'
+    );
 
-  res.status(200).json({
-    success: true,
-    bookedDates
-  });
+    const bookedDates = bookings.map(booking => ({
+      pickupDate: booking.pickupDate,
+      dropoffDate: booking.dropoffDate
+    }));
+
+    res.status(200).json({
+      success: true,
+      bookedDates
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve booked dates',
+      error: error.message
+    });
+  }
 });
+
 
 
 
