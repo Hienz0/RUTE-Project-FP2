@@ -24,6 +24,7 @@ interface Accommodation {
   imageUrl: string;
   location: string;
   roomTypes: RoomType[];
+  productImages: string[];
 }
 
 @Component({
@@ -51,6 +52,7 @@ export class ManageAccommodationComponent implements OnInit {
     imageUrl: '',
     location: '',
     roomTypes: [],
+    productImages: [],
   };
 
   constructor(
@@ -70,6 +72,7 @@ export class ManageAccommodationComponent implements OnInit {
           imageUrl: data.productImages[0] || '',
           location: data.location,
           roomTypes: data.roomTypes || [], // Ensure roomTypes is an array
+          productImages: data.productImages || [],
         };
       });
     }
@@ -115,9 +118,31 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   saveAccommodation() {
-    console.log('Accommodation saved:', this.accommodation);
-    this.toggleEdit();
+    const serviceId = this.route.snapshot.paramMap.get('serviceId');
+    if (serviceId) {
+      // Prepare the accommodation object with only the necessary fields
+      const accommodationData = {
+        productName: this.accommodation.name, // Map to productName
+        productDescription: this.accommodation.description, // Map to productDescription
+        productImages: this.accommodation.productImages, // Map to productImages
+        location: this.accommodation.location // Map to location
+      };
+  
+      // Call the update service function
+      this.servicesService.updateAccommodationService(serviceId, accommodationData).subscribe(
+        (response) => {
+          console.log('Update response:', response); // Log the response from the server
+          this.isEditing = false; // Close editing mode
+          // Optionally display a success message
+        },
+        (error) => {
+          console.error('Update error:', error); // Log any errors
+        }
+      );
+    }
   }
+  
+  
 
   addRoomType() {
     this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [], amenities: [], images: [] });
@@ -614,5 +639,53 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
     
     
     
+    // for managing services image
+
+    isDragging = false;
+
+triggerFileInputService() {
+  document.getElementById('fileUpload')?.click();
+}
+
+onImageSelectService(event: any) {
+  const files = event.target.files;
+  this.uploadImagesService(files);
+}
+
+onDropService(event: DragEvent) {
+  event.preventDefault();
+  this.isDragging = false;
+  const files = event.dataTransfer?.files;
+  if (files) {
+    this.uploadImagesService(files);
+  }
+}
+
+onDragOverService(event: DragEvent) {
+  event.preventDefault();
+  this.isDragging = true;
+}
+
+onDragLeaveService(event: DragEvent) {
+  event.preventDefault();
+  this.isDragging = false;
+}
+
+uploadImagesService(files: FileList) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Assuming you want to add the base64 image directly to productImages
+      this.accommodation.productImages.push(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+removeImageService(index: number) {
+  this.accommodation.productImages.splice(index, 1);
+}
+
 
 }

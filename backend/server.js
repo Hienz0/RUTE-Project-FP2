@@ -387,6 +387,38 @@ app.delete('/api/services/accommodations/:accommodationId/room-types/:roomTypeId
 });
 
 
+// Update service by ID
+// Update service by ID
+app.put('/api/services/update/:id', async (req, res) => {
+  console.log(req.body);
+  try {
+    // Only update the fields that are provided in the request body
+    const { productName, productDescription, productImages, location } = req.body;
+    
+    const updatedService = await Service.findByIdAndUpdate(
+      req.params.id,
+      { productName, productDescription, productImages, location },
+      { new: true }
+    );
+
+    if (!updatedService) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Respond with a success message and the updated service
+    res.json({
+      message: 'Service updated successfully',
+      service: updatedService
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+
+
 
 
 

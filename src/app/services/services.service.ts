@@ -83,6 +83,15 @@ export class ServicesService {
     deleteRoomType(accommodationId: string, roomTypeId: string): Observable<any> {
       return this.http.delete<any>(`${this.apiUrl}/accommodations/${accommodationId}/room-types/${roomTypeId}`);
     }
+
+  // Update accommodation service by ID
+  updateAccommodationService(id: string, accommodation: any): Observable<any> {
+    console.log('Updating accommodation with ID:', id); // Log the ID of the accommodation being updated
+    console.log('Accommodation data:', accommodation); // Log the accommodation data being sent
+  
+    return this.http.put<any>(`${this.apiUrl}/update/${id}`, accommodation);
+  }
+  
     
 
 

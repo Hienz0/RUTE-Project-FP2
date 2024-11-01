@@ -7,7 +7,42 @@
       <div *ngIf="!isEditing">
         <h3><i class="fas fa-hotel icon"></i> {{ accommodation.name }}</h3>
         <p class="text-muted">{{ accommodation.description }}</p>
-        <img [src]="accommodation.imageUrl" class="img-fluid rounded mb-4" alt="Accommodation Image" />
+              <!-- Display Product Images -->
+              <div id="accommodationCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                <!-- Indicators -->
+                <div class="carousel-indicators">
+                  <button 
+                    *ngFor="let image of accommodation.productImages; let i = index" 
+                    type="button" 
+                    data-bs-target="#accommodationCarousel" 
+                    [attr.data-bs-slide-to]="i" 
+                    [class.active]="i === 0" 
+                    aria-current="i === 0 ? 'true' : undefined" 
+                    [attr.aria-label]="'Slide ' + (i + 1)">
+                  </button>
+                </div>
+              
+                <!-- Carousel inner with images -->
+                <div class="carousel-inner">
+                  <div 
+                    *ngFor="let image of accommodation.productImages; let i = index" 
+                    class="carousel-item" 
+                    [class.active]="i === 0">
+                    <img [src]="'http://localhost:3000/' + image" class="d-block w-100 img-fluid rounded" alt="Product Image" style="height: 400px; object-fit: cover;" />
+                  </div>
+                </div>
+              
+                <!-- Controls -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+              
         <p><i class="fas fa-map-marker-alt icon"></i><strong> Location:</strong> {{ accommodation.location }}</p>
         <button class="btn btn-primary mt-3" (click)="toggleEdit()">
           <i class="fas fa-edit"></i> Edit
@@ -29,10 +64,29 @@
               name="description" rows="3"></textarea>
           </div>
           <div class="form-group mb-3">
-            <label for="accommodationImage"><i class="fas fa-image icon"></i> Image URL</label>
-            <input type="text" class="form-control" id="accommodationImage" [(ngModel)]="accommodation.imageUrl"
-              name="imageUrl" />
+            <label><i class="fas fa-image icon"></i> Upload Images</label>
+            <input type="file" (change)="onImageSelectService($event)" multiple class="form-control-file" id="fileUpload" hidden />
+            <div
+              class="upload-drop-zone"
+              (drop)="onDropService($event)"
+              (dragover)="onDragOverService($event)"
+              (dragleave)="onDragLeaveService($event)"
+              (click)="triggerFileInputService()"
+              [class.drag-over]="isDragging"
+            >
+              <p>Click or drag images here to upload</p>
+            </div>
           </div>
+          
+          <!-- Image Preview with Delete Button -->
+          <div class="image-preview-container">
+            <div class="image-preview" *ngFor="let image of accommodation.productImages; let i = index">
+              <img [src]="'http://localhost:3000/' + image" class="img-fluid rounded" alt="Product Image" />
+              <button type="button" class="delete-btn" (click)="removeImageService(i)">×</button>
+              <input type="text" class="form-control mt-2" [(ngModel)]="accommodation.productImages[i]" name="productImages" />
+            </div>
+          </div>
+          
           <div class="form-group mb-3">
             <label for="accommodationLocation"><i class="fas fa-map-marker-alt icon"></i> Location</label>
             <input type="text" class="form-control" id="accommodationLocation" [(ngModel)]="accommodation.location"
