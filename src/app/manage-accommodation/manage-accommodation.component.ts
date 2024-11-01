@@ -449,7 +449,7 @@ uploadImages(): void {
       });
     }
 
-    removeExistingImage(accommodationIndex: number, roomTypeIndex: number, isEditing = false, imageUrl: string): void {  
+    removeExistingImage(accommodationIndex: number, roomTypeIndex: number, imageIndex: number): void {  
       const accommodation = this.accommodationDetail?.[accommodationIndex];
       console.log('Selected accommodation:', accommodation);
     
@@ -471,16 +471,16 @@ uploadImages(): void {
         confirmButtonText: 'Yes, delete it!',
       }).then((result: any) => { 
         if (result.isConfirmed) {
-          const imageIndex = roomType.images.indexOf(imageUrl);
-          if (imageIndex > -1) {
+          if (imageIndex > -1 && imageIndex < roomType.images.length) {
             roomType.images.splice(imageIndex, 1);
             Swal.fire('Deleted!', 'Your image has been deleted.', 'success');
           } else {
-            console.warn('Image URL not found in roomType images array.');
+            console.warn('Image index is out of bounds.');
           }
         }
       });
     }
+    
     
     
 
@@ -558,15 +558,33 @@ uploadImages(): void {
     }
     
     
-    saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
-      const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
-    
-      // Here, you would include any save logic you have, such as updating the backend
-      console.log('Room Type saved:', roomType);
-    
-      // Exit edit mode after saving
-      roomType.isEditing = false;
+// Frontend - Component
+saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
+  const accommodation = this.accommodationDetail[accommodationIndex];
+  const roomType = accommodation.roomTypes[roomTypeIndex];
+
+  // Store images as Base64 locally in roomType.base64Images and create files for uploading
+  roomType.uploadImages = roomType.images.map((image: any, index: number) => {
+    // Check if image is a Base64 string
+    if (typeof image === 'string' && !image.startsWith('/uploads')) {
+      return this.base64ToFile(image, `roomtype-image-${index}.png`);
     }
+    return image; // Keep existing paths or File objects as-is
+  });
+
+  this.servicesService.updateRoomType(accommodation._id, roomType)
+    .subscribe(
+      (response) => {
+        console.log('Room Type saved:', response);
+        roomType.isEditing = false;
+      },
+      (error) => console.error('Error saving room type:', error)
+    );
+}
+
+
+
+
     
     
     

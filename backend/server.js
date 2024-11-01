@@ -317,6 +317,54 @@ app.get('/api/accommodation/service/:serviceId', async (req, res) => {
 });
 
 
+// Update a specific room type within an accommodation
+app.put('/api/services/accommodations/:id/roomtype', upload.array('images'), async (req, res) => {
+  const { id } = req.params;
+  const roomTypeData = req.body;
+
+  if (roomTypeData.rooms) {
+    roomTypeData.rooms = JSON.parse(roomTypeData.rooms);
+  }
+
+  try {
+    const accommodation = await Accommodation.findById(id);
+    if (!accommodation) return res.status(404).send('Accommodation not found');
+
+    const roomTypeIndex = accommodation.roomTypes.findIndex(
+      (rt) => rt._id.toString() === roomTypeData._id
+    );
+    if (roomTypeIndex === -1) return res.status(404).send('Room Type not found');
+
+    // const existingImages = (accommodation.roomTypes[roomTypeIndex].images || []).filter(image => image.startsWith('/uploads'));
+    const existingImages = roomTypeData.images || [];
+    console.log('Existing images:', existingImages);
+
+    console.log('Images to be processed from roomTypeData:', roomTypeData.images);
+
+    if (req.files) {
+      const newImagePaths = req.files.map(file => `/uploads/${file.filename}`);
+      console.log('New images being uploaded:', newImagePaths);
+      roomTypeData.images = [...existingImages, ...newImagePaths];
+    } else {
+      roomTypeData.images = existingImages;
+    }
+
+    accommodation.roomTypes[roomTypeIndex] = { 
+      ...accommodation.roomTypes[roomTypeIndex]._doc, 
+      ...roomTypeData,
+      images: roomTypeData.images
+    };
+
+    await accommodation.save();
+    res.status(200).send(accommodation.roomTypes[roomTypeIndex]);
+  } catch (error) {
+    console.error('Error updating room type:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
 
 
 

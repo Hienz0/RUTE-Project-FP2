@@ -40,5 +40,47 @@ export class ServicesService {
       return this.http.get<any>(`http://localhost:3000/api/accommodation/service/${serviceId}`);
     }
 
+    updateRoomType(accommodationId: string, roomType: any): Observable<any> {
+      const formData = new FormData();
+    
+      // Append room type data to FormData
+      formData.append('_id', roomType._id);
+      formData.append('name', roomType.name);
+      formData.append('price', roomType.price.toString());
+    
+      // Append amenities, images, and rooms
+      roomType.amenities.forEach((amenity: string) => formData.append('amenities', amenity));
+      // Append rooms as a single JSON string
+      formData.append('rooms', JSON.stringify(roomType.rooms));
+
+        // Log images before appending them to FormData
+  console.log('Images to be uploaded:', roomType.uploadImages);
+  
+    
+      // Append only the converted File objects or paths for uploading
+      // roomType.uploadImages.forEach((image: any) => {
+
+      //   console.log('Processing image for upload:', image);
+      //   if (image instanceof File) {
+      //     formData.append('images', image);
+      //   } else {
+      //     formData.append('images', image); // For existing image paths
+      //   }
+      // });
+
+        // Append only the converted File objects or paths for uploading
+  roomType.uploadImages.forEach((image: any) => {
+    // Log the image being processed
+    console.log('Processing image for upload:', image);
+
+    // Append both File objects and existing image paths to FormData
+    formData.append('images', image);
+  });
+    
+      return this.http.put(`${this.apiUrl}/accommodations/${accommodationId}/roomtype`, formData);
+    }
+    
+
+
     
 }
