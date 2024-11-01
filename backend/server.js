@@ -364,6 +364,29 @@ app.put('/api/services/accommodations/:id/roomtype', upload.array('images'), asy
 });
 
 
+// DELETE room type by accommodation and room type IDs
+app.delete('/api/services/accommodations/:accommodationId/room-types/:roomTypeId', async (req, res) => {
+  const { accommodationId, roomTypeId } = req.params;
+
+  try {
+    const accommodation = await Accommodation.findOneAndUpdate(
+      { _id: accommodationId },
+      { $pull: { roomTypes: { _id: roomTypeId } } },
+      { new: true }
+    );
+
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    res.status(200).json({ message: 'Room type deleted successfully', accommodation });
+  } catch (error) {
+    console.error('Error deleting room type:', error);
+    res.status(500).json({ message: 'Error deleting room type', error });
+  }
+});
+
+
 
 
 

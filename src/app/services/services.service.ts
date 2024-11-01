@@ -79,6 +79,10 @@ export class ServicesService {
     
       return this.http.put(`${this.apiUrl}/accommodations/${accommodationId}/roomtype`, formData);
     }
+
+    deleteRoomType(accommodationId: string, roomTypeId: string): Observable<any> {
+      return this.http.delete<any>(`${this.apiUrl}/accommodations/${accommodationId}/room-types/${roomTypeId}`);
+    }
     
 
 

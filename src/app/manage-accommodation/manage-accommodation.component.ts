@@ -171,6 +171,23 @@ export class ManageAccommodationComponent implements OnInit {
     this.accommodation.roomTypes.splice(index, 1);
   }
 
+  removeExistingRoomType(accommodationIndex: number, roomTypeIndex: number): void {
+    const accommodation = this.accommodationDetail[accommodationIndex];
+    const roomType = accommodation.roomTypes[roomTypeIndex];
+  
+    this.servicesService.deleteRoomType(accommodation._id, roomType._id).subscribe(
+      (response) => {
+        console.log('Room type deleted successfully:', response);
+        // Remove room type locally after successful deletion from the server
+        accommodation.roomTypes.splice(roomTypeIndex, 1);
+      },
+      (error) => {
+        console.error('Error deleting room type:', error);
+      }
+    );
+  }
+  
+
   // Method to remove a room from a specific room type by index
   removeRoom(roomType: RoomType, roomIndex: number) {
     roomType.rooms.splice(roomIndex, 1);
