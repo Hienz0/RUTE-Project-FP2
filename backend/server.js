@@ -657,7 +657,6 @@ app.post('/api/bookTransports', async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set time to 00:00 for date-only validation
 
-    // Check if the pickup date is in the past
     if (start < today) {
       return res.status(400).json({
         success: false,
@@ -670,33 +669,43 @@ app.post('/api/bookTransports', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
     }
 
-        // Check for any existing bookings that overlap with the selected dates and match the same serviceId
-    const existingBooking = await VehicleBooking.findOne({
-      serviceId: serviceId,
-      $or: [
-        // Check if the pickup or dropoff dates overlap with any existing booking's dates
-        {
-          pickupDate: { $lte: end, $gte: start }
-        },
-        {
-          dropoffDate: { $lte: end, $gte: start }
-        },
-        {
-          pickupDate: { $lte: start },
-          dropoffDate: { $gte: end }
-        }
-      ]
-    });
+    // Loop through each vehicle in the booking to check quantity
+    for (const vehicle of vehicleBooking) {
+      const { name, quantity: requestedQuantity } = vehicle;
 
-    if (existingBooking) {
-      return res.status(400).json({
-        success: false,
-        message: 'The selected dates are already booked for this service.'
-      });
+      // Get the maximum quantity for this vehicle type in Transportation schema
+      const serviceVehicle = service.productSubcategory.find(v => v.name === name);
+      if (!serviceVehicle) {
+        return res.status(400).json({ success: false, message: `Vehicle ${name} not found in service.` });
+      }
+
+      // Check existing bookings for the same vehicle type
+      const existingBookings = await VehicleBooking.aggregate([
+        { $match: { serviceId: serviceId } },
+        { $unwind: "$vehicleBooking" },
+        { $match: {
+          "vehicleBooking.name": name,
+          $or: [
+            { pickupDate: { $lte: end, $gte: start } },
+            { dropoffDate: { $lte: end, $gte: start } },
+            { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
+          ]
+        }},
+        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" }}}
+      ]);
+
+      const totalBooked = existingBookings[0]?.totalBooked || 0;
+
+      // Check if the requested quantity exceeds the available quantity
+      if (totalBooked + requestedQuantity > serviceVehicle.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient quantity for ${name}. Only ${serviceVehicle.quantity - totalBooked} available.`
+        });
+      }
     }
 
-
-    // Create new booking with provided data
+    // If all checks pass, create the new booking
     const newBooking = new VehicleBooking({
       customerName: user.name,
       productName: service.productName,
@@ -731,31 +740,68 @@ app.post('/api/bookTransports', async (req, res) => {
 });
 
 
+
 app.get('/api/bookedDates/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Dapatkan data transportation berdasarkan serviceId
+    const transportationData = await Transportation.findOne({ serviceId: id });
+    if (!transportationData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Data transportasi tidak ditemukan'
+      });
+    }
+
+    // Ambil data booking berdasarkan serviceId
     const bookings = await VehicleBooking.find(
-      { serviceId: id }, 
-      'pickupDate dropoffDate'
+      { serviceId: id },
+      'pickupDate dropoffDate vehicleBooking'
     );
 
-    const bookedDates = bookings.map(booking => ({
-      pickupDate: booking.pickupDate,
-      dropoffDate: booking.dropoffDate
-    }));
+    // Hitung jumlah kendaraan yang dipesan per tanggal
+    const dateCounts = {};
+    bookings.forEach(booking => {
+      booking.vehicleBooking.forEach(vehicle => {
+        let currentDate = new Date(booking.pickupDate);
+        const endDate = new Date(booking.dropoffDate);
+
+        // Iterasi setiap hari dari pickupDate ke dropoffDate
+        while (currentDate <= endDate) {
+          const dateString = currentDate.toISOString().split('T')[0]; // Format tanggal sebagai string
+          if (!dateCounts[dateString]) {
+            dateCounts[dateString] = 0;
+          }
+          dateCounts[dateString] += vehicle.quantity;
+
+          // Tambahkan satu hari
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      });
+    });
+
+    // Cari tanggal yang harus dinonaktifkan berdasarkan quantity di transportationData
+    const disabledDates = [];
+    for (const [date, count] of Object.entries(dateCounts)) {
+      if (count >= transportationData.productSubcategory.reduce((acc, item) => acc + item.quantity, 0)) {
+        disabledDates.push(date);
+      }
+    }
 
     res.status(200).json({
       success: true,
-      bookedDates
+      disabledDates,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve booked dates',
+      message: 'Gagal mengambil tanggal yang sudah dibooking',
       error: error.message
     });
   }
 });
+
 
 
 

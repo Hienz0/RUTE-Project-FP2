@@ -38,7 +38,7 @@ export class BookTransportationComponent implements OnInit {
   pickupMap: any; // Declare pickup map globally
   dropoffMap: any; // Declare dropoff map globally
 
-  bookedDates: string[] = []; // Store booked dates as flat strings (YYYY-MM-DD)
+  disabledDates: string[] = []; // Store booked dates as flat strings (YYYY-MM-DD)
 
   selectedVehicleTypes: any[] = [];
   vehicleQuantities: { [key: string]: number } = {};
@@ -101,24 +101,25 @@ export class BookTransportationComponent implements OnInit {
         if (
           response &&
           response.success &&
-          Array.isArray(response.bookedDates)
+          Array.isArray(response.disabledDates)
         ) {
-          // Extract bookedDates from the response object
-          this.bookedDates = this.flattenBookedDates(response.bookedDates);
+          // Set the disabled dates directly from response
+          this.disabledDates = response.disabledDates;
         } else {
           console.warn('Unexpected response format:', response);
-          this.bookedDates = [];
+          this.disabledDates = [];
         }
-        // Call initDatePickers after fetching the booked dates
+        // Call initDatePickers after fetching the disabled dates
         this.initDatePickers();
       },
       (error) => {
-        console.error('Error fetching booked dates:', error);
-        this.bookedDates = []; // Set to empty array in case of an error
+        console.error('Error fetching disabled dates:', error);
+        this.disabledDates = []; // Set to empty array in case of an error
         this.initDatePickers();
       }
     );
   }
+
   
 
   flattenBookedDates(
@@ -139,7 +140,7 @@ export class BookTransportationComponent implements OnInit {
   }
 
   initDatePickers(): void {
-    const disabledDates = this.bookedDates;
+    const disabledDates = this.disabledDates;
     console.log('Disabled Dates:', disabledDates); // Debug log
 
     // Initialize Flatpickr for the pickup date
