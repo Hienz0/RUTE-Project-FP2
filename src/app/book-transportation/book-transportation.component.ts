@@ -50,6 +50,9 @@ export class BookTransportationComponent implements OnInit {
   individualPricesPerDay: { [key: string]: number } = {};
 
   vehicleBooking: Array<{ name: string; quantity: number; pricePerVehicle: number; totalPrice: number; selectedVehicleType: string }> = [];
+  
+  transportID: string = '';
+  remainingQuantity: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,14 +66,15 @@ export class BookTransportationComponent implements OnInit {
     console.log('Logged in user:', this.currentUser);
   
     // Get ID from route parameter
-    const transportID = this.route.snapshot.paramMap.get('id');
-    console.log('Transport ID from route:', transportID);
+    this.transportID = this.route.snapshot.paramMap.get('id')!;
+    console.log('Transport ID from route:', this.transportID);
   
-    if (transportID) {
-      this.service.getTransporationDetailsByID(transportID).subscribe(
+    if (this.transportID) {
+      this.service.getTransporationDetailsByID(this.transportID).subscribe(
         (data) => {
           this.transportationService = data;
           console.log('data', data);
+          
   
           // Initialize the maps after transportation service is fetched
           setTimeout(() => {
@@ -80,7 +84,7 @@ export class BookTransportationComponent implements OnInit {
           }, 0);
   
           // Fetch booked dates specific to this transportation service
-          this.fetchBookedDates(transportID);
+          this.fetchBookedDates(this.transportID);
         },
         (error) => {
           console.error('Error fetching transportation service:', error);
@@ -286,10 +290,36 @@ onQuantityInput(subcategory: any) {
     this.calculateTotalPrice();
 }
 
-  // Fungsi untuk menghitung ulang harga saat tanggal berubah
+  // Fungsi untuk menghitung ulang harga dan validasi tanggal
   onDateChange() {
+    if (this.pickupDate && this.dropoffDate) {
+      const pickup = new Date(this.pickupDate);
+      const dropoff = new Date(this.dropoffDate);
+
+      // Validasi: Dropoff date harus lebih besar dari Pickup date
+      if (dropoff <= pickup) {
+        alert('Tanggal Dropoff harus lebih besar dari Tanggal Pickup.');
+        this.dropoffDate = ''; // Reset dropoffDate jika invalid
+        return; // Keluar dari fungsi jika validasi gagal
+      }
+
+      // Panggil API untuk mendapatkan kuantitas yang tersisa jika tanggal valid
+      this.service.getRemainingQuantity(this.transportID, this.pickupDate, this.dropoffDate)
+        .subscribe(
+          (data) => {
+            this.remainingQuantity = data.availableQuantity;
+            console.log(this.remainingQuantity);
+          },
+          (error) => {
+            console.error('Gagal mendapatkan sisa kuantitas:', error);
+          }
+        );
+    }
+
+    // Hitung total harga jika tanggal valid
     this.calculateTotalPrice();
   }
+
 
   // Function to book transportation
   bookTransport(): void {

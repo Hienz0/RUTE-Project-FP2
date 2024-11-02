@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 export class TransportationService {
   private url = 'http://localhost:3000';
   private apiUrl = 'http://localhost:3000/api/bookTransports';
-
+  private getUrl = 'http://localhost:3000/remaining-quantity';
   constructor(private http: HttpClient) {}
 
 
@@ -40,5 +40,9 @@ export class TransportationService {
   getBookedDates(serviceId: any): Observable<any> {
     const data = `${this.url}/api/bookedDates/${serviceId}`;
     return this.http.get<any[]>(data);
+  }
+
+  getRemainingQuantity(serviceId: string, pickupDate: string, dropoffDate: string): Observable<any> {
+    return this.http.get<any>(`${this.getUrl}?serviceId=${serviceId}&pickupDate=${pickupDate}&dropoffDate=${dropoffDate}`);
   }
 }

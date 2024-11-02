@@ -802,6 +802,49 @@ app.get('/api/bookedDates/:id', async (req, res) => {
   }
 });
 
+app.get('/remaining-quantity', async (req, res) => {
+  try {
+    const { serviceId, pickupDate, dropoffDate } = req.query;
+    const pickup = new Date(pickupDate);
+    const dropoff = new Date(dropoffDate);
+
+    // Ambil detail transportasi berdasarkan serviceId
+    const transportation = await Transportation.findOne({ serviceId });
+    if (!transportation) {
+      return res.status(404).json({ message: 'Layanan tidak ditemukan.' });
+    }
+    // Hitung total kuantitas dari semua subkategori
+    let availableQuantity = transportation.productSubcategory.reduce(
+      (total, subcategory) => total + (subcategory.quantity || 0),
+      0
+    );
+
+    // Ambil pemesanan terkait dengan serviceId yang bertumpuk dengan tanggal yang dipilih
+    const bookings = await VehicleBooking.find({
+      serviceId,
+      bookingStatus: 'Booked',
+      $or: [
+        { pickupDate: { $lt: dropoff }, dropoffDate: { $gt: pickup } }
+      ]
+    });
+
+    // Kurangi kuantitas berdasarkan pemesanan yang bertumpuk
+    bookings.forEach((booking) => {
+      booking.vehicleBooking.forEach((vehicle) => {
+        availableQuantity -= vehicle.quantity;
+      });
+    });
+
+    // Pastikan kuantitas tidak negatif
+    availableQuantity = Math.max(availableQuantity, 0);
+
+    res.json({ availableQuantity });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat menghitung sisa kuantitas.' });
+  }
+});
+
 
 
 

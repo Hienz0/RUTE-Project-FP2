@@ -185,7 +185,7 @@
                 [for]="'vehicleType' + subcategory.name"
               >
                 {{ subcategory.name }} - {{ subcategory.type }} (Tersedia:
-                {{ subcategory.quantity }})
+                {{ this.remainingQuantity }})
               </label>
             </div>
 
