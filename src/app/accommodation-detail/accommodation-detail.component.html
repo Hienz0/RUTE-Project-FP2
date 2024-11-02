@@ -245,11 +245,20 @@
               class="form-control" required />
           </div>
 
-          <!-- Room Number -->
-          <div class="mb-3">
-            <label for="roomNumber" class="form-label">Room Number</label>
-            <input id="roomNumber" type="number" [(ngModel)]="bookingDetails.roomNumber" name="roomNumber"
-              class="form-control" placeholder="Enter room number" required />
+          <!-- Room Type Selection -->
+          <div class="mb-3" *ngIf="accommodationData?.length > 0">
+            <label for="roomType" class="form-label">Room Type</label>
+            <select
+              id="roomType"
+              [(ngModel)]="bookingDetails.roomTypeId"
+              name="roomType"
+              class="form-select"
+              required
+            >
+              <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
+                {{ roomType.name }}
+              </option>
+            </select>
           </div>
 
           <!-- Special Request -->

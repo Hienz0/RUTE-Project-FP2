@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -95,6 +96,21 @@ export class ServicesService {
   getAccommodationDataById(serviceId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/accommodations/service/${serviceId}`);
   }
+
+  getAvailableRoom(roomTypeId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/rooms/available/${roomTypeId}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          // Suppress the console log for 404 errors and return null
+          return of(null);
+        }
+        // For other errors, rethrow the error so it can be handled elsewhere
+        return throwError(error);
+      })
+    );
+  }
+
+  
   
     
 

@@ -24,12 +24,14 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
     guestName: '',
-    accommodationType: 'Hotel',
+    accommodationType: 'Hotel', // Default accommodation type
     numberOfGuests: 1,
     checkInDate: '',
     checkOutDate: '',
-    roomNumber: null,
-    specialRequest: '',
+    roomTypeId: '', // Added to store the selected room type ID
+    roomId: '', // To store the selected room ID
+    accommodationId: '', // To store the accommodation ID
+    specialRequest: ''
   };
   selectedImage: string | null = null;
   isImagePreviewOpen: boolean = false;
@@ -99,13 +101,24 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   loadAccommodationData(serviceId: string): void {
     this.servicesService.getAccommodationDataById(serviceId).subscribe(
       (data) => {
+              // Assign accommodationId to bookingDetails
+      this.bookingDetails.accommodationId = data._id;
         // Filter out 'rooms' for each room type
-        this.accommodationData = data.roomTypes.map((roomType: any) => ({
-          name: roomType.name,
-          price: roomType.price,
-          amenities: roomType.amenities,
-          images: roomType.images,
-        }));
+      // Filter out 'rooms' and 'roomTypeId' for each room type
+      this.accommodationData = data.roomTypes.map((roomType: any) => ({
+        name: roomType.name,
+        price: roomType.price,
+        amenities: roomType.amenities,
+        images: roomType.images,
+        roomTypeId: roomType._id,
+        accommodationId: data._id,
+        rooms: roomType.rooms.map((room: any) => ({
+          roomId: room._id,
+          number: room.number,
+          status: room.status,
+        })),
+      }));
+        console.log(this.accommodationData)
       },
       (error) => {
         console.error('Error loading accommodation details:', error);
@@ -148,38 +161,40 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
 
 
   
-  // Submit the booking form
+  // temporary commented Submit the booking form
+  // submitBooking(): void {
+  //   console.log('Booking form submitted');
+  //   console.log('Booking details:', this.bookingDetails);
+  // }
   
   submitBooking(): void {
-      // Get today's date in 'yyyy-mm-dd' format to compare
-  const today = new Date().toISOString().split('T')[0];
-
+    const today = new Date().toISOString().split('T')[0];
+  
     // Check if all required fields are filled
     if (!this.bookingDetails.guestName || !this.bookingDetails.accommodationType || 
         !this.bookingDetails.numberOfGuests || !this.bookingDetails.checkInDate || 
-        !this.bookingDetails.checkOutDate || !this.bookingDetails.roomNumber) {
+        !this.bookingDetails.checkOutDate || !this.bookingDetails.roomTypeId) {
   
-      // Display SweetAlert2 error popup if validation fails
       Swal.fire({
         icon: 'error',
         title: 'Missing Fields',
         text: 'Please fill in all the required fields.',
         confirmButtonColor: '#3085d6',
       });
-      return; // Stop the submission process if validation fails
+      return;
     }
-
-      // Check if check-in date is in the past
-  if (this.bookingDetails.checkInDate < today) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Invalid Check-in Date',
-      text: 'Check-in date cannot be in the past.',
-      confirmButtonColor: '#d33',
-    });
-    return; // Stop submission if check-in date is invalid
-  }
-
+  
+    // Check if check-in date is in the past
+    if (this.bookingDetails.checkInDate < today) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Check-in Date',
+        text: 'Check-in date cannot be in the past.',
+        confirmButtonColor: '#d33',
+      });
+      return;
+    }
+  
     // Check if check-out date is earlier than check-in date
     if (this.bookingDetails.checkOutDate < this.bookingDetails.checkInDate) {
       Swal.fire({
@@ -190,56 +205,76 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       });
       return;
     }
-
-    
-
-   // Check room availability
-   this.bookingService.checkRoomAvailability(
-    this.serviceId!,
-    this.bookingDetails.roomNumber!,
-    this.bookingDetails.checkInDate,
-    this.bookingDetails.checkOutDate
-  ).subscribe((isAvailable: boolean) => {
-    if (!isAvailable) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Room Unavailable',
-        text: 'The selected room is already booked for the chosen dates. Please choose different dates or a different room.',
-        confirmButtonColor: '#d33',
-      });
-      return;
-    }
-
-    // If room is available, proceed with booking
-    const bookingData = {
-      ...this.bookingDetails,
-      serviceId: this.serviceId,
-      userId: this.currentUser?.userId,
-    };
-
-    this.bookingService.bookAccommodation(bookingData).subscribe(
-      (response) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Booking Successful!',
-          text: 'Your accommodation has been booked successfully.',
-          confirmButtonColor: '#3085d6',
-        });
-        this.closeModal();
+  
+    // Find an available room ID for the selected room type
+    this.servicesService.getAvailableRoom(this.bookingDetails.roomTypeId).subscribe(
+      (room: any) => {
+        if (!room) {
+          Swal.fire({
+            icon: 'error',
+            title: 'No Rooms Available',
+            text: 'There are no available rooms for the selected room type.',
+            confirmButtonColor: '#d33',
+          });
+          return;
+        }
+  
+        // Assign the available room ID
+        this.bookingDetails.roomId = room._id;
+  
+        console.log('Booking form submitted');
+        console.log('Booking details:', this.bookingDetails);
+  
+        const bookingData = {
+          ...this.bookingDetails,
+          serviceId: this.serviceId,
+          userId: this.currentUser?.userId,
+        };
+  
+        // Submit the booking data
+        this.bookingService.bookAccommodation(bookingData).subscribe(
+          (response) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Booking Successful!',
+              text: 'Your accommodation has been booked successfully.',
+              confirmButtonColor: '#3085d6',
+            });
+            this.closeModal();
+          },
+          (error) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Booking Failed',
+              text: 'There was an error processing your booking. Please try again.',
+              confirmButtonColor: '#d33',
+            });
+          }
+        );
       },
       (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Booking Failed',
-          text: 'There was an error processing your booking. Please try again.',
-          confirmButtonColor: '#d33',
-        });
+        // Handle the 404 "No Room Available" response specifically
+        if (error.status === 404) {
+          Swal.fire({
+            icon: 'error',
+            title: 'No Room Available',
+            text: 'There are no rooms available for the selected room type at this time.',
+            confirmButtonColor: '#d33',
+          });
+        } else {
+          // Handle other errors
+          Swal.fire({
+            icon: 'error',
+            title: 'Error Finding Room',
+            text: 'An error occurred while finding an available room. Please try again later.',
+            confirmButtonColor: '#d33',
+          });
+        }
       }
     );
-  }, (error) => {
-    console.error('Error checking room availability', error);
-  });
-}
+  }
+  
+  
 
   // Function to show image preview
   // Function to show image preview and open the modal

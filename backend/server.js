@@ -140,7 +140,15 @@ const bookingAccommodationSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-  }
+  },
+  accommodationId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Accommodation', required: true }, // Reference to Accommodation
+  roomTypeId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    required: true }, // Reference to RoomType
+  roomId: { type: mongoose.Schema.Types.ObjectId, 
+    required: true } // Reference to Room
 }, { timestamps: true });
 
 // Create the Booking model
@@ -478,6 +486,23 @@ app.get('/api/services/accommodations/service/:serviceId', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
+  const { roomTypeId } = req.params;
+  try {
+    const accommodation = await Accommodation.findOne({ 'roomTypes._id': roomTypeId });
+    const roomType = accommodation.roomTypes.id(roomTypeId);
+    const availableRoom = roomType.rooms.find(room => room.status === 'available');
+    if (availableRoom) {
+      res.json(availableRoom);
+    } else {
+      res.status(200).json({ message: 'No available rooms found for this room type.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error finding available room', error });
+  }
+});
+
 
 
 
