@@ -9,6 +9,7 @@ import * as L from 'leaflet';
 
 // Declare Swal globally
 declare var Swal: any;
+declare var bootstrap: any;
 @Component({
   selector: 'app-accommodation-detail',
   templateUrl: './accommodation-detail.component.html',
@@ -19,6 +20,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
 
   serviceId: string | null = null;
   accommodationDetail: any = null;
+  accommodationData: any = null;
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
     guestName: '',
@@ -29,6 +31,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     roomNumber: null,
     specialRequest: '',
   };
+  selectedImage: string | null = null;
+  isImagePreviewOpen: boolean = false;
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map: L.Map | undefined;
@@ -50,7 +54,9 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     this.serviceId = this.route.snapshot.paramMap.get('id');
     if (this.serviceId) {
       this.loadAccommodationDetail(this.serviceId);
+      this.loadAccommodationData(this.serviceId);
     }
+
 
         // // Dynamically add Tailwind CDN script
         // const script = this.renderer.createElement('script');
@@ -85,6 +91,23 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       },
       (error) => {
         console.error('Error fetching accommodation detail', error);
+      }
+    );
+  }
+
+  loadAccommodationData(serviceId: string): void {
+    this.servicesService.getAccommodationDataById(serviceId).subscribe(
+      (data) => {
+        // Filter out 'rooms' for each room type
+        this.accommodationData = data.roomTypes.map((roomType: any) => ({
+          name: roomType.name,
+          price: roomType.price,
+          amenities: roomType.amenities,
+          images: roomType.images,
+        }));
+      },
+      (error) => {
+        console.error('Error loading accommodation details:', error);
       }
     );
   }
@@ -209,5 +232,16 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     console.error('Error checking room availability', error);
   });
 }
+
+  // Function to show image preview
+  // Function to show image preview and open the modal
+  showImagePreview(imageUrl: string): void {
+    this.selectedImage = imageUrl;
+
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = document.getElementById('imagePreviewModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
   
 }

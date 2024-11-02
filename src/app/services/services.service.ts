@@ -91,6 +91,10 @@ export class ServicesService {
   
     return this.http.put<any>(`${this.apiUrl}/update/${id}`, accommodation);
   }
+
+  getAccommodationDataById(serviceId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/accommodations/service/${serviceId}`);
+  }
   
     
 

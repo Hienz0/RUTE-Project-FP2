@@ -34,8 +34,10 @@
           <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Customize User Profile</a></li>
           <li><a class="dropdown-item" href="#"><i class="fas fa-paint-brush"></i> Change Theme</a></li>
           <li><a class="dropdown-item" href="#"><i class="fas fa-key"></i> Reset Password</a></li>
-          <li *ngIf="currentUser.userType === 'user'"><a class="dropdown-item" href="/provider-registration"><i class="fas fa-user-plus"></i> Register as Provider</a></li>
-          <li *ngIf="currentUser.userType !== 'user'"><a class="dropdown-item" href="/manage-services"><i class="fas fa-exchange-alt"></i> Switch to Provider Mode</a></li>
+          <li *ngIf="currentUser.userType === 'user'"><a class="dropdown-item" href="/provider-registration"><i
+                class="fas fa-user-plus"></i> Register as Provider</a></li>
+          <li *ngIf="currentUser.userType !== 'user'"><a class="dropdown-item" href="/manage-services"><i
+                class="fas fa-exchange-alt"></i> Switch to Provider Mode</a></li>
           <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
         </ul>
       </li>
@@ -62,63 +64,48 @@
     </div>
   </div>
 
-<!-- Carousel for Accommodation Images -->
-<div *ngIf="accommodationDetail.productImages?.length" class="row my-5" style="margin: 0;">
-  <div id="accommodationCarousel" class="carousel slide col-12 shadow-lg rounded overflow-hidden" data-bs-ride="carousel">
-    <div class="carousel-inner">
-      <div
-        *ngFor="let image of accommodationDetail.productImages; let isFirst = first"
-        [class.active]="isFirst"
-        class="carousel-item"
-      >
-        <img
-          [src]="'http://localhost:3000/' + image"
-          class="d-block w-100"
-          alt="{{ accommodationDetail.productName }}"
-          style="height: 400px; object-fit: cover;"
-        />
+  <!-- Carousel for Accommodation Images -->
+  <div *ngIf="accommodationDetail.productImages?.length" class="row my-5" style="margin: 0;">
+    <div id="accommodationCarousel" class="carousel slide col-12 shadow-lg rounded overflow-hidden"
+      data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div *ngFor="let image of accommodationDetail.productImages; let isFirst = first" [class.active]="isFirst"
+          class="carousel-item">
+          <img [src]="'http://localhost:3000/' + image" class="d-block w-100"
+            alt="{{ accommodationDetail.productName }}" style="height: 400px; object-fit: cover;" />
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Small Images Below Carousel -->
+  <div class="row my-3" style="margin: 0;">
+    <div class="col-12 d-flex justify-content-between">
+      <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
+        <img [src]="'http://localhost:3000/' + accommodationDetail.productImages[0]" class="img-fluid rounded"
+          alt="{{ accommodationDetail.productName }} small image 1"
+          style="object-fit: cover; height: 200px; width: 100%;" />
+      </div>
+      <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
+        <img [src]="'http://localhost:3000/' + accommodationDetail.productImages[1]" class="img-fluid rounded"
+          alt="{{ accommodationDetail.productName }} small image 2"
+          style="object-fit: cover; height: 200px; width: 100%;" />
+      </div>
+      <div class="small-image-wrapper" style="flex: 1;">
+        <img [src]="'http://localhost:3000/' + accommodationDetail.productImages[2]" class="img-fluid rounded"
+          alt="{{ accommodationDetail.productName }} small image 3"
+          style="object-fit: cover; height: 200px; width: 100%;" />
       </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </button>
   </div>
-</div>
-
-<!-- Small Images Below Carousel -->
-<div class="row my-3" style="margin: 0;">
-  <div class="col-12 d-flex justify-content-between">
-    <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
-      <img
-        [src]="'http://localhost:3000/' + accommodationDetail.productImages[0]"
-        class="img-fluid rounded"
-        alt="{{ accommodationDetail.productName }} small image 1"
-        style="object-fit: cover; height: 200px; width: 100%;"
-      />
-    </div>
-    <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
-      <img
-        [src]="'http://localhost:3000/' + accommodationDetail.productImages[1]"
-        class="img-fluid rounded"
-        alt="{{ accommodationDetail.productName }} small image 2"
-        style="object-fit: cover; height: 200px; width: 100%;"
-      />
-    </div>
-    <div class="small-image-wrapper" style="flex: 1;">
-      <img
-        [src]="'http://localhost:3000/' + accommodationDetail.productImages[2]"
-        class="img-fluid rounded"
-        alt="{{ accommodationDetail.productName }} small image 3"
-        style="object-fit: cover; height: 200px; width: 100%;"
-      />
-    </div>
-  </div>
-</div>
 
 
 
@@ -131,6 +118,69 @@
     </div>
   </div>
 
+  <div *ngIf="accommodationData" class="container my-4">
+    <!-- Room Types Heading -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold text-info">
+        <i class="fas fa-hotel me-2"></i>Room Types
+      </h1>
+      <p class="text-muted">Explore the various room types available for your stay</p>
+    </div>
+  
+    <div *ngFor="let roomType of accommodationData" class="card mb-4 shadow-lg border-light">
+      <div class="card-body">
+        <!-- Room Type Header with Icon -->
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="card-title mb-1 text-dark">
+            <i class="fas fa-bed me-2 text-info"></i>{{ roomType.name }}
+          </h2>
+          <span class="badge bg-warning text-dark fs-6">
+            <i class="fas fa-dollar-sign"></i> {{ roomType.price | currency }}
+          </span>
+        </div>
+  
+        <!-- Amenities Section -->
+        <p class="text-muted mt-2"><i class="fas fa-concierge-bell me-2"></i>Amenities:</p>
+        <ul class="list-inline">
+          <li *ngFor="let amenity of roomType.amenities" class="list-inline-item me-2">
+            <span class="badge bg-secondary text-light">{{ amenity }}</span>
+          </li>
+        </ul>
+  
+        <!-- Images Section -->
+        <div *ngIf="roomType.images.length > 0" class="mt-3">
+          <p class="text-muted"><i class="fas fa-images me-2"></i>Images:</p>
+          <div class="d-flex flex-wrap">
+            <div *ngFor="let image of roomType.images" class="position-relative m-1">
+              <img [src]="image.startsWith('/upload') ? 'http://localhost:3000' + image : image"
+                   alt="Room Image"
+                   class="img-thumbnail rounded"
+                   style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; border: 2px solid #dee2e6;"
+                   (click)="showImagePreview(image.startsWith('/upload') ? 'http://localhost:3000' + image : image)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Bootstrap Modal for Image Preview -->
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagePreviewModalLabel"><i class="fas fa-image me-2"></i>Image Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img [src]="selectedImage" alt="Preview Image" class="img-fluid rounded" />
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
   <!-- Booking Button -->
   <div class="row mt-5">
     <div class="col-12 text-center">
@@ -139,6 +189,8 @@
       </button>
     </div>
   </div>
+
+
 
   <!-- Booking Modal -->
   <div *ngIf="isModalOpen">
@@ -158,27 +210,15 @@
               <!-- Guest Name -->
               <div class="mb-3">
                 <label for="guestName" class="form-label">Guest Name</label>
-                <input
-                  id="guestName"
-                  type="text"
-                  [(ngModel)]="bookingDetails.guestName"
-                  name="guestName"
-                  class="form-control"
-                  placeholder="Enter your name"
-                  required
-                />
+                <input id="guestName" type="text" [(ngModel)]="bookingDetails.guestName" name="guestName"
+                  class="form-control" placeholder="Enter your name" required />
               </div>
 
               <!-- Accommodation Type -->
               <div class="mb-3">
                 <label for="accommodationType" class="form-label">Accommodation Type</label>
-                <select
-                  id="accommodationType"
-                  [(ngModel)]="bookingDetails.accommodationType"
-                  name="accommodationType"
-                  class="form-select"
-                  required
-                >
+                <select id="accommodationType" [(ngModel)]="bookingDetails.accommodationType" name="accommodationType"
+                  class="form-select" required>
                   <option [value]="accommodationDetail.productSubcategory">
                     {{ accommodationDetail.productSubcategory }}
                   </option>
@@ -188,69 +228,36 @@
               <!-- Number of Guests -->
               <div class="mb-3">
                 <label for="numberOfGuests" class="form-label">Number of Guests</label>
-                <input
-                  id="numberOfGuests"
-                  type="number"
-                  [(ngModel)]="bookingDetails.numberOfGuests"
-                  name="numberOfGuests"
-                  min="1"
-                  class="form-control"
-                  placeholder="Enter number of guests"
-                  required
-                />
+                <input id="numberOfGuests" type="number" [(ngModel)]="bookingDetails.numberOfGuests"
+                  name="numberOfGuests" min="1" class="form-control" placeholder="Enter number of guests" required />
               </div>
 
               <!-- Check-in Date -->
               <div class="mb-3">
                 <label for="checkInDate" class="form-label">Check-in Date</label>
-                <input
-                  id="checkInDate"
-                  type="date"
-                  [(ngModel)]="bookingDetails.checkInDate"
-                  name="checkInDate"
-                  class="form-control"
-                  required
-                />
+                <input id="checkInDate" type="date" [(ngModel)]="bookingDetails.checkInDate" name="checkInDate"
+                  class="form-control" required />
               </div>
 
               <!-- Check-out Date -->
               <div class="mb-3">
                 <label for="checkOutDate" class="form-label">Check-out Date</label>
-                <input
-                  id="checkOutDate"
-                  type="date"
-                  [(ngModel)]="bookingDetails.checkOutDate"
-                  name="checkOutDate"
-                  class="form-control"
-                  required
-                />
+                <input id="checkOutDate" type="date" [(ngModel)]="bookingDetails.checkOutDate" name="checkOutDate"
+                  class="form-control" required />
               </div>
 
               <!-- Room Number -->
               <div class="mb-3">
                 <label for="roomNumber" class="form-label">Room Number</label>
-                <input
-                  id="roomNumber"
-                  type="number"
-                  [(ngModel)]="bookingDetails.roomNumber"
-                  name="roomNumber"
-                  class="form-control"
-                  placeholder="Enter room number"
-                  required
-                />
+                <input id="roomNumber" type="number" [(ngModel)]="bookingDetails.roomNumber" name="roomNumber"
+                  class="form-control" placeholder="Enter room number" required />
               </div>
 
               <!-- Special Request -->
               <div class="mb-3">
                 <label for="specialRequest" class="form-label">Special Request</label>
-                <textarea
-                  id="specialRequest"
-                  [(ngModel)]="bookingDetails.specialRequest"
-                  name="specialRequest"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Enter any special requests"
-                ></textarea>
+                <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
+                  class="form-control" rows="3" placeholder="Enter any special requests"></textarea>
               </div>
 
               <!-- Modal Actions -->

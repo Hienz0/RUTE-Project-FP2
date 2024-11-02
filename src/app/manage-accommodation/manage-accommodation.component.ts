@@ -113,9 +113,22 @@ export class ManageAccommodationComponent implements OnInit {
   
   
 
-  toggleEdit() {
+  toggleEdit(): void {
+    if (this.isEditing) {
+      // Revert to original data if canceling
+      this.accommodation = this.originalAccommodationDetail
+        ? JSON.parse(JSON.stringify(this.originalAccommodationDetail))
+        : this.accommodation;
+    } else {
+      // Enter edit mode
+      this.originalAccommodationDetail = JSON.parse(JSON.stringify(this.accommodation));
+    }
     this.isEditing = !this.isEditing;
   }
+
+  // toggleEdit() {
+  //   this.isEditing = !this.isEditing;
+  // }
 
   saveAccommodation() {
     const serviceId = this.route.snapshot.paramMap.get('serviceId');

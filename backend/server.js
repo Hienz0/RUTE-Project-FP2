@@ -440,6 +440,28 @@ app.put('/api/services/update/:id', upload.array('productImages', 10), async (re
   }
 });
 
+// Get accommodation by serviceId
+app.get('/api/services/accommodations/service/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
+  
+  try {
+    const accommodation = await Accommodation.findOne({ serviceId })
+      .select('roomTypes') // Only fetch room types field
+      .populate({
+        path: 'roomTypes',
+        select: 'name price amenities images', // Exclude 'rooms' field
+      });
+
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    res.json(accommodation);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 
 
 
