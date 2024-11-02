@@ -329,10 +329,13 @@ app.post('/api/services/accommodations', upload.array('images', 10), async (req,
     // Parse room types from request body
     const roomTypes = req.body.roomTypes.map((roomType, index) => {
       const parsedRoomType = JSON.parse(roomType);
+      
+      // Get images associated with this room type
       const images = req.files
-        .filter((file) => file.fieldname === 'images') // Filter for all images
+        .filter((file) => file.fieldname === 'images' && file.originalname.includes(`image_${index}_`)) // Filter for images of the current room type
         .map((file) => `/uploads/${file.filename}`);
-      return { ...parsedRoomType, images };
+        
+      return { ...parsedRoomType, images }; // Return the room type with its associated images
     });
 
     const { serviceId } = req.body;
@@ -355,9 +358,11 @@ app.post('/api/services/accommodations', upload.array('images', 10), async (req,
       res.status(201).json(savedAccommodation);
     }
   } catch (error) {
+    console.error('Error publishing accommodation:', error);
     res.status(500).json({ error: 'Failed to publish accommodation' });
   }
 });
+
 
 
 // Accommodation Controller

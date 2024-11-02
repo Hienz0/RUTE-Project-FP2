@@ -280,20 +280,7 @@
 
 
 
-<!-- Bootstrap Modal for Image Preview -->
-<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="imagePreviewModalLabel"><i class="fas fa-image me-2"></i>Image Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img [src]="previewImageUrl" alt="Preview Image" class="img-fluid rounded" />
-      </div>
-    </div>
-  </div>
-</div>
+
 
           <!-- Amenities Selector -->
           <!-- Display Selected Amenities -->
@@ -420,7 +407,20 @@
 
 
 
-
+<!-- Bootstrap Modal for Image Preview -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagePreviewModalLabel"><i class="fas fa-image me-2"></i>Image Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img [src]="previewImageUrl" alt="Preview Image" class="img-fluid rounded" />
+      </div>
+    </div>
+  </div>
+</div>
 
 
   <button class="btn btn-info mb-3" (click)="logAllData()">

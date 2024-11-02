@@ -168,38 +168,65 @@ export class ManageAccommodationComponent implements OnInit {
   }
 
   publishAccommodation() {
-    const formData = new FormData();
-    const serviceId = this.route.snapshot.paramMap.get('serviceId');
-    if (serviceId) formData.append('serviceId', serviceId);
+    // SweetAlert2 confirmation prompt
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to publish this accommodation?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, publish it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        const formData = new FormData();
+        const serviceId = this.route.snapshot.paramMap.get('serviceId');
+        if (serviceId) formData.append('serviceId', serviceId);
+    
+        this.accommodation.roomTypes.forEach((roomType, roomIndex) => {
+          // Create a temporary array to hold the file URLs
+          const uploadedImageUrls: string[] = [];
+    
+          // Append room type details as a JSON string
+          formData.append(`roomTypes[${roomIndex}]`, JSON.stringify({
+            name: roomType.name,
+            price: roomType.price,
+            amenities: roomType.amenities,
+            rooms: roomType.rooms,
+            images: JSON.stringify(uploadedImageUrls) // Make sure to stringify for consistency
+          }));
   
-    this.accommodation.roomTypes.forEach((roomType, index) => {
-      formData.append(`roomTypes[${index}]`, JSON.stringify({
-        name: roomType.name,
-        price: roomType.price,
-        amenities: roomType.amenities,
-        rooms: roomType.rooms,
-      }));
-      roomType.images.forEach((imageBase64, imageIndex) => {
-        const file = this.base64ToFile(imageBase64, `image_${index}_${imageIndex}.png`);
-        if (file) { // Ensure that file is not null
-          console.log(`Room Type Index: ${index}, Image Index: ${imageIndex}, Image File:`, file);
-          formData.append('images', file); // Now safe to append
-        } else {
-          console.error(`Failed to convert image at index ${imageIndex} to file.`);
-        }
-      });
-      
-    });
-  
-    this.servicesService.publishAccommodation(formData).subscribe({
-      next: (response) => {
-        Swal.fire('Success', 'Accommodation published successfully!', 'success');
-      },
-      error: (error) => {
-        Swal.fire('Error', 'Failed to publish accommodation.', 'error');
+          console.log('roomType:', roomType);
+          console.log('formData:', formData);
+    
+          // Append each image and store their filenames for later use
+          roomType.images.forEach((imageBase64, imageIndex) => {
+            const file = this.base64ToFile(imageBase64, `image_${roomIndex}_${imageIndex}.png`);
+            if (file) {
+              // Store the file in formData
+              formData.append('images', file);  // Changed from unique key to 'images'
+              uploadedImageUrls.push(`uploads/image_${roomIndex}_${imageIndex}.png`); // This URL structure should match your backend URL for uploaded images
+            } else {
+              console.error(`Failed to convert image at index ${imageIndex} to file.`);
+            }
+          });
+        });
+    
+        this.servicesService.publishAccommodation(formData).subscribe({
+          next: (response) => {
+            Swal.fire('Success', 'Accommodation published successfully!', 'success');
+          },
+          error: (error) => {
+            Swal.fire('Error', 'Failed to publish accommodation.', 'error');
+          }
+        });
       }
     });
   }
+  
+  
+  
+  
   
   
   
@@ -462,10 +489,22 @@ selectedAccommodationIndex: number | null = null;
 // Modify onFilesSelected to check that accommodationDetail is populated
 onFilesSelected(event: Event) {
   const files = (event.target as HTMLInputElement).files;
-  if (files && this.selectedRoomTypeIndex !== null && this.accommodationDetail && this.selectedAccommodationIndex !== null) {
-    const accommodation = this.accommodationDetail[this.selectedAccommodationIndex];
-    const roomType = accommodation?.roomTypes[this.selectedRoomTypeIndex];
 
+  // Ensure files and selectedRoomTypeIndex are valid
+  if (files && this.selectedRoomTypeIndex !== null) {
+    let roomType;
+
+    // Check if we're editing an existing accommodation or adding to a new one
+    if (this.isEditing && this.selectedAccommodationIndex !== null && this.accommodationDetail) {
+      // Editing existing accommodation
+      const accommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+      roomType = accommodation?.roomTypes[this.selectedRoomTypeIndex];
+    } else if (this.accommodation) {
+      // Adding a new room type to a new accommodation
+      roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+    }
+
+    // Validate roomType existence
     if (!roomType) {
       console.warn('Room type not found');
       return;
@@ -483,8 +522,11 @@ onFilesSelected(event: Event) {
     for (let file of this.selectedImages) {
       this.previewImage(file);
     }
+  } else {
+    console.error("Files or selectedRoomTypeIndex not set correctly.");
   }
 }
+
 
 
 
@@ -818,24 +860,42 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
   const accommodation = this.accommodationDetail[accommodationIndex];
   const roomType = accommodation.roomTypes[roomTypeIndex];
 
-  // Store images as Base64 locally in roomType.base64Images and create files for uploading
-  roomType.uploadImages = roomType.images.map((image: any, index: number) => {
-    // Check if image is a Base64 string
-    if (typeof image === 'string' && !image.startsWith('/uploads')) {
-      return this.base64ToFile(image, `roomtype-image-${index}.png`);
-    }
-    return image; // Keep existing paths or File objects as-is
-  });
+  // SweetAlert2 confirmation prompt
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to save these changes to this room type?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, save it!',
+  }).then((result: any) => {
+    if (result.isConfirmed) {
+      // Store images as Base64 locally in roomType.base64Images and create files for uploading
+      roomType.uploadImages = roomType.images.map((image: any, index: number) => {
+        // Check if image is a Base64 string
+        if (typeof image === 'string' && !image.startsWith('/uploads')) {
+          return this.base64ToFile(image, `roomtype-image-${index}.png`);
+        }
+        return image; // Keep existing paths or File objects as-is
+      });
 
-  this.servicesService.updateRoomType(accommodation._id, roomType)
-    .subscribe(
-      (response) => {
-        console.log('Room Type saved:', response);
-        roomType.isEditing = false;
-      },
-      (error) => console.error('Error saving room type:', error)
-    );
+      this.servicesService.updateRoomType(accommodation._id, roomType)
+        .subscribe(
+          (response) => {
+            console.log('Room Type saved:', response);
+            roomType.isEditing = false;
+            Swal.fire('Saved!', 'The room type changes have been saved.', 'success');
+          },
+          (error) => {
+            console.error('Error saving room type:', error);
+            Swal.fire('Error!', 'There was an error saving the room type.', 'error');
+          }
+        );
+    }
+  });
 }
+
 
 
 

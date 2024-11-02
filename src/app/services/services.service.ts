@@ -55,7 +55,7 @@ export class ServicesService {
       formData.append('rooms', JSON.stringify(roomType.rooms));
 
         // Log images before appending them to FormData
-  console.log('Images to be uploaded:', roomType.uploadImages);
+      console.log('Images to be uploaded:', roomType.uploadImages);
   
     
       // Append only the converted File objects or paths for uploading
