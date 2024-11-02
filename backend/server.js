@@ -285,6 +285,7 @@ const uploadMultiple = upload.array('images', 10); // Limit to 10 images per roo
 
 app.post('/api/services/accommodations', upload.array('images', 10), async (req, res) => {
   try {
+    // Parse room types from request body
     const roomTypes = req.body.roomTypes.map((roomType, index) => {
       const parsedRoomType = JSON.parse(roomType);
       const images = req.files
@@ -293,15 +294,30 @@ app.post('/api/services/accommodations', upload.array('images', 10), async (req,
       return { ...parsedRoomType, images };
     });
 
-    const accommodationData = { ...req.body, roomTypes };
-    const accommodation = new Accommodation(accommodationData);
-    const savedAccommodation = await accommodation.save();
+    const { serviceId } = req.body;
 
-    res.status(201).json(savedAccommodation);
+    // Find existing accommodation by serviceId
+    let accommodation = await Accommodation.findOne({ serviceId });
+
+    if (accommodation) {
+      // Append new roomTypes to existing roomTypes
+      accommodation.roomTypes.push(...roomTypes);
+      await accommodation.save();
+      res.status(200).json(accommodation);
+    } else {
+      // Create a new accommodation if none exists with the serviceId
+      const newAccommodation = new Accommodation({
+        serviceId,
+        roomTypes,
+      });
+      const savedAccommodation = await newAccommodation.save();
+      res.status(201).json(savedAccommodation);
+    }
   } catch (error) {
     res.status(500).json({ error: 'Failed to publish accommodation' });
   }
 });
+
 
 // Accommodation Controller
 // Get accommodation by serviceId
