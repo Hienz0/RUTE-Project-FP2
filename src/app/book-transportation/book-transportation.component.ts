@@ -52,7 +52,8 @@ export class BookTransportationComponent implements OnInit {
   vehicleBooking: Array<{ name: string; quantity: number; pricePerVehicle: number; totalPrice: number; selectedVehicleType: string }> = [];
   
   transportID: string = '';
-  remainingQuantity: any;
+  remainingQuantity: { [key: string]: number } = {}; // Inisialisasi sebagai objek kosong
+
 
   constructor(
     private route: ActivatedRoute,
@@ -296,18 +297,16 @@ onQuantityInput(subcategory: any) {
       const pickup = new Date(this.pickupDate);
       const dropoff = new Date(this.dropoffDate);
 
-      // Validasi: Dropoff date harus lebih besar dari Pickup date
       if (dropoff <= pickup) {
         alert('Tanggal Dropoff harus lebih besar dari Tanggal Pickup.');
-        this.dropoffDate = ''; // Reset dropoffDate jika invalid
-        return; // Keluar dari fungsi jika validasi gagal
+        this.dropoffDate = '';
+        return;
       }
 
-      // Panggil API untuk mendapatkan kuantitas yang tersisa jika tanggal valid
       this.service.getRemainingQuantity(this.transportID, this.pickupDate, this.dropoffDate)
         .subscribe(
           (data) => {
-            this.remainingQuantity = data.availableQuantity;
+            this.remainingQuantity = data.availableQuantities || {};  // Memastikan data ada atau kosong
             console.log(this.remainingQuantity);
           },
           (error) => {
@@ -316,7 +315,6 @@ onQuantityInput(subcategory: any) {
         );
     }
 
-    // Hitung total harga jika tanggal valid
     this.calculateTotalPrice();
   }
 

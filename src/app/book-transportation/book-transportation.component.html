@@ -167,11 +167,7 @@
           <label class="form-label"
             ><strong>Pilih Tipe Kendaraan</strong></label
           >
-          <div
-            *ngFor="
-              let subcategory of transportationService?.productSubcategory
-            "
-          >
+          <div *ngFor="let subcategory of transportationService?.productSubcategory">
             <div class="form-check mb-2">
               <input
                 class="form-check-input"
@@ -184,11 +180,11 @@
                 class="form-check-label"
                 [for]="'vehicleType' + subcategory.name"
               >
-                {{ subcategory.name }} - {{ subcategory.type }} (Tersedia:
-                {{ this.remainingQuantity }})
+                {{ subcategory.name }} - {{ subcategory.type }} 
+                (Tersedia: {{ remainingQuantity?.[subcategory._id] || 0 }})
               </label>
             </div>
-
+          
             <div *ngIf="selectedVehicleTypes.includes(subcategory)" class="mb-3">
               <label class="form-label" [for]="'vehicleQuantity' + subcategory.name">
                 Kuantitas
@@ -196,7 +192,7 @@
               <input
                 type="number"
                 min="1"
-                [max]="subcategory.quantity"
+                [max]="remainingQuantity?.[subcategory._id] || subcategory.quantity"
                 [(ngModel)]="vehicleQuantities[subcategory.name]"
                 (input)="onQuantityInput(subcategory)"
                 class="form-control"
@@ -204,28 +200,9 @@
                 placeholder="Masukkan kuantitas"
                 [ngModelOptions]="{ standalone: true }"
               />
-            
-              <!-- Harga per Hari untuk Kendaraan -->
-              <p class="mt-2">
-                <strong>Harga per kendaraan untuk {{ subcategory.name }}:</strong>
-                {{ individualPricesPerDay[subcategory.name] | currency : "IDR" : "symbol" }}
-              </p>
-            
-              <!-- Total Harga untuk Kendaraan Berdasarkan Hari -->
-              <p class="mt-2">
-                <strong>Total Harga untuk {{ subcategory.name }}:</strong>
-                {{
-                  individualPrices[subcategory.name]
-                    | currency : "IDR" : "symbol"
-                }}
-              </p>
-            
-              <!-- Pesan Peringatan jika Kuantitas Melebihi Stok -->
-              <p *ngIf="quantityWarnings[subcategory.name]" class="text-danger">
-                {{ quantityWarnings[subcategory.name] }}
-              </p>
             </div>
           </div>
+          
         </div>
 
         <!-- Total Harga Booking Keseluruhan -->
