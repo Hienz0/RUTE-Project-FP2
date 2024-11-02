@@ -267,7 +267,7 @@
               <div *ngFor="let image of roomType.images" class="position-relative m-1">
                 <img [src]="image" alt="Room Image" class="img-thumbnail"
                   style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
-                  (click)="showImagePreview(image)">
+                  (click)="showImagePreview(image.startsWith('/upload') ? 'http://localhost:3000' + image : image)">
                 <button class="btn btn-danger btn-sm position-absolute"
                   style="top: 0; right: 0; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
                   (click)="confirmRemoveImage(image, i)"> <!-- Pass room type index 'i' -->
@@ -280,17 +280,20 @@
 
 
 
-          <!-- Image Preview Modal -->
-          <div *ngIf="isImagePreviewOpen" class="modal fade show d-block" tabindex="-1" role="dialog"
-            style="background: rgba(0, 0, 0, 0.8);">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-              <div class="modal-content bg-transparent border-0">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2"
-                  aria-label="Close" (click)="closeImagePreview()"></button>
-                <img [src]="previewImageUrl" alt="Preview Image" class="img-fluid rounded">
-              </div>
-            </div>
-          </div>
+<!-- Bootstrap Modal for Image Preview -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagePreviewModalLabel"><i class="fas fa-image me-2"></i>Image Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img [src]="previewImageUrl" alt="Preview Image" class="img-fluid rounded" />
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- Amenities Selector -->
           <!-- Display Selected Amenities -->
@@ -340,82 +343,80 @@
   </div>
 
   <!-- Amenities Modal -->
-  <div #amenitiesModal class="modal fade" id="amenitiesModal" tabindex="-1" aria-labelledby="amenitiesModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="amenitiesModalLabel">Select Amenities</h5>
-          <button type="button" class="btn-close" (click)="closeAmenitiesModal()" aria-label="Close"></button>
+<!-- Amenities Modal -->
+<div #amenitiesModal class="modal fade" id="amenitiesModal" tabindex="-1" aria-labelledby="amenitiesModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="amenitiesModalLabel">Select Amenities</h5>
+        <button type="button" class="btn-close" (click)="closeAmenitiesModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Checkbox List of Amenities -->
+        <div *ngFor="let amenity of amenitiesList" class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            [checked]="isAmenitySelected(amenity)"
+            (change)="toggleAmenitySelection(amenity, $event)" 
+          />
+          <label class="form-check-label">{{ amenity }}</label>
         </div>
-        <div class="modal-body">
-          <!-- Checkbox List of Amenities -->
-          <div *ngFor="let amenity of amenitiesList" class="form-check">
-            <input class="form-check-input" type="checkbox" [checked]="isAmenitySelected(amenity)"
-              (change)="toggleAmenitySelection(amenity, $event)" />
-            <label class="form-check-label">{{ amenity }}</label>
-          </div>
 
-
-
-
-
-          <!-- Custom Amenity Input -->
-          <div class="mt-3">
-            <label for="customAmenity" class="form-label">Add Custom Amenity</label>
-            <input type="text" id="customAmenity" class="form-control" [(ngModel)]="customAmenity">
-            <button class="btn btn-primary mt-2" (click)="addCustomAmenity()">Add</button>
-          </div>
+        <!-- Custom Amenity Input -->
+        <div class="mt-3">
+          <label for="customAmenity" class="form-label">Add Custom Amenity</label>
+          <input type="text" id="customAmenity" class="form-control" [(ngModel)]="customAmenity">
+          <button class="btn btn-primary mt-2" (click)="addCustomAmenity()">Add</button>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeAmenitiesModal()">Close</button>
-          <button type="button" class="btn btn-primary" (click)="saveAmenities()">Save Amenities</button>
-
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAmenitiesModal()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="saveAmenities()">Save Amenities</button>
       </div>
     </div>
   </div>
+</div>
+
 
   <!-- Custom Modal Backdrop -->
-  <div *ngIf="isModalOpen" class="modal-backdrop fade show" style="background-color: rgba(0, 0, 0, 0.7);"></div>
+  <!-- <div *ngIf="isModalOpen" class="modal-backdrop fade show" style="background-color: rgba(0, 0, 0, 0.7);"></div> -->
 
 
   <!-- Image Upload Modal -->
-  <div class="modal fade" tabindex="-1" role="dialog" #imageModal>
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Upload Images</h5>
-          <button type="button" class="close" (click)="closeImageModal()">
-            <span>&times;</span>
-          </button>
+<!-- Image Upload Modal -->
+<div class="modal fade" id="imageUploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true" #imageModal>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadModalLabel">Upload Images</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeImageModal()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Drag and Drop Area -->
+        <div class="drag-drop-area" (click)="triggerFileInput()" (dragover)="onDragOver($event)" (drop)="onDrop($event)"
+             style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer;">
+          Drag & Drop or Click to Upload Images
+          <input type="file" multiple (change)="onFilesSelected($event)" style="display: none" #fileInput />
         </div>
-        <div class="modal-body">
-          <!-- Drag and Drop Area -->
-          <div class="drag-drop-area" (click)="triggerFileInput()" (dragover)="onDragOver($event)"
-            (drop)="onDrop($event)"
-            style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer;">
-            Drag & Drop or Click to Upload Images
-            <input type="file" multiple (change)="onFilesSelected($event)" style="display: none" #fileInput />
-          </div>
 
-          <!-- Preview Section -->
-          <div *ngIf="previewUrls.length > 0" class="mt-3">
-            <div *ngFor="let url of previewUrls" style="margin-top: 10px;">
-              <img [src]="url" alt="Selected Image Preview" style="width: 100%; max-width: 200px;" />
-            </div>
+        <!-- Preview Section -->
+        <div *ngIf="previewUrls.length > 0" class="mt-3">
+          <div *ngFor="let url of previewUrls" style="margin-top: 10px;">
+            <img [src]="url" alt="Selected Image Preview" style="width: 100%; max-width: 200px;" />
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeImageModal()">Close</button>
-          <button type="button" class="btn btn-primary" [disabled]="selectedImages.length === 0"
-            (click)="uploadImages()">
-            Upload
-          </button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeImageModal()">Close</button>
+        <button type="button" class="btn btn-primary" [disabled]="selectedImages.length === 0" (click)="processImageUpload()">
+          {{ isEditing ? 'Save Changes' : 'Upload' }}
+        </button>
       </div>
     </div>
   </div>
+</div>
+
 
 
 

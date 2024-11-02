@@ -4,6 +4,8 @@ import { ServicesService } from '../services/services.service';
 
 
 declare const Swal: any;
+declare var bootstrap: any;
+
 
 interface Room {
   number: string;
@@ -206,35 +208,85 @@ export class ManageAccommodationComponent implements OnInit {
   
 
   // Method to remove a room type by index
-  removeRoomType(index: number) {
-    this.accommodation.roomTypes.splice(index, 1);
+  removeRoomType(index: number): void {
+    // SweetAlert2 confirmation prompt
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to remove this room type?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // Remove room type locally after confirmation
+        this.accommodation.roomTypes.splice(index, 1);
+        Swal.fire('Deleted!', 'The room type has been removed.', 'success');
+      }
+    });
   }
+  
 
   removeExistingRoomType(accommodationIndex: number, roomTypeIndex: number): void {
     const accommodation = this.accommodationDetail[accommodationIndex];
     const roomType = accommodation.roomTypes[roomTypeIndex];
   
-    this.servicesService.deleteRoomType(accommodation._id, roomType._id).subscribe(
-      (response) => {
-        console.log('Room type deleted successfully:', response);
-        // Remove room type locally after successful deletion from the server
-        accommodation.roomTypes.splice(roomTypeIndex, 1);
-      },
-      (error) => {
-        console.error('Error deleting room type:', error);
+    // SweetAlert2 confirmation prompt
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to remove this room type?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // Proceed with deletion if confirmed
+        this.servicesService.deleteRoomType(accommodation._id, roomType._id).subscribe(
+          (response) => {
+            console.log('Room type deleted successfully:', response);
+            // Remove room type locally after successful deletion from the server
+            accommodation.roomTypes.splice(roomTypeIndex, 1);
+            Swal.fire('Deleted!', 'The room type has been deleted.', 'success');
+          },
+          (error) => {
+            console.error('Error deleting room type:', error);
+            Swal.fire('Error', 'There was an issue deleting the room type.', 'error');
+          }
+        );
       }
-    );
+    });
   }
+  
   
 
   // Method to remove a room from a specific room type by index
-  removeRoom(roomType: RoomType, roomIndex: number) {
-    roomType.rooms.splice(roomIndex, 1);
+  removeRoom(roomType: RoomType, roomIndex: number): void {
+    // SweetAlert2 confirmation prompt
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to remove this room?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // Remove room from roomType after confirmation
+        roomType.rooms.splice(roomIndex, 1);
+        Swal.fire('Deleted!', 'The room has been removed.', 'success');
+      }
+    });
   }
+  
 
   openAmenitiesModal(index: number, isEditing = false): void {
     this.selectedRoomTypeIndex = index;
     this.isEditing = isEditing; // Use isEditing instead of isEditingMode
+  
     if (isEditing) {
       this.selectedAmenities = [...this.accommodationDetail[0].roomTypes[index].amenities];
       console.log('Editing room type with index:', index);
@@ -242,10 +294,15 @@ export class ManageAccommodationComponent implements OnInit {
     } else {
       this.selectedAmenities = [...this.accommodation.roomTypes[index].amenities];
     }
-    this.amenitiesModal.nativeElement.classList.add('show');
-    this.amenitiesModal.nativeElement.style.display = 'block';
+  
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = this.amenitiesModal.nativeElement;
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  
     this.isModalOpen = true;
   }
+  
 
 
   openEditAmenitiesModal(accommodationIndex: number, roomTypeIndex: number, isEditing = false): void {
@@ -259,21 +316,31 @@ export class ManageAccommodationComponent implements OnInit {
       this.selectedAmenities = [...this.accommodation.roomTypes[roomTypeIndex].amenities];
     }
   
-    this.amenitiesModal.nativeElement.classList.add('show');
-    this.amenitiesModal.nativeElement.style.display = 'block';
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = this.amenitiesModal.nativeElement;
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  
     this.isModalOpen = true;
   }
+  
   
 
 
   closeAmenitiesModal(): void {
-    // Reset the selectedRoomTypeIndex to null if necessary
+    // Use Bootstrap's modal API to hide the modal
+    const modalElement = this.amenitiesModal.nativeElement;
+    const modal = bootstrap.Modal.getInstance(modalElement);
+  
+    if (modal) {
+      modal.hide();
+    }
+  
+    // Reset properties after closing the modal
     this.selectedRoomTypeIndex = null;
-    // Hide the modal
-    this.amenitiesModal.nativeElement.classList.remove('show');
-    this.amenitiesModal.nativeElement.style.display = 'none';
     this.isModalOpen = false;
   }
+  
   
 
   addCustomAmenity(): void {
@@ -336,32 +403,50 @@ toggleAmenitySelection(amenity: string, event: Event): void {
 
 
    // Open the Image Upload Modal
-   openImageModal(index: number) {
+   openImageModal(index: number): void {
     this.selectedRoomTypeIndex = index;
-    this.imageModal.nativeElement.classList.add('show');
-    this.imageModal.nativeElement.style.display = 'block';
-    this.isModalOpen = true;
+    console.log('selected room index: ', this.selectedRoomTypeIndex)
+  
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = this.imageModal.nativeElement;
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    
+    this.isEditing = false;
   }
 
   openEditImageModal(accommodationIndex: number, roomTypeIndex: number, isEditing = false): void {
     this.selectedAccommodationIndex = accommodationIndex;
     this.selectedRoomTypeIndex = roomTypeIndex;
     this.isEditing = isEditing;
-    this.imageModal.nativeElement.classList.add('show');
-    this.imageModal.nativeElement.style.display = 'block';
+  
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = this.imageModal.nativeElement;
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  
     this.isModalOpen = true;
-}
+  }
+  
 
 
   // Close the Image Upload Modal
-  closeImageModal() {
-    this.imageModal.nativeElement.classList.remove('show');
-    this.imageModal.nativeElement.style.display = 'none';
+  closeImageModal(): void {
+    // Use Bootstrap's modal API to hide the modal
+    const modalElement = this.imageModal.nativeElement;
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    
+    if (modal) {
+      modal.hide();
+    }
+  
+    // Clear data after modal is closed
     this.selectedImages = [];
     this.previewUrls = [];
     this.selectedRoomTypeIndex = null;
     this.isModalOpen = false;
   }
+  
 
   // Trigger file input on click
   triggerFileInput() {
@@ -431,27 +516,54 @@ onFilesSelected(event: Event) {
 
   // Upload all selected images
 // Upload all selected images
-uploadImages(): void {
-  console.log("Selected Accommodation Index:", this.selectedAccommodationIndex);
-  console.log("Selected Room Type Index:", this.selectedRoomTypeIndex);
+// uploadImages(): void {
+//   console.log("Selected Accommodation Index:", this.selectedAccommodationIndex);
+//   console.log("Selected Room Type Index:", this.selectedRoomTypeIndex);
 
-  if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null && this.selectedAccommodationIndex !== null) {
-    let roomType;
+//   if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
+//     let roomType;
 
-    // Check if editing existing accommodation or working on a new one
-    if (this.isEditing) {
-      const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
-      roomType = targetAccommodation?.roomTypes[this.selectedRoomTypeIndex];
-    } else {
-      roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
-    }
+//     if (this.isEditing && this.selectedAccommodationIndex !== null) {
+//       // Editing images of an existing room type in accommodationData
+//       const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+//       roomType = targetAccommodation?.roomTypes[this.selectedRoomTypeIndex];
+//     } else {
+//       // Adding images to a new room type in accommodation
+//       roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+//     }
 
-    // Check if roomType exists, and initialize images if needed
+//     if (roomType) {
+//       if (!roomType.images) {
+//         roomType.images = [];
+//       }
+
+//       // Check image limit
+//       if (roomType.images.length + this.previewUrls.length > 10) {
+//         Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+//         return;
+//       }
+
+//       roomType.images.push(...this.previewUrls); 
+//       this.closeImageModal();
+//     } else {
+//       console.error("Room type not found.");
+//     }
+//   } else {
+//     console.error("Selected images or room type index not properly set.");
+//   }
+// }
+uploadNewRoomTypeImages(): void {
+  console.log("Selected Room Type Index for New Room:", this.selectedRoomTypeIndex);
+
+  if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null) {
+    const roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+
     if (roomType) {
       if (!roomType.images) {
         roomType.images = [];
       }
 
+      // Check image limit
       if (roomType.images.length + this.previewUrls.length > 10) {
         Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
         return;
@@ -460,12 +572,86 @@ uploadImages(): void {
       roomType.images.push(...this.previewUrls); 
       this.closeImageModal();
     } else {
-      console.error("Room type not found.");
+      console.error("Room type not found in new accommodation.");
     }
   } else {
-    console.error("Selected images or room type index not properly set.");
+    console.error("Selected images or room type index not properly set for new accommodation.");
   }
 }
+
+uploadExistingRoomTypeImages(): void {
+  console.log("Selected Accommodation Index:", this.selectedAccommodationIndex);
+  console.log("Selected Room Type Index:", this.selectedRoomTypeIndex);
+
+  if (this.selectedImages.length > 0 && this.selectedAccommodationIndex !== null && this.selectedRoomTypeIndex !== null) {
+    const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+    const roomType = targetAccommodation?.roomTypes[this.selectedRoomTypeIndex];
+
+    if (roomType) {
+      if (!roomType.images) {
+        roomType.images = [];
+      }
+
+      // Check image limit
+      if (roomType.images.length + this.previewUrls.length > 10) {
+        Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+        return;
+      }
+
+      roomType.images.push(...this.previewUrls); 
+      this.closeImageModal();
+    } else {
+      console.error("Room type not found in existing accommodation.");
+    }
+  } else {
+    console.error("Selected images or indices not properly set for existing accommodation.");
+  }
+}
+
+// Trigger the appropriate image upload method based on the editing state
+processImageUpload(): void {
+  if (this.isEditing) {
+    this.uploadExistingRoomTypeImages();
+  } else {
+    this.uploadNewRoomTypeImages();
+  }
+}
+
+// uploadImages(): void {
+//   console.log("Selected Accommodation Index:", this.selectedAccommodationIndex);
+//   console.log("Selected Room Type Index:", this.selectedRoomTypeIndex);
+
+//   if (this.selectedImages.length > 0 && this.selectedRoomTypeIndex !== null && this.selectedAccommodationIndex !== null) {
+//     let roomType;
+
+//     // Check if editing existing accommodation or working on a new one
+//     if (this.isEditing) {
+//       const targetAccommodation = this.accommodationDetail[this.selectedAccommodationIndex];
+//       roomType = targetAccommodation?.roomTypes[this.selectedRoomTypeIndex];
+//     } else {
+//       roomType = this.accommodation.roomTypes[this.selectedRoomTypeIndex];
+//     }
+
+//     // Check if roomType exists, and initialize images if needed
+//     if (roomType) {
+//       if (!roomType.images) {
+//         roomType.images = [];
+//       }
+
+//       if (roomType.images.length + this.previewUrls.length > 10) {
+//         Swal.fire('Limit Exceeded', 'You can upload a maximum of 10 images.', 'warning');
+//         return;
+//       }
+
+//       roomType.images.push(...this.previewUrls); 
+//       this.closeImageModal();
+//     } else {
+//       console.error("Room type not found.");
+//     }
+//   } else {
+//     console.error("Selected images or room type index not properly set.");
+//   }
+// }
 
 
 
@@ -475,13 +661,26 @@ uploadImages(): void {
 
   showImagePreview(imageUrl: string): void {
     this.previewImageUrl = imageUrl;
-    this.isImagePreviewOpen = true;
+  
+    // Use Bootstrap's modal API to open the modal
+    const modalElement = document.getElementById('imagePreviewModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
   }
+  
 
   closeImagePreview(): void {
-    this.isImagePreviewOpen = false;
-    this.previewImageUrl = '';
+    // Use Bootstrap's modal API to close the modal
+    const modalElement = document.getElementById('imagePreviewModal');
+    const modal = bootstrap.Modal.getInstance(modalElement); // Get the existing modal instance
+    if (modal) {
+      modal.hide(); // Hide the modal
+    }
+    
+    this.isImagePreviewOpen = false; // Reset the preview state
+    this.previewImageUrl = ''; // Clear the preview URL
   }
+  
 
   
     // Confirm removal of an image with SweetAlert2

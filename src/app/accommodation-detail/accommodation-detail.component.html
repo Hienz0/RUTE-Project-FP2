@@ -126,7 +126,7 @@
       </h1>
       <p class="text-muted">Explore the various room types available for your stay</p>
     </div>
-  
+
     <div *ngFor="let roomType of accommodationData" class="card mb-4 shadow-lg border-light">
       <div class="card-body">
         <!-- Room Type Header with Icon -->
@@ -138,7 +138,7 @@
             <i class="fas fa-dollar-sign"></i> {{ roomType.price | currency }}
           </span>
         </div>
-  
+
         <!-- Amenities Section -->
         <p class="text-muted mt-2"><i class="fas fa-concierge-bell me-2"></i>Amenities:</p>
         <ul class="list-inline">
@@ -146,27 +146,28 @@
             <span class="badge bg-secondary text-light">{{ amenity }}</span>
           </li>
         </ul>
-  
+
         <!-- Images Section -->
         <div *ngIf="roomType.images.length > 0" class="mt-3">
           <p class="text-muted"><i class="fas fa-images me-2"></i>Images:</p>
-          <div class="d-flex flex-wrap">
-            <div *ngFor="let image of roomType.images" class="position-relative m-1">
-              <img [src]="image.startsWith('/upload') ? 'http://localhost:3000' + image : image"
-                   alt="Room Image"
-                   class="img-thumbnail rounded"
-                   style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; border: 2px solid #dee2e6;"
-                   (click)="showImagePreview(image.startsWith('/upload') ? 'http://localhost:3000' + image : image)">
+          <div class="d-flex overflow-auto" style="white-space: nowrap;">
+            <div *ngFor="let image of roomType.images" class="position-relative m-1" style="display: inline-block;">
+              <img [src]="image.startsWith('/upload') ? 'http://localhost:3000' + image : image" alt="Room Image"
+                class="img-thumbnail rounded"
+                style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; border: 2px solid #dee2e6;"
+                (click)="showImagePreview(image.startsWith('/upload') ? 'http://localhost:3000' + image : image)">
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
-  
-  
+
+
   <!-- Bootstrap Modal for Image Preview -->
-  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -179,7 +180,7 @@
       </div>
     </div>
   </div>
-  
+
 
   <!-- Booking Button -->
   <div class="row mt-5">
@@ -193,91 +194,108 @@
 
 
   <!-- Booking Modal -->
-<!-- Booking Modal -->
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-3">
-      <!-- Modal Header -->
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title mx-auto" id="bookingModalLabel">{{ accommodationDetail.productName }}</h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Close"></button>
-      </div>
+  <!-- Booking Modal -->
+  <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow rounded-4">
+        <!-- Modal Header -->
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title mx-auto d-flex align-items-center gap-2" id="bookingModalLabel">
+            <i class="fas fa-bed"></i>
+            {{ accommodationDetail.productName }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Close"></button>
+        </div>
 
-      <!-- Modal Body -->
-      <div class="modal-body">
-        <form (submit)="submitBooking()">
-          <!-- Guest Name -->
-          <div class="mb-3">
-            <label for="guestName" class="form-label">Guest Name</label>
-            <input id="guestName" type="text" [(ngModel)]="bookingDetails.guestName" name="guestName"
-              class="form-control" placeholder="Enter your name" required />
-          </div>
+        <!-- Modal Body -->
+        <div class="modal-body p-4">
+          <form (submit)="submitBooking()" novalidate>
+            <!-- Guest Name -->
+            <div class="mb-3">
+              <label for="guestName" class="form-label">
+                <i class="fas fa-user me-2"></i>Guest Name
+              </label>
+              <input id="guestName" type="text" [(ngModel)]="bookingDetails.guestName" name="guestName"
+                class="form-control rounded-3" placeholder="Enter your name" required />
+            </div>
 
-          <!-- Accommodation Type -->
-          <div class="mb-3">
-            <label for="accommodationType" class="form-label">Accommodation Type</label>
-            <select id="accommodationType" [(ngModel)]="bookingDetails.accommodationType" name="accommodationType"
-              class="form-select" required>
-              <option [value]="accommodationDetail.productSubcategory">
-                {{ accommodationDetail.productSubcategory }}
-              </option>
-            </select>
-          </div>
+            <!-- Accommodation Type -->
+            <div class="mb-3">
+              <label for="accommodationType" class="form-label">
+                <i class="fas fa-hotel me-2"></i>Accommodation Type
+              </label>
+              <select id="accommodationType" [(ngModel)]="bookingDetails.accommodationType" name="accommodationType"
+                class="form-select rounded-3" required>
+                <option [value]="accommodationDetail.productSubcategory">
+                  {{ accommodationDetail.productSubcategory }}
+                </option>
+              </select>
+            </div>
 
-          <!-- Number of Guests -->
-          <div class="mb-3">
-            <label for="numberOfGuests" class="form-label">Number of Guests</label>
-            <input id="numberOfGuests" type="number" [(ngModel)]="bookingDetails.numberOfGuests" name="numberOfGuests"
-              min="1" class="form-control" placeholder="Enter number of guests" required />
-          </div>
+            <!-- Number of Guests -->
+            <div class="mb-3">
+              <label for="numberOfGuests" class="form-label">
+                <i class="fas fa-users me-2"></i>Number of Guests
+              </label>
+              <input id="numberOfGuests" type="number" [(ngModel)]="bookingDetails.numberOfGuests" name="numberOfGuests"
+                min="1" class="form-control rounded-3" placeholder="Enter number of guests" required />
+            </div>
 
-          <!-- Check-in Date -->
-          <div class="mb-3">
-            <label for="checkInDate" class="form-label">Check-in Date</label>
-            <input id="checkInDate" type="date" [(ngModel)]="bookingDetails.checkInDate" name="checkInDate"
-              class="form-control" required />
-          </div>
+            <!-- Check-in and Check-out Dates -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="checkInDate" class="form-label">
+                  <i class="fas fa-calendar-check me-2"></i>Check-in Date
+                </label>
+                <input id="checkInDate" type="date" [(ngModel)]="bookingDetails.checkInDate" name="checkInDate"
+                  class="form-control rounded-3" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="checkOutDate" class="form-label">
+                  <i class="fas fa-calendar-day me-2"></i>Check-out Date
+                </label>
+                <input id="checkOutDate" type="date" [(ngModel)]="bookingDetails.checkOutDate" name="checkOutDate"
+                  class="form-control rounded-3" required />
+              </div>
+            </div>
 
-          <!-- Check-out Date -->
-          <div class="mb-3">
-            <label for="checkOutDate" class="form-label">Check-out Date</label>
-            <input id="checkOutDate" type="date" [(ngModel)]="bookingDetails.checkOutDate" name="checkOutDate"
-              class="form-control" required />
-          </div>
+            <!-- Room Type Selection -->
+            <div class="mb-3" *ngIf="accommodationData?.length > 0">
+              <label for="roomType" class="form-label">
+                <i class="fas fa-door-open me-2"></i>Room Type
+              </label>
+              <select id="roomType" [(ngModel)]="bookingDetails.roomTypeId" name="roomType"
+                class="form-select rounded-3" required>
+                <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
+                  {{ roomType.name }}
+                </option>
+              </select>
+            </div>
 
-          <!-- Room Type Selection -->
-          <div class="mb-3" *ngIf="accommodationData?.length > 0">
-            <label for="roomType" class="form-label">Room Type</label>
-            <select
-              id="roomType"
-              [(ngModel)]="bookingDetails.roomTypeId"
-              name="roomType"
-              class="form-select"
-              required
-            >
-              <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
-                {{ roomType.name }}
-              </option>
-            </select>
-          </div>
+            <!-- Special Request -->
+            <div class="mb-3">
+              <label for="specialRequest" class="form-label">
+                <i class="fas fa-comment-dots me-2"></i>Special Request
+              </label>
+              <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
+                class="form-control rounded-3" rows="3" placeholder="Enter any special requests"></textarea>
+            </div>
 
-          <!-- Special Request -->
-          <div class="mb-3">
-            <label for="specialRequest" class="form-label">Special Request</label>
-            <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
-              class="form-control" rows="3" placeholder="Enter any special requests"></textarea>
-          </div>
-
-          <!-- Modal Actions -->
-          <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary me-2">Book Now</button>
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-          </div>
-        </form>
+            <!-- Modal Actions -->
+            <div class="d-flex justify-content-between mt-4">
+              <button type="submit" class="btn btn-primary rounded-3 px-4">
+                <i class="fas fa-check-circle me-2"></i>Book Now
+              </button>
+              <button type="button" class="btn btn-secondary rounded-3 px-4" (click)="closeModal()">
+                <i class="fas fa-times-circle me-2"></i>Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
 
 </div>
 
