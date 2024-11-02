@@ -33,6 +33,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   };
   selectedImage: string | null = null;
   isImagePreviewOpen: boolean = false;
+  bookingModal: any;
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map: L.Map | undefined;
@@ -130,12 +131,19 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
 
   // Open the booking modal
   openModal(): void {
-    this.isModalOpen = true;
+    const modalElement = document.getElementById('bookingModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
   }
 
-  // Close the booking modal
   closeModal(): void {
-    this.isModalOpen = false;
+    const modalElement = document.getElementById('bookingModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
   }
 
 
@@ -243,5 +251,6 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
   }
+  
   
 }

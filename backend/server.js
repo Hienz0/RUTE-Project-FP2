@@ -258,7 +258,8 @@ app.get('/api/bookings/check-availability', async (req, res) => {
 // manage accommodation
 
 const roomSchema = new mongoose.Schema({
-  number: { type: String, required: true }
+  number: { type: String, required: true },
+  status: { type: String, default: 'available' } // Added status with default value
 });
 
 const roomTypeSchema = new mongoose.Schema({
