@@ -26,6 +26,7 @@ import { AccommodationComponent } from './accommodation/accommodation.component'
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-guide.component';
 import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
+import { ManageTourComponent } from './manage-tour/manage-tour.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/boo
     AccommodationComponent,
     AccommodationDetailComponent,
     BookingTourGuideComponent,
-    BookingTourGuideDetailComponent
+    BookingTourGuideDetailComponent,
+    ManageTourComponent
   ],
   imports: [
     BrowserModule,

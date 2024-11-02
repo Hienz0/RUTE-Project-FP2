@@ -167,7 +167,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     const bookingData = {
       ...this.bookingDetails,
       serviceId: this.serviceId,          // Include serviceId
-      userId: this.currentUser?._id        // Include userId from the current user
+      userId: this.currentUser?.userId        // Include userId from the current user
     };
 
     console.log(bookingData)

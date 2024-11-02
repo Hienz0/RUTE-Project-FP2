@@ -14,6 +14,7 @@ import { AccommodationComponent } from './accommodation/accommodation.component'
 import { AccommodationDetailComponent } from './accommodation-detail/accommodation-detail.component';
 import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-guide.component';
 import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
+import { ManageTourComponent } from './manage-tour/manage-tour.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -32,6 +33,8 @@ const routes: Routes = [
   {path: 'booking-tour-guide', component: BookingTourGuideComponent},
   { path: 'tour-guide/:id', component: BookingTourGuideDetailComponent},
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
+  {path: 'manage-tour/:serviceId', component: ManageTourComponent},
+  // {path: 'manage-tour', component: ManageTourComponent},
 ];
 
 @NgModule({

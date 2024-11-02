@@ -230,6 +230,31 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
 //   }
 // });
 
+// TEST UPDATE
+
+app.put('/api/services/:id', (req, res) => {
+  const serviceId = req.params.id;
+  const updatedData = req.body;
+
+  // Example: Validate incoming data
+  if (!updatedData.name || !updatedData.price) {
+      return res.status(400).json({ message: 'Name and price are required.' });
+  }
+
+  // Example: Update service in database
+  Service.findByIdAndUpdate(serviceId, updatedData, { new: true })
+      .then(service => {
+          if (!service) {
+              return res.status(404).json({ message: 'Service not found.' });
+          }
+          res.status(200).json(service);
+      })
+      .catch(err => {
+          console.error('Error updating service:', err);
+          res.status(500).json({ message: 'Internal Server Error' });
+      });
+});
+
 
 ///////////
 // book transportation

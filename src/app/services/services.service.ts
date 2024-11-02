@@ -29,4 +29,14 @@ export class ServicesService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+
+  // Add this method in your existing ServicesService
+  updateTourGuideService(id: string, updatedData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, updatedData);
+  }
+
+  deleteTourGuideService(serviceId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${serviceId}`);
+  }
+
 }
