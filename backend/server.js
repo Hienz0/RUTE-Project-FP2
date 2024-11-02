@@ -117,10 +117,6 @@ const bookingAccommodationSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    roomNumber: {
-        type: Number,
-        required: true
-    },
     specialRequest: {
         type: String,
         trim: true
@@ -188,20 +184,56 @@ app.get('/api/services/restaurant/:id', async (req, res) => {
 // 
 // Route to handle booking accommodation
 app.post('/api/bookings/accommodation', async (req, res) => {
+  console.log('Request body:', req.body);
+  
   try {
     const bookingData = {
       ...req.body,
-      serviceId: req.body.serviceId, // Make sure these are passed from the client side
-      userId: req.body.userId       // or set here if you have access to current user
+      serviceId: req.body.serviceId,
+      userId: req.body.userId,
     };
+    
+    // Step 1: Create the booking
     const booking = new Booking(bookingData);
     await booking.save();
-    res.status(201).json(booking);
+    
+    // Step 2: Update the room status to 'booked' in the accommodation collection
+    const { accommodationId, roomTypeId, roomId } = req.body;
+    
+    // Find the accommodation by its ID and update the room status
+    const accommodation = await Accommodation.findOneAndUpdate(
+      {
+        _id: accommodationId,
+        'roomTypes._id': roomTypeId,
+        'roomTypes.rooms._id': roomId,
+      },
+      {
+        $set: {
+          'roomTypes.$[type].rooms.$[room].status': 'booked'
+        }
+      },
+      {
+        arrayFilters: [
+          { 'type._id': roomTypeId },
+          { 'room._id': roomId }
+        ],
+        new: true,
+      }
+    );
+
+    // If accommodation not found, handle the error
+    if (!accommodation) {
+      return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
+    }
+
+    // Step 3: Return the created booking and updated accommodation
+    res.status(201).json({ booking, accommodation });
   } catch (error) {
-    console.error('Error details:', error); // Log error details for debugging
-    res.status(400).json({ error: 'Error creating booking', details: error });
+    console.error('Error details:', error);
+    res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
   }
 });
+
 
 // Route to check room availability for specific dates
 // app.get('/api/bookings/check-availability', async (req, res) => {  // Add missing "/"

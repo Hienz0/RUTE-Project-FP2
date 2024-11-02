@@ -211,7 +211,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       (room: any) => {
         if (!room) {
           Swal.fire({
-            icon: 'error',
+            icon: 'info',
             title: 'No Rooms Available',
             text: 'There are no available rooms for the selected room type.',
             confirmButtonColor: '#d33',
@@ -221,9 +221,21 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   
         // Assign the available room ID
         this.bookingDetails.roomId = room._id;
+        console.log(this.bookingDetails)
   
         console.log('Booking form submitted');
         console.log('Booking details:', this.bookingDetails);
+
+              // Check if roomId is defined before proceeding
+      if (!this.bookingDetails.roomId) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Room is Full',
+          text: 'The selected room type has no available rooms at the moment.',
+          confirmButtonColor: '#3085d6',
+        });
+        return;
+      }
   
         const bookingData = {
           ...this.bookingDetails,
@@ -256,7 +268,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         // Handle the 404 "No Room Available" response specifically
         if (error.status === 404) {
           Swal.fire({
-            icon: 'error',
+            icon: 'info',
             title: 'No Room Available',
             text: 'There are no rooms available for the selected room type at this time.',
             confirmButtonColor: '#d33',
