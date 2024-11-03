@@ -53,6 +53,8 @@ export class BookTransportationComponent implements OnInit {
   
   transportID: string = '';
   remainingQuantity: { [key: string]: number } = {}; // Inisialisasi sebagai objek kosong
+  isModalOpen = false;
+  ubudCircle: any;
 
 
   constructor(
@@ -279,17 +281,24 @@ calculateTotalPrice() {
 }
 
 onQuantityInput(subcategory: any) {
-    const maxQuantity = subcategory.quantity;
-    const currentQuantity = this.vehicleQuantities[subcategory.name];
+  const maxQuantity = this.remainingQuantity[subcategory._id] || subcategory.quantity; // Default to subcategory quantity if remainingQuantity is not available
+  let currentQuantity = this.vehicleQuantities[subcategory.name];
 
-    if (currentQuantity > maxQuantity) {
-        this.quantityWarnings[subcategory.name] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
-    } else {
-        delete this.quantityWarnings[subcategory.name];
-    }
+  if (currentQuantity > maxQuantity) {
+      // Set the current quantity to the maximum allowed quantity
+      this.vehicleQuantities[subcategory.name] = maxQuantity;
 
-    this.calculateTotalPrice();
+      // Display a warning message
+      this.quantityWarnings[subcategory._id] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
+  } else {
+      // Remove the warning if the quantity is within the allowed limit
+      delete this.quantityWarnings[subcategory._id];
+  }
+
+  this.calculateTotalPrice();
 }
+
+
 
   // Fungsi untuk menghitung ulang harga dan validasi tanggal
   onDateChange() {
@@ -403,10 +412,39 @@ onQuantityInput(subcategory: any) {
     this.reverseGeocode(latitude, longitude, 'location'); // Assuming it's similar to the pickup, adjust if needed
   }
 
+
+
+  openModal() {
+    this.isModalOpen = true;
+    setTimeout(() => {
+      this.initPickupMap();  // Initialize the map after the modal opens
+      this.pickupMap?.invalidateSize();  // Adjust layout to fit modal
+      this.initDropoffMap();  // Initialize the map after the modal opens
+      this.dropoffMap?.invalidateSize();
+      this.centerMap();  // Center the map view on the marker
+    }, 100); // Delay allows modal rendering before map adjustments
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false; // Hide modal
+  }
+
+  // Center map function for consistency
+centerMap(): void {
+  
+  if (this.pickupMap) {
+    this.pickupMap.fitBounds(this.ubudCircle.getBounds());
+  }
+  if (this.dropoffMap) {
+    this.dropoffMap.fitBounds(this.ubudCircle.getBounds());
+  }
+}
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
     if (this.pickupMap) {
-      return; // If it's already initialized, do nothing
+      
+      
+      return; // Avoid re-initializing the map
     }
 
     this.pickupMap = L.map('pickupMap').setView(
@@ -425,7 +463,7 @@ onQuantityInput(subcategory: any) {
     });
 
     const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
-    const ubudCircle = L.circle(ubudCenter, {
+    this.ubudCircle = L.circle(ubudCenter, {
       color: 'blue',
       fillColor: '#add8e6',
       fillOpacity: 0.2,
@@ -438,7 +476,7 @@ onQuantityInput(subcategory: any) {
     }).addTo(this.pickupMap);
 
     // Adjust map view to fit the circle bounds
-    this.pickupMap.fitBounds(ubudCircle.getBounds());
+    this.pickupMap.fitBounds(this.ubudCircle.getBounds());
 
     // Add search control to map
     const searchControl = new (L.Control as any).Search({
@@ -515,7 +553,7 @@ onQuantityInput(subcategory: any) {
     });
 
     const ubudCenter = L.latLng(this.defaultLat, this.defaultLng);
-    const ubudCircle = L.circle(ubudCenter, {
+    this.ubudCircle = L.circle(ubudCenter, {
       color: 'blue',
       fillColor: '#add8e6',
       fillOpacity: 0.2,
@@ -528,7 +566,7 @@ onQuantityInput(subcategory: any) {
     }).addTo(this.dropoffMap);
 
     // Adjust map view to fit the circle bounds
-    this.dropoffMap.fitBounds(ubudCircle.getBounds());
+    this.dropoffMap.fitBounds(this.ubudCircle.getBounds());
 
     // Add search control to map
     const searchControl = new (L.Control as any).Search({

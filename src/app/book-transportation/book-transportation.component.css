@@ -51,4 +51,32 @@
     font-size: 1.15rem;
     color: #6c757d;
   }
+
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8); /* Gelap transparan */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1040; /* Pastikan backdrop berada di bawah modal */
+  }
+
+  .position-relative .calendar-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 10px; /* Posisi dari sisi kanan */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d; /* Warna ikon, sesuaikan dengan tema */
+    font-size: 1.2em; /* Ukuran ikon */
+    pointer-events: all; /* Agar ikon dapat diklik */
+  }
+  
+  .position-relative .form-control {
+    padding-right: 2.5rem; /* Menambah ruang di dalam input untuk ikon */
+  }
+  
+  
+  
   
