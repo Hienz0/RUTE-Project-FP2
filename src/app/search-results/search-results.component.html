@@ -50,41 +50,38 @@
 </nav>
 
 <div class="main">
-  <div class="search-results">
-    <h2>Search Results for "{{ searchTerm }}"</h2>
-    <div *ngIf="searchResults.length === 0">No results found.</div>
-    <div *ngFor="let result of searchResults; let i = index">
-      <!-- Display result details -->
-      <div>{{ result.productName }}</div>
+  <div class="container my-5">
+    <div class="search-results text-center mb-4">
+      <h2 class="display-4">Search Results for "{{ searchTerm }}"</h2>
+      <div *ngIf="searchResults.length === 0" class="mt-3 no-results">No results found.</div>
     </div>
-  </div>
-
-  <div class="container">
-    <h2 class="mt-3">Search Results for "{{ searchTerm }}"</h2>
-    <div *ngIf="searchResults.length === 0" class="mt-3">No results found.</div>
-    <div class="row mt-3">
-      <div class="col-md-4" *ngFor="let result of searchResults; let i = index">
-        <div class="card mb-3">
+  
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let result of searchResults; let i = index">
+        <div class="card h-100 custom-card" (click)="redirectToAccommodation(result._id)">
           <!-- Carousel for images -->
           <div id="carousel{{i}}" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-              <!-- Loop through all product images -->
-              <div *ngFor="let image of result.productImages; let isFirst = first" [class.active]="isFirst" class="carousel-item">
+              <div *ngFor="let image of result.productImages; let isFirst = first" 
+                   [class.active]="isFirst" 
+                   class="carousel-item">
                 <!-- Display the image -->
-                <img [src]="'http://localhost:3000/' + image" class="d-block w-100" alt="Service Image">
+                <img [src]="'http://localhost:3000/' + image" class="d-block w-100 carousel-image" alt="Service Image">
               </div>
             </div>
             <!-- Carousel controls -->
-            <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
+<!-- Carousel controls -->
+<button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="prev" (click)="$event.stopPropagation()">
+  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+  <span class="visually-hidden">Previous</span>
+</button>
+<button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="next" (click)="$event.stopPropagation()">
+  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  <span class="visually-hidden">Next</span>
+</button>
+
           </div>
-          
+  
           <div class="card-body">
             <h5 class="card-title">{{ result.productName }}</h5>
             <p class="card-text">{{ result.productDescription }}</p>
@@ -102,6 +99,7 @@
       </div>
     </div>
   </div>
+  
 </div>
 
 

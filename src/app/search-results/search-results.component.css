@@ -920,5 +920,46 @@ h2 {
   }
   
 
+  body {
+    background-color: #f8f9fa; /* Light background for contrast */
+  }
+  
+  .custom-card {
+    border: none; /* Remove default border */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transitions */
+  }
+  
+  .custom-card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+  }
+  
+  .carousel-image {
+    height: 200px; /* Set a fixed height for images */
+    object-fit: cover; /* Cover the area without distortion */
+    border-radius: 0.5rem; /* Rounded corners for images */
+  }
+  
+  .no-results {
+    color: #dc3545; /* Bootstrap danger color */
+    font-size: 1.2rem; /* Slightly larger font for emphasis */
+    font-weight: bold; /* Bold text for visibility */
+  }
+  
+  h2.display-4 {
+    font-weight: 700; /* Make the main heading bold */
+    color: #343a40; /* Darker color for better readability */
+  }
+  
+  .card-title {
+    font-size: 1.25rem; /* Slightly larger title */
+    color: #000000; /* Bootstrap primary color */
+  }
+  
+  .card-text small {
+    font-weight: 400; /* Normal weight for small text */
+  }
+  
+
 
 /* end of responsive navbar */

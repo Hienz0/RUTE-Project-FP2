@@ -96,4 +96,71 @@
         </div>
       </div>
     </div>
+
+
+
+
+<!-- Add Menu Item Form -->
+<div class="card p-4 my-4 border-light shadow-sm" style="border-radius: 8px;">
+  <div class="card-body">
+    <h3 class="card-title text-center mb-4">
+      <i class="fas fa-utensils icon"></i> Add New Menu Item
+    </h3>
+    <form>
+      <!-- Menu Item Name -->
+      <div class="form-group mb-3">
+        <label for="menuItemName">
+          <i class="fas fa-tag icon"></i> Menu Item Name
+        </label>
+        <input type="text" class="form-control" id="menuItemName" [(ngModel)]="restaurant.name" name="name" required placeholder="Enter menu item name" />
+      </div>
+
+      <!-- Menu Item Image Upload -->
+      <div class="form-group mb-3">
+        <label><i class="fas fa-image icon"></i> Upload Image</label>
+        <div class="file-upload" id="fileUploadArea">
+          <input type="file" (change)="dummyFunction()" id="menuItemImage" class="file-upload-input" />
+          <div class="file-upload-text">
+            <p>Click or drag an image here to upload</p>
+          </div>
+        </div>
+        <small class="form-text text-muted mt-2">Accepted formats: .jpg, .png, .gif</small>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block mt-3" (click)="dummyFunction()">
+        <i class="fas fa-plus"></i> Add Menu Item
+      </button>
+    </form>
+  </div>
+</div>
+
+
+
+
+<!-- Add Menu Item Form
+<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card-body">
+    <h3><i class="fas fa-utensils icon"></i> Add New Menu Item</h3>
+    <form>
+      Menu Item Name
+      <div class="form-group mb-3">
+        <label for="menuItemName"><i class="fas fa-tag icon"></i> Menu Item Name</label>
+        <input type="text" class="form-control" id="menuItemName" [(ngModel)]="newMenuItem.name" name="name" required />
+      </div>
+
+      Menu Item Image Upload
+      <div class="form-group mb-3">
+        <label><i class="fas fa-image icon"></i> Upload Image</label>
+        <input type="file" (change)="onMenuImageSelect($event)" class="form-control-file" id="menuItemImage" />
+        <p class="mt-2">Click or drag an image here to upload</p>
+      </div>
+
+      <button class="btn btn-primary mt-3" (click)="addMenuItem()">
+        <i class="fas fa-plus"></i> Add Menu Item
+      </button>
+    </form>
+  </div>
+</div> -->
+
+
   </div>

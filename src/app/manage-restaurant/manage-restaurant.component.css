@@ -80,4 +80,39 @@
   }
   
 
+  .file-upload {
+    border: 2px dashed #007bff; /* Bootstrap primary color */
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa; /* Light background */
+    transition: background-color 0.3s, border-color 0.3s;
+    cursor: pointer;
+  }
+  
+  .file-upload:hover {
+    background-color: #e9ecef; /* Slightly darker on hover */
+    border-color: #0056b3; /* Darker border on hover */
+  }
+  
+  .file-upload-input {
+    display: none; /* Hide the default file input */
+  }
+  
+  .file-upload-text {
+    color: #6c757d; /* Bootstrap secondary text color */
+    font-size: 16px;
+  }
+  
+  .file-upload p {
+    margin: 0; /* Remove default margin */
+  }
+  
+  /* Optional: Style for drag-and-drop feedback */
+  .file-upload.dragover {
+    background-color: #e2e6ea; /* Light background on drag over */
+    border-color: #0056b3; /* Darker border on drag over */
+  }
+  
+
   

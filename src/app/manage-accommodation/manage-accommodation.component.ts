@@ -135,27 +135,41 @@ export class ManageAccommodationComponent implements OnInit {
   saveAccommodation() {
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
     if (serviceId) {
-      // Prepare the accommodation object with only the necessary fields
-      const accommodationData = {
-        productName: this.accommodation.name, // Map to productName
-        productDescription: this.accommodation.description, // Map to productDescription
-        productImages: this.accommodation.productImages, // Map to productImages
-        location: this.accommodation.location // Map to location
-      };
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to save the changes to the accommodation?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, save it!',
+      }).then((result: any) => { // Explicitly typing result as any
+        if (result.isConfirmed) {
+          // Prepare the accommodation object with only the necessary fields
+          const accommodationData = {
+            productName: this.accommodation.name, // Map to productName
+            productDescription: this.accommodation.description, // Map to productDescription
+            productImages: this.accommodation.productImages, // Map to productImages
+            location: this.accommodation.location // Map to location
+          };
   
-      // Call the update service function
-      this.servicesService.updateAccommodationService(serviceId, accommodationData).subscribe(
-        (response) => {
-          console.log('Update response:', response); // Log the response from the server
-          this.isEditing = false; // Close editing mode
-          // Optionally display a success message
-        },
-        (error) => {
-          console.error('Update error:', error); // Log any errors
+          // Call the update service function
+          this.servicesService.updateAccommodationService(serviceId, accommodationData).subscribe(
+            (response) => {
+              console.log('Update response:', response); // Log the response from the server
+              this.isEditing = false; // Close editing mode
+              Swal.fire('Saved!', 'Your accommodation has been updated.', 'success'); // Show success message
+            },
+            (error) => {
+              console.error('Update error:', error); // Log any errors
+              Swal.fire('Error!', 'There was an error updating the accommodation.', 'error'); // Show error message
+            }
+          );
         }
-      );
+      });
     }
   }
+  
   
   
 
@@ -955,9 +969,23 @@ uploadImagesService(files: FileList) {
   }
 }
 
-removeImageService(index: number) {
-  this.accommodation.productImages.splice(index, 1);
+removeImageService(index: number): void {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to remove this image?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+  }).then((result: any) => { // Explicitly typing result as any
+    if (result.isConfirmed) {
+      this.accommodation.productImages.splice(index, 1); // Remove the image from the array
+      Swal.fire('Deleted!', 'Your image has been deleted.', 'success');
+    }
+  });
 }
+
 
 isBase64Image(image: string): boolean {
   return image.startsWith('data:image/');

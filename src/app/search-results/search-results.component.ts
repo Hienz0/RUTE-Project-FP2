@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -15,6 +15,7 @@ export class SearchResultsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private authService: AuthService
   ) {}
 
@@ -41,6 +42,10 @@ export class SearchResultsComponent implements OnInit {
       this.searchResults = results;
       console.log('search result: ', this.searchResults);
     });
+  }
+
+  redirectToAccommodation(serviceId: string): void {
+    this.router.navigate([`/accommodation/${serviceId}`]);
   }
   
 }

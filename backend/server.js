@@ -669,6 +669,33 @@ app.put('/api/services/update/restaurant/:id', upload.array('productImages', 10)
 
 
 
+const restaurantMenuSchema = new mongoose.Schema({
+  serviceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true,
+  },
+  menuFiles: [
+    {
+      fileName: String,
+      fileUrl: String,
+      uploadedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+});
+
+const RestaurantMenu = mongoose.model('RestaurantMenu', restaurantMenuSchema);
+
+
+
+// white space
+
+
+
+
 
 
 

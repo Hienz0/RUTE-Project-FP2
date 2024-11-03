@@ -143,7 +143,9 @@ export class ManageRestaurantComponent {
         }
       }
       
-  
+  dummyFunction(){
+    
+  }
 
 
 }
