@@ -541,6 +541,58 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
 });
 
 
+// Update restaurantservice by ID
+app.put('/api/services/update/restaurant/:id', upload.array('productImages', 10), async (req, res) => {
+  // console.log(req.body);
+  try {
+    const { productName, productDescription, location } = req.body;
+
+    // Initialize an array to hold processed image URLs
+    let processedImages = [];
+
+    // Check if productImages is in the request body
+    if (req.body.productImages) {
+      for (let image of req.body.productImages) {
+        // Check if the image is a Base64 string
+        if (image.startsWith('data:image/')) {
+          const base64Data = image.split(',')[1];
+          const buffer = Buffer.from(base64Data, 'base64');
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`; // Generate a unique file name
+          const filePath = path.join(__dirname, 'uploads', fileName);
+
+          // Write the buffer to the file system
+          await fs.promises.writeFile(filePath, buffer);
+          // Push the URL of the saved image to processedImages
+          processedImages.push(`uploads/${fileName}`);
+        } else {
+          // If it's not a Base64 string, assume it's a URL from the request
+          processedImages.push(image);
+        }
+      }
+    }
+
+    // Update the service with the new product images and other details
+    const updatedService = await Service.findByIdAndUpdate(
+      req.params.id,
+      { productName, productDescription, productImages: processedImages, location },
+      { new: true }
+    );
+
+    if (!updatedService) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Respond with a success message and the updated service
+    res.json({
+      message: 'Service updated successfully',
+      service: updatedService
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 
 

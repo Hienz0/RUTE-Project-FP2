@@ -110,6 +110,15 @@ export class ServicesService {
     );
   }
 
+
+  
+  // Update accommodation service by ID
+  updateRestaurantService(id: string, accommodation: any): Observable<any> {
+    console.log('Updating accommodation with ID:', id); // Log the ID of the accommodation being updated
+    console.log('Accommodation data:', accommodation); // Log the accommodation data being sent
+  
+    return this.http.put<any>(`${this.apiUrl}/update/restaurant/${id}`, accommodation);
+  }
   
   
     
