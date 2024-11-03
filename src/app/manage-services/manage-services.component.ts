@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ManageService } from '../services/manage.service';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-manage-services',
@@ -33,7 +34,7 @@ export class ManageServicesComponent implements OnInit {
     'Transportation': ['Motorbikes', 'Cars', 'Bicycles'],
   };
 
-  constructor(private manageService: ManageService, private authService: AuthService, private snackBar: MatSnackBar) {}
+  constructor(private manageService: ManageService, private authService: AuthService, private snackBar: MatSnackBar,     private router: Router ) {}
 
   ngOnInit() {
     this.loadServices();
@@ -355,4 +356,15 @@ export class ManageServicesComponent implements OnInit {
       return `http://localhost:3000/${imagePath}`;
     }
   }
+
+    // Method to navigate to manage-accommodation route if the productCategory is Accommodation
+    navigateToService(service: any) {
+      console.log(service);
+      if (service.productCategory === 'Accommodation') {
+        this.router.navigate([`/manage-accommodation/${service._id}`]);
+      }
+      else if (service.productCategory === 'Tour Guide') {
+        this.router.navigate([`/manage-tour/${service._id}`]);
+      }
+    }
 }

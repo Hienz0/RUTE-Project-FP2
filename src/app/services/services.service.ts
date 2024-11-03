@@ -31,12 +31,18 @@ export class ServicesService {
 
 
   // Add this method in your existing ServicesService
-  updateTourGuideService(id: string, updatedData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, updatedData);
-  }
+
 
   deleteTourGuideService(serviceId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${serviceId}`);
   }
+
+  
+  updateTourGuideService(id: string, tourGuide: any): Observable<any> {
+
+    return this.http.put<any>(`${this.apiUrl}/update/tourGuide/${id}`, tourGuide);
+  }
+
+  
 
 }

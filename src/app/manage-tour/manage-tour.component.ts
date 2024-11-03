@@ -1,8 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import Swal from 'sweetalert2';
+
+
+declare const Swal: any;
+declare var bootstrap: any;
+
+
+interface TourGuide {
+  name: string;
+  description: string;
+  imageUrl: string;
+  location: string;
+  productImages: string[];
+}
 
 @Component({
   selector: 'app-manage-tour',
@@ -10,106 +21,130 @@ import Swal from 'sweetalert2';
   styleUrls: ['./manage-tour.component.css']
 })
 export class ManageTourComponent implements OnInit {
-  serviceId: string = ''; // To store the service ID
-  service: any; // To store the fetched service details
+  originalTourGuideDetail: TourGuide[] = [];
   isEditing: boolean = false; // To toggle edit mode
+
+  tourGuide: TourGuide = {
+    name: '',
+    description: '',
+    imageUrl: '',
+    location: '',
+    productImages: [],
+  };
 
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService
   ) {}
 
-  ngOnInit() {
-    // Get the serviceId from route parameters
-    this.route.paramMap.subscribe(params => {
-      this.serviceId = params.get('serviceId') || '';
-      this.fetchTourGuideService();
-    });
+  ngOnInit(): void {
+    const serviceId = this.route.snapshot.paramMap.get('serviceId');
+    console.log('Service ID:', serviceId); // Log the serviceId
+    
+    if (serviceId) {
+      this.servicesService.getTourGuideServiceById(serviceId).subscribe((data) => {
+        this.tourGuide = {
+          name: data.productName,
+          description: data.productDescription,
+          imageUrl: data.productImages[0] || '',
+          location: data.location,
+          productImages: data.productImages || [],
+        };
+      });
+    }
+  
   }
 
-  fetchTourGuideService() {
-    this.servicesService.getTourGuideServiceById(this.serviceId).subscribe(
-      (data: any) => {
-        this.service = data; // Set the fetched service data
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error fetching tour guide service', error);
-        Swal.fire('Error', 'Failed to fetch tour guide service data', 'error');
-      }
-    );
+  isBase64Image(image: string): boolean {
+    return image.startsWith('data:image/');
   }
 
-  toggleEdit() {
+  toggleEdit(): void {
+    if (this.isEditing) {
+      // Revert to original data if canceling
+      this.tourGuide = this.originalTourGuideDetail
+        ? JSON.parse(JSON.stringify(this.originalTourGuideDetail))
+        : this.tourGuide;
+    } else {
+      // Enter edit mode
+      this.originalTourGuideDetail = JSON.parse(JSON.stringify(this.tourGuide));
+    }
     this.isEditing = !this.isEditing;
   }
 
-  saveService() {
-    const updatedData = {
-        name: this.service.name,
-        price: this.service.price,
-        description: this.service.description,
-        location: this.service.location // Adjust according to your schema
-    };
 
-    console.log('Sending updated data:', updatedData); // Check the payload
+      isDragging = false;
 
-    this.servicesService.updateTourGuideService(this.serviceId, updatedData).subscribe(
-        (response: any) => {
-            console.log('Service updated successfully', response);
-            this.service = response; // Update the local service data
-            this.isEditing = false; // Exit edit mode
-            Swal.fire('Success', 'Service updated successfully', 'success');
-        },
-        (error: HttpErrorResponse) => {
-            console.error('Error updating service', error);
-            Swal.fire('Error', 'Failed to update service', 'error');
-        }
-    );
-}
-
-
-  deleteService() {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This action will permanently delete the service.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.servicesService.deleteTourGuideService(this.serviceId).subscribe(
-          () => {
-            Swal.fire('Deleted!', 'The service has been deleted.', 'success');
-          },
-          (error: HttpErrorResponse) => {
-            console.error('Error deleting service', error);
-            Swal.fire('Error', 'Failed to delete service', 'error');
-          }
-        );
+      triggerFileInputService() {
+        document.getElementById('fileUpload')?.click();
       }
-    });
-  }
-
-  deleteTourOption(tourOption: any) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This action will permanently delete this tour option.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Find the index of the tour option to delete
-        const index = this.service.tourOptions.indexOf(tourOption);
-        if (index > -1) {
-          // Remove the tour option from the array
-          this.service.tourOptions.splice(index, 1);
-          Swal.fire('Deleted!', 'The tour option has been deleted.', 'success');
+      
+      onImageSelectService(event: any) {
+        const files = event.target.files;
+        this.uploadImagesService(files);
+      }
+      
+      onDropService(event: DragEvent) {
+        event.preventDefault();
+        this.isDragging = false;
+        const files = event.dataTransfer?.files;
+        if (files) {
+          this.uploadImagesService(files);
         }
       }
-    });
-  }
+      
+      onDragOverService(event: DragEvent) {
+        event.preventDefault();
+        this.isDragging = true;
+      }
+      
+      onDragLeaveService(event: DragEvent) {
+        event.preventDefault();
+        this.isDragging = false;
+      }
+
+      uploadImagesService(files: FileList) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const reader = new FileReader();
+          reader.onload = () => {
+            // Assuming you want to add the base64 image directly to productImages
+            this.tourGuide.productImages.push(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      removeImageService(index: number) {
+        this.tourGuide.productImages.splice(index, 1);
+      }
+      
+      saveTourGuide() {
+        const serviceId = this.route.snapshot.paramMap.get('serviceId');
+        if (serviceId) {
+
+          const tourGuideData = {
+            productName: this.tourGuide.name, // Map to productName
+            productDescription: this.tourGuide.description, // Map to productDescription
+            productImages: this.tourGuide.productImages, // Map to productImages
+            location: this.tourGuide.location // Map to location
+          };
+      
+          // Call the update service function
+          this.servicesService.updateTourGuideService(serviceId, tourGuideData).subscribe(
+            (response) => {
+              console.log('Update response:', response); // Log the response from the server
+              this.isEditing = false; // Close editing mode
+              // Optionally display a success message
+            },
+            (error) => {
+              console.error('Update error:', error); // Log any errors
+            }
+          );
+        }
+      }
+      
+  
+
 
 }
