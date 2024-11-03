@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service'; // Import the booking service
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 import * as L from 'leaflet';
 
 
@@ -45,7 +46,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     private servicesService: ServicesService,
     private bookingService: BookingService, // Inject the booking service
     private authService: AuthService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -247,6 +249,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         // Submit the booking data
         this.bookingService.bookAccommodation(bookingData).subscribe(
           (response) => {
+            console.log('Booking Response:', response); // Log the response here
             Swal.fire({
               icon: 'success',
               title: 'Booking Successful!',
@@ -254,6 +257,11 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
               confirmButtonColor: '#3085d6',
             });
             this.closeModal();
+
+                  // Redirect to accommodation-booking-detail page with the booking ID
+                  const bookingId = response.booking._id;
+                  // Assume response contains bookingId
+      this.router.navigate([`/accommodation-booking-detail/${bookingId}`]);
           },
           (error) => {
             Swal.fire({

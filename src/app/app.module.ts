@@ -28,6 +28,7 @@ import { RestaurantComponent } from './restaurant/restaurant.component';
 import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail.component';
 import { ManageAccommodationComponent } from './manage-accommodation/manage-accommodation.component';
 import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant.component';
+import { AccommodationBookingDetailComponent } from './accommodation-booking-detail/accommodation-booking-detail.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant
     RestaurantComponent,
     RestaurantDetailComponent,
     ManageAccommodationComponent,
-    ManageRestaurantComponent
+    ManageRestaurantComponent,
+    AccommodationBookingDetailComponent
   ],
   imports: [
     BrowserModule,

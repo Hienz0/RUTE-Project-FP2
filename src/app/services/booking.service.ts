@@ -21,4 +21,9 @@ export class BookingService {
         params: { serviceId, roomNumber: roomNumber.toString(), checkInDate, checkOutDate }
       });
     }
+
+
+    getBookingById(bookingId: string): Observable<any> {
+      return this.http.get(`${this.apiUrl}/accommodationBooking/${bookingId}`);
+    }
 }

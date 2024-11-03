@@ -591,6 +591,22 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
 });
 
 
+// Get booking by ID
+app.get('/api/bookings/accommodationBooking/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('userId serviceId accommodationId roomTypeId roomId');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    res.status(200).json(booking);
+  } catch (error) {
+    console.error('Error fetching booking:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 
 
 
