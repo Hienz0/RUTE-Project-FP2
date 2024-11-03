@@ -97,18 +97,19 @@ export class ServicesService {
     return this.http.get<any>(`${this.apiUrl}/accommodations/service/${serviceId}`);
   }
 
-  getAvailableRoom(roomTypeId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/rooms/available/${roomTypeId}`).pipe(
+  getAvailableRoom(roomTypeId: string, checkInDate: string, checkOutDate: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/rooms/available/${roomTypeId}`, {
+      params: { checkInDate, checkOutDate }
+    }).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
-          // Suppress the console log for 404 errors and return null
           return of(null);
         }
-        // For other errors, rethrow the error so it can be handled elsewhere
         return throwError(error);
       })
     );
   }
+  
 
 
   

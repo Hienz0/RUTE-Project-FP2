@@ -526,19 +526,77 @@ app.get('/api/services/accommodations/service/:serviceId', async (req, res) => {
 
 app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
   const { roomTypeId } = req.params;
+  const { checkInDate, checkOutDate } = req.query;
+
+  console.log(`Received request for room availability with roomTypeId: ${roomTypeId}`);
+  console.log(`Check-in Date: ${checkInDate}, Check-out Date: ${checkOutDate}`);
+
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+
+  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+    console.error('Invalid date format detected');
+    return res.status(400).json({ message: 'Invalid check-in or check-out date format.' });
+  }
+
   try {
     const accommodation = await Accommodation.findOne({ 'roomTypes._id': roomTypeId });
+
+    if (!accommodation) {
+      console.warn(`No accommodation found for roomTypeId: ${roomTypeId}`);
+      return res.status(404).json({ message: 'Accommodation not found for this room type.' });
+    }
+
     const roomType = accommodation.roomTypes.id(roomTypeId);
-    const availableRoom = roomType.rooms.find(room => room.status === 'available');
-    if (availableRoom) {
+    console.log(`Found room type: ${roomType.name} with ${roomType.rooms.length} rooms`);
+
+    // Check each room for availability
+    const availableRooms = await Promise.all(roomType.rooms.map(async (room) => {
+      console.log(`Checking room ID: ${room._id} for availability`);
+
+      const overlappingBooking = await Booking.findOne({
+        roomId: room._id,
+        bookingStatus: { $ne: 'Cancelled' }, // Exclude cancelled bookings
+        $or: [
+          {
+            checkInDate: { $lte: checkOut }, // Prevents booking if check-in date <= new check-out
+            checkOutDate: { $gte: checkIn }  // Prevents booking if check-out date >= new check-in
+          }
+        ]
+      });
+
+      if (!overlappingBooking) {
+        console.log(`Room ID: ${room._id} is available`);
+        return room;
+      } else {
+        console.log(`Room ID: ${room._id} is not available due to overlapping booking`);
+        return null;
+      }
+    }));
+
+    // Filter out the available rooms
+    const availableRoom = availableRooms.filter(room => room !== null);
+
+    if (availableRoom.length > 0) {
+      console.log(`Available rooms found: ${availableRoom.map(room => room._id).join(', ')}`);
       res.json(availableRoom);
     } else {
-      res.status(200).json({ message: 'No available rooms found for this room type.' });
+      console.log('No available rooms found for the selected date range');
+      res.status(200).json({ message: 'No available rooms found for this room type and date range.' });
     }
   } catch (error) {
+    console.error('Error finding available room:', error);
     res.status(500).json({ message: 'Error finding available room', error });
   }
 });
+
+
+
+
+
+
+
+
 
 
 // Update restaurantservice by ID

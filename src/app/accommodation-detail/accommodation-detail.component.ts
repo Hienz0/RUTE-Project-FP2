@@ -207,9 +207,13 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     }
   
     // Find an available room ID for the selected room type
-    this.servicesService.getAvailableRoom(this.bookingDetails.roomTypeId).subscribe(
-      (room: any) => {
-        if (!room) {
+    this.servicesService.getAvailableRoom(
+      this.bookingDetails.roomTypeId,
+      this.bookingDetails.checkInDate,
+      this.bookingDetails.checkOutDate
+    ).subscribe(
+      (rooms: any[]) => {
+        if (!rooms || rooms.length === 0) {  // If rooms is null or an empty array
           Swal.fire({
             icon: 'info',
             title: 'No Rooms Available',
@@ -218,24 +222,21 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
           });
           return;
         }
-  
-        // Assign the available room ID
-        this.bookingDetails.roomId = room._id;
-        console.log(this.bookingDetails)
-  
-        console.log('Booking form submitted');
-        console.log('Booking details:', this.bookingDetails);
-
-              // Check if roomId is defined before proceeding
-      if (!this.bookingDetails.roomId) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Room is Full',
-          text: 'The selected room type has no available rooms at the moment.',
-          confirmButtonColor: '#3085d6',
-        });
-        return;
-      }
+    
+        // Safely check for an available room
+        const availableRoom = rooms[0];
+        if (availableRoom && availableRoom._id) {
+          this.bookingDetails.roomId = availableRoom._id;
+          console.log('Available room ID:', this.bookingDetails.roomId);
+        } else {
+          Swal.fire({
+            icon: 'info',
+            title: 'Room is Full',
+            text: 'The selected room type has no available rooms at the moment.',
+            confirmButtonColor: '#3085d6',
+          });
+          return;
+        }
   
         const bookingData = {
           ...this.bookingDetails,
