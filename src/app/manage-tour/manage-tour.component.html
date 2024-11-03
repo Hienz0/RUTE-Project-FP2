@@ -1,46 +1,109 @@
-<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
-    <h1 class="text-center mb-5" style="color: #343a40;">Manage Tour</h1>
+<div class="container">
+  <h2>Manage Tour</h2>
   
-    <div *ngIf="!service">Loading...</div>
-    <div *ngIf="service" class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
-      <div class="card-body">
-        <h3 *ngIf="!isEditing">{{ service.name }}</h3>
-        
-        <div *ngIf="isEditing">
-          <label>Tour Name:</label>
-          <input type="text" [(ngModel)]="service.name" class="form-control" />
-        </div>
-        
-        <div *ngIf="!isEditing">
-          <p>{{ service.description }}</p>
-        </div>
-        
-        <div *ngIf="isEditing">
-          <label>Description:</label>
-          <textarea [(ngModel)]="service.description" class="form-control"></textarea>
-        </div>
-  
-        <div *ngIf="!isEditing">
-          <p><strong>Location:</strong> {{ service.location }}</p>
-        </div>
-        
-        <div *ngIf="isEditing">
-          <label>Price:</label>
-          <input type="number" [(ngModel)]="service.price" class="form-control" />
-        </div>
-  
-        <div *ngIf="!isEditing">
-          <p><strong>Duration:</strong> {{ service.duration }} hours</p>
-        </div>
-  
-        <div *ngIf="isEditing">
-          <label>Duration:</label>
-          <input type="number" [(ngModel)]="service.duration" class="form-control" />
-        </div>
-  
-        <button class="btn btn-primary" (click)="toggleEdit()">{{ isEditing ? 'Cancel' : 'Edit' }}</button>
-        <button *ngIf="isEditing" class="btn btn-success" (click)="saveService()">Save</button>
+  <!-- Carousel for Tour Images -->
+  <div *ngIf="service?.images?.length" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+      <div *ngFor="let image of service.images; let i = index" 
+           [class.active]="i === 0" 
+           class="carousel-item">
+        <img [src]="image.url" class="d-block w-100" alt="Tour Image">
       </div>
     </div>
+    <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
   </div>
-  
+
+  <!-- Tour Details -->
+  <div *ngIf="service">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input
+        id="name"
+        type="text"
+        class="form-control"
+        [(ngModel)]="service.name"
+        [readonly]="!isEditing"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        class="form-control"
+        [(ngModel)]="service.description"
+        [readonly]="!isEditing"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location</label>
+      <input
+        id="location"
+        type="text"
+        class="form-control"
+        [(ngModel)]="service.location"
+        [readonly]="!isEditing"
+      />
+    </div>
+    
+    <!-- Room Types -->
+    <h3>Tour Options</h3>
+    <div *ngFor="let tourOption of service.tourOptions" class="card my-3">
+      <div class="card-body">
+        <div class="form-group">
+          <label for="roomTypeName">Tour Option Name</label>
+          <input
+            id="roomTypeName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="tourOption.name"
+            [readonly]="!isEditing"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="price">Price</label>
+          <input
+            id="price"
+            type="number"
+            class="form-control"
+            [(ngModel)]="tourOption.price"
+            [readonly]="!isEditing"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="amenities">Amenities</label>
+          <input
+            id="amenities"
+            type="text"
+            class="form-control"
+            [(ngModel)]="tourOption.amenities"
+            [readonly]="!isEditing"
+          />
+        </div>
+        
+        <button *ngIf="isEditing" class="btn btn-danger" (click)="deleteTourOption(tourOption)">
+          Delete Tour Option
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Buttons -->
+    <div *ngIf="isEditing">
+      <button class="btn btn-primary" (click)="saveService()">Save</button>
+      <button class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
+    </div>
+    <div *ngIf="!isEditing">
+      <button class="btn btn-warning" (click)="toggleEdit()">Edit</button>
+    </div>
+  </div>
+</div>

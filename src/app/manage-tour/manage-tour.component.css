@@ -1,0 +1,22 @@
+.container {
+    max-width: 800px;
+  }
+  
+  .carousel-item img {
+    height: 300px;
+    object-fit: cover;
+  }
+  
+  h2 {
+    font-size: 1.8rem;
+    color: #333;
+  }
+  
+  ul {
+    padding-left: 20px;
+  }
+  
+  button.btn-danger {
+    margin-top: 10px;
+  }
+  

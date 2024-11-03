@@ -219,22 +219,14 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   }
 });
 
-// app.post('/api/bookings/tour-guide', async (req, res) => {
-//   try {
-//     const booking = new TourBooking(req.body);
-//     await booking.save();
-//     res.status(201).json(booking);
-//   } catch (error) {
-//     console.error('Error details:', error); // Log error details for debugging
-//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
-//   }
-// });
-
 // TEST UPDATE
 
 app.put('/api/services/:id', (req, res) => {
   const serviceId = req.params.id;
   const updatedData = req.body;
+
+  console.log('Updating service with ID:', serviceId);
+  console.log('Received updated data:', updatedData);
 
   // Example: Validate incoming data
   if (!updatedData.name || !updatedData.price) {
@@ -254,6 +246,19 @@ app.put('/api/services/:id', (req, res) => {
           res.status(500).json({ message: 'Internal Server Error' });
       });
 });
+
+
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//     const booking = new TourBooking(req.body);
+//     await booking.save();
+//     res.status(201).json(booking);
+//   } catch (error) {
+//     console.error('Error details:', error); // Log error details for debugging
+//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+//   }
+// });
+
 
 
 ///////////
