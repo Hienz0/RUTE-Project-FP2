@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 import * as L from 'leaflet'; // Import Leaflet.js
 import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
 import flatpickr from 'flatpickr';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-book-transportation',
@@ -43,49 +45,54 @@ export class BookTransportationComponent implements OnInit {
   selectedVehicleTypes: any[] = [];
   vehicleQuantities: { [key: string]: number } = {};
   totalBookingPrice: number = 0;
-  numDays: number =1;
+  numDays: number = 1;
   // Inisialisasi individualPrices sebagai objek kosong
   individualPrices: { [key: string]: number } = {};
   quantityWarnings: { [key: string]: string } = {};
   individualPricesPerDay: { [key: string]: number } = {};
 
-  vehicleBooking: Array<{ name: string; quantity: number; pricePerVehicle: number; totalPrice: number; selectedVehicleType: string }> = [];
-  
+  vehicleBooking: Array<{
+    name: string;
+    quantity: number;
+    pricePerVehicle: number;
+    totalPrice: number;
+    selectedVehicleType: string;
+  }> = [];
+
   transportID: string = '';
   remainingQuantity: { [key: string]: number } = {}; // Inisialisasi sebagai objek kosong
   isModalOpen = false;
   ubudCircle: any;
 
-
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
-  
+
     // Get ID from route parameter
     this.transportID = this.route.snapshot.paramMap.get('id')!;
     console.log('Transport ID from route:', this.transportID);
-  
+
     if (this.transportID) {
       this.service.getTransporationDetailsByID(this.transportID).subscribe(
         (data) => {
           this.transportationService = data;
           console.log('data', data);
-          
-  
+
           // Initialize the maps after transportation service is fetched
           setTimeout(() => {
             this.initMap(); // General map initialization
             this.initPickupMap(); // Initialize the pickup map with marker
             this.initDropoffMap(); // Initialize the dropoff map with marker
           }, 0);
-  
+
           // Fetch booked dates specific to this transportation service
           this.fetchBookedDates(this.transportID);
         },
@@ -96,12 +103,12 @@ export class BookTransportationComponent implements OnInit {
     } else {
       console.error('Transport ID is null or invalid');
     }
-  
+
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
   }
-  
+
   fetchBookedDates(transportID: string): void {
     this.service.getBookedDates(transportID).subscribe(
       (response: any) => {
@@ -126,8 +133,6 @@ export class BookTransportationComponent implements OnInit {
       }
     );
   }
-
-  
 
   flattenBookedDates(
     data: { pickupDate: string; dropoffDate: string }[]
@@ -224,42 +229,45 @@ export class BookTransportationComponent implements OnInit {
 
   onVehicleTypeChange(event: any, subcategory: any) {
     if (event.target.checked) {
-        this.selectedVehicleTypes.push(subcategory);
-        this.vehicleQuantities[subcategory.name] = 1; // Default quantity
+      this.selectedVehicleTypes.push(subcategory);
+      this.vehicleQuantities[subcategory.name] = 1; // Default quantity
 
-        // Add to vehicleBooking
-        this.vehicleBooking.push({
-            name: subcategory.name,
-            quantity: 1,
-            pricePerVehicle: subcategory.price,
-            totalPrice: subcategory.price * (this.numDays || 1),
-            selectedVehicleType:subcategory.type
-        });
+      // Add to vehicleBooking
+      this.vehicleBooking.push({
+        name: subcategory.name,
+        quantity: 1,
+        pricePerVehicle: subcategory.price,
+        totalPrice: subcategory.price * (this.numDays || 1),
+        selectedVehicleType: subcategory.type,
+      });
     } else {
-        this.selectedVehicleTypes = this.selectedVehicleTypes.filter(
-            (type) => type.name !== subcategory.name
-        );
-        delete this.vehicleQuantities[subcategory.name];
-        delete this.individualPrices[subcategory.name];
+      this.selectedVehicleTypes = this.selectedVehicleTypes.filter(
+        (type) => type.name !== subcategory.name
+      );
+      delete this.vehicleQuantities[subcategory.name];
+      delete this.individualPrices[subcategory.name];
 
-        // Remove from vehicleBooking
-        this.vehicleBooking = this.vehicleBooking.filter(
-            (vehicle) => vehicle.name !== subcategory.name
-        );
+      // Remove from vehicleBooking
+      this.vehicleBooking = this.vehicleBooking.filter(
+        (vehicle) => vehicle.name !== subcategory.name
+      );
     }
     this.calculateTotalPrice();
-}
+  }
 
-calculateTotalPrice() {
+  calculateTotalPrice() {
     const pickup = new Date(this.pickupDate);
     const dropoff = new Date(this.dropoffDate);
 
     // Calculate the number of days between pickupDate and dropoffDate
-    const days = Math.floor((dropoff.getTime() - pickup.getTime()) / (1000 * 3600 * 24));
+    const days = Math.floor(
+      (dropoff.getTime() - pickup.getTime()) / (1000 * 3600 * 24)
+    );
     const numDays = days > 0 ? days : 1;
 
     // Calculate total price including quantity, price per day, and number of days
-    this.totalBookingPrice = this.selectedVehicleTypes.reduce((total, subcategory) => {
+    this.totalBookingPrice = this.selectedVehicleTypes.reduce(
+      (total, subcategory) => {
         const quantity = this.vehicleQuantities[subcategory.name] || 0;
         const pricePerDay = subcategory.price;
         const totalDatPrice = pricePerDay * numDays;
@@ -269,36 +277,41 @@ calculateTotalPrice() {
         this.individualPrices[subcategory.name] = totalPrice;
 
         // Update vehicleBooking
-        const vehicle = this.vehicleBooking.find(v => v.name === subcategory.name);
+        const vehicle = this.vehicleBooking.find(
+          (v) => v.name === subcategory.name
+        );
         if (vehicle) {
-            vehicle.quantity = quantity;
-            vehicle.pricePerVehicle = totalDatPrice;
-            vehicle.totalPrice = totalPrice;
+          vehicle.quantity = quantity;
+          vehicle.pricePerVehicle = totalDatPrice;
+          vehicle.totalPrice = totalPrice;
         }
 
         return total + totalPrice;
-    }, 0);
-}
+      },
+      0
+    );
+  }
 
-onQuantityInput(subcategory: any) {
-  const maxQuantity = this.remainingQuantity[subcategory._id] || subcategory.quantity; // Default to subcategory quantity if remainingQuantity is not available
-  let currentQuantity = this.vehicleQuantities[subcategory.name];
+  onQuantityInput(subcategory: any) {
+    const maxQuantity =
+      this.remainingQuantity[subcategory._id] || subcategory.quantity; // Default to subcategory quantity if remainingQuantity is not available
+    let currentQuantity = this.vehicleQuantities[subcategory.name];
 
-  if (currentQuantity > maxQuantity) {
+    if (currentQuantity > maxQuantity) {
       // Set the current quantity to the maximum allowed quantity
       this.vehicleQuantities[subcategory.name] = maxQuantity;
 
       // Display a warning message
-      this.quantityWarnings[subcategory._id] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
-  } else {
+      this.quantityWarnings[
+        subcategory._id
+      ] = `Stok tidak tersedia sebanyak itu. Maksimal: ${maxQuantity}`;
+    } else {
       // Remove the warning if the quantity is within the allowed limit
       delete this.quantityWarnings[subcategory._id];
+    }
+
+    this.calculateTotalPrice();
   }
-
-  this.calculateTotalPrice();
-}
-
-
 
   // Fungsi untuk menghitung ulang harga dan validasi tanggal
   onDateChange() {
@@ -312,10 +325,15 @@ onQuantityInput(subcategory: any) {
         return;
       }
 
-      this.service.getRemainingQuantity(this.transportID, this.pickupDate, this.dropoffDate)
+      this.service
+        .getRemainingQuantity(
+          this.transportID,
+          this.pickupDate,
+          this.dropoffDate
+        )
         .subscribe(
           (data) => {
-            this.remainingQuantity = data.availableQuantities || {};  // Memastikan data ada atau kosong
+            this.remainingQuantity = data.availableQuantities || {}; // Memastikan data ada atau kosong
             console.log(this.remainingQuantity);
           },
           (error) => {
@@ -326,7 +344,6 @@ onQuantityInput(subcategory: any) {
 
     this.calculateTotalPrice();
   }
-
 
   // Function to book transportation
   bookTransport(): void {
@@ -343,7 +360,7 @@ onQuantityInput(subcategory: any) {
       !this.dropoffLocation
     ) {
       console.error('All fields are required');
-      alert('Please fill in all required fields.');
+      this.showAlert('warning', 'Incomplete Form', 'Please fill in all required fields.');
       return;
     }
 
@@ -355,17 +372,29 @@ onQuantityInput(subcategory: any) {
       specialRequest: this.specialRequest,
       pickupLocation: this.pickupLocation,
       dropoffLocation: this.dropoffLocation,
-      vehicleBooking: this.vehicleBooking,         // Add vehicle details
-      totalBookingPrice: this.totalBookingPrice     // Add total price
+      vehicleBooking: this.vehicleBooking, // Add vehicle details
+      totalBookingPrice: this.totalBookingPrice, // Add total price
     };
 
     console.log(bookingData);
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
-        
+         // Show success message with redirect
+        this.showAlert(
+          'success',
+          'Booking Successful!',
+          'Your transportation service has been booked successfully.',
+          '/transportationService'
+        );
       },
       (error) => {
+        // Show error message
+        this.showAlert(
+          'error',
+          'Booking Failed',
+          'An error occurred while booking the transportation service. Please try again.'
+        );
         console.error('Error booking transportation:', error);
       }
     );
@@ -412,16 +441,14 @@ onQuantityInput(subcategory: any) {
     this.reverseGeocode(latitude, longitude, 'location'); // Assuming it's similar to the pickup, adjust if needed
   }
 
-
-
   openModal() {
     this.isModalOpen = true;
     setTimeout(() => {
-      this.initPickupMap();  // Initialize the map after the modal opens
-      this.pickupMap?.invalidateSize();  // Adjust layout to fit modal
-      this.initDropoffMap();  // Initialize the map after the modal opens
+      this.initPickupMap(); // Initialize the map after the modal opens
+      this.pickupMap?.invalidateSize(); // Adjust layout to fit modal
+      this.initDropoffMap(); // Initialize the map after the modal opens
       this.dropoffMap?.invalidateSize();
-      this.centerMap();  // Center the map view on the marker
+      this.centerMap(); // Center the map view on the marker
     }, 100); // Delay allows modal rendering before map adjustments
   }
 
@@ -430,20 +457,17 @@ onQuantityInput(subcategory: any) {
   }
 
   // Center map function for consistency
-centerMap(): void {
-  
-  if (this.pickupMap) {
-    this.pickupMap.fitBounds(this.ubudCircle.getBounds());
+  centerMap(): void {
+    if (this.pickupMap) {
+      this.pickupMap.fitBounds(this.ubudCircle.getBounds());
+    }
+    if (this.dropoffMap) {
+      this.dropoffMap.fitBounds(this.ubudCircle.getBounds());
+    }
   }
-  if (this.dropoffMap) {
-    this.dropoffMap.fitBounds(this.ubudCircle.getBounds());
-  }
-}
   // Initialize Pickup Map with bounds limitation and search functionality
   initPickupMap(): void {
     if (this.pickupMap) {
-      
-      
       return; // Avoid re-initializing the map
     }
 
@@ -706,4 +730,23 @@ centerMap(): void {
   getFullImagePath(image: string): string {
     return `http://localhost:3000/${image}`;
   }
+
+  showAlert(
+    icon: 'success' | 'error' | 'warning' | 'info',
+    title: string,
+    text: string,
+    redirectTo?: string // optional redirect path
+  ): void {
+    Swal.fire({
+      icon: icon,
+      title: title,
+      text: text,
+      confirmButtonText: 'OK'
+    }).then((result) => {
+      if (result.isConfirmed && redirectTo) {
+        this.router.navigate([redirectTo]);
+      }
+    });
+  }
+  
 }

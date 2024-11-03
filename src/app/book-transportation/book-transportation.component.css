@@ -62,20 +62,22 @@
     z-index: 1040; /* Pastikan backdrop berada di bawah modal */
   }
 
-  .position-relative .calendar-icon {
-    cursor: pointer;
-    position: absolute;
-    right: 10px; /* Posisi dari sisi kanan */
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d; /* Warna ikon, sesuaikan dengan tema */
-    font-size: 1.2em; /* Ukuran ikon */
-    pointer-events: all; /* Agar ikon dapat diklik */
-  }
-  
-  .position-relative .form-control {
-    padding-right: 2.5rem; /* Menambah ruang di dalam input untuk ikon */
-  }
+ /* Style the calendar icon inside the input box */
+.input-group .calendar-icon {
+  right: 12px;  /* Adjust for your layout */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Ensure the input box has padding so text does not overlap with icon */
+.input-group .form-control {
+  padding-right: 2.5rem;  /* Adjust to leave room for the icon */
+}
+
+
   
   
   
