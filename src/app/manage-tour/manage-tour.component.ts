@@ -129,8 +129,8 @@ export class ManageTourComponent implements OnInit {
           const tourGuideData = {
             productName: this.tourGuide.name, // Map to productName
             productDescription: this.tourGuide.description, // Map to productDescription
-            productImages: this.tourGuide.productImages, // Map to productImages
             productPrice: this.tourGuide.productPrice, 
+            productImages: this.tourGuide.productImages, // Map to productImages
             location: this.tourGuide.location // Map to location
           };
       

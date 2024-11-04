@@ -1337,7 +1337,7 @@ app.get('/api/search', authMiddleware, async (req, res) => {
 app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10), async (req, res) => {
   // console.log(req.body);
   try {
-    const { productName, productDescription, location } = req.body;
+    const { productName, productDescription, productPrice, location } = req.body;
 
     // Initialize an array to hold processed image URLs
     let processedImages = [];
@@ -1366,7 +1366,7 @@ app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10),
     // Update the service with the new product images and other details
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
-      { productName, productDescription, productImages: processedImages, location },
+      { productName, productDescription, productPrice, productImages: processedImages, location },
       { new: true }
     );
 
