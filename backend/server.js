@@ -193,7 +193,13 @@ const bookingTourSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-  }
+  },
+
+  tourTime: { // Add the tourTime field
+    type: String,
+    required: true,
+    enum: ['9:00-11:00','13:00-15:00', '17:00-19:00'] // Restrict to available time options
+}
 
 }, { timestamps: true });
 
@@ -209,7 +215,8 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
     const bookingData = {
       ...req.body,
       serviceId: req.body.serviceId, // Make sure these are passed from the client side
-      userId: req.body.userId       // or set here if you have access to current user
+      userId: req.body.userId,      // or set here if you have access to current user
+      // tourTime: req.body.tourTime
     };
     const booking = new TourBooking(bookingData);
     await booking.save();
@@ -220,33 +227,6 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   }
 });
 
-// TEST UPDATE
-
-app.put('/api/services/:id', (req, res) => {
-  const serviceId = req.params.id;
-  const updatedData = req.body;
-
-  console.log('Updating service with ID:', serviceId);
-  console.log('Received updated data:', updatedData);
-
-  // Example: Validate incoming data
-  if (!updatedData.name || !updatedData.price) {
-      return res.status(400).json({ message: 'Name and price are required.' });
-  }
-
-  // Example: Update service in database
-  Service.findByIdAndUpdate(serviceId, updatedData, { new: true })
-      .then(service => {
-          if (!service) {
-              return res.status(404).json({ message: 'Service not found.' });
-          }
-          res.status(200).json(service);
-      })
-      .catch(err => {
-          console.error('Error updating service:', err);
-          res.status(500).json({ message: 'Internal Server Error' });
-      });
-});
 
 
 // app.post('/api/bookings/tour-guide', async (req, res) => {

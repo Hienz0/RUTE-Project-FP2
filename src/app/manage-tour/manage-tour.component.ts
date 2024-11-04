@@ -13,6 +13,7 @@ interface TourGuide {
   imageUrl: string;
   location: string;
   productImages: string[];
+  productPrice: number;
 }
 
 @Component({
@@ -30,6 +31,7 @@ export class ManageTourComponent implements OnInit {
     imageUrl: '',
     location: '',
     productImages: [],
+    productPrice: 0,
   };
 
   constructor(
@@ -49,6 +51,7 @@ export class ManageTourComponent implements OnInit {
           imageUrl: data.productImages[0] || '',
           location: data.location,
           productImages: data.productImages || [],
+          productPrice: data.productPrice,
         };
       });
     }
@@ -127,6 +130,7 @@ export class ManageTourComponent implements OnInit {
             productName: this.tourGuide.name, // Map to productName
             productDescription: this.tourGuide.description, // Map to productDescription
             productImages: this.tourGuide.productImages, // Map to productImages
+            productPrice: this.tourGuide.productPrice, 
             location: this.tourGuide.location // Map to location
           };
       
@@ -134,11 +138,23 @@ export class ManageTourComponent implements OnInit {
           this.servicesService.updateTourGuideService(serviceId, tourGuideData).subscribe(
             (response) => {
               console.log('Update response:', response); // Log the response from the server
+              Swal.fire({
+                icon: 'success',
+                title: 'Changes Successful!',
+                text: 'Your tour or guide has been Updated successfully.',
+                confirmButtonColor: '#3085d6',
+              });
               this.isEditing = false; // Close editing mode
               // Optionally display a success message
             },
             (error) => {
               console.error('Update error:', error); // Log any errors
+              Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: 'There was an error processing your Update. Nice try again.',
+                confirmButtonColor: '#d33',
+              });
             }
           );
         }

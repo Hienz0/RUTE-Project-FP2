@@ -27,6 +27,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     tourguideType: 'With Guide',
     numberOfParticipants: 1,
     tourDate: '',
+    tourTime: '',
     specialRequest: '',
     pickupLocation: ''
   };
@@ -138,6 +139,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     if (!this.bookingDetails.customerName || 
         !this.bookingDetails.tourguideType || 
         !this.bookingDetails.numberOfParticipants || 
+        !this.bookingDetails.tourTime||
         !this.bookingDetails.tourDate) {
   
       Swal.fire({
