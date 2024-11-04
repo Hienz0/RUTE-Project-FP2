@@ -341,24 +341,27 @@ app.get('/transportationService/:id', async (req, res) => {
     // Find Transportation documents that match the serviceId
     const transportationData = await Transportation.findOne({ serviceId: transportId }).exec();
 
-    if (!transportationData) {
-      return res.status(404).json({ message: 'Transportation data not found for the specified serviceId' });
+    // Prepare the response object
+    const response = {
+      serviceDetails: service
+    };
+
+    // Add transportationData only if it exists
+    if (transportationData) {
+      response.transportationData = {
+        productSubcategory: transportationData.productSubcategory,
+      };
     }
 
-    // Combine service data with transportation productSubcategory details
-    res.json({
-      serviceDetails: service,
-      transportationData: {
-      
-        productSubcategory: transportationData.productSubcategory,
-        
-      }
-    });
+    // Send the response
+    res.json(response);
+
   } catch (error) {
     console.error('Error retrieving provider data:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 
 app.post('/manage/transportation', async (req, res) => {
