@@ -99,38 +99,78 @@
 
 
 
-
 <!-- Add Menu Item Form -->
 <div class="card p-4 my-4 border-light shadow-sm" style="border-radius: 8px;">
   <div class="card-body">
     <h3 class="card-title text-center mb-4">
       <i class="fas fa-utensils icon"></i> Add New Menu Item
     </h3>
-    <form>
+    <form (ngSubmit)="addMenuItem()">
       <!-- Menu Item Name -->
       <div class="form-group mb-3">
         <label for="menuItemName">
           <i class="fas fa-tag icon"></i> Menu Item Name
         </label>
-        <input type="text" class="form-control" id="menuItemName" [(ngModel)]="restaurant.name" name="name" required placeholder="Enter menu item name" />
+        <input type="text" class="form-control" id="menuItemName" [(ngModel)]="restaurantMenu.name" name="name" required placeholder="Enter menu item name" />
       </div>
 
       <!-- Menu Item Image Upload -->
-      <div class="form-group mb-3">
-        <label><i class="fas fa-image icon"></i> Upload Image</label>
-        <div class="file-upload" id="fileUploadArea">
-          <input type="file" (change)="dummyFunction()" id="menuItemImage" class="file-upload-input" />
-          <div class="file-upload-text">
-            <p>Click or drag an image here to upload</p>
-          </div>
-        </div>
-        <small class="form-text text-muted mt-2">Accepted formats: .jpg, .png, .gif</small>
-      </div>
+<!-- Menu Item Image Upload -->
+<div class="form-group mb-3">
+  <label><i class="fas fa-image icon"></i> Upload Image or PDF</label>
+  <div
+    class="file-upload"
+    id="fileUploadArea"
+    (click)="triggerFileInput()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    [ngClass]="{'dragging': isDragging}"
+    style="cursor: pointer;"
+  >
+    <input
+      type="file"
+      accept=".jpg, .jpeg, .png, .gif, .pdf"
+      (change)="onFileSelected($event)"
+      id="menuItemImage"
+      class="file-upload-input"
+      style="display: none;"
+    />
+    <div class="file-upload-text" *ngIf="!restaurantMenu.file">
+      <p>Click or drag an image or PDF here to upload</p>
+    </div>
+    <div *ngIf="restaurantMenu.file && fileIsImage(restaurantMenu.file)">
+      <img [src]="restaurantMenu.file" alt="Preview" class="img-preview mt-2" style="max-width: 100px;" />
+    </div>
+    <div *ngIf="restaurantMenu.file && fileIsPDF(restaurantMenu.file)">
+      <p>PDF file uploaded</p>
+    </div>
+  </div>
+  <small class="form-text text-muted mt-2">Accepted formats: .jpg, .png, .gif, .pdf</small>
+</div>
 
-      <button type="button" class="btn btn-primary btn-block mt-3" (click)="dummyFunction()">
+
+
+
+      <button type="submit" class="btn btn-primary btn-block mt-3">
         <i class="fas fa-plus"></i> Add Menu Item
       </button>
     </form>
+  </div>
+</div>
+
+<!-- Display Added Menu Items -->
+<div *ngIf="menuItems.length > 0" class="mt-4">
+  <h4>Added Menu Items</h4>
+  <div *ngFor="let item of menuItems" class="menu-item-preview mt-3">
+    <h5>{{ item.name }}</h5>
+    <div *ngIf="fileIsImage(item.file)">
+      <img [src]="item.file" alt="Menu Item Image" style="max-width: 200px;" />
+    </div>
+    <div *ngIf="fileIsPDF(item.file)">
+      <i class="fas fa-file-pdf fa-2x text-danger"></i>
+      <p>PDF file added</p>
+    </div>
   </div>
 </div>
 
@@ -162,5 +202,8 @@
   </div>
 </div> -->
 
-
+    <!-- Publish Button -->
+    <button class="btn btn-success mt-4" (click)="dummyFunction()">
+      <i class="fas fa-cloud-upload-alt"></i> Publish
+    </button>
   </div>

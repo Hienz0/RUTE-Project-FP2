@@ -84,11 +84,14 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
-    userType: { type: String, default: 'user' }  // Add userType with default value 'user'
+    address: String,
+    contact: String,
+    avatar: String,
+    userType: { type: String, default: 'user' },  // Add userType with default value 'user'
   });
-  
+ 
   const User = mongoose.model('User', userSchema);
-
+ 
 /////////////////////////////////////////////////////////
 // booking accomodation
 

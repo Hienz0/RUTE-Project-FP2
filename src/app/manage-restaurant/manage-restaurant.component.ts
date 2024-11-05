@@ -31,6 +31,15 @@ export class ManageRestaurantComponent {
     productImages: [],
   };
 
+  restaurantMenu = {
+    name: '',
+    image: null as string | null,
+    file: null as string | null,  // New property for handling both images and PDFs
+  };
+
+  menuItems: Array<{ name: string; file: string | null }> = [];
+
+
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService
@@ -147,5 +156,81 @@ export class ManageRestaurantComponent {
     
   }
 
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input?.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.restaurantMenu.image = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = true; // Set dragging state
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false; // Reset dragging state
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false; // Reset dragging state
+
+    if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
+      const file = event.dataTransfer.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.restaurantMenu.image = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  addMenuItem(): void {
+    if (this.restaurantMenu.name && this.restaurantMenu.file) {
+      // Add the new item to the menu items array
+      this.menuItems.push({ name: this.restaurantMenu.name, file: this.restaurantMenu.file });
+
+      // Reset form after adding item
+      this.restaurantMenu = { name: '', image: null, file: null };
+    } else {
+      console.error('Please complete all fields.');
+    }
+  }
+  
+
+  triggerFileInput(): void {
+    const fileInput = document.getElementById('menuItemImage') as HTMLInputElement;
+    fileInput.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input?.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.restaurantMenu.file = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  fileIsImage(file: string | null): boolean {
+    return !!file && file.startsWith('data:image/');
+  }
+
+  fileIsPDF(file: string | null): boolean {
+    return !!file && file.startsWith('data:application/pdf');
+  }
+  
+  
 
 }
