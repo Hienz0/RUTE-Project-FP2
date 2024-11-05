@@ -1,1 +1,176 @@
-<p>customize-profile works!</p>
+<div class="container" style="margin-top: 33px">
+  <div class="row justify-content-center">
+    <!-- Profile Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card profile-card border-0 shadow-lg rounded-3">
+        <div class="card-body text-center py-5">
+            <img
+            src="https://via.placeholder.com/120"
+            alt="User profile picture"
+            class="profile-picture rounded-circle border border-3 mb-3"
+            style="width: 120px; height: 120px; border: 3px solid #0dcaf0 !important;"
+          />
+          <h2 class="mb-1">John Doe</h2>
+          <p class="text-muted mb-3">johndoemail.com</p>
+          <button class="btn btn-outline-info btn-sm">
+            Change Profile Picture
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="col-md-8">
+      <div class="card profile-form shadow-lg rounded-3 border-0">
+        <div class="card-header bg-light border-0 pb-1 text-center">
+          <h4
+            class="fw-bold mt-3"
+            style="font-size: 1.6rem; color: #0dcaf0; letter-spacing: 0.5px"
+          >
+            Personalize Your Profile
+          </h4>
+          <p style="font-size: 0.7rem; color: #6c757d; margin-top: -5px">
+            Make changes to your account information
+          </p>
+        </div>
+
+        <div class="card-body pt-4 p-4">
+          <form>
+            <!-- Full Name -->
+            <div class="form-group mb-3">
+              <label for="name" class="form-label fw-semibold">Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-person text-info"></i>
+                </span>
+                <input
+                  type="text"
+                  id="name"
+                  class="form-control form-control-lg"
+                  name="name"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-group mb-3">
+              <label for="address" class="form-label fw-semibold"
+                >Address</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-geo-alt text-info"></i>
+                </span>
+                <input
+                  type="text"
+                  id="address"
+                  class="form-control form-control-lg"
+                  name="address"
+                  placeholder="Enter your address"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="form-group mb-3">
+              <label for="contact" class="form-label fw-semibold"
+                >Contact</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-telephone text-info"></i>
+                </span>
+                <input
+                  type="tel"
+                  id="contact"
+                  class="form-control form-control-lg"
+                  name="contact"
+                  placeholder="Enter your contact number"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Current Password -->
+            <div class="form-group mb-3">
+              <label for="currentPassword" class="form-label fw-semibold"
+                >Current Password</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-lock text-info"></i>
+                </span>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  class="form-control form-control-lg"
+                  name="currentPassword"
+                  placeholder="Enter current password"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- New Password -->
+            <div class="form-group mb-3">
+              <label for="newPassword" class="form-label fw-semibold"
+                >New Password</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-shield-lock text-info"></i>
+                </span>
+                <input
+                  type="password"
+                  id="newPassword"
+                  class="form-control form-control-lg"
+                  name="newPassword"
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Confirm New Password -->
+            <div class="form-group mb-3">
+              <label for="confirmNewPassword" class="form-label fw-semibold"
+                >Confirm New Password</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-0">
+                  <i class="bi bi-shield-check text-info"></i>
+                </span>
+                <input
+                  type="password"
+                  id="confirmNewPassword"
+                  class="form-control form-control-lg"
+                  name="confirmNewPassword"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-info px-5 py-2">
+                    <i class="bi bi-save me-2" style="color: rgb(247, 247, 247);"></i> 
+                    <span style="color: rgb(247, 247, 247);">Save Changes</span>
+                  </button>
+                  
+              <button
+                type="button"
+                class="btn btn-outline-secondary px-5 py-2 mx-2"
+              >
+                <i class="bi bi-x-lg me-2"></i> Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
