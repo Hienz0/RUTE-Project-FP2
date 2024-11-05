@@ -10,8 +10,8 @@
             class="profile-picture rounded-circle border border-3 mb-3"
             style="width: 120px; height: 120px; border: 3px solid #0dcaf0 !important;"
           />
-          <h2 class="mb-1">John Doe</h2>
-          <p class="text-muted mb-3">johndoemail.com</p>
+          <h2 class="mb-1">{{ currentUser.name }}</h2>
+          <p class="text-muted mb-3">{{ currentUser.email }}</p>
           <button class="btn btn-outline-info btn-sm">
             Change Profile Picture
           </button>
@@ -48,7 +48,7 @@
                   id="name"
                   class="form-control form-control-lg"
                   name="name"
-                  placeholder="Enter your full name"
+                  [placeholder]="currentUser?.name || 'Enter your name'"
                   required
                 />
               </div>
@@ -68,7 +68,8 @@
                   id="address"
                   class="form-control form-control-lg"
                   name="address"
-                  placeholder="Enter your address"
+                  [placeholder]="currentUser?.address || 'Enter your address'"
+                  
                   required
                 />
               </div>
@@ -88,7 +89,7 @@
                   id="contact"
                   class="form-control form-control-lg"
                   name="contact"
-                  placeholder="Enter your contact number"
+                  [placeholder]="currentUser?.contact || 'Enter your contact'"
                   required
                 />
               </div>
