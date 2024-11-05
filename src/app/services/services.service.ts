@@ -29,9 +29,7 @@ export class ServicesService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-
   // Add this method in your existing ServicesService
-
 
   deleteTourGuideService(serviceId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${serviceId}`);
@@ -43,6 +41,9 @@ export class ServicesService {
     return this.http.put<any>(`${this.apiUrl}/update/tourGuide/${id}`, tourGuide);
   }
 
-  
+  // GET booking
+  getUserBookings(userId: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/bookings/user/${userId}`);
+  }
 
 }

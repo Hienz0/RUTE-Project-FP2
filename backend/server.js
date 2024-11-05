@@ -227,6 +227,19 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   }
 });
 
+// GET route to fetch bookings by userId
+app.get('/api/services/bookings/user/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const bookings = await TourBooking.find({ userId: userId });
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ error: 'Error fetching bookings' });
+  }
+});
+
+
 
 
 // app.post('/api/bookings/tour-guide', async (req, res) => {

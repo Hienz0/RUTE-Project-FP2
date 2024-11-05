@@ -104,4 +104,11 @@ export class AuthService {
     this.currentUserSubject.next(null);
     console.log('currentUserSubject after logout:', this.currentUserSubject.value); // Debugging BehaviorSubject after logout
   }
+
+  // New method to get current user ID NEW
+  public getCurrentUserId(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.id : null; // Assuming `id` is the identifier in the user object
+  }
+
 }

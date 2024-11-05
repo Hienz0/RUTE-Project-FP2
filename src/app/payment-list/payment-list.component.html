@@ -1,0 +1,10 @@
+<div class="payment-list">
+    <h2>Payment List</h2>
+    <div *ngFor="let booking of bookings" class="booking-item">
+      <h4>{{ booking.serviceData?.productName }}</h4>
+      <p><strong>Service Type:</strong> {{ booking.serviceData?.productCategory }}</p>
+      <p><strong>Booking Date:</strong> {{ booking.createdAt | date }}</p>
+      <p><strong>Price:</strong> {{ booking.serviceData?.productPrice | currency:'IDR' }}</p>
+      <button class="btn btn-primary" (click)="payForBooking(booking.id)">Pay</button>
+    </div>
+</div>
