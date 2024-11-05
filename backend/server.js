@@ -693,6 +693,34 @@ const restaurantMenuSchema = new mongoose.Schema({
 const RestaurantMenu = mongoose.model('RestaurantMenu', restaurantMenuSchema);
 
 
+// POST endpoint for uploading menu
+app.post('/api/services/upload-menu', upload.any(), async (req, res) => {
+  const { serviceId } = req.body;
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded' });
+  }
+
+  try {
+    // Map each uploaded file to the format needed for RestaurantMenu
+    const menuFiles = req.files.map(file => ({
+      fileName: file.filename,
+      fileUrl: `/uploads/${file.filename}`,
+      uploadedAt: new Date(),
+    }));
+
+    const newMenu = new RestaurantMenu({
+      serviceId,
+      menuFiles,
+    });
+
+    await newMenu.save();
+    res.status(201).json({ message: 'Menu items uploaded successfully', menu: newMenu });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error, could not upload menu' });
+  }
+});
 
 // white space
 

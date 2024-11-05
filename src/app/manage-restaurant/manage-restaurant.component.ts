@@ -36,6 +36,7 @@ export class ManageRestaurantComponent {
     image: null as string | null,
     file: null as string | null,  // New property for handling both images and PDFs
   };
+  
 
   menuItems: Array<{ name: string; file: string | null }> = [];
 
@@ -229,6 +230,65 @@ export class ManageRestaurantComponent {
 
   fileIsPDF(file: string | null): boolean {
     return !!file && file.startsWith('data:application/pdf');
+  }
+
+  publishMenu(): void {
+    const serviceId = this.route.snapshot.paramMap.get('serviceId') || '';
+  
+    // Check if there are any items in the menuItems array
+    if (this.menuItems.length > 0) {
+      const formData = new FormData();
+  
+      // Loop through each menu item and append to FormData
+      this.menuItems.forEach((menuItem, index) => {
+        if (menuItem.file && menuItem.name) {
+        // Check if the file is a Blob and has a name
+        const fileBlob = this.dataURLtoBlob(menuItem.file);
+        const fileName = `${menuItem.name}.${fileBlob.type.split('/')[1]}`; // Append the file extension
+
+        // Convert the file from Data URL to Blob and append it
+        formData.append(`file${index}`, fileBlob, fileName);
+        formData.append(`name${index}`, menuItem.name);
+          
+        } else {
+          console.error(`Menu item ${index + 1} is missing file or name.`);
+        }
+      });
+  
+      // Make sure to send the serviceId as well
+      formData.append('serviceId', serviceId);
+
+         // Manually log FormData contents
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+  
+      // Call the service to upload the menu items
+      this.servicesService.uploadMenu(formData).subscribe(
+        (response) => {
+          console.log('Menus published successfully:', response);
+          // Optionally clear the menu items or provide feedback here
+        },
+        (error) => {
+          console.error('Error uploading menus:', error);
+        }
+      );
+    } else {
+      console.error('No menu items to publish.');
+    }
+  }
+  
+
+  dataURLtoBlob(dataUrl: string): Blob {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
   }
   
   

@@ -120,6 +120,17 @@ export class ServicesService {
   
     return this.http.put<any>(`${this.apiUrl}/update/restaurant/${id}`, accommodation);
   }
+
+  uploadMenu(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload-menu`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('An error occurred:', error.message);
+    return throwError('Something went wrong. Please try again later.');
+  }
   
   
     
