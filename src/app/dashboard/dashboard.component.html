@@ -26,7 +26,7 @@
           <li class="nav-item dropdown" id="navProfile">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                  <img src="../../assets/images/sample photo/1.jpeg" alt="Profile" class="rounded-circle"
+                  <img [src]="getFullImagePath(currentUser?.avatar)" alt="Profile" class="rounded-circle"
                     style="width: 30px; height: 30px;">
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
