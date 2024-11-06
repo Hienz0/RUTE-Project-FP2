@@ -160,19 +160,31 @@
 </div>
 
 <!-- Display Added Menu Items -->
+<!-- Display Added Menu Items -->
 <div *ngIf="menuItems.length > 0" class="mt-4">
   <h4>Added Menu Items</h4>
-  <div *ngFor="let item of menuItems" class="menu-item-preview mt-3">
-    <h5>{{ item.name }}</h5>
-    <div *ngIf="fileIsImage(item.file)">
-      <img [src]="item.file" alt="Menu Item Image" style="max-width: 200px;" />
-    </div>
-    <div *ngIf="fileIsPDF(item.file)">
-      <i class="fas fa-file-pdf fa-2x text-danger"></i>
-      <p>PDF file added</p>
-    </div>
+<!-- Updated *ngFor loop with trackBy -->
+<div *ngFor="let item of menuItems; let i = index; trackBy: trackByIndex" class="menu-item-preview mt-3" style="position: relative;">
+  <h5>{{ item.name }}</h5>
+
+  <!-- Remove X button with class -->
+  <button (click)="removeMenuItem(i)" class="delete-btn">
+    ×
+  </button>
+
+  <div *ngIf="fileIsImage(item.file)">
+    <img [src]="getFileUrl(item.file)" alt="Menu Item Image" style="max-width: 200px;" />
+  </div>
+
+  <div *ngIf="fileIsPDF(item.file)">
+    <i class="fas fa-file-pdf fa-2x text-danger"></i>
+    <p>PDF file added</p>
   </div>
 </div>
+
+</div>
+
+
 
 
 

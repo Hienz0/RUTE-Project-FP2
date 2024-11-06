@@ -131,6 +131,17 @@ export class ServicesService {
     console.error('An error occurred:', error.message);
     return throwError('Something went wrong. Please try again later.');
   }
+
+    // Method to fetch the restaurant menu
+    getRestaurantMenu(serviceId: string): Observable<any> {
+      return this.http.get(`${this.apiUrl}/restaurantMenu/${serviceId}`).pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error in getRestaurantMenu:', error);
+          return throwError(() => new Error(error.message));
+        })
+      );
+    }
+    
   
   
     

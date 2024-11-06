@@ -696,31 +696,78 @@ const RestaurantMenu = mongoose.model('RestaurantMenu', restaurantMenuSchema);
 // POST endpoint for uploading menu
 app.post('/api/services/upload-menu', upload.any(), async (req, res) => {
   const { serviceId } = req.body;
+  console.log(req.body);
 
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ message: 'No files uploaded' });
+  if (!req.files && !Object.keys(req.body).some(key => key.startsWith('fileUrl'))) {
+    return res.status(400).json({ message: 'No files or URLs provided' });
   }
 
   try {
-    // Map each uploaded file to the format needed for RestaurantMenu
-    const menuFiles = req.files.map(file => ({
+    // Extract uploaded files from req.files
+    const menuFiles = (req.files || []).map(file => ({
       fileName: file.filename,
       fileUrl: `/uploads/${file.filename}`,
       uploadedAt: new Date(),
     }));
 
-    const newMenu = new RestaurantMenu({
-      serviceId,
-      menuFiles,
+    // Extract file URLs from req.body (handle keys like fileUrl0, fileUrl1, etc.)
+    Object.keys(req.body).forEach((key) => {
+      if (key.startsWith('fileUrl') && req.body[key]) {
+        // Extract the last part of the URL as a placeholder for fileName
+        const urlSegments = req.body[key].split('/');
+        const placeholderName = urlSegments[urlSegments.length - 1];
+        menuFiles.push({
+          fileName: placeholderName || 'URL-file',  // Use the last segment or a default placeholder
+          fileUrl: req.body[key],
+          uploadedAt: new Date(),
+        });
+      }
     });
 
-    await newMenu.save();
-    res.status(201).json({ message: 'Menu items uploaded successfully', menu: newMenu });
+    // Use findOneAndUpdate to update if exists, or create if it doesn’t
+    const updatedMenu = await RestaurantMenu.findOneAndUpdate(
+      { serviceId },
+      { menuFiles }, // Replace the existing menuFiles array with new data
+      { new: true, upsert: true, setDefaultsOnInsert: true } // Options to create if not found
+    );
+
+    res.status(201).json({
+      message: 'Menu items uploaded successfully',
+      menu: updatedMenu,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error, could not upload menu' });
   }
 });
+
+
+
+
+// Route to get restaurant menu by serviceId
+// Route to get all restaurant menus by serviceId
+app.get('/api/services/restaurantMenu/:serviceId', async (req, res) => {
+  try {
+    const serviceId = req.params.serviceId;
+
+    // Find all restaurant menus associated with the serviceId
+    const restaurantMenus = await RestaurantMenu.find({ serviceId }).exec();
+
+    if (!restaurantMenus.length) {
+      return res.status(404).json({ message: 'No menus found for this service' });
+    }
+
+    // Flatten menuFiles arrays if each menu has multiple files
+    const menuFiles = restaurantMenus.flatMap((menu) => menu.menuFiles);
+
+    res.json({ menuFiles });
+  } catch (error) {
+    console.error('Error fetching restaurant menus:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 
 // white space
 

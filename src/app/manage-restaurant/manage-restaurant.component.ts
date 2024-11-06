@@ -5,6 +5,8 @@ import { ServicesService } from '../services/services.service';
 declare const Swal: any;
 declare var bootstrap: any;
 
+const BASE_URL = 'http://localhost:3000';
+
 interface Restaurant {
   name: string;
   description: string;
@@ -19,6 +21,7 @@ interface Restaurant {
   styleUrls: ['./manage-restaurant.component.css']
 })
 export class ManageRestaurantComponent {
+
 
   originalRestaurantDetail: Restaurant[] = [];
   isEditing: boolean = false; // To toggle edit mode
@@ -60,6 +63,26 @@ export class ManageRestaurantComponent {
           productImages: data.productImages || [],
         };
       });
+
+      this.servicesService.getRestaurantMenu(serviceId).subscribe(
+        (menuData) => {
+          console.log('Received menu data:', menuData);
+          // Ensure menuData contains a valid array for menuFiles
+          if (menuData && Array.isArray(menuData.menuFiles)) {
+            this.menuItems = menuData.menuFiles.map((file: { fileName: string; fileUrl: string }) => ({
+              name: file.fileName,
+              file: file.fileUrl,
+            }));
+          } else {
+            console.warn('menuFiles is not an array or is undefined');
+            this.menuItems = []; // Clear items if the data format is incorrect
+          }
+        },
+        (error) => {
+          console.error('Error fetching menu data:', error);
+        }
+      );
+      
     }
   
   }
@@ -201,6 +224,8 @@ export class ManageRestaurantComponent {
 
       // Reset form after adding item
       this.restaurantMenu = { name: '', image: null, file: null };
+
+      console.log('Menu items:', this.menuItems);
     } else {
       console.error('Please complete all fields.');
     }
@@ -224,59 +249,92 @@ export class ManageRestaurantComponent {
     }
   }
   
-  fileIsImage(file: string | null): boolean {
-    return !!file && file.startsWith('data:image/');
+// Check if file is an image
+// fileIsImage(file: string | null): boolean {
+//   return !!file && (/\.(jpg|jpeg|png|gif|svg)$/i.test(file) || file.startsWith('data:image'));
+// }
+
+// fileIsPDF(file: string | null): boolean {
+//   return !!file && (/\.pdf$/i.test(file) || file.startsWith('data:application/pdf'));
+// }
+
+// Define a base URL for assets that are not base64-encoded
+
+fileIsImage(file: string | null): boolean {
+  return !!file && (/\.(jpg|jpeg|png|gif|svg)$/i.test(file) || file.startsWith('data:image'));
+}
+
+fileIsPDF(file: string | null): boolean {
+  return !!file && (/\.pdf$/i.test(file) || file.startsWith('data:application/pdf'));
+}
+
+// Function to fetch the correct URL for non-base64 images or PDFs
+getFileUrl(file: string | null): string | null {
+  if (!file) return null;
+  // Check if the file is base64 or a URL
+  if (file.startsWith('data:')) {
+    return file; // Return the base64 string directly
+  } else {
+    return `${BASE_URL}${file}`; // Prepend the base URL for non-base64 files
   }
+}
 
-  fileIsPDF(file: string | null): boolean {
-    return !!file && file.startsWith('data:application/pdf');
-  }
 
-  publishMenu(): void {
-    const serviceId = this.route.snapshot.paramMap.get('serviceId') || '';
-  
-    // Check if there are any items in the menuItems array
-    if (this.menuItems.length > 0) {
-      const formData = new FormData();
-  
-      // Loop through each menu item and append to FormData
-      this.menuItems.forEach((menuItem, index) => {
-        if (menuItem.file && menuItem.name) {
-        // Check if the file is a Blob and has a name
-        const fileBlob = this.dataURLtoBlob(menuItem.file);
-        const fileName = `${menuItem.name}.${fileBlob.type.split('/')[1]}`; // Append the file extension
+publishMenu(): void {
+  const serviceId = this.route.snapshot.paramMap.get('serviceId') || '';
 
-        // Convert the file from Data URL to Blob and append it
-        formData.append(`file${index}`, fileBlob, fileName);
-        formData.append(`name${index}`, menuItem.name);
-          
+  // Check if there are any items in the menuItems array
+  if (this.menuItems.length > 0) {
+    const formData = new FormData();
+
+    // Loop through each menu item and append to FormData
+    this.menuItems.forEach((menuItem, index) => {
+      if (menuItem.file && menuItem.name) {
+        // Check if the file is base64 (image or PDF)
+        if (menuItem.file.startsWith('data:image') || menuItem.file.startsWith('data:application/pdf')) {
+          // Convert base64-encoded files to Blob
+          const fileBlob = this.dataURLtoBlob(menuItem.file);
+          if (fileBlob) {
+            const fileName = `${menuItem.name}.${fileBlob.type.split('/')[1]}`;
+            formData.append(`file${index}`, fileBlob, fileName);
+            formData.append(`name${index}`, menuItem.name);
+          } else {
+            console.error(`Invalid base64 data for menu item ${index + 1}.`);
+          }
         } else {
-          console.error(`Menu item ${index + 1} is missing file or name.`);
+          // Append non-base64 URLs directly
+          formData.append(`fileUrl${index}`, menuItem.file);
+          formData.append(`name${index}`, menuItem.name);
         }
-      });
-  
-      // Make sure to send the serviceId as well
-      formData.append('serviceId', serviceId);
+      } else {
+        console.error(`Menu item ${index + 1} is missing file or name.`);
+      }
+    });
 
-         // Manually log FormData contents
+    // Append serviceId
+    formData.append('serviceId', serviceId);
+
+    // Log FormData contents
     formData.forEach((value, key) => {
       console.log(`${key}:`, value);
     });
-  
-      // Call the service to upload the menu items
-      this.servicesService.uploadMenu(formData).subscribe(
-        (response) => {
-          console.log('Menus published successfully:', response);
-          // Optionally clear the menu items or provide feedback here
-        },
-        (error) => {
-          console.error('Error uploading menus:', error);
-        }
-      );
-    } else {
-      console.error('No menu items to publish.');
-    }
+
+    // Call the service to upload the menu items
+    this.servicesService.uploadMenu(formData).subscribe(
+      (response) => {
+        console.log('Menus published successfully:', response);
+      },
+      (error) => {
+        console.error('Error uploading menus:', error);
+      }
+    );
+  } else {
+    console.error('No menu items to publish.');
   }
+}
+
+
+
   
 
   dataURLtoBlob(dataUrl: string): Blob {
@@ -290,7 +348,18 @@ export class ManageRestaurantComponent {
     }
     return new Blob([u8arr], { type: mime });
   }
+
+  removeMenuItem(index: number): void {
+    // Remove the item at the given index
+    this.menuItems.splice(index, 1);
+    console.log(this.menuItems);
+  }
   
   
+  // In your component class
+trackByIndex(index: number, item: any): number {
+  return index; // Use index as unique identifier
+}
+
 
 }
