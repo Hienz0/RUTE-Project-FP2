@@ -59,6 +59,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     address: String,
     contact: String,
+    avatar: String,
     userType: { type: String, default: 'user' },  // Add userType with default value 'user'
     bookingHistory: [{
       bookingType: { type: String, enum: ['transportation', 'accommodation', 'tour&guide'] },
@@ -292,7 +293,7 @@ app.post('/signin', async (req, res) => {
     const token = generateToken(user);
 
     // Include user details in the response
-    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType } };
+    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address } };
     console.log('Sending response:', response); // Debugging response from server
     res.status(200).json(response);
   } catch (error) {
@@ -341,24 +342,27 @@ app.get('/transportationService/:id', async (req, res) => {
     // Find Transportation documents that match the serviceId
     const transportationData = await Transportation.findOne({ serviceId: transportId }).exec();
 
-    if (!transportationData) {
-      return res.status(404).json({ message: 'Transportation data not found for the specified serviceId' });
+    // Prepare the response object
+    const response = {
+      serviceDetails: service
+    };
+
+    // Add transportationData only if it exists
+    if (transportationData) {
+      response.transportationData = {
+        productSubcategory: transportationData.productSubcategory,
+      };
     }
 
-    // Combine service data with transportation productSubcategory details
-    res.json({
-      serviceDetails: service,
-      transportationData: {
-      
-        productSubcategory: transportationData.productSubcategory,
-        
-      }
-    });
+    // Send the response
+    res.json(response);
+
   } catch (error) {
     console.error('Error retrieving provider data:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 
 app.post('/manage/transportation', async (req, res) => {
