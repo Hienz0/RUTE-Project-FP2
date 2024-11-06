@@ -1,10 +1,23 @@
-<div class="payment-list">
-    <h2>Payment List</h2>
-    <div *ngFor="let booking of bookings" class="booking-item">
-      <h4>{{ booking.serviceData?.productName }}</h4>
-      <p><strong>Service Type:</strong> {{ booking.serviceData?.productCategory }}</p>
-      <p><strong>Booking Date:</strong> {{ booking.createdAt | date }}</p>
-      <p><strong>Price:</strong> {{ booking.serviceData?.productPrice | currency:'IDR' }}</p>
-      <button class="btn btn-primary" (click)="payForBooking(booking.id)">Pay</button>
+<div class="payment-container">
+  <h2 class="payment-title">Payment List</h2>
+  <div class="payment-list">
+    <div *ngFor="let booking of bookings" class="card h-100 shadow-sm hover-shadow booking-card">
+      <!-- Check if serviceData and productImages exist -->
+      <div *ngIf="booking.serviceData && booking.serviceData.productImages?.length">
+        <img
+          [src]="'http://localhost:3000/' + booking.serviceData.productImages[0]"
+          alt="{{ booking.serviceData.productName }}"
+          class="card-img-top img-fluid"
+          style="height: 300px; object-fit: cover;"
+        />
+      </div>
+      <div class="card-body" *ngIf="booking.serviceData">
+        <h3 class="card-title">{{ booking.serviceData.productName }}</h3>
+        <p class="card-text">{{ booking.serviceData.productDescription }}</p>
+        <p><strong>Price:</strong> {{ booking.serviceData.productPrice | currency:'IDR' }}</p>
+        <p><strong>Location:</strong> {{ booking.serviceData.location }}</p>
+        <button class="btn btn-primary mt-2" (click)="payForBooking(booking.id)">Pay</button>
+      </div>
     </div>
+  </div>
 </div>
