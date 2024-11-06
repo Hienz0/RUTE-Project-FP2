@@ -60,7 +60,15 @@ export class CustomizeProfileComponent implements OnInit {
     this.userService.customizeProfile(formData).subscribe(
       response => {
         console.log('Profile updated successfully:', response);
-        this.authService.updateCurrentUser(response.user);
+    
+        // Ganti _id menjadi userId pada response
+        const updatedUser = { ...response.user, userId: response.user._id }; // Ganti _id menjadi userId
+        delete updatedUser._id; // Hapus _id jika tidak diperlukan lagi
+    
+        // Memperbarui user di authService
+        this.authService.updateCurrentUser(updatedUser);
+    
+        // Menampilkan notifikasi dan mengarahkan ke /dashboard
         this.showAlert(
           'success',
           'Profile Updated!',
@@ -70,14 +78,16 @@ export class CustomizeProfileComponent implements OnInit {
       },
       error => {
         console.error('Error updating profile:', error);
-        console.log(formData)
+        // Menampilkan error jika ada
         this.showAlert(
           'error',
-          'Update Failed',
-          'There was an error updating your profile. Please try again.'
+          'Update Failed!',
+          'There was an error while updating your profile.',
+          ''
         );
       }
     );
+    
   }
 
   cancelChanges(): void {
