@@ -13,8 +13,12 @@ const bcrypt = require('bcrypt');
 const { type } = require('os');
 const fs = require('fs');
 
+const midtransClient = require('midtrans-client');
+
 const app = express();
 const PORT = 3000;
+// const midtransClient = require('midtrans-client');
+// import midtransClient from 'midtrans-client';
 
 app.use(cors({
   origin: 'http://localhost:4200',
@@ -127,8 +131,6 @@ app.post('/api/bookings/accommodation', async (req, res) => {
 
 // 
 
-
-
 // booking tour
 
 // Define the tour booking schema
@@ -239,8 +241,93 @@ app.get('/api/services/bookings/user/:userId', async (req, res) => {
   }
 });
 
+// NEW MIDTRANS
+// Setup Midtrans API
+let snap = new midtransClient.Snap({
+  isProduction: false, // Set to true for production
+  serverKey: 'SB-Mid-server-EkQFDkUqZ0I0nG-avUrCzTi0',
+  clientKey: 'SB-Mid-client-Vn8ozmwoyZZQXGJa'
+});
 
+// Create a transaction and return a token for Midtrans payment
+app.post('/api/create-transaction', async (req, res) => {
+  const { bookingId, amount, userId } = req.body;
 
+  // Create a new booking
+  const newBooking = new Booking({ bookingId, userId, amount });
+  await newBooking.save();
+
+  // Prepare the transaction
+  const transactionDetails = {
+    order_id: bookingId,
+    gross_amount: amount,
+  };
+
+  const itemDetails = [{
+    id: bookingId,
+    price: amount,
+    quantity: 1,
+    name: `Booking #${bookingId}`,
+  }];
+
+  const customerDetails = {
+    first_name: 'Customer',
+    last_name: 'User',
+    email: 'customer@example.com',
+    phone: '123456789',
+  };
+
+  const midtransTransaction = {
+    transaction_details: transactionDetails,
+    item_details: itemDetails,
+    customer_details: customerDetails,
+  };
+
+  try {
+    const transaction = await snap.createTransaction(midtransTransaction);
+    res.json({ token: transaction.token });
+  } catch (error) {
+    console.error('Midtrans transaction creation failed:', error);
+    res.status(500).send('Transaction creation failed');
+  }
+});
+
+// Verify the payment after the user completes the transaction
+app.post('/api/verify-payment', async (req, res) => {
+  const { order_id } = req.body;
+
+  try {
+    const transactionStatus = await snap.transaction.status(order_id);
+
+    if (transactionStatus.transaction_status === 'settlement') {
+      // Update booking status to 'paid'
+      await Booking.findOneAndUpdate({ bookingId: order_id }, { status: 'paid' });
+      res.json({ success: true, message: 'Payment verified' });
+    } else {
+      res.json({ success: false, message: 'Payment not completed or failed' });
+    }
+  } catch (error) {
+    console.error('Payment verification failed:', error);
+    res.status(500).send('Payment verification failed');
+  }
+});
+
+// Sample endpoint to fetch user bookings (for payment list)
+app.get('/api/bookings/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const bookings = await Booking.find({ userId });
+    res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).send('Error fetching bookings');
+  }
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
 
 // app.post('/api/bookings/tour-guide', async (req, res) => {
 //   try {

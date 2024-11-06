@@ -2,7 +2,6 @@
   <h2 class="payment-title">Payment List</h2>
   <div class="payment-list">
     <div *ngFor="let booking of bookings" class="card h-100 shadow-sm hover-shadow booking-card">
-      <!-- Check if serviceData and productImages exist -->
       <div *ngIf="booking.serviceData && booking.serviceData.productImages?.length">
         <img
           [src]="'http://localhost:3000/' + booking.serviceData.productImages[0]"
@@ -16,7 +15,9 @@
         <p class="card-text">{{ booking.serviceData.productDescription }}</p>
         <p><strong>Price:</strong> {{ booking.serviceData.productPrice | currency:'IDR' }}</p>
         <p><strong>Location:</strong> {{ booking.serviceData.location }}</p>
-        <button class="btn btn-primary mt-2" (click)="payForBooking(booking.id)">Pay</button>
+        <button class="btn btn-primary mt-2" (click)="payForBooking(booking.id, booking.serviceData.productPrice)">
+          Pay
+        </button>
       </div>
     </div>
   </div>
