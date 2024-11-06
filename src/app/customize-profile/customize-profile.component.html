@@ -4,15 +4,28 @@
     <div class="col-md-4 mb-4">
       <div class="card profile-card border-0 shadow-lg rounded-3">
         <div class="card-body text-center py-5">
-            <img
-            src="https://via.placeholder.com/120"
+          <img
+            [src]="previewAvatarUrl"
             alt="User profile picture"
             class="profile-picture rounded-circle border border-3 mb-3"
-            style="width: 120px; height: 120px; border: 3px solid #0dcaf0 !important;"
+            style="
+              width: 120px;
+              height: 120px;
+              border: 3px solid #0dcaf0 !important;
+            "
           />
           <h2 class="mb-1">{{ currentUser.name }}</h2>
           <p class="text-muted mb-3">{{ currentUser.email }}</p>
-          <button class="btn btn-outline-info btn-sm">
+          <input
+            type="file"
+            (change)="onAvatarSelected($event)"
+            hidden
+            #fileInput
+          />
+          <button
+            class="btn btn-outline-info btn-sm"
+            (click)="fileInput.click()"
+          >
             Change Profile Picture
           </button>
         </div>
@@ -35,141 +48,134 @@
         </div>
 
         <div class="card-body pt-4 p-4">
-          <form>
-            <!-- Full Name -->
-            <div class="form-group mb-3">
-              <label for="name" class="form-label fw-semibold">Name</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-person text-info"></i>
-                </span>
-                <input
-                  type="text"
-                  id="name"
-                  class="form-control form-control-lg"
-                  name="name"
-                  [placeholder]="currentUser?.name || 'Enter your name'"
-                  required
-                />
-              </div>
+          <!-- Full Name -->
+          <div class="form-group mb-3">
+            <label for="name" class="form-label fw-semibold">Name</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-person text-info"></i>
+              </span>
+              <input
+                type="text"
+                id="name"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.name"
+                [placeholder]="currentUser.name || 'Enter your name'"
+                required
+              />
             </div>
+          </div>
 
-            <!-- Address -->
-            <div class="form-group mb-3">
-              <label for="address" class="form-label fw-semibold"
-                >Address</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-geo-alt text-info"></i>
-                </span>
-                <input
-                  type="text"
-                  id="address"
-                  class="form-control form-control-lg"
-                  name="address"
-                  [placeholder]="currentUser?.address || 'Enter your address'"
-                  
-                  required
-                />
-              </div>
+          <!-- Address -->
+          <div class="form-group mb-3">
+            <label for="address" class="form-label fw-semibold">Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-geo-alt text-info"></i>
+              </span>
+              <input
+                type="text"
+                id="address"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.address"
+                [placeholder]="currentUser.address || 'Enter your address'"
+                required
+              />
             </div>
+          </div>
 
-            <!-- Contact -->
-            <div class="form-group mb-3">
-              <label for="contact" class="form-label fw-semibold"
-                >Contact</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-telephone text-info"></i>
-                </span>
-                <input
-                  type="tel"
-                  id="contact"
-                  class="form-control form-control-lg"
-                  name="contact"
-                  [placeholder]="currentUser?.contact || 'Enter your contact'"
-                  required
-                />
-              </div>
+          <!-- Contact -->
+          <div class="form-group mb-3">
+            <label for="contact" class="form-label fw-semibold">Contact</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-telephone text-info"></i>
+              </span>
+              <input
+                type="tel"
+                id="contact"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.contact"
+                [placeholder]="currentUser.contact || 'Enter your contact'"
+                required
+              />
             </div>
+          </div>
 
-            <!-- Current Password -->
-            <div class="form-group mb-3">
-              <label for="currentPassword" class="form-label fw-semibold"
-                >Current Password</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-lock text-info"></i>
-                </span>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  class="form-control form-control-lg"
-                  name="currentPassword"
-                  placeholder="Enter current password"
-                  required
-                />
-              </div>
+          <!-- Current Password -->
+          <div class="form-group mb-3">
+            <label for="currentPassword" class="form-label fw-semibold"
+              >Current Password</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-lock text-info"></i>
+              </span>
+              <input
+                type="password"
+                id="currentPassword"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.currentPassword"
+                placeholder="Enter current password"
+                required
+              />
             </div>
+          </div>
 
-            <!-- New Password -->
-            <div class="form-group mb-3">
-              <label for="newPassword" class="form-label fw-semibold"
-                >New Password</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-shield-lock text-info"></i>
-                </span>
-                <input
-                  type="password"
-                  id="newPassword"
-                  class="form-control form-control-lg"
-                  name="newPassword"
-                  placeholder="Enter new password"
-                  required
-                />
-              </div>
+          <!-- New Password -->
+          <div class="form-group mb-3">
+            <label for="newPassword" class="form-label fw-semibold"
+              >New Password</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-shield-lock text-info"></i>
+              </span>
+              <input
+                type="password"
+                id="newPassword"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.newPassword"
+                placeholder="Enter new password"
+                required
+              />
             </div>
+          </div>
 
-            <!-- Confirm New Password -->
-            <div class="form-group mb-3">
-              <label for="confirmNewPassword" class="form-label fw-semibold"
-                >Confirm New Password</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light border-0">
-                  <i class="bi bi-shield-check text-info"></i>
-                </span>
-                <input
-                  type="password"
-                  id="confirmNewPassword"
-                  class="form-control form-control-lg"
-                  name="confirmNewPassword"
-                  placeholder="Confirm new password"
-                  required
-                />
-              </div>
+          <!-- Confirm New Password -->
+          <div class="form-group mb-3">
+            <label for="confirmNewPassword" class="form-label fw-semibold"
+              >Confirm New Password</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0">
+                <i class="bi bi-shield-check text-info"></i>
+              </span>
+              <input
+                type="password"
+                id="confirmNewPassword"
+                class="form-control form-control-lg"
+                [(ngModel)]="profileData.confirmNewPassword"
+                placeholder="Confirm new password"
+                required
+              />
             </div>
+          </div>
 
-            <!-- Buttons -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-info px-5 py-2">
-                    <i class="bi bi-save me-2" style="color: rgb(247, 247, 247);"></i> 
-                    <span style="color: rgb(247, 247, 247);">Save Changes</span>
-                  </button>
-                  
-              <button
-                type="button"
-                class="btn btn-outline-secondary px-5 py-2 mx-2"
-              >
-                <i class="bi bi-x-lg me-2"></i> Cancel
-              </button>
-            </div>
-          </form>
+          <!-- Buttons -->
+          <div class="text-center">
+            <button (click)="saveChanges()" class="btn btn-info px-5 py-2">
+              <i class="bi bi-save me-2" style="color: rgb(247, 247, 247)"></i>
+              <span style="color: rgb(247, 247, 247)">Save Changes</span>
+            </button>
+
+            <button
+              (click)="cancelChanges()"
+              class="btn btn-outline-secondary px-5 py-2 mx-2"
+            >
+              <i class="bi bi-x-lg me-2"></i> Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
