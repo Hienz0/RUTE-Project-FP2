@@ -48,7 +48,7 @@ export class CustomizeProfileComponent implements OnInit {
   // Update profile information
   saveChanges(): void {
     const formData = new FormData();
-    formData.append('userId', this.currentUser._id);
+    formData.append('userId', this.currentUser.userId || this.currentUser._id);
     formData.append('name', this.profileData.name);
     formData.append('address', this.profileData.address);
     formData.append('contact', this.profileData.contact);
@@ -70,6 +70,7 @@ export class CustomizeProfileComponent implements OnInit {
       },
       error => {
         console.error('Error updating profile:', error);
+        console.log(formData)
         this.showAlert(
           'error',
           'Update Failed',

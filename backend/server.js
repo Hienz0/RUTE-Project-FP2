@@ -932,6 +932,8 @@ app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
   try {
     const { userId, name, address, contact, currentPassword, newPassword, confirmNewPassword } = req.body;
 
+    console.log(req.body);
+
     // Cari pengguna berdasarkan userId
     let user = await User.findById(userId);
     if (!user) {
