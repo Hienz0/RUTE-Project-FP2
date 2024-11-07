@@ -158,6 +158,7 @@
     </form>
   </div>
 <!-- Display Added Menu Items -->
+<!-- Display Added Menu Items -->
 <div *ngIf="menuItems.length > 0" class="mt-4">
   <h3 class="text-primary mb-3">Added Menu Items</h3>
 
@@ -169,19 +170,19 @@
       class="col-md-6 mb-4"
     >
       <div class="card shadow-sm p-3 h-100">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-4">
+        <div class="card-body d-flex align-items-center position-relative">
+          <div class="me-4" (click)="openPreviewModal(item)">
             <!-- Display Item Icon based on file type -->
             <ng-container *ngIf="fileIsImage(item.file); else pdfIcon">
               <img
                 [src]="getFileUrl(item.file)"
                 alt="Menu Item Image"
                 class="img-fluid rounded"
-                style="width: 180px; height: 100px; object-fit: cover;"
+                style="width: 180px; height: 100px; object-fit: cover; cursor: pointer;"
               />
             </ng-container>
             <ng-template #pdfIcon>
-              <i class="fas fa-file-pdf fa-4x text-danger"></i>
+              <i class="fas fa-file-pdf fa-4x text-danger" style="cursor: pointer;"></i>
               <p class="text-muted fs-5 mb-0">PDF file added</p>
             </ng-template>
           </div>
@@ -205,6 +206,36 @@
     </div>
   </div>
 </div>
+
+<!-- Preview Modal for Images and PDFs -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-3 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagePreviewModalLabel">
+          <i [class]="selectedItem?.isImage ? 'fas fa-image' : 'fas fa-file-pdf'" class="me-2"></i> Preview
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <!-- Dynamic Content: Image or PDF -->
+        <ng-container *ngIf="selectedItem?.isImage; else pdfPreview">
+          <img [src]="selectedItem?.fileUrl || ''" alt="Preview Image" class="img-fluid rounded mb-3" />
+        </ng-container>
+        <ng-template #pdfPreview>
+          <iframe [src]="selectedItem?.fileUrl || ''" width="100%" height="500px" class="rounded border"></iframe>
+        </ng-template>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <a [href]="selectedItem?.fileUrl || ''" download class="btn btn-primary btn-sm">
+          <i class="fas fa-download me-1"></i> Download
+        </a>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 

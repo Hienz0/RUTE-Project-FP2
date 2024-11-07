@@ -4,10 +4,14 @@ import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import * as L from 'leaflet';
+import Panzoom from '@panzoom/panzoom';
 
 // Declare Swal globally
 declare var Swal: any;
 declare var bootstrap: any;
+
+const BASE_URL = 'http://localhost:3000';
+
 
 @Component({
   selector: 'app-restaurant-detail',
@@ -21,7 +25,11 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map: L.Map | undefined;
   menuItems: any[] = [];
-  selectedItem: { fileName: string; fileUrl: SafeResourceUrl; isImage: boolean } | null = null;
+  isZoomed: boolean = false;
+
+  selectedItem: any = null;
+  @ViewChild('imagePreview') imagePreview!: ElementRef;
+  panzoomInstance: any;
 
 
   constructor(
@@ -49,6 +57,18 @@ ngAfterViewInit(): void {
   } else {
     console.error('Map container not available');
   }
+
+  if (this.imagePreview) {
+    this.panzoomInstance = Panzoom(this.imagePreview.nativeElement, {
+      maxScale: 3, // Maximum zoom level
+      minScale: 1, // Minimum zoom level
+      contain: 'outside', // Keeps the image contained within the container
+      startScale: 1, // Initial scale when the modal opens
+    });
+
+    // Enable mouse wheel zoom
+    this.imagePreview.nativeElement.parentElement.addEventListener('wheel', this.panzoomInstance.zoomWithWheel);
+  }
 }
 
 showMenu(): void {
@@ -64,6 +84,7 @@ showMenu(): void {
         }));
         
         this.openModal();
+        console.log(this.menuItems)
       },
       (error) => {
         console.error('Error fetching menu:', error);
@@ -98,6 +119,24 @@ openPreviewModal(item: { fileName: string; fileUrl: string; isImage: boolean }) 
   previewModal.show();
 }
 
+viewMenuItem(item: any) {
+  this.selectedItem = {
+    ...item,
+    isImage: this.fileIsImage(item.fileUrl),
+    fileUrl: this.getFileUrl(item.fileUrl),
+  };
+
+  console.log('selected item: ', this.selectedItem);
+
+  this.closeMenuModal();
+
+  const modalElement = document.getElementById('imagePreviewModal');
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
+}
+
 
 
 closeModal() {
@@ -110,6 +149,10 @@ closeModal() {
   if (previewModal) {
     new bootstrap.Modal(previewModal).hide();
   }
+
+  if (this.panzoomInstance) {
+    this.panzoomInstance.destroy();
+  }
 }
 
 closeMenuModal(): void {
@@ -118,6 +161,8 @@ closeMenuModal(): void {
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal?.hide();
   }
+  
+  this.isZoomed = false;
 }
 
 
@@ -153,6 +198,42 @@ loadRestaurantDetails(id: string): void {
       this.map?.invalidateSize();
     }, 0);
   }
+  fileIsImage(file: string | null): boolean {
+    return !!file && (/\.(jpg|jpeg|png|gif|svg)$/i.test(file) || file.startsWith('data:image'));
+  }
   
+  fileIsPDF(file: string | null): boolean {
+    return !!file && (/\.pdf$/i.test(file) || file.startsWith('data:application/pdf'));
+  }
+  
+  // Function to fetch the correct URL for non-base64 images or PDFs
+  getFileUrl(file: string | null): string | null {
+    if (!file) return null;
+    if (file.startsWith('data:') || file.startsWith('http://')) {
+      return file; // Return base64 or complete URL directly
+    } else {
+      return `${BASE_URL}${file}`; // Prepend only for relative paths
+    }
+  }
+  
+
+toggleZoom() {
+  this.isZoomed = !this.isZoomed;
+}
+
+  // Reset zoom when clicking outside the image
+  onModalClick(event: MouseEvent) {
+    const modalContent = event.target as HTMLElement;
+
+    // If the click is outside the image (and on the backdrop or modal), reset zoom
+    if (!modalContent.closest('img')) {
+      this.isZoomed = false; // Reset zoom state
+    }
+  }
+
+  // Handle image click separately (don't trigger zoom toggle)
+  onImageClick(event: MouseEvent) {
+    event.stopPropagation(); // Prevent click from propagating to the modal backdrop
+  }
   
 }

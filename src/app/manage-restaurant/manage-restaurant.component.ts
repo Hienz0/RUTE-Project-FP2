@@ -42,6 +42,7 @@ export class ManageRestaurantComponent {
   
 
   menuItems: Array<{ name: string; file: string | null }> = [];
+  selectedItem: any = null;
 
 
   constructor(
@@ -361,5 +362,20 @@ trackByIndex(index: number, item: any): number {
   return index; // Use index as unique identifier
 }
 
+openPreviewModal(item: any) {
+  // Determine if the file is an image or PDF
+  this.selectedItem = {
+    ...item,
+    isImage: this.fileIsImage(item.file),
+    fileUrl: this.getFileUrl(item.file)
+  };
+
+  // Open the modal by using Bootstrap's modal API
+  const modalElement = document.getElementById('imagePreviewModal');
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
+}
 
 }
