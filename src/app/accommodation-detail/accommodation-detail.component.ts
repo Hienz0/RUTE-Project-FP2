@@ -18,7 +18,9 @@ declare var bootstrap: any;
 })
 export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   currentUser: any;
-
+  minDate: string = '';
+  maxDate: string = '';
+  
   serviceId: string | null = null;
   accommodationDetail: any = null;
   accommodationData: any = null;
@@ -37,6 +39,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   selectedImage: string | null = null;
   isImagePreviewOpen: boolean = false;
   bookingModal: any;
+  bookedDates: string[] = [];
+  
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map: L.Map | undefined;
@@ -51,6 +55,17 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+
+        // Set minDate to today's date in YYYY-MM-DD format
+        const today = new Date();
+        this.minDate = today.toISOString().split('T')[0];
+        
+        // Optional: Set maxDate if you have a limit for check-in dates
+        const max = new Date();
+        max.setFullYear(today.getFullYear() + 1); // Example: 1 year from today
+        this.maxDate = max.toISOString().split('T')[0];
+
+
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
       this.bookingDetails.guestName = user?.name || '';
@@ -60,6 +75,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     if (this.serviceId) {
       this.loadAccommodationDetail(this.serviceId);
       this.loadAccommodationData(this.serviceId);
+      this.loadBookedDates();
     }
 
 
@@ -128,6 +144,36 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     );
   }
 
+// Fetch dates for the selected room type
+loadBookedDates(): void {
+  if (this.serviceId && this.bookingDetails.roomTypeId) {
+      this.bookingService.getBookedDates(this.serviceId, this.bookingDetails.roomTypeId).subscribe(
+          (dates: string[]) => {
+              this.bookedDates = dates;
+              console.log('Booked dates:', this.bookedDates);
+          },
+          (error) => {
+              console.error('Error loading booked dates:', error);
+          }
+      );
+  }
+}
+
+// Detect room type selection change to trigger date fetch
+onRoomTypeChange(): void {
+  this.loadBookedDates(); // Fetch new dates based on selected room type
+}
+
+  isDateDisabled(date: string): boolean {
+    return this.bookedDates.includes(date);
+  }
+
+  // Reset or adjust check-out date if check-in date changes
+onDateChange(): void {
+  if (this.bookingDetails.checkOutDate <= this.bookingDetails.checkInDate) {
+    this.bookingDetails.checkOutDate = ''; // Reset check-out date
+  }
+}
   initMap(): void {
     console.log('map called');
     // Initialize the map with placeholder coordinates

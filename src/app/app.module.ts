@@ -30,6 +30,9 @@ import { ManageAccommodationComponent } from './manage-accommodation/manage-acco
 import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant.component';
 import { AccommodationBookingDetailComponent } from './accommodation-booking-detail/accommodation-booking-detail.component';
 import { SafeUrlPipe } from './safe-url.pipe';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -62,6 +65,9 @@ import { SafeUrlPipe } from './safe-url.pipe';
     ReactiveFormsModule,
     CommonModule,
     FormsModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatNativeDateModule,
     MatSnackBarModule, // Add comma here
     RouterModule.forRoot([
       { path: 'manage-services', component: ManageServicesComponent },

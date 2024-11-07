@@ -26,4 +26,10 @@ export class BookingService {
     getBookingById(bookingId: string): Observable<any> {
       return this.http.get(`${this.apiUrl}/accommodationBooking/${bookingId}`);
     }
+
+      // Method to get booked dates for a specific serviceId
+      getBookedDates(serviceId: string, roomTypeId: string): Observable<string[]> {
+        return this.http.get<string[]>(`${this.apiUrl}/booked-dates/${serviceId}/${roomTypeId}`);
+    }
+    
 }

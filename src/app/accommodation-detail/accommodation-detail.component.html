@@ -241,23 +241,42 @@
                 min="1" class="form-control rounded-3" placeholder="Enter number of guests" required />
             </div>
 
-            <!-- Check-in and Check-out Dates -->
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="checkInDate" class="form-label">
-                  <i class="fas fa-calendar-check me-2"></i>Check-in Date
-                </label>
-                <input id="checkInDate" type="date" [(ngModel)]="bookingDetails.checkInDate" name="checkInDate"
-                  class="form-control rounded-3" required />
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="checkOutDate" class="form-label">
-                  <i class="fas fa-calendar-day me-2"></i>Check-out Date
-                </label>
-                <input id="checkOutDate" type="date" [(ngModel)]="bookingDetails.checkOutDate" name="checkOutDate"
-                  class="form-control rounded-3" required />
-              </div>
-            </div>
+<!-- Check-in and Check-out Dates -->
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label for="checkInDate" class="form-label">
+      <i class="fas fa-calendar-check me-2"></i>Check-in Date
+    </label>
+    <input
+      id="checkInDate"
+      type="date"
+      [(ngModel)]="bookingDetails.checkInDate"
+      name="checkInDate"
+      class="form-control rounded-3"
+      [min]="minDate"
+      [attr.max]="maxDate"
+      [disabled]="isDateDisabled(bookingDetails.checkInDate)"
+      (change)="onDateChange()"
+      required
+    />
+  </div>
+  <div class="col-md-6 mb-3">
+    <label for="checkOutDate" class="form-label">
+      <i class="fas fa-calendar-day me-2"></i>Check-out Date
+    </label>
+    <input
+      id="checkOutDate"
+      type="date"
+      [(ngModel)]="bookingDetails.checkOutDate"
+      name="checkOutDate"
+      class="form-control rounded-3"
+      [min]="bookingDetails.checkInDate"
+      [disabled]="isDateDisabled(bookingDetails.checkOutDate)"
+      required
+    />
+  </div>
+</div>
+
 
             <!-- Room Type Selection -->
             <div class="mb-3" *ngIf="accommodationData?.length > 0">
@@ -265,11 +284,12 @@
                 <i class="fas fa-door-open me-2"></i>Room Type
               </label>
               <select id="roomType" [(ngModel)]="bookingDetails.roomTypeId" name="roomType"
-                class="form-select rounded-3" required>
-                <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
-                  {{ roomType.name }}
-                </option>
-              </select>
+              class="form-select rounded-3" required (change)="onRoomTypeChange()">
+          <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
+              {{ roomType.name }}
+          </option>
+      </select>
+      
             </div>
 
             <!-- Special Request -->

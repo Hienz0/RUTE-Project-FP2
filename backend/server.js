@@ -156,6 +156,37 @@ const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchem
 module.exports = Booking;
 
 
+
+
+app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) => {
+  try {
+      const { serviceId, roomTypeId } = req.params;
+
+      // Find bookings for the specified service and room type
+      const bookings = await Booking.find({ serviceId: serviceId, roomTypeId: roomTypeId }, 'checkInDate checkOutDate');
+
+      // Extract dates in 'YYYY-MM-DD' format
+      const bookedDates = [];
+      bookings.forEach(booking => {
+          let currentDate = new Date(booking.checkInDate);
+          while (currentDate <= booking.checkOutDate) {
+              bookedDates.push(currentDate.toISOString().split('T')[0]);
+              currentDate.setDate(currentDate.getDate() + 1);
+          }
+      });
+
+      // Remove duplicates
+      const uniqueDates = [...new Set(bookedDates)];
+      res.json(uniqueDates);
+  } catch (error) {
+      console.error('Error fetching booked dates:', error);
+      res.status(500).json({ message: 'Error fetching booked dates' });
+  }
+});
+
+
+
+
 // 
 
 // Fetch all restaurant services (where productCategory is "Restaurant")
