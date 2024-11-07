@@ -8,6 +8,11 @@ import { HttpClient } from '@angular/common/http';
 
 declare var snap: any;
 
+// payment-list.component.ts
+
+declare let window: Window;
+
+
 @Component({
   selector: 'app-payment-list',
   templateUrl: './payment-list.component.html',
@@ -96,7 +101,7 @@ export class PaymentListComponent implements OnInit {
     );
   }
 
-  verifyPayment(result): void {
+  verifyPayment(result: { order_id: string; }): void {
     this.servicesService.verifyPayment(result.order_id).subscribe(
       (response) => {
         if (response.success) {
@@ -111,4 +116,17 @@ export class PaymentListComponent implements OnInit {
       }
     );
   }
+
+  initiatePayment(response: any) {
+    window.snap.pay(response.token, {
+      onSuccess: (result: any) => {
+        console.log("Payment successful:", result);
+        this.verifyPayment(result);
+      },
+      onError: (error: any) => {
+        console.error("Payment failed:", error);
+      }
+    });
+  }
+
 }

@@ -334,7 +334,7 @@ app.post("/api/verify-payment", async (req, res) => {
   }
 });
 
-// Sample endpoint to fetch user bookings (for payment list)
+// Sample endpoint to fetch user bookings (for payment list)t
 app.get("/api/bookings/user/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
