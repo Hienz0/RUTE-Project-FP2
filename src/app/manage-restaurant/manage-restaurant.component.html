@@ -183,8 +183,19 @@
             </ng-container>
             <ng-template #pdfIcon>
               <i class="fas fa-file-pdf fa-4x text-danger" style="cursor: pointer;"></i>
-              <p class="text-muted fs-5 mb-0">PDF file added</p>
+              <p class="text-muted fs-5 mb-0">PDF file</p>
             </ng-template>
+            <!-- <ng-template #pdfPreview>
+              PDF preview using iframe
+              <iframe
+                [src]="sanitizeUrl(getFileUrl(item.file))"
+                width="180px"
+                height="100px"
+                class="border rounded"
+                style="object-fit: cover; cursor: pointer;"
+              ></iframe>
+              <p class="text-muted fs-5 mb-0 mt-2">PDF file added</p>
+            </ng-template> -->
           </div>
 
           <div>

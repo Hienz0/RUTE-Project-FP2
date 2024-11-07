@@ -1,6 +1,8 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 
 declare const Swal: any;
 declare var bootstrap: any;
@@ -47,7 +49,8 @@ export class ManageRestaurantComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private servicesService: ServicesService
+    private servicesService: ServicesService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -222,13 +225,20 @@ export class ManageRestaurantComponent {
     if (this.restaurantMenu.name && this.restaurantMenu.file) {
       // Add the new item to the menu items array
       this.menuItems.push({ name: this.restaurantMenu.name, file: this.restaurantMenu.file });
-
+  
       // Reset form after adding item
       this.restaurantMenu = { name: '', image: null, file: null };
-
+  
       console.log('Menu items:', this.menuItems);
     } else {
-      console.error('Please complete all fields.');
+      // Show SweetAlert2 error when fields are incomplete
+      Swal.fire({
+        title: 'Error!',
+        text: 'Please complete all fields.',
+        icon: 'error',
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'OK',
+      });
     }
   }
   
@@ -284,54 +294,75 @@ getFileUrl(file: string | null): string | null {
 publishMenu(): void {
   const serviceId = this.route.snapshot.paramMap.get('serviceId') || '';
 
-  // Check if there are any items in the menuItems array
-  if (this.menuItems.length > 0) {
-    const formData = new FormData();
+  // SweetAlert2 confirmation prompt
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to publish the menu?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, publish it!',
+  }).then((result: any) => {
+    if (result.isConfirmed) {
+      // Check if there are any items in the menuItems array
+      if (this.menuItems.length > 0) {
+        const formData = new FormData();
 
-    // Loop through each menu item and append to FormData
-    this.menuItems.forEach((menuItem, index) => {
-      if (menuItem.file && menuItem.name) {
-        // Check if the file is base64 (image or PDF)
-        if (menuItem.file.startsWith('data:image') || menuItem.file.startsWith('data:application/pdf')) {
-          // Convert base64-encoded files to Blob
-          const fileBlob = this.dataURLtoBlob(menuItem.file);
-          if (fileBlob) {
-            const fileName = `${menuItem.name}.${fileBlob.type.split('/')[1]}`;
-            formData.append(`file${index}`, fileBlob, fileName);
-            formData.append(`name${index}`, menuItem.name);
+        // Loop through each menu item and append to FormData
+        this.menuItems.forEach((menuItem, index) => {
+          if (menuItem.file && menuItem.name) {
+            // Check if the file is base64 (image or PDF)
+            if (menuItem.file.startsWith('data:image') || menuItem.file.startsWith('data:application/pdf')) {
+              // Convert base64-encoded files to Blob
+              const fileBlob = this.dataURLtoBlob(menuItem.file);
+              if (fileBlob) {
+                const fileName = `${menuItem.name}.${fileBlob.type.split('/')[1]}`;
+                formData.append(`file${index}`, fileBlob, fileName);
+                formData.append(`name${index}`, menuItem.name);
+              } else {
+                console.error(`Invalid base64 data for menu item ${index + 1}.`);
+              }
+            } else {
+              // Append non-base64 URLs directly
+              formData.append(`fileUrl${index}`, menuItem.file);
+              formData.append(`name${index}`, menuItem.name);
+            }
           } else {
-            console.error(`Invalid base64 data for menu item ${index + 1}.`);
+            console.error(`Menu item ${index + 1} is missing file or name.`);
           }
-        } else {
-          // Append non-base64 URLs directly
-          formData.append(`fileUrl${index}`, menuItem.file);
-          formData.append(`name${index}`, menuItem.name);
-        }
+        });
+
+        // Append serviceId
+        formData.append('serviceId', serviceId);
+
+        // Log FormData contents
+        formData.forEach((value, key) => {
+          console.log(`${key}:`, value);
+        });
+
+        // Call the service to upload the menu items
+        this.servicesService.uploadMenu(formData).subscribe(
+          (response) => {
+            console.log('Menus published successfully:', response);
+            // Show SweetAlert2 success message
+            Swal.fire({
+              title: 'Published!',
+              text: 'The menu has been published successfully.',
+              icon: 'success',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'OK',
+            });
+          },
+          (error) => {
+            console.error('Error uploading menus:', error);
+          }
+        );
       } else {
-        console.error(`Menu item ${index + 1} is missing file or name.`);
+        console.error('No menu items to publish.');
       }
-    });
-
-    // Append serviceId
-    formData.append('serviceId', serviceId);
-
-    // Log FormData contents
-    formData.forEach((value, key) => {
-      console.log(`${key}:`, value);
-    });
-
-    // Call the service to upload the menu items
-    this.servicesService.uploadMenu(formData).subscribe(
-      (response) => {
-        console.log('Menus published successfully:', response);
-      },
-      (error) => {
-        console.error('Error uploading menus:', error);
-      }
-    );
-  } else {
-    console.error('No menu items to publish.');
-  }
+    }
+  });
 }
 
 
@@ -351,9 +382,23 @@ publishMenu(): void {
   }
 
   removeMenuItem(index: number): void {
-    // Remove the item at the given index
-    this.menuItems.splice(index, 1);
-    console.log(this.menuItems);
+    // SweetAlert2 confirmation prompt
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to remove this menu item?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // Remove the item at the given index after confirmation
+        this.menuItems.splice(index, 1);
+        console.log(this.menuItems);
+        Swal.fire('Removed!', 'The menu item has been removed.', 'success');
+      }
+    });
   }
   
   
@@ -363,19 +408,31 @@ trackByIndex(index: number, item: any): number {
 }
 
 openPreviewModal(item: any) {
-  // Determine if the file is an image or PDF
+  // Check if `item.file` is null or undefined, and handle it accordingly
+  const fileUrl = item.file ? this.getFileUrl(item.file) : null;
+
+  // Determine if the file is an image or PDF and set the sanitized URL if it's not an image
   this.selectedItem = {
     ...item,
     isImage: this.fileIsImage(item.file),
-    fileUrl: this.getFileUrl(item.file)
+    fileUrl: item.isImage ? fileUrl : fileUrl ? this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl) : null
   };
 
-  // Open the modal by using Bootstrap's modal API
+  console.log(this.selectedItem);
+
+  // Open the modal using Bootstrap's modal API
   const modalElement = document.getElementById('imagePreviewModal');
   if (modalElement) {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
   }
 }
+
+  // Public method to sanitize URLs for the template
+  // Public method to sanitize URLs for the template, with null handling
+  sanitizeUrl(url: string | null): SafeResourceUrl | null {
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  }
+
 
 }

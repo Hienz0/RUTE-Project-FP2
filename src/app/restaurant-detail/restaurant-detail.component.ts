@@ -120,14 +120,19 @@ openPreviewModal(item: { fileName: string; fileUrl: string; isImage: boolean }) 
 }
 
 viewMenuItem(item: any) {
+  // Check if `item.fileUrl` is null or undefined, and handle it accordingly
+  const fileUrl = item.fileUrl ? this.getFileUrl(item.fileUrl) : null;
+
+  // Determine if the file is an image or PDF and set the sanitized URL if it's not an image
   this.selectedItem = {
     ...item,
     isImage: this.fileIsImage(item.fileUrl),
-    fileUrl: this.getFileUrl(item.fileUrl),
+    fileUrl: item.isImage ? fileUrl : fileUrl ? this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl) : null
   };
 
   console.log('selected item: ', this.selectedItem);
 
+  // Close the menu modal if it's open, then open the preview modal
   this.closeMenuModal();
 
   const modalElement = document.getElementById('imagePreviewModal');
@@ -136,6 +141,7 @@ viewMenuItem(item: any) {
     modal.show();
   }
 }
+
 
 
 
