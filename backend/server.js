@@ -696,28 +696,34 @@ const RestaurantMenu = mongoose.model('RestaurantMenu', restaurantMenuSchema);
 // POST endpoint for uploading menu
 app.post('/api/services/upload-menu', upload.any(), async (req, res) => {
   const { serviceId } = req.body;
-  console.log(req.body);
+  console.log('body: ', req.body);
+  console.log('files: ', req.files);
 
   if (!req.files && !Object.keys(req.body).some(key => key.startsWith('fileUrl'))) {
     return res.status(400).json({ message: 'No files or URLs provided' });
   }
 
   try {
-    // Extract uploaded files from req.files
-    const menuFiles = (req.files || []).map(file => ({
-      fileName: file.filename,
-      fileUrl: `/uploads/${file.filename}`,
-      uploadedAt: new Date(),
-    }));
+    // Extract uploaded files from req.files, removing numeric prefix and extension from fileName
+    const menuFiles = (req.files || []).map(file => {
+      let originalNameWithoutExt = file.originalname.replace(/\.[^/.]+$/, ''); // Remove extension
+      originalNameWithoutExt = originalNameWithoutExt.replace(/^\d+-/, ''); // Remove numeric prefix if it exists
+      return {
+        fileName: originalNameWithoutExt, // Store name without extension or prefix
+        fileUrl: `/uploads/${file.filename}`, // Use the actual saved filename for the URL path
+        uploadedAt: new Date(),
+      };
+    });
 
     // Extract file URLs from req.body (handle keys like fileUrl0, fileUrl1, etc.)
     Object.keys(req.body).forEach((key) => {
       if (key.startsWith('fileUrl') && req.body[key]) {
-        // Extract the last part of the URL as a placeholder for fileName
         const urlSegments = req.body[key].split('/');
-        const placeholderName = urlSegments[urlSegments.length - 1];
+        const placeholderNameWithExt = urlSegments[urlSegments.length - 1];
+        let placeholderNameWithoutExt = placeholderNameWithExt.replace(/\.[^/.]+$/, ''); // Remove extension
+        placeholderNameWithoutExt = placeholderNameWithoutExt.replace(/^\d+-/, ''); // Remove numeric prefix if it exists
         menuFiles.push({
-          fileName: placeholderName || 'URL-file',  // Use the last segment or a default placeholder
+          fileName: placeholderNameWithoutExt || 'URL-file',
           fileUrl: req.body[key],
           uploadedAt: new Date(),
         });
@@ -728,7 +734,7 @@ app.post('/api/services/upload-menu', upload.any(), async (req, res) => {
     const updatedMenu = await RestaurantMenu.findOneAndUpdate(
       { serviceId },
       { menuFiles }, // Replace the existing menuFiles array with new data
-      { new: true, upsert: true, setDefaultsOnInsert: true } // Options to create if not found
+      { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
     res.status(201).json({
@@ -740,6 +746,8 @@ app.post('/api/services/upload-menu', upload.any(), async (req, res) => {
     res.status(500).json({ message: 'Server error, could not upload menu' });
   }
 });
+
+
 
 
 
