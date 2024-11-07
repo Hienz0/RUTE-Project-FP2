@@ -1,1 +1,20 @@
-<p>search works!</p>
+  
+    <!-- Search -->
+  
+  
+    <div class="search-bar">
+        <input type="search" id="search-input" placeholder="Search" class="rounded-left search-input" [(ngModel)]="searchTerm" (keyup.enter)="performSearch()">
+        <button class="btn btn-secondary rounded-right search-btn" (click)="performSearch()"><i class="fas fa-search"></i></button>
+        <div class="search-categories">
+          <span>Search in:</span>
+          <ul>
+            <li><a href="#" (click)="searchInCategory('Accommodation')">Accommodation</a></li>
+            <li><a href="#" (click)="searchInCategory('Tour & Guide')">Tour & Guide</a></li>
+            <li><a href="#" (click)="searchInCategory('Restaurant')">Restaurant</a></li>
+            <li><a href="#" (click)="searchInCategory('Transportation')">Transportation</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      
+      
