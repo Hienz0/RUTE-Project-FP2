@@ -931,3 +931,31 @@ margin-top: 80px;
   margin: 0 auto;  /* Center the map horizontally */
   margin-bottom: 20px;
 }
+
+/* Modal and Card Styling */
+#menuModal .modal-content {
+  border-radius: 10px;
+}
+
+#menuModal .modal-header {
+  padding: 10px 20px;
+}
+
+#menuModal .card {
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#menuModal .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+#menuModal .card-body {
+  padding: 15px;
+}
+
+#menuModal .btn-outline-primary {
+  font-size: 0.875rem;
+  padding: 6px 12px;
+}

@@ -29,6 +29,7 @@ import { RestaurantDetailComponent } from './restaurant-detail/restaurant-detail
 import { ManageAccommodationComponent } from './manage-accommodation/manage-accommodation.component';
 import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant.component';
 import { AccommodationBookingDetailComponent } from './accommodation-booking-detail/accommodation-booking-detail.component';
+import { SafeUrlPipe } from './safe-url.pipe';
 
 @NgModule({
   declarations: [
@@ -51,7 +52,8 @@ import { AccommodationBookingDetailComponent } from './accommodation-booking-det
     RestaurantDetailComponent,
     ManageAccommodationComponent,
     ManageRestaurantComponent,
-    AccommodationBookingDetailComponent
+    AccommodationBookingDetailComponent,
+    SafeUrlPipe
   ],
   imports: [
     BrowserModule,
