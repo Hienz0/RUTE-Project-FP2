@@ -160,29 +160,50 @@ module.exports = Booking;
 
 app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) => {
   try {
-      const { serviceId, roomTypeId } = req.params;
+    const { serviceId, roomTypeId } = req.params;
 
-      // Find bookings for the specified service and room type
-      const bookings = await Booking.find({ serviceId: serviceId, roomTypeId: roomTypeId }, 'checkInDate checkOutDate');
+    // Find all rooms for the given room type
+    const accommodation = await Accommodation.findOne({ serviceId: serviceId });
+    const roomType = accommodation.roomTypes.find(rt => rt._id.toString() === roomTypeId);
 
-      // Extract dates in 'YYYY-MM-DD' format
-      const bookedDates = [];
-      bookings.forEach(booking => {
-          let currentDate = new Date(booking.checkInDate);
-          while (currentDate <= booking.checkOutDate) {
-              bookedDates.push(currentDate.toISOString().split('T')[0]);
-              currentDate.setDate(currentDate.getDate() + 1);
-          }
-      });
+    if (!roomType) {
+      return res.status(404).json({ message: 'Room type not found' });
+    }
 
-      // Remove duplicates
-      const uniqueDates = [...new Set(bookedDates)];
-      res.json(uniqueDates);
+    const totalRooms = roomType.rooms.length;
+    if (totalRooms === 0) {
+      return res.json([]); // No rooms available, no dates to lock
+    }
+
+    // Find bookings for the specified service and room type
+    const bookings = await Booking.find({ serviceId: serviceId, roomTypeId: roomTypeId }, 'checkInDate checkOutDate roomId');
+
+    // Count bookings per date
+    const dateCounts = {};
+    bookings.forEach(booking => {
+      let currentDate = new Date(booking.checkInDate);
+      while (currentDate <= booking.checkOutDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+
+        if (!dateCounts[dateStr]) {
+          dateCounts[dateStr] = new Set(); // Track booked rooms by date
+        }
+        dateCounts[dateStr].add(booking.roomId.toString());
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    // Determine locked dates (where all rooms are booked)
+    const lockedDates = Object.keys(dateCounts).filter(dateStr => dateCounts[dateStr].size >= totalRooms);
+
+    res.json(lockedDates);
   } catch (error) {
-      console.error('Error fetching booked dates:', error);
-      res.status(500).json({ message: 'Error fetching booked dates' });
+    console.error('Error fetching booked dates:', error);
+    res.status(500).json({ message: 'Error fetching booked dates' });
   }
 });
+
 
 
 
