@@ -51,50 +51,70 @@
   
   <!-- Restaurant Section -->
   <div *ngIf="restaurant" class="container my-5">
-    <!-- Restaurant Title and Description -->
+    <!-- Accommodation Title and Description -->
     <div class="row">
       <div class="col-12 text-center">
-        <h1 class="display-4">{{ restaurant.productName }}</h1>
+        <h1 class="display-4 fw-bold">{{ restaurant.productName }}</h1>
         <p class="lead text-muted">{{ restaurant.productDescription }}</p>
+        <div class="d-flex justify-content-center align-items-center">
+          <span class="badge bg-success me-2">★ {{ restaurant.rating }}</span>
+          <span class="text-muted">({{ restaurant.reviewsCount }} reviews)</span>
+        </div>
       </div>
     </div>
   
-    <!-- Restaurant Image Carousel -->
-    <div *ngIf="restaurant.productImages?.length" class="row my-5">
-      <div id="restaurantCarousel" class="carousel slide col-12 col-md-8 offset-md-2" data-bs-ride="carousel">
+    <!-- Carousel for Accommodation Images -->
+    <div *ngIf="restaurant.productImages?.length" class="row my-5" style="margin: 0;">
+      <div id="accommodationCarousel" class="carousel slide col-12 shadow-lg rounded overflow-hidden"
+        data-bs-ride="carousel">
         <div class="carousel-inner">
-          <div
-            *ngFor="let image of restaurant.productImages; let isFirst = first"
-            [class.active]="isFirst"
-            class="carousel-item"
-          >
-            <img
-              [src]="'http://localhost:3000/' + image"
-              class="d-block w-100"
-              alt="{{ restaurant.productName }}"
-              style="height: 400px; object-fit: cover;"
-            />
+          <div *ngFor="let image of restaurant.productImages; let isFirst = first" [class.active]="isFirst"
+            class="carousel-item">
+            <img [src]="'http://localhost:3000/' + image" class="d-block w-100"
+              alt="{{ restaurant.productName }}" style="height: 400px; object-fit: cover;" />
           </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#restaurantCarousel" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#restaurantCarousel" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
       </div>
     </div>
   
-    <!-- Price and Location -->
-    <div class="row text-center">
-      <div class="col-12">
-        <p><strong>Price:</strong> {{ restaurant.productPrice | currency }}</p>
-        <p><strong>Location:</strong> {{ restaurant.location }}</p>
+    <!-- Small Images Below Carousel -->
+    <div class="row my-3" style="margin: 0;">
+      <div class="col-12 d-flex justify-content-between">
+        <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
+          <img [src]="'http://localhost:3000/' + restaurant.productImages[0]" class="img-fluid rounded"
+            alt="{{ restaurant.productName }} small image 1"
+            style="object-fit: cover; height: 200px; width: 100%;" />
+        </div>
+        <div class="small-image-wrapper" style="flex: 1; margin-right: 5px;">
+          <img [src]="'http://localhost:3000/' + restaurant.productImages[1]" class="img-fluid rounded"
+            alt="{{ restaurant.productName }} small image 2"
+            style="object-fit: cover; height: 200px; width: 100%;" />
+        </div>
+        <div class="small-image-wrapper" style="flex: 1;">
+          <img [src]="'http://localhost:3000/' + restaurant.productImages[2]" class="img-fluid rounded"
+            alt="{{ restaurant.productName }} small image 3"
+            style="object-fit: cover; height: 200px; width: 100%;" />
+        </div>
       </div>
     </div>
-
+  
+  
+  
+  
+    <!-- Price and Location -->
+    <div class="row text-center mb-4">
+      <div class="col-12">
+        <p class="h5"><strong>Location:</strong> {{ restaurant.location }}</p>
+      </div>
+    </div>
 
   
     <!-- Booking Section -->
@@ -209,3 +229,129 @@
       </div>
     </div>
   
+
+    
+<!-- Rating and Review Section -->
+<div class="container my-5">
+  <h2>Rating & Reviews</h2>
+  <div class="mb-4">
+    <h4>Your Rating:</h4>
+    <div class="star-rating">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
+    </div>
+    <textarea class="form-control mt-2" rows="3" placeholder="Leave your review..."></textarea>
+    <button class="btn btn-primary mt-2">Submit Review</button>
+  </div>
+  <div class="reviews-list">
+    <h4>Reviews:</h4>
+    <div class="review">
+      <p><strong>John Doe</strong> - ⭐⭐⭐⭐⭐</p>
+      <p>Great place to stay! Highly recommend.</p>
+      <p><small>Posted on: 2024-10-26</small></p>
+    </div>
+    <div class="review">
+      <p><strong>Jane Smith</strong> - ⭐⭐⭐</p>
+      <p>Decent accommodation but could use some improvements.</p>
+      <p><small>Posted on: 2024-10-25</small></p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="container my-5">
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-item">
+    <h5>Q: What is your pet policy?</h5>
+    <p>A: We allow pets for an additional fee. Please contact us for details.</p>
+  </div>
+  <div class="faq-item">
+    <h5>Q: What are your cancellation policies?</h5>
+    <p>A: Cancellations made 24 hours before check-in are fully refundable.</p>
+  </div>
+  <div class="faq-item">
+    <h5>Q: What time is check-in/check-out?</h5>
+    <p>A: Check-in is at 3 PM and check-out is at 11 AM.</p>
+  </div>
+</div>
+
+<!-- Amenities Section -->
+<div class="container my-5">
+  <h2>Amenities</h2>
+  <ul class="list-group">
+    <li class="list-group-item">🆕 Wi-Fi</li>
+    <li class="list-group-item">🏊 Pool</li>
+    <li class="list-group-item">🥐 Breakfast</li>
+    <li class="list-group-item">🏋️ Gym</li>
+  </ul>
+</div>
+
+<!-- Social Share Buttons -->
+<div class="container my-5">
+  <h2>Share This Accommodation</h2>
+  <div>
+    <button class="btn btn-outline-primary me-2">Share on Facebook</button>
+    <button class="btn btn-outline-info me-2">Share on Twitter</button>
+    <button class="btn btn-outline-danger">Share on Instagram</button>
+  </div>
+</div>
+
+<!-- Contact Information Section -->
+<div class="container my-5">
+  <h2>Contact Us</h2>
+  <p>If you have any questions, feel free to reach out to us:</p>
+  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+  <p><strong>Email:</strong> infoexample.com</p>
+</div>
+
+<!-- Similar Accommodations Section -->
+<div class="container my-5">
+  <h2>Similar Accommodations</h2>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <img src="dummy_image_url_1.jpg" class="card-img-top" alt="Accommodation 1">
+        <div class="card-body">
+          <h5 class="card-title">Accommodation 1</h5>
+          <p class="card-text">Description of accommodation 1.</p>
+          <a href="#" class="btn btn-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <img src="dummy_image_url_2.jpg" class="card-img-top" alt="Accommodation 2">
+        <div class="card-body">
+          <h5 class="card-title">Accommodation 2</h5>
+          <p class="card-text">Description of accommodation 2.</p>
+          <a href="#" class="btn btn-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <img src="dummy_image_url_3.jpg" class="card-img-top" alt="Accommodation 3">
+        <div class="card-body">
+          <h5 class="card-title">Accommodation 3</h5>
+          <p class="card-text">Description of accommodation 3.</p>
+          <a href="#" class="btn btn-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Profile Section -->
+<div *ngIf="currentUser" class="container my-5">
+  <h2>Your Profile</h2>
+  <p><strong>Name:</strong> {{ currentUser.name }}</p>
+  <p><strong>Email:</strong> {{ currentUser.email }}</p>
+  <h4>Past Bookings</h4>
+  <ul class="list-group">
+    <li class="list-group-item">Booking 1 - Date: 2024-10-15</li>
+    <li class="list-group-item">Booking 2 - Date: 2024-10-20</li>
+  </ul>
+</div>
