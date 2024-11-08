@@ -1,6 +1,15 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
+import { BookingService } from '../services/booking.service'; // Import the booking service
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { OverlayContainer } from '@angular/cdk/overlay';
+
+
+
+
+
 
 
 declare const Swal: any;
@@ -34,7 +43,9 @@ interface Accommodation {
   templateUrl: './manage-accommodation.component.html',
   styleUrls: ['./manage-accommodation.component.css'],
 })
-export class ManageAccommodationComponent implements OnInit {
+export class ManageAccommodationComponent implements OnInit, AfterViewInit {
+  currentUser: any;
+
   accommodationDetail: any = null; // Add this line
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   @ViewChild('imageModal') imageModal!: ElementRef;
@@ -57,17 +68,65 @@ export class ManageAccommodationComponent implements OnInit {
     productImages: [],
   };
 
+
+
+  // for booking offline
+
+  minDate = new Date();
+  maxDate: string = '';
+  
+  serviceId: string | null = null;
+  accommodationData: any = null;
+  bookingDetails = {
+    guestName: '',
+    accommodationType: 'Hotel', // Default accommodation type
+    numberOfGuests: 1,
+    checkInDate: '',
+    checkOutDate: '',
+    roomTypeId: '', // Added to store the selected room type ID
+    roomId: '', // To store the selected room ID
+    accommodationId: '', // To store the accommodation ID
+    specialRequest: ''
+  };
+  selectedImage: string | null = null;
+  bookingModal: any;
+  bookedDates: string[] = [];
+  minCheckOutDate: Date | null = null;
+  
+
+
+  //
+
   constructor(
     private route: ActivatedRoute,
-    private servicesService: ServicesService
+    private servicesService: ServicesService,
+    private bookingService: BookingService,
+    private router: Router,
+    private authService: AuthService,
+    private overlayContainer: OverlayContainer,
+
   ) {}
 
   ngOnInit(): void {
+
+    this.overlayContainer.getContainerElement().classList.add('custom-overlay-container');
+
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+      this.bookingDetails.guestName = user?.name || '';
+    });
+    
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
     console.log('Service ID:', serviceId); // Log the serviceId
+
+    this.serviceId = this.route.snapshot.paramMap.get('serviceId');
+
     
     if (serviceId) {
       this.servicesService.getAccommodationServiceById(serviceId).subscribe((data) => {
+        this.bookingDetails.accommodationType = data.productSubcategory;
+
+        console.log('Accommodation Service:', data);
         this.accommodation = {
           name: data.productName,
           description: data.productDescription,
@@ -76,12 +135,26 @@ export class ManageAccommodationComponent implements OnInit {
           roomTypes: data.roomTypes || [], // Ensure roomTypes is an array
           productImages: data.productImages || [],
         };
+
+        this.bookingDetails.accommodationType = data.productSubcategory;
+        console.log('productSubcategory:', this.bookingDetails.accommodationType);
       });
+
+      this.loadAccommodationData(serviceId);
+      this.loadBookedDates();
     }
   
     if (serviceId !== null) {
       this.loadAccommodationDetail(serviceId);
     }
+  }
+
+  ngAfterViewInit(): void {
+    const overlayContainer = document.querySelector('.cdk-overlay-container') as HTMLElement;
+    if (overlayContainer) {
+      overlayContainer.style.zIndex = '1200';
+    }
+    console.log('ngAfterViewInit called');
   }
   
   // Method to load accommodation details
@@ -989,6 +1062,366 @@ removeImageService(index: number): void {
 
 isBase64Image(image: string): boolean {
   return image.startsWith('data:image/');
+}
+
+
+
+
+
+//for bookings
+
+
+onCheckInDateChange(date: Date): void {
+  console.log('Check-in date changed:', date);
+
+  if (date) {
+    // Set the time to noon to avoid any time zone issues
+    date.setHours(12, 0, 0, 0);
+
+    // Format the date to 'YYYY-MM-DD' without using toISOString()
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+
+    this.bookingDetails.checkInDate = `${year}-${month}-${day}`;
+    console.log('Updated Check-in date:', this.bookingDetails.checkInDate);
+  } else {
+    this.bookingDetails.checkInDate = '';
+  }
+}
+
+
+loadAccommodationData(serviceId: string): void {
+  this.servicesService.getAccommodationDataById(serviceId).subscribe(
+    (data) => {
+            // Assign accommodationId to bookingDetails
+    this.bookingDetails.accommodationId = data._id;
+      // Filter out 'rooms' for each room type
+    // Filter out 'rooms' and 'roomTypeId' for each room type
+    this.accommodationData = data.roomTypes.map((roomType: any) => ({
+      name: roomType.name,
+      price: roomType.price,
+      amenities: roomType.amenities,
+      images: roomType.images,
+      roomTypeId: roomType._id,
+      accommodationId: data._id,
+      rooms: roomType.rooms.map((room: any) => ({
+        roomId: room._id,
+        number: room.number,
+        status: room.status,
+      })),
+    }));
+      console.log(this.accommodationData)
+    },
+    (error) => {
+      console.error('Error loading accommodation details:', error);
+    }
+  );
+}
+
+// Fetch dates for the selected room type
+loadBookedDates(): void {
+  console.log('Room type selected:', this.bookingDetails.roomTypeId);
+  console.log('Service ID:', this.serviceId);
+if (this.serviceId && this.bookingDetails.roomTypeId) {
+    this.bookingService.getBookedDates(this.serviceId, this.bookingDetails.roomTypeId).subscribe(
+        (dates: string[]) => {
+            this.bookedDates = dates;
+            console.log('Booked dates:', this.bookedDates);
+        },
+        (error) => {
+            console.error('Error loading booked dates:', error);
+        }
+    );
+}
+}
+
+// Detect room type selection change to trigger date fetch
+onRoomTypeChange(): void {
+this.loadBookedDates(); // Fetch new dates based on selected room type
+console.log('booked dates',this.bookedDates);
+this.bookingDetails.checkInDate = '';
+this.bookingDetails.checkOutDate = 'null';
+
+}
+
+isDateDisabled(date: string): boolean {
+  return this.bookedDates.includes(date);
+}
+
+// Reset or adjust check-out date if check-in date changes
+onDateChange(): void {
+if (this.bookingDetails.checkOutDate <= this.bookingDetails.checkInDate) {
+  this.bookingDetails.checkOutDate = ''; // Reset check-out date
+}
+}
+
+disableBookedDates = (date: Date | null): boolean => {
+if (!date) {
+  return false; // Allow selection if the date is null (no date selected)
+}
+
+// Get today's date in local time
+const today = new Date();
+today.setHours(0, 0, 0, 0); // Set to the start of today in local time
+
+// Set the time of the selected date to local time (start of the day)
+date.setHours(0, 0, 0, 0);
+
+// Manually format the date as 'YYYY-MM-DD' in local time
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+const day = String(date.getDate()).padStart(2, '0');
+const dateString = `${year}-${month}-${day}`;
+
+console.log('Today (local time):', today);
+console.log('Selected date (local time):', dateString);
+
+// Disable if the date is before today or if it's in the list of booked dates
+return date >= today && !this.bookedDates.includes(dateString);
+};
+
+
+disablePastAndBookedDatesForCheckOut = (date: Date | null): boolean => {
+if (!date || !this.bookingDetails.checkInDate) {
+  return false;
+}
+
+// Parse and set the check-in date at midnight
+const checkInDate = new Date(this.bookingDetails.checkInDate);
+checkInDate.setHours(0, 0, 0, 0);
+date.setHours(0, 0, 0, 0); // Set selected date to midnight for comparison
+
+// Find the next booked date after the check-in date
+const nextBookedDate = this.bookedDates
+  .map(booked => new Date(booked))
+  .filter(booked => booked > checkInDate)
+  .sort((a, b) => a.getTime() - b.getTime())[0]; // Get the closest booked date after check-in
+
+// Format selected date for comparison with booked dates
+const dateString = this.formatDate(date);
+
+// Calculate the day before the next booked date
+let maxCheckOutDate = nextBookedDate ? new Date(nextBookedDate) : null;
+if (maxCheckOutDate) {
+  maxCheckOutDate.setDate(maxCheckOutDate.getDate() - 1);
+}
+
+// Ensure the selected date is:
+// 1. After check-in date
+// 2. Not in booked dates
+// 3. Before the day before the next booked date (if it exists)
+const isAfterCheckInDate = date > checkInDate;
+const isNotBookedOrExceedingMax = (!this.bookedDates.includes(dateString) && 
+  (!maxCheckOutDate || date <= maxCheckOutDate));
+
+return isAfterCheckInDate && isNotBookedOrExceedingMax;
+};
+
+// Helper method to format date to 'YYYY-MM-DD'
+formatDate(date: Date): string {
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0');
+const day = String(date.getDate()).padStart(2, '0');
+return `${year}-${month}-${day}`;
+}
+
+
+
+
+onCheckOutDateChange(date: Date): void {
+console.log('Check-out date changed (raw):', date);
+
+if (date) {
+  // Set the time to noon to avoid time zone issues and treat the date as local
+  date.setHours(12, 0, 0, 0);
+
+  // Manually format the date to 'YYYY-MM-DD' in local time
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, '0');
+
+  // Store the formatted local date string
+  this.bookingDetails.checkOutDate = `${year}-${month}-${day}`;
+  console.log('Updated Check-out date (local time):', this.bookingDetails.checkOutDate);
+} else {
+  this.bookingDetails.checkOutDate = '';
+}
+}
+
+
+
+// Call this function whenever checkInDate changes
+updateMinCheckOutDate() {
+  if (this.bookingDetails.checkInDate) {
+    this.minCheckOutDate = new Date(this.bookingDetails.checkInDate);
+    this.minCheckOutDate.setDate(this.minCheckOutDate.getDate() + 1); // Set minimum to the day after check-in
+  } else {
+    this.minCheckOutDate = null; // Reset if checkInDate is null
+  }
+}
+
+
+
+
+// Open the booking modal
+openModal(): void {
+  const modalElement = document.getElementById('bookingModal');
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
+}
+
+closeModal(): void {
+  const modalElement = document.getElementById('bookingModal');
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal?.hide();
+  }
+}
+
+
+
+
+// temporary commented Submit the booking form
+// submitBooking(): void {
+//   console.log('Booking form submitted');
+//   console.log('Booking details:', this.bookingDetails);
+// }
+
+submitBooking(): void {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check if all required fields are filled
+  if (!this.bookingDetails.guestName || !this.bookingDetails.accommodationType || 
+      !this.bookingDetails.numberOfGuests || !this.bookingDetails.checkInDate || 
+      !this.bookingDetails.checkOutDate || !this.bookingDetails.roomTypeId) {
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Missing Fields',
+      text: 'Please fill in all the required fields.',
+      confirmButtonColor: '#3085d6',
+    });
+    return;
+  }
+
+  // Check if check-in date is in the past
+  if (this.bookingDetails.checkInDate < today) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Check-in Date',
+      text: 'Check-in date cannot be in the past.',
+      confirmButtonColor: '#d33',
+    });
+    return;
+  }
+
+  // Check if check-out date is earlier than check-in date
+  if (this.bookingDetails.checkOutDate < this.bookingDetails.checkInDate) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Check-out Date',
+      text: 'Check-out date cannot be earlier than the check-in date.',
+      confirmButtonColor: '#d33',
+    });
+    return;
+  }
+
+  // Find an available room ID for the selected room type
+  this.servicesService.getAvailableRoom(
+    this.bookingDetails.roomTypeId,
+    this.bookingDetails.checkInDate,
+    this.bookingDetails.checkOutDate
+  ).subscribe(
+    (rooms: any[]) => {
+      if (!rooms || rooms.length === 0) {  // If rooms is null or an empty array
+        Swal.fire({
+          icon: 'info',
+          title: 'No Rooms Available',
+          text: 'There are no available rooms for the selected room type.',
+          confirmButtonColor: '#d33',
+        });
+        return;
+      }
+  
+      // Safely check for an available room
+      const availableRoom = rooms[0];
+      if (availableRoom && availableRoom._id) {
+        this.bookingDetails.roomId = availableRoom._id;
+        console.log('Available room ID:', this.bookingDetails.roomId);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Room is Full',
+          text: 'The selected room type has no available rooms at the moment.',
+          confirmButtonColor: '#3085d6',
+        });
+        return;
+      }
+
+      const bookingData = {
+        ...this.bookingDetails,
+        serviceId: this.serviceId,
+        userId: this.currentUser?.userId,
+      };
+
+      // Submit the booking data
+      this.bookingService.bookAccommodation(bookingData).subscribe(
+        (response) => {
+          console.log('Booking Response:', response); // Log the response here
+          Swal.fire({
+            icon: 'success',
+            title: 'Booking Successful!',
+            text: 'Your accommodation has been booked successfully.',
+            confirmButtonColor: '#3085d6',
+          });
+          this.closeModal();
+
+                // Redirect to accommodation-booking-detail page with the booking ID
+                const bookingId = response.booking._id;
+                // Assume response contains bookingId
+    this.router.navigate([`/accommodation-booking-detail/${bookingId}`]);
+        },
+        (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Booking Failed',
+            text: 'There was an error processing your booking. Please try again.',
+            confirmButtonColor: '#d33',
+          });
+        }
+      );
+    },
+    (error) => {
+      // Handle the 404 "No Room Available" response specifically
+      if (error.status === 404) {
+        Swal.fire({
+          icon: 'info',
+          title: 'No Room Available',
+          text: 'There are no rooms available for the selected room type at this time.',
+          confirmButtonColor: '#d33',
+        });
+      } else {
+        // Handle other errors
+        Swal.fire({
+          icon: 'error',
+          title: 'Error Finding Room',
+          text: 'An error occurred while finding an available room. Please try again later.',
+          confirmButtonColor: '#d33',
+        });
+      }
+    }
+  );
+}
+
+
+
+// Function to show image preview
+// Function to show image preview and open the modal
+get checkInDateAsDate(): Date {
+  return new Date(this.bookingDetails.checkInDate);
 }
 
 
