@@ -333,8 +333,11 @@ app.get('/api/bookings/check-availability', async (req, res) => {
 
 const roomSchema = new mongoose.Schema({
   number: { type: String, required: true },
-  status: { type: String, default: 'available' } // Added status with default value
+  status: { type: String, default: 'available' }, // Status for each room
+  isLocked: { type: Boolean, default: false }, // Indicates if the room is locked
+  lockReason: { type: String, default: '' } // Reason for locking the room
 });
+
 
 const roomTypeSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -638,6 +641,82 @@ app.get('/api/bookings/accommodationBooking/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.put('/api/services/:accommodationId/roomType', async (req, res) => {
+  const { accommodationId } = req.params;
+  const updatedRoomType = req.body;
+
+  try {
+    const accommodation = await Accommodation.findById(accommodationId);
+    const roomType = accommodation.roomTypes.id(updatedRoomType._id);
+
+    if (!roomType) {
+      return res.status(404).send({ error: 'Room type not found' });
+    }
+
+    // Check if all rooms are locked
+    const allRoomsLocked = roomType.rooms.every(room => room.isLocked);
+
+    roomType.rooms.forEach((room, index) => {
+      if (allRoomsLocked) {
+        // Unlock all rooms if they are all locked
+        room.isLocked = false;
+        room.status = 'available';
+        room.lockReason = '';
+      } else {
+        // Update each room based on the provided updatedRoomType data
+        room.isLocked = updatedRoomType.rooms[index].isLocked;
+        room.lockReason = updatedRoomType.rooms[index].lockReason;
+        room.status = updatedRoomType.rooms[index].status;
+      }
+    });
+
+    await accommodation.save();
+    res.send({ success: true });
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to update room type' });
+  }
+});
+
+app.put('/api/services/:accommodationId/room-types/:roomTypeId/rooms/:roomId/status', async (req, res) => {
+  try {
+    const { accommodationId, roomTypeId, roomId } = req.params;
+    const { status, isLocked, lockReason } = req.body;
+
+    // Find the accommodation and room by IDs
+    const accommodation = await Accommodation.findById(accommodationId);
+    if (!accommodation) return res.status(404).json({ message: 'Accommodation not found' });
+
+    const roomType = accommodation.roomTypes.id(roomTypeId);
+    if (!roomType) return res.status(404).json({ message: 'Room type not found' });
+
+    const room = roomType.rooms.id(roomId);
+    if (!room) return res.status(404).json({ message: 'Room not found' });
+
+    // Toggle lock/unlock status
+    if (room.isLocked) {
+      // Unlock the room
+      room.isLocked = false;
+      room.status = 'available';
+      room.lockReason = '';
+    } else {
+      // Lock the room with the provided details
+      room.isLocked = isLocked;
+      room.status = status;
+      room.lockReason = lockReason;
+    }
+
+    // Save the updated accommodation document
+    await accommodation.save();
+
+    res.status(200).json({ message: 'Room status updated successfully', room });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to update room status', error });
+  }
+});
+
+
 
 
 

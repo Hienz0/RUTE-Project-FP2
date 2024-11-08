@@ -141,6 +141,16 @@ export class ServicesService {
         })
       );
     }
+
+    updateRoomStatus(accommodationId: string, roomType: any) {
+      return this.http.put(`${this.apiUrl}/${accommodationId}/roomType`, roomType);
+    }
+
+    updateSelectedRoomStatus(accommodationId: string, roomTypeId: string, roomId: string, status: string, isLocked: boolean, lockReason: string): Observable<any> {
+      const url = `${this.apiUrl}/${accommodationId}/room-types/${roomTypeId}/rooms/${roomId}/status`;
+      return this.http.put(url, { status, isLocked, lockReason });
+    }
+    
     
   
   

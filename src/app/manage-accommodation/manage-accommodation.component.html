@@ -136,6 +136,12 @@
               <!-- <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5> -->
               <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
 
+              <!-- Lock Button -->
+<button class="btn btn-warning btn-sm me-2" (click)="openLockModal(accommodationIndex, i)">
+  <i class="fas fa-lock"></i> Lock
+</button>
+
+
               <!-- Edit Button -->
               <button *ngIf="!roomType.isEditing" class="btn btn-primary btn-sm" (click)="toggleEditMode(accommodationIndex, i)">
                 <i class="fas fa-edit"></i> Edit
@@ -221,6 +227,12 @@
               style="background-color: #f8f9fa;">
               <div class="d-flex justify-content-between align-items-center">
                 <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
+                <!-- Room Lock Button -->
+<!-- Lock Room Button -->
+<button *ngIf="roomType.isEditing" class="btn btn-warning btn-sm" (click)="openLockRoomModal(accommodationIndex, i, j)">
+  <i class="fas fa-lock"></i> Lock Room
+</button>
+
                 <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)">
                   <i class="fas fa-trash-alt"></i> Delete
                 </button>
@@ -563,3 +575,61 @@
         </div>
       </div>
     </div>
+
+    <!-- Lock Room Type Modal -->
+<div class="modal fade" id="lockModal" tabindex="-1" aria-labelledby="lockModalLabel" aria-hidden="true" #lockModal>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lockModalLabel">Lock Room Type</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label for="lockReasonSelect">Select Reason</label>
+          <select class="form-select" [(ngModel)]="lockReason" id="lockReasonSelect">
+            <option value="Maintenance">Maintenance</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" *ngIf="lockReason === 'Other'">
+          <label for="customReason">Custom Reason</label>
+          <input type="text" class="form-control" id="customReason" [(ngModel)]="customReason" placeholder="Enter reason">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="lockRoomType()">Lock</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lock Room Modal -->
+<div class="modal fade" id="lockRoomModal" tabindex="-1" aria-labelledby="lockRoomModalLabel" aria-hidden="true" #lockRoomModal>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lockRoomModalLabel">Lock Room</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label for="roomLockReasonSelect">Select Reason</label>
+          <select class="form-select" [(ngModel)]="roomLockReason" id="roomLockReasonSelect">
+            <option value="Maintenance">Maintenance</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" *ngIf="roomLockReason === 'Other'">
+          <label for="roomCustomReason">Custom Reason</label>
+          <input type="text" class="form-control" id="roomCustomReason" [(ngModel)]="roomCustomReason" placeholder="Enter reason">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="lockRoom()">Lock Room</button>
+      </div>
+    </div>
+  </div>
+</div>

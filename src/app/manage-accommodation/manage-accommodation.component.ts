@@ -18,7 +18,11 @@ declare var bootstrap: any;
 
 interface Room {
   number: string;
+  status: string;
+  isLocked: boolean;
+  lockReason: string;
 }
+
 
 interface RoomType {
   name: string;
@@ -50,6 +54,10 @@ export class ManageAccommodationComponent implements OnInit, AfterViewInit {
   @ViewChild('amenitiesModal') amenitiesModal!: ElementRef;
   @ViewChild('imageModal') imageModal!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('lockModal', { static: false }) lockModal!: ElementRef;
+  @ViewChild('lockRoomModal', { static: false }) lockRoomModal!: ElementRef;
+
+
   originalAccommodationDetail: Accommodation[] = [];
   selectedImages: File[] = [];
   previewUrls: string[] = [];
@@ -58,6 +66,14 @@ export class ManageAccommodationComponent implements OnInit, AfterViewInit {
   selectedAmenities: string[] = [];
   customAmenity = '';
   selectedRoomTypeIndex: number | null = null;
+  lockReason: string = 'Maintenance';
+customReason: string = '';
+
+
+selectedRoomIndex: number | null = null;  // Add this line
+roomLockReason: string = 'Maintenance';
+roomCustomReason: string = '';
+
   isModalOpen: boolean = false;
   accommodation: Accommodation = {
     name: '',
@@ -251,8 +267,14 @@ export class ManageAccommodationComponent implements OnInit, AfterViewInit {
   }
 
   addRoom(roomType: RoomType) {
-    roomType.rooms.push({ number: '' });
+    roomType.rooms.push({ 
+      number: '', 
+      status: 'available', // Default status value
+      isLocked: false,     // Default isLocked value
+      lockReason: ''       // Default lockReason value
+    });
   }
+  
 
   publishAccommodation() {
     // SweetAlert2 confirmation prompt
@@ -997,6 +1019,118 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
     }
     
     
+
+
+
+
+
+    openLockModal(accommodationIndex: number, roomTypeIndex: number): void {
+      this.selectedAccommodationIndex = accommodationIndex;
+      this.selectedRoomTypeIndex = roomTypeIndex;
+    
+      // Use Bootstrap's modal API to open the lock modal
+      const modalElement = this.lockModal.nativeElement;
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+    
+    lockRoomType(): void {
+      if (this.selectedAccommodationIndex === null || this.selectedRoomTypeIndex === null) {
+        return;
+      }
+    
+      const reason = this.lockReason === 'Other' ? this.customReason : this.lockReason;
+      if (!reason) {
+        alert('Please provide a reason for locking the rooms.');
+        return;
+      }
+    
+      const roomType = this.accommodationDetail[this.selectedAccommodationIndex].roomTypes[this.selectedRoomTypeIndex];
+      roomType.rooms.forEach((room: Room) => { // Define 'room' as Room type
+        room.isLocked = true;
+        room.lockReason = reason;
+        room.status = 'locked'; // Optional: change status to indicate it's locked
+      });
+    
+      this.servicesService.updateRoomStatus(this.accommodationDetail[this.selectedAccommodationIndex]._id, roomType)
+        .subscribe(response => {
+          alert('Rooms locked successfully.');
+        }, error => {
+          console.error('Error locking rooms:', error);
+        });
+    
+      // Reset modal variables
+      this.selectedAccommodationIndex = null;
+      this.selectedRoomTypeIndex = null;
+      this.lockReason = 'Maintenance';
+      this.customReason = '';
+    
+      const modalElement = this.lockModal.nativeElement;
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal.hide();
+    }
+
+    openLockRoomModal(accommodationIndex: number, roomTypeIndex: number, roomIndex: number): void {
+      this.selectedAccommodationIndex = accommodationIndex;
+      this.selectedRoomTypeIndex = roomTypeIndex;
+      this.selectedRoomIndex = roomIndex;
+    
+      const modalElement = this.lockRoomModal.nativeElement;
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+
+    lockRoom(): void {
+      if (this.selectedAccommodationIndex === null || this.selectedRoomTypeIndex === null || this.selectedRoomIndex === null) {
+        return;
+      }
+    
+      const reason = this.roomLockReason === 'Other' ? this.roomCustomReason : this.roomLockReason;
+      if (!reason) {
+        alert('Please provide a reason for locking the room.');
+        return;
+      }
+    
+      const room = this.accommodationDetail[this.selectedAccommodationIndex].roomTypes[this.selectedRoomTypeIndex].rooms[this.selectedRoomIndex];
+      room.isLocked = true;
+      room.lockReason = reason;
+      room.status = 'locked';
+    
+      this.servicesService.updateSelectedRoomStatus(
+        this.accommodationDetail[this.selectedAccommodationIndex]._id,
+        this.accommodationDetail[this.selectedAccommodationIndex].roomTypes[this.selectedRoomTypeIndex]._id,
+        room._id,
+        room.status,
+        room.isLocked,
+        room.lockReason
+      ).subscribe(
+        response => alert('Room locked successfully.'),
+        error => console.error('Error locking room:', error)
+      );
+    
+      // Reset modal variables
+      this.selectedAccommodationIndex = null;
+      this.selectedRoomTypeIndex = null;
+      this.selectedRoomIndex = null;
+      this.roomLockReason = 'Maintenance';
+      this.roomCustomReason = '';
+    
+      const modalElement = this.lockRoomModal.nativeElement;
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal.hide();
+    }
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
     
     // for managing services image
 
