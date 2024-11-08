@@ -4,6 +4,9 @@ import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service'; // Import the booking service
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { ChangeDetectorRef } from '@angular/core';
+
 import * as L from 'leaflet';
 
 
@@ -18,7 +21,7 @@ declare var bootstrap: any;
 })
 export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   currentUser: any;
-  minDate: string = '';
+  minDate = new Date();
   maxDate: string = '';
   
   serviceId: string | null = null;
@@ -40,6 +43,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   isImagePreviewOpen: boolean = false;
   bookingModal: any;
   bookedDates: string[] = [];
+  minCheckOutDate: Date | null = null;
   
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
@@ -52,19 +56,22 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     private authService: AuthService,
     private renderer: Renderer2,
     private router: Router,
+    private overlayContainer: OverlayContainer,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
 
         // Set minDate to today's date in YYYY-MM-DD format
-        const today = new Date();
-        this.minDate = today.toISOString().split('T')[0];
+        // const today = new Date();
+        // this.minDate = today.toISOString().split('T')[0];
         
         // Optional: Set maxDate if you have a limit for check-in dates
-        const max = new Date();
-        max.setFullYear(today.getFullYear() + 1); // Example: 1 year from today
-        this.maxDate = max.toISOString().split('T')[0];
+        // const max = new Date();
+        // max.setFullYear(today.getFullYear() + 1); // Example: 1 year from today
+        // this.maxDate = max.toISOString().split('T')[0];
 
+        this.overlayContainer.getContainerElement().classList.add('custom-overlay-container');
 
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
@@ -86,7 +93,12 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         // this.renderer.appendChild(document.body, script);
   }
 
+  
   ngAfterViewInit(): void {
+    const overlayContainer = document.querySelector('.cdk-overlay-container') as HTMLElement;
+    if (overlayContainer) {
+      overlayContainer.style.zIndex = '1200';
+    }
     console.log('ngAfterViewInit called');
     if (this.mapContainer) {
       console.log('Map container available');
@@ -95,6 +107,32 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       console.error('Map container not available');
     }
   }
+
+  onCheckInDateChange(date: Date): void {
+    console.log('Check-in date changed:', date);
+  
+    if (date) {
+      // Set the time to noon to avoid any time zone issues
+      date.setHours(12, 0, 0, 0);
+  
+      // Format the date to 'YYYY-MM-DD' without using toISOString()
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const day = String(date.getDate()).padStart(2, '0');
+  
+      this.bookingDetails.checkInDate = `${year}-${month}-${day}`;
+      console.log('Updated Check-in date:', this.bookingDetails.checkInDate);
+    } else {
+      this.bookingDetails.checkInDate = '';
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
   
   loadAccommodationDetail(id: string): void {
     this.servicesService.getAccommodationServiceById(id).subscribe(
@@ -162,6 +200,9 @@ loadBookedDates(): void {
 // Detect room type selection change to trigger date fetch
 onRoomTypeChange(): void {
   this.loadBookedDates(); // Fetch new dates based on selected room type
+  this.bookingDetails.checkInDate = '';
+  this.bookingDetails.checkOutDate = 'null';
+
 }
 
   isDateDisabled(date: string): boolean {
@@ -174,6 +215,114 @@ onDateChange(): void {
     this.bookingDetails.checkOutDate = ''; // Reset check-out date
   }
 }
+
+disableBookedDates = (date: Date | null): boolean => {
+  if (!date) {
+    return false; // Allow selection if the date is null (no date selected)
+  }
+
+  // Get today's date in local time
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to the start of today in local time
+
+  // Set the time of the selected date to local time (start of the day)
+  date.setHours(0, 0, 0, 0);
+
+  // Manually format the date as 'YYYY-MM-DD' in local time
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateString = `${year}-${month}-${day}`;
+
+  console.log('Today (local time):', today);
+  console.log('Selected date (local time):', dateString);
+
+  // Disable if the date is before today or if it's in the list of booked dates
+  return date >= today && !this.bookedDates.includes(dateString);
+};
+
+
+disablePastAndBookedDatesForCheckOut = (date: Date | null): boolean => {
+  if (!date || !this.bookingDetails.checkInDate) {
+    return false;
+  }
+
+  // Parse and set the check-in date at midnight
+  const checkInDate = new Date(this.bookingDetails.checkInDate);
+  checkInDate.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0); // Set selected date to midnight for comparison
+  
+  // Find the next booked date after the check-in date
+  const nextBookedDate = this.bookedDates
+    .map(booked => new Date(booked))
+    .filter(booked => booked > checkInDate)
+    .sort((a, b) => a.getTime() - b.getTime())[0]; // Get the closest booked date after check-in
+
+  // Format selected date for comparison with booked dates
+  const dateString = this.formatDate(date);
+
+  // Calculate the day before the next booked date
+  let maxCheckOutDate = nextBookedDate ? new Date(nextBookedDate) : null;
+  if (maxCheckOutDate) {
+    maxCheckOutDate.setDate(maxCheckOutDate.getDate() - 1);
+  }
+
+  // Ensure the selected date is:
+  // 1. After check-in date
+  // 2. Not in booked dates
+  // 3. Before the day before the next booked date (if it exists)
+  const isAfterCheckInDate = date > checkInDate;
+  const isNotBookedOrExceedingMax = (!this.bookedDates.includes(dateString) && 
+    (!maxCheckOutDate || date <= maxCheckOutDate));
+
+  return isAfterCheckInDate && isNotBookedOrExceedingMax;
+};
+
+// Helper method to format date to 'YYYY-MM-DD'
+formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+
+
+
+onCheckOutDateChange(date: Date): void {
+  console.log('Check-out date changed (raw):', date);
+
+  if (date) {
+    // Set the time to noon to avoid time zone issues and treat the date as local
+    date.setHours(12, 0, 0, 0);
+
+    // Manually format the date to 'YYYY-MM-DD' in local time
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Store the formatted local date string
+    this.bookingDetails.checkOutDate = `${year}-${month}-${day}`;
+    console.log('Updated Check-out date (local time):', this.bookingDetails.checkOutDate);
+  } else {
+    this.bookingDetails.checkOutDate = '';
+  }
+}
+
+
+
+  // Call this function whenever checkInDate changes
+  updateMinCheckOutDate() {
+    if (this.bookingDetails.checkInDate) {
+      this.minCheckOutDate = new Date(this.bookingDetails.checkInDate);
+      this.minCheckOutDate.setDate(this.minCheckOutDate.getDate() + 1); // Set minimum to the day after check-in
+    } else {
+      this.minCheckOutDate = null; // Reset if checkInDate is null
+    }
+  }
+
+
+
   initMap(): void {
     console.log('map called');
     // Initialize the map with placeholder coordinates
@@ -206,6 +355,7 @@ onDateChange(): void {
       modal?.hide();
     }
   }
+
 
 
   
@@ -352,6 +502,10 @@ onDateChange(): void {
     const modalElement = document.getElementById('imagePreviewModal');
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
+  }
+
+  get checkInDateAsDate(): Date {
+    return new Date(this.bookingDetails.checkInDate);
   }
   
   

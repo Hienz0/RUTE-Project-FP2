@@ -199,122 +199,126 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content border-0 shadow rounded-4">
         <!-- Modal Header -->
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title mx-auto d-flex align-items-center gap-2" id="bookingModalLabel">
-            <i class="fas fa-bed"></i>
+        <div class="modal-header bg-primary text-white position-relative">
+          <h5 class="modal-title mx-auto d-flex align-items-center gap-2 fs-4 fw-bold" id="bookingModalLabel" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            <i class="fas fa-bed" style="font-size: 1.2em; opacity: 0.8;"></i>
             {{ accommodationDetail.productName }}
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3 mt-1" (click)="closeModal()" aria-label="Close"></button>
         </div>
+        
 
         <!-- Modal Body -->
         <div class="modal-body p-4">
-          <form (submit)="submitBooking()" novalidate>
-            <!-- Guest Name -->
-            <div class="mb-3">
-              <label for="guestName" class="form-label">
-                <i class="fas fa-user me-2"></i>Guest Name
+          <!-- Guest Name -->
+          <div class="mb-3">
+            <label for="guestName" class="form-label">
+              <i class="fas fa-user me-2"></i>Guest Name
+            </label>
+            <input id="guestName" type="text" [(ngModel)]="bookingDetails.guestName" name="guestName"
+              class="form-control rounded-3" placeholder="Enter your name" required />
+          </div>
+
+          <!-- Accommodation Type -->
+          <div class="mb-3">
+            <label for="accommodationType" class="form-label">
+              <i class="fas fa-hotel me-2"></i>Accommodation Type
+            </label>
+            <select id="accommodationType" [(ngModel)]="bookingDetails.accommodationType" name="accommodationType"
+              class="form-select rounded-3" required>
+              <option [value]="accommodationDetail.productSubcategory">
+                {{ accommodationDetail.productSubcategory }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Number of Guests -->
+          <div class="mb-3">
+            <label for="numberOfGuests" class="form-label">
+              <i class="fas fa-users me-2"></i>Number of Guests
+            </label>
+            <input id="numberOfGuests" type="number" [(ngModel)]="bookingDetails.numberOfGuests" name="numberOfGuests"
+              min="1" class="form-control rounded-3" placeholder="Enter number of guests" required />
+          </div>
+
+          <!-- Room Type Selection -->
+          <div class="mb-3" *ngIf="accommodationData?.length > 0">
+            <label for="roomType" class="form-label">
+              <i class="fas fa-door-open me-2"></i>Room Type
+            </label>
+            <select id="roomType" [(ngModel)]="bookingDetails.roomTypeId" name="roomType" class="form-select rounded-3"
+              required (change)="onRoomTypeChange()">
+              <option value="" disabled selected>Select a Room Type</option> <!-- Placeholder option -->
+              <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
+                {{ roomType.name }}
+              </option>
+            </select>
+          </div>
+
+
+          <!-- Check-in and Check-out Dates Section -->
+          <!-- Check-in and Check-out Dates Section -->
+          <div class="row g-3 align-items-center py-3 px-4 rounded shadow-sm bg-white">
+            <!-- Check-in Date -->
+            <div class="col-md-6">
+              <label for="checkInDate" class="form-label text-dark fw-bold d-flex align-items-center">
+                <i class="fas fa-calendar-check me-2 text-primary"></i> Check-in Date
               </label>
-              <input id="guestName" type="text" [(ngModel)]="bookingDetails.guestName" name="guestName"
-                class="form-control rounded-3" placeholder="Enter your name" required />
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Check-in Date</mat-label>
+                <input matInput class="z-index-front" [matDatepicker]="picker" [(ngModel)]="bookingDetails.checkInDate"
+                  (ngModelChange)="onCheckInDateChange($event)" [matDatepickerFilter]="disableBookedDates"
+                  [disabled]="!bookingDetails.roomTypeId" matTooltip="Please select a room type first"
+                  [matTooltipDisabled]="!!bookingDetails.roomTypeId" required readonly />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
             </div>
 
-            <!-- Accommodation Type -->
-            <div class="mb-3">
-              <label for="accommodationType" class="form-label">
-                <i class="fas fa-hotel me-2"></i>Accommodation Type
+            <!-- Check-out Date -->
+            <div class="col-md-6">
+              <label for="checkOutDate" class="form-label text-dark fw-bold d-flex align-items-center">
+                <i class="fas fa-calendar-day me-2 text-primary"></i> Check-out Date
               </label>
-              <select id="accommodationType" [(ngModel)]="bookingDetails.accommodationType" name="accommodationType"
-                class="form-select rounded-3" required>
-                <option [value]="accommodationDetail.productSubcategory">
-                  {{ accommodationDetail.productSubcategory }}
-                </option>
-              </select>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Check-out Date</mat-label>
+                <input matInput class="z-index-front" [matDatepicker]="picker2"
+                  [(ngModel)]="bookingDetails.checkOutDate" (ngModelChange)="onCheckOutDateChange($event)"
+                  [matDatepickerFilter]="disablePastAndBookedDatesForCheckOut" [disabled]="!bookingDetails.checkInDate"
+                  matTooltip="Please select a check-in date first" [matTooltipDisabled]="!!bookingDetails.checkInDate"
+                  required readonly />
+                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-datepicker #picker2></mat-datepicker>
+              </mat-form-field>
             </div>
-
-            <!-- Number of Guests -->
-            <div class="mb-3">
-              <label for="numberOfGuests" class="form-label">
-                <i class="fas fa-users me-2"></i>Number of Guests
-              </label>
-              <input id="numberOfGuests" type="number" [(ngModel)]="bookingDetails.numberOfGuests" name="numberOfGuests"
-                min="1" class="form-control rounded-3" placeholder="Enter number of guests" required />
-            </div>
-
-<!-- Check-in and Check-out Dates -->
-<div class="row">
-  <div class="col-md-6 mb-3">
-    <label for="checkInDate" class="form-label">
-      <i class="fas fa-calendar-check me-2"></i>Check-in Date
-    </label>
-    <input
-      id="checkInDate"
-      type="date"
-      [(ngModel)]="bookingDetails.checkInDate"
-      name="checkInDate"
-      class="form-control rounded-3"
-      [min]="minDate"
-      [attr.max]="maxDate"
-      [disabled]="isDateDisabled(bookingDetails.checkInDate)"
-      (change)="onDateChange()"
-      required
-    />
-  </div>
-  <div class="col-md-6 mb-3">
-    <label for="checkOutDate" class="form-label">
-      <i class="fas fa-calendar-day me-2"></i>Check-out Date
-    </label>
-    <input
-      id="checkOutDate"
-      type="date"
-      [(ngModel)]="bookingDetails.checkOutDate"
-      name="checkOutDate"
-      class="form-control rounded-3"
-      [min]="bookingDetails.checkInDate"
-      [disabled]="isDateDisabled(bookingDetails.checkOutDate)"
-      required
-    />
-  </div>
-</div>
+          </div>
 
 
-            <!-- Room Type Selection -->
-            <div class="mb-3" *ngIf="accommodationData?.length > 0">
-              <label for="roomType" class="form-label">
-                <i class="fas fa-door-open me-2"></i>Room Type
-              </label>
-              <select id="roomType" [(ngModel)]="bookingDetails.roomTypeId" name="roomType"
-              class="form-select rounded-3" required (change)="onRoomTypeChange()">
-          <option *ngFor="let roomType of accommodationData" [value]="roomType.roomTypeId">
-              {{ roomType.name }}
-          </option>
-      </select>
-      
-            </div>
 
-            <!-- Special Request -->
-            <div class="mb-3">
-              <label for="specialRequest" class="form-label">
-                <i class="fas fa-comment-dots me-2"></i>Special Request
-              </label>
-              <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
-                class="form-control rounded-3" rows="3" placeholder="Enter any special requests"></textarea>
-            </div>
 
-            <!-- Modal Actions -->
-            <div class="d-flex justify-content-between mt-4">
-              <button type="submit" class="btn btn-primary rounded-3 px-4">
-                <i class="fas fa-check-circle me-2"></i>Book Now
-              </button>
-              <button type="button" class="btn btn-secondary rounded-3 px-4" (click)="closeModal()">
-                <i class="fas fa-times-circle me-2"></i>Cancel
-              </button>
-            </div>
-          </form>
+          <!-- Special Request -->
+          <div class="mb-3">
+            <label for="specialRequest" class="form-label">
+              <i class="fas fa-comment-dots me-2"></i>Special Request
+            </label>
+            <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
+              class="form-control rounded-3" rows="3" placeholder="Enter any special requests"></textarea>
+          </div>
+
+          <!-- Modal Actions -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-primary rounded-3 px-4" (click)="submitBooking()">
+              <i class="fas fa-check-circle me-2"></i>Book Now
+            </button>
+            <button type="button" class="btn btn-secondary rounded-3 px-4" (click)="closeModal()">
+              <i class="fas fa-times-circle me-2"></i>Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 
 
 </div>

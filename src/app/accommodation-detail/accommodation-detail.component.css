@@ -915,3 +915,28 @@
   margin-bottom: 20px;
 }
 
+/* Increase z-index for Angular Material Datepicker */
+.mat-datepicker-content {
+  z-index: 9999 !important; /* Same as Bootstrap modal */
+}
+
+.cdk-overlay-container {
+  z-index: 1200 !important; /* Set higher than Bootstrap modal */
+}
+
+/* Ensure the backdrop is behind the modal content */
+.modal-backdrop {
+  z-index: 1040 !important; /* Adjust this if needed */
+}
+
+/* Set modal content to be above the backdrop */
+.modal-content {
+  z-index: 1050 !important; /* Should be higher than the backdrop */
+}
+
+.z-index-front {
+  position: relative; /* Ensure z-index applies */
+  z-index: 1060; /* Set a high enough value to bring it forward */
+}
+
+

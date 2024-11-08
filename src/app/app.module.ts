@@ -33,6 +33,9 @@ import { SafeUrlPipe } from './safe-url.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @NgModule({
   declarations: [
@@ -68,7 +71,9 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatDatepickerModule,
     MatInputModule,
     MatNativeDateModule,
+    MatFormFieldModule,
     MatSnackBarModule, // Add comma here
+    MatTooltipModule,
     RouterModule.forRoot([
       { path: 'manage-services', component: ManageServicesComponent },
       { path: 'register', component: RegisterComponent },
