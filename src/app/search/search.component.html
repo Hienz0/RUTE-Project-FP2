@@ -1,20 +1,24 @@
+<div class="search-bar d-flex align-items-center">
+  <input type="search" id="search-input" placeholder="Search" class="form-control search-input me-2" [(ngModel)]="searchTerm" (keyup.enter)="performSearch()">
   
-    <!-- Search -->
-  
-  
-    <div class="search-bar">
-        <input type="search" id="search-input" placeholder="Search" class="rounded-left search-input" [(ngModel)]="searchTerm" (keyup.enter)="performSearch()">
-        <button class="btn btn-secondary rounded-right search-btn" (click)="performSearch()"><i class="fas fa-search"></i></button>
-        <div class="search-categories">
-          <span>Search in:</span>
-          <ul>
-            <li><a href="#" (click)="searchInCategory('Accommodation')">Accommodation</a></li>
-            <li><a href="#" (click)="searchInCategory('Tour & Guide')">Tour & Guide</a></li>
-            <li><a href="#" (click)="searchInCategory('Restaurant')">Restaurant</a></li>
-            <li><a href="#" (click)="searchInCategory('Transportation')">Transportation</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      
-      
+  <!-- Dropdown for Search Categories -->
+  <div class="dropdown me-2">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+      Search in: {{ selectedCategory || 'Select Category' }}
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+      <li><a class="dropdown-item" (click)="selectCategory('Accommodation')">Accommodation</a></li>
+      <li><a class="dropdown-item" (click)="selectCategory('Tour & Guide')">Tour & Guide</a></li>
+      <li><a class="dropdown-item" (click)="selectCategory('Restaurant')">Restaurant</a></li>
+      <li><a class="dropdown-item" (click)="selectCategory('Transportation')">Transportation</a></li>
+      <li><a class="dropdown-item" (click)="selectCategory('')">All</a></li>
+    </ul>
+  </div>
+
+  <!-- Search Button -->
+  <button class="btn btn-secondary me-2" (click)="performSearch()">
+    <i class="fas fa-search"></i>
+  </button>
+
+
+</div>

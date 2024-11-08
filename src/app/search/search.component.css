@@ -903,6 +903,24 @@
 .main {
   margin-top: 80px;
 }
+
+.search-bar {
+  position: relative;
+}
 }
 
+.search-bar {
+  position: relative; /* Make sure this is set */
+  overflow: visible;
+}
+
+.dropdown-menu {
+  position: absolute; /* Ensures the dropdown is positioned relative to its parent */
+  top: 100%; /* Position the dropdown below the button */
+  left: 0;
+}
+
+
 /* end of responsive navbar */
+
+

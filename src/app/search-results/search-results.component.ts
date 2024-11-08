@@ -44,8 +44,14 @@ export class SearchResultsComponent implements OnInit {
     });
   }
 
-  redirectToAccommodation(serviceId: string): void {
-    this.router.navigate([`/accommodation/${serviceId}`]);
+  redirectToAccommodation(serviceId: string, category: string): void {
+    if (category === 'Accommodation') {
+      // If category is 'accommodation', navigate to /accommodation/{serviceId}
+      this.router.navigate([`/accommodation/${serviceId}`]);
+    } else if (category === 'Restaurant') {
+      // If category is 'restaurant', navigate to /restaurant/{serviceId}
+      this.router.navigate([`/restaurant-detail/${serviceId}`]);
+    }
   }
   
 }

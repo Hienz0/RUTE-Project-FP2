@@ -24,7 +24,7 @@
   
   .carousel-item img {
     border-radius: 10px; /* Adjust this value to change the roundness */
-    margin-top: 20px; /* Adjust this value to set the margin top */
+/* Adjust this value to set the margin top */
   }
   
   .carousel-item {
@@ -32,7 +32,7 @@
   }
   .carousel-item img {
     border-radius: 10px; /* Adjust this value to change the roundness */
-    margin-top: 20px; /* Adjust this value to set the margin top */
+ /* Adjust this value to set the margin top */
     height: 100%; /* Make all images fill the item height */
   }
   
@@ -256,7 +256,7 @@
   
    /*# backgroud image */
    .main {
-    background-image: url('../../assets/images/radoslav-bali-ca3d4FYDf84-unsplash.jpg');
+    /* background-image: url('../../assets/images/radoslav-bali-ca3d4FYDf84-unsplash.jpg'); */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -298,7 +298,7 @@
       padding-top: 20px;
     
       /* Other styles for the main container */
-      background-image: url('../../assets/images/radoslav-bali-ca3d4FYDf84-unsplash.jpg');
+      /* background-image: url('../../assets/images/radoslav-bali-ca3d4FYDf84-unsplash.jpg'); */
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -682,67 +682,6 @@
 
 /* Responsive styles */
 /* Responsive styles */
-@media (max-width: 767px) {
-  #carouselExampleIndicators {
-    height: 200px; /* Adjust the height as needed */
-}
-  /* Carousel container */
-  #carouselExampleIndicators {
-    /* margin: 10px; Remove any default margin */
-    width: 100%; /* Ensure the carousel fills the entire width */
-  }
-
-  /* Smaller carousel */
-  .carousel {
-    width: 100%; /* Ensures the carousel fills the container */
-    margin: 0; /* Remove any default margin */
-    padding: 0; /* Remove any default padding */
-    position: relative; /* Set position relative for absolute positioning of caption and controls */
-  }
-
-  /* Smaller carousel items */
-  .carousel-item {
-    width: 100%; /* Makes each carousel item take full width */
-  }
-
-  /* Smaller carousel item images */
-  .carousel-item img {
-    width: 100%; /* Ensures the image fills the entire width of the carousel */
-    height: 200px;
-  }
-
-  /* Centering carousel caption */
-  .carousel-caption {
-    position: absolute;
-    top: 145px; /* Adjust vertical position */
-    left: 50%;
-    font-size: 10px;
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Centering buttons */
-  .carousel-control-prev,
-  .carousel-control-next {
-    position: absolute;
-    top: 120px; /* Adjust vertical position */
-    transform: translateY(-50%);
-    font-size: 10px;
-    z-index: 10; /* Ensure the buttons appear above the image */
-  }
-
-  /* Smaller carousel titles */
-  .carousel-title {
-    font-size: 18px;
-    top: 120px;
-  }
-
-  /* Smaller plan button */
-  .carousel-caption .btn-primary {
-    padding: 5px 10px;
-    font-size: 10px;
-  }
-}
 
 @media (max-width: 767px) {
   .custom-container {
