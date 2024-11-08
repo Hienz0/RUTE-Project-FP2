@@ -5,6 +5,8 @@ import { AuthService } from '../services/auth.service';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+declare var window: any;
+
 @Component({
   selector: 'app-payment-list',
   templateUrl: './payment-list.component.html',
@@ -59,8 +61,24 @@ export class PaymentListComponent implements OnInit {
     }
   }
 
-  payForBooking(bookingId: string): void {
-    console.log('Payment initiated for booking:', bookingId);
-    // Integrate payment gateway logic here
+  payForBooking(bookingId: string, amount: number, bookingType: string): void {
+    this.servicesService.createTransaction(bookingId, amount, this.currentUser.userId).subscribe(response => {
+        if (response.token) {
+            window.snap.pay(response.token, {
+                onSuccess: (result: any) => {
+                    alert('Payment successful!');
+                    this.servicesService.updatePaymentStatus(bookingId, bookingType).subscribe(
+                        () => alert('Booking status updated in the system.'),
+                        (error) => console.error('Failed to update booking status:', error)
+                    );
+                },
+                // Handle other payment responses...
+            });
+        } else {
+            alert('Failed to initiate payment. No token returned.');
+        }
+    });
   }
+
+
 }

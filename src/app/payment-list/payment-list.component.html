@@ -16,7 +16,7 @@
         <p class="card-text">{{ booking.serviceData.productDescription }}</p>
         <p><strong>Price:</strong> {{ booking.serviceData.productPrice | currency:'IDR' }}</p>
         <p><strong>Location:</strong> {{ booking.serviceData.location }}</p>
-        <button class="btn btn-primary mt-2" (click)="payForBooking(booking.id)">Pay</button>
+        <button class="btn btn-primary mt-2" (click)="payForBooking(booking.id, booking.amount, booking.type)">Pay</button>
       </div>
     </div>
   </div>

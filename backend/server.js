@@ -64,6 +64,58 @@ const userSchema = new mongoose.Schema({
   
   const User = mongoose.model('User', userSchema);
 
+
+ ///////////////////////////////////////////
+ //midtrans
+
+ const midtransClient = require("midtrans-client");
+
+ // Initialize Midtrans Snap client
+const snap = new midtransClient.Snap({
+  isProduction: false, // Set to true in production
+  serverKey: "SB-Mid-server-EkQFDkUqZ0I0nG-avUrCzTi0",
+});
+
+// Create transaction route
+app.post('/api/create-transaction', async (req, res) => {
+  const { bookingId, amount, userId } = req.body;
+  if (!bookingId || !amount || !userId) {
+      return res.status(400).json({ error: 'Required parameters missing' });
+  }
+
+  try {
+    const transaction = await snap.createTransaction(midtransTransaction);
+    res.json({ token: transaction.token });
+} catch (error) {
+    console.error("Midtrans transaction creation failed:", error);
+    res.status(500).json({ error: "Transaction creation failed", details: error });
+}
+});
+
+// Define the route to handle payment updates
+app.post('/api/payments/update-status', async (req, res) => {
+    const { bookingId, bookingType } = req.body;
+
+    // Identify the correct model based on booking type
+    let BookingModel;
+    if (bookingType === 'accommodation') BookingModel = AccommodationBooking;
+    else if (bookingType === 'tour') BookingModel = TourBooking;
+    else if (bookingType === 'transportation') BookingModel = VehicleBooking;
+    else return res.status(400).json({ error: 'Invalid booking type' });
+
+    try {
+        // Update payment status to 'Paid'
+        await BookingModel.findByIdAndUpdate(bookingId, { paymentStatus: 'Paid' });
+        res.status(200).json({ message: 'Payment status updated successfully.' });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ error: 'Failed to update payment status' });
+    }
+});
+
+
+////////////////////////////////////////////////////////
+
 /////////////////////////////////////////////////////////
 // booking accomodation
 
@@ -199,7 +251,13 @@ const bookingTourSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['9:00-11:00','13:00-15:00', '17:00-19:00'] // Restrict to available time options
-}
+},
+
+paymentStatus: {
+  type: String,
+  default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+  enum: ['Pending', 'Paid', 'Failed']
+},
 
 }, { timestamps: true });
 
