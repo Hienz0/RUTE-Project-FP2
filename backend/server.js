@@ -98,6 +98,7 @@ app.post('/api/create-transaction', async (req, res) => {
     // Create the transaction with Midtrans
     const transaction = await snap.createTransaction(midtransTransaction);
     res.json({ token: transaction.token });
+    console.log(transaction);
   } catch (error) {
     console.error("Midtrans transaction creation failed:", error);
     res.status(500).json({ error: "Transaction creation failed", details: error });
