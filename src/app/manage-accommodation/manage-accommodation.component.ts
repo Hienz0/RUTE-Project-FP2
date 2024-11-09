@@ -1595,5 +1595,13 @@ isAllRoomsLocked(roomType: any): boolean {
   return roomType.rooms.every((room: any) => room.isLocked);
 }
 
+// accommodation-detail.component.ts
+viewBookings(): void {
+  if (this.serviceId) {
+    this.router.navigate(['/manage-bookings', this.serviceId]);
+  }
+}
+
+
 
 }
