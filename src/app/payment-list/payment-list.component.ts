@@ -51,6 +51,7 @@ export class PaymentListComponent implements OnInit {
               console.log('Bookings with Service Data:', this.bookings);
             }
           );
+          console.log('Bookings with Service Data:', this.bookings);
         },
         (error) => {
           console.error('Error fetching bookings:', error);
@@ -62,6 +63,8 @@ export class PaymentListComponent implements OnInit {
   }
 
   payForBooking(bookingId: string, amount: number, bookingType: string): void {
+    console.log("test", bookingId, amount, bookingType);
+    console.log("test", this.currentUser.userId);
     this.servicesService.createTransaction(bookingId, amount, this.currentUser.userId).subscribe(response => {
       console.log("test", bookingId)
       

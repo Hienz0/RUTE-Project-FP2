@@ -80,16 +80,28 @@ const snap = new midtransClient.Snap({
 app.post('/api/create-transaction', async (req, res) => {
   const { bookingId, amount, userId } = req.body;
   if (!bookingId || !amount || !userId) {
-      return res.status(400).json({ error: 'Required parameters missing' });
+    return res.status(400).json({ error: 'Required parameters missing' });
   }
 
   try {
+    // Define the transaction payload
+    const midtransTransaction = {
+      transaction_details: {
+        order_id: `order-${bookingId}-${Date.now()}`, // Unique order ID
+        gross_amount: amount, // Total amount to be charged
+      },
+      customer_details: {
+        user_id: userId,
+      },
+    };
+
+    // Create the transaction with Midtrans
     const transaction = await snap.createTransaction(midtransTransaction);
     res.json({ token: transaction.token });
-} catch (error) {
+  } catch (error) {
     console.error("Midtrans transaction creation failed:", error);
     res.status(500).json({ error: "Transaction creation failed", details: error });
-}
+  }
 });
 
 // Define the route to handle payment updates
@@ -98,9 +110,9 @@ app.post('/api/payments/update-status', async (req, res) => {
 
     // Identify the correct model based on booking type
     let BookingModel;
-    if (bookingType === 'accommodation') BookingModel = AccommodationBooking;
-    else if (bookingType === 'tour') BookingModel = TourBooking;
-    else if (bookingType === 'transportation') BookingModel = VehicleBooking;
+    if (bookingType === 'Accommodation') BookingModel = AccommodationBooking;
+    else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
+    else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
     else return res.status(400).json({ error: 'Invalid booking type' });
 
     try {

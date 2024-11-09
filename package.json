@@ -23,6 +23,7 @@
     "@types/googlemaps": "^3.43.3",
     "bootstrap": "^5.3.3",
     "leaflet": "^1.9.4",
+    "midtrans-client": "^1.4.2",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.14.4",
     "tslib": "^2.3.0",
