@@ -137,9 +137,16 @@
               <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
 
               <!-- Lock Button -->
-<button class="btn btn-warning btn-sm me-2" (click)="openLockModal(accommodationIndex, i)">
-  <i class="fas fa-lock"></i> Lock
+<!-- Lock/Unlock Button -->
+<button
+  class="btn btn-sm me-2 ms-auto"
+  [ngClass]="isAllRoomsLocked(roomType) ? 'btn-success' : 'btn-warning'"
+  (click)="openLockModal(accommodationIndex, i)"
+>
+  <i class="fas" [ngClass]="isAllRoomsLocked(roomType) ? 'fa-unlock' : 'fa-lock'"></i>
+  {{ isAllRoomsLocked(roomType) ? 'Unlock' : 'Lock' }}
 </button>
+
 
 
               <!-- Edit Button -->
@@ -229,9 +236,15 @@
                 <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
                 <!-- Room Lock Button -->
 <!-- Lock Room Button -->
-<button *ngIf="roomType.isEditing" class="btn btn-warning btn-sm" (click)="openLockRoomModal(accommodationIndex, i, j)">
-  <i class="fas fa-lock"></i> Lock Room
+<!-- Lock/Unlock Room Button -->
+<button  class="btn btn-sm me-2 ms-auto"
+  [ngClass]="room.isLocked ? 'btn-success' : 'btn-warning'"
+  (click)="openLockRoomModal(accommodationIndex, i, j)"
+>
+  <i class="fas" [ngClass]="room.isLocked ? 'fa-unlock' : 'fa-lock'"></i>
+  {{ room.isLocked ? 'Unlock' : 'Lock' }}
 </button>
+
 
                 <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)">
                   <i class="fas fa-trash-alt"></i> Delete

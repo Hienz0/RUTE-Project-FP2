@@ -1027,12 +1027,31 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
     openLockModal(accommodationIndex: number, roomTypeIndex: number): void {
       this.selectedAccommodationIndex = accommodationIndex;
       this.selectedRoomTypeIndex = roomTypeIndex;
+      console.log('testing');
+      
+      console.log('accomodation ', this.accommodationDetail);
+      console.log('accomodation room type ', this.accommodationDetail[0].roomTypes);
     
-      // Use Bootstrap's modal API to open the lock modal
+      const roomType = this.accommodationDetail[0].roomTypes[roomTypeIndex];
+      console.log('Room Type:', roomType);
+    
+      // Check if all rooms in the room type are locked
+      if (this.isAllRoomsLocked(roomType)) {
+        // Unlock all rooms in the room type
+        roomType.rooms.forEach((room: any) => {
+          room.isLocked = false;
+          room.lockReason = ''; // Clear the lock reason
+        });
+        console.log('All rooms were locked. They have been unlocked.');
+        return; // Exit the function, do not show the modal
+      }
+    
+      // Show the lock modal if not all rooms are locked
       const modalElement = this.lockModal.nativeElement;
       const modal = new bootstrap.Modal(modalElement);
       modal.show();
     }
+    
     
     lockRoomType(): void {
       if (this.selectedAccommodationIndex === null || this.selectedRoomTypeIndex === null) {
@@ -1075,10 +1094,23 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
       this.selectedRoomTypeIndex = roomTypeIndex;
       this.selectedRoomIndex = roomIndex;
     
-      const modalElement = this.lockRoomModal.nativeElement;
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
+      const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
+      const room = roomType.rooms[roomIndex];
+    
+      // Toggle lock status for the selected room
+      if (room.isLocked) {
+        // Unlock the room
+        room.isLocked = false;
+        room.lockReason = ''; // Clear the lock reason if unlocking
+        console.log('Room unlocked:', room);
+      } else {
+        // Lock the room (show modal to provide lock reason)
+        const modalElement = this.lockRoomModal.nativeElement;
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      }
     }
+    
 
     lockRoom(): void {
       if (this.selectedAccommodationIndex === null || this.selectedRoomTypeIndex === null || this.selectedRoomIndex === null) {
@@ -1558,6 +1590,10 @@ get checkInDateAsDate(): Date {
   return new Date(this.bookingDetails.checkInDate);
 }
 
+// Method to check if all rooms in a room type are locked
+isAllRoomsLocked(roomType: any): boolean {
+  return roomType.rooms.every((room: any) => room.isLocked);
+}
 
 
 }
