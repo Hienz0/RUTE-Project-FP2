@@ -63,6 +63,8 @@ export class PaymentListComponent implements OnInit {
 
   payForBooking(bookingId: string, amount: number, bookingType: string): void {
     this.servicesService.createTransaction(bookingId, amount, this.currentUser.userId).subscribe(response => {
+      console.log("test", bookingId)
+      
         if (response.token) {
             window.snap.pay(response.token, {
                 onSuccess: (result: any) => {
