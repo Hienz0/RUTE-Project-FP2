@@ -10,6 +10,7 @@ const path = require('path');
 const providerControll = require('./controller/provider');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const cron = require('node-cron');
 
 const app = express();
 const PORT = 3000;
@@ -607,6 +608,41 @@ app.get('/transportationsDetails/:serviceId', async (req, res) => {
 });
 
 
+
+
+
+
+// Function to check and update bookings immediately
+async function updateExpiredBookings() {
+  try {
+      const today = new Date();
+
+      // Find bookings where the dropoffDate has passed but the status is still "Booked"
+      const bookingsToUpdate = await VehicleBooking.find({
+          dropoffDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
+
+      // Update booking statuses to "Completed"
+      if (bookingsToUpdate.length > 0) {
+          await VehicleBooking.updateMany(
+              { _id: { $in: bookingsToUpdate.map(booking => booking._id) } },
+              { $set: { bookingStatus: 'Completed' } }
+          );
+          console.log(`${bookingsToUpdate.length} bookings marked as Completed at startup.`);
+      } else {
+          console.log('No bookings to update at startup.');
+      }
+  } catch (error) {
+      console.error('Error updating booking statuses at startup:', error);
+  }
+}
+
+// Run the immediate check at server startup
+updateExpiredBookings();
+
+// Schedule the cron job to run daily at a specified time, e.g., 9:46 PM
+cron.schedule('46 21 * * *', updateExpiredBookings);
 
 
 

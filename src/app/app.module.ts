@@ -27,6 +27,7 @@ import { TransportationServicesComponent } from './transportation-services/trans
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
 
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
+import { RateServicesComponent } from './rate-services/rate-services.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { ManageTransportationComponent } from './manage-transportation/manage-tr
     TransportationServicesComponent,
     BookTransportationComponent,
     
-    ManageTransportationComponent
+    ManageTransportationComponent,
+          RateServicesComponent
   ],
   imports: [
     BrowserModule,

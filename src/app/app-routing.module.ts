@@ -15,6 +15,7 @@ import { TransportationServicesComponent } from './transportation-services/trans
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
 
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
+import { RateServicesComponent } from './rate-services/rate-services.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -32,7 +33,8 @@ const routes: Routes = [
  
   {path: 'transportationService', component: TransportationServicesComponent},
   {path:'manageTransportation/:id', component: ManageTransportationComponent},
-  {path:'transportationDetail/:id', component: BookTransportationComponent}
+  {path:'transportationDetail/:id', component: BookTransportationComponent},
+  {path:'rateServices', component: RateServicesComponent},
 ];
 
 @NgModule({
