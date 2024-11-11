@@ -147,7 +147,17 @@ const bookingAccommodationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     required: true }, // Reference to RoomType
   roomId: { type: mongoose.Schema.Types.ObjectId, 
-    required: true } // Reference to Room
+    required: true }, // Reference to Room
+  amount: {
+    type: Number,
+    required: true,
+    min: 0
+},
+  paymentStatus: {
+    type: String,
+    default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+    enum: ['Pending', 'Paid', 'Failed']
+  },
 }, { timestamps: true });
 
 // Create the Booking model
@@ -2083,6 +2093,146 @@ app.get('/api/search', authMiddleware, async (req, res) => {
     res.status(500).send('Server Side Error');
   }
 });
+
+
+
+
+
+
+// setting midtrans payment
+
+ ///////////////////////////////////////////
+ //midtrans
+
+ const midtransClient = require("midtrans-client");
+
+ // Initialize Midtrans Snap client
+const snap = new midtransClient.Snap({
+  isProduction: false, // Set to true in production
+  serverKey: "SB-Mid-server-EkQFDkUqZ0I0nG-avUrCzTi0",
+});
+
+// Create transaction route
+app.post('/api/create-transaction', async (req, res) => {
+  const { bookingId, amount, userId } = req.body;
+  if (!bookingId || !amount || !userId) {
+    return res.status(400).json({ error: 'Required parameters missing' });
+  }
+
+  try {
+    // Define the transaction payload
+    const midtransTransaction = {
+      transaction_details: {
+        order_id: `order-${bookingId}-${Date.now()}`, // Unique order ID
+        gross_amount: amount, // Total amount to be charged
+      },
+      customer_details: {
+        user_id: userId,
+      },
+    };
+
+    // Create the transaction with Midtrans
+    const transaction = await snap.createTransaction(midtransTransaction);
+    res.json({ token: transaction.token });
+    console.log(transaction);
+  } catch (error) {
+    console.error("Midtrans transaction creation failed:", error);
+    res.status(500).json({ error: "Transaction creation failed", details: error });
+  }
+});
+
+// Define the route to handle payment updates
+app.post('/api/payments/update-status', async (req, res) => {
+    const { bookingId, bookingType } = req.body;
+
+    // Identify the correct model based on booking type
+    let BookingModel;
+    if (bookingType === 'Accommodation') BookingModel = Booking;
+    else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
+    else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
+    else return res.status(400).json({ error: 'Invalid booking type' });
+
+    try {
+        // Update payment status to 'Paid'
+        await BookingModel.findByIdAndUpdate(bookingId, { paymentStatus: 'Paid' });
+        res.status(200).json({ message: 'Payment status updated successfully.' });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ error: 'Failed to update payment status' });
+    }
+});
+
+
+////////////////////////////////////////////////////////
+
+
+
+// backup midtrans
+
+ ///////////////////////////////////////////
+ //midtrans
+
+//  const midtransClient = require("midtrans-client");
+
+//  // Initialize Midtrans Snap client
+// const snap = new midtransClient.Snap({
+//   isProduction: false, // Set to true in production
+//   serverKey: "SB-Mid-server-EkQFDkUqZ0I0nG-avUrCzTi0",
+// });
+
+// // Create transaction route
+// app.post('/api/create-transaction', async (req, res) => {
+//   const { bookingId, amount, userId } = req.body;
+//   if (!bookingId || !amount || !userId) {
+//     return res.status(400).json({ error: 'Required parameters missing' });
+//   }
+
+//   try {
+//     // Define the transaction payload
+//     const midtransTransaction = {
+//       transaction_details: {
+//         order_id: `order-${bookingId}-${Date.now()}`, // Unique order ID
+//         gross_amount: amount, // Total amount to be charged
+//       },
+//       customer_details: {
+//         user_id: userId,
+//       },
+//     };
+
+//     // Create the transaction with Midtrans
+//     const transaction = await snap.createTransaction(midtransTransaction);
+//     res.json({ token: transaction.token });
+//     console.log(transaction);
+//   } catch (error) {
+//     console.error("Midtrans transaction creation failed:", error);
+//     res.status(500).json({ error: "Transaction creation failed", details: error });
+//   }
+// });
+
+// // Define the route to handle payment updates
+// app.post('/api/payments/update-status', async (req, res) => {
+//     const { bookingId, bookingType } = req.body;
+
+//     // Identify the correct model based on booking type
+//     let BookingModel;
+//     if (bookingType === 'Accommodation') BookingModel = AccommodationBooking;
+//     else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
+//     else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
+//     else return res.status(400).json({ error: 'Invalid booking type' });
+
+//     try {
+//         // Update payment status to 'Paid'
+//         await BookingModel.findByIdAndUpdate(bookingId, { paymentStatus: 'Paid' });
+//         res.status(200).json({ message: 'Payment status updated successfully.' });
+//     } catch (error) {
+//         console.error('Error updating payment status:', error);
+//         res.status(500).json({ error: 'Failed to update payment status' });
+//     }
+// });
+
+
+////////////////////////////////////////////////////////
+
 
   
 

@@ -8,6 +8,7 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { ChangeDetectorRef } from '@angular/core';
 
 import * as L from 'leaflet';
+import { concat } from 'rxjs';
 
 
 
@@ -30,14 +31,15 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
     guestName: '',
-    accommodationType: 'Hotel', // Default accommodation type
+    accommodationType: 'Hotel',
     numberOfGuests: 1,
     checkInDate: '',
     checkOutDate: '',
-    roomTypeId: '', // Added to store the selected room type ID
-    roomId: '', // To store the selected room ID
-    accommodationId: '', // To store the accommodation ID
-    specialRequest: ''
+    roomTypeId: '',
+    roomId: '',
+    accommodationId: '',
+    specialRequest: '',
+    amount: 0 // Add amount property here
   };
   selectedImage: string | null = null;
   isImagePreviewOpen: boolean = false;
@@ -157,30 +159,27 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   loadAccommodationData(serviceId: string): void {
     this.servicesService.getAccommodationDataById(serviceId).subscribe(
       (data) => {
-              // Assign accommodationId to bookingDetails
-      this.bookingDetails.accommodationId = data._id;
-        // Filter out 'rooms' for each room type
-      // Filter out 'rooms' and 'roomTypeId' for each room type
-      this.accommodationData = data.roomTypes.map((roomType: any) => ({
-        name: roomType.name,
-        price: roomType.price,
-        amenities: roomType.amenities,
-        images: roomType.images,
-        roomTypeId: roomType._id,
-        accommodationId: data._id,
-        rooms: roomType.rooms.map((room: any) => ({
-          roomId: room._id,
-          number: room.number,
-          status: room.status,
-        })),
-      }));
-        console.log(this.accommodationData)
+        this.bookingDetails.accommodationId = data._id;
+        this.accommodationData = data.roomTypes.map((roomType: any) => ({
+          name: roomType.name,
+          price: roomType.price,
+          amenities: roomType.amenities,
+          images: roomType.images,
+          roomTypeId: roomType._id,
+          accommodationId: data._id,
+          rooms: roomType.rooms.map((room: any) => ({
+            roomId: room._id,
+            number: room.number,
+            status: room.status,
+          })),
+        }));
       },
       (error) => {
         console.error('Error loading accommodation details:', error);
       }
     );
   }
+  
 
 // Fetch dates for the selected room type
 loadBookedDates(): void {
@@ -201,8 +200,9 @@ loadBookedDates(): void {
 onRoomTypeChange(): void {
   this.loadBookedDates(); // Fetch new dates based on selected room type
   this.bookingDetails.checkInDate = '';
-  this.bookingDetails.checkOutDate = 'null';
+  this.bookingDetails.checkOutDate = '';
 
+  console.log(this.bookingDetails.roomTypeId);
 }
 
   isDateDisabled(date: string): boolean {
@@ -364,8 +364,37 @@ onCheckOutDateChange(date: Date): void {
   //   console.log('Booking form submitted');
   //   console.log('Booking details:', this.bookingDetails);
   // }
+
+  selectRoomType(roomTypeId: string): void {
+    const selectedRoomType = this.accommodationData.find(
+      (roomType: { roomTypeId: string; price: number }) => roomType.roomTypeId === roomTypeId
+    );
+    
+    if (selectedRoomType) {
+      this.bookingDetails.roomTypeId = roomTypeId;
+  
+      // Calculate number of days between check-in and check-out
+      if (this.bookingDetails.checkInDate && this.bookingDetails.checkOutDate) {
+        const checkInDate = new Date(this.bookingDetails.checkInDate);
+        const checkOutDate = new Date(this.bookingDetails.checkOutDate);
+        const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+        const numberOfDays = timeDiff / (1000 * 3600 * 24); // Convert milliseconds to days
+        
+        // Set amount based on room price * number of days
+        this.bookingDetails.amount = selectedRoomType.price * numberOfDays;
+      }
+
+      console.log
+    }
+  }
+  
+  
+  
   
   submitBooking(): void {
+    const selectedRoomTypeId = this.bookingDetails.roomTypeId;
+    this.selectRoomType(selectedRoomTypeId); // Set amount based on the selected room type price
+    console.log('final booking details: ', this.bookingDetails);
     const today = new Date().toISOString().split('T')[0];
   
     // Check if all required fields are filled

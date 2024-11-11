@@ -39,6 +39,18 @@ export class BookingService {
     getAccommodationBookingsByUserId(userId: string | null): Observable<any[]> {
       return this.http.get<any[]>(`${this.apiUrl}/accommodation/user/${userId}`);
     }
+
+    updatePaymentStatus(bookingId: string, bookingType: string): Observable<any> {
+      return this.http.post<any>('http://localhost:3000/api/payments/update-status', { bookingId, bookingType });
+    }
+    
+    createTransaction(bookingId: string, amount: number, userId: string): Observable<any> {
+      return this.http.post<any>('http://localhost:3000/api/create-transaction', {
+          bookingId,
+          amount,
+          userId,
+      });
+    }
     
     
 }

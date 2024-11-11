@@ -23,6 +23,7 @@
     "@panzoom/panzoom": "^4.5.1",
     "bootstrap": "^5.3.3",
     "leaflet": "^1.9.4",
+    "midtrans-client": "^1.4.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"

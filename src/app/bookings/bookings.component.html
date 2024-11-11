@@ -196,9 +196,13 @@
 
     <!-- Conditionally Rendered Buttons for Pending Status -->
     <ng-container *ngIf="selectedBooking?.bookingStatus === 'Pending'">
-        <button type="button" class="btn btn-outline-success btn-sm" (click)="payBooking(selectedBooking)">
-            <i class="fas fa-check-circle me-2"></i>Pay Now
-        </button>
+        <button 
+        type="button" 
+        class="btn btn-outline-success btn-sm" 
+        (click)="payForBooking(selectedBooking._id, selectedBooking.amount, selectedBooking.accommodationType)">
+        <i class="fas fa-check-circle me-2"></i>Pay Now
+      </button>
+      
         <button type="button" class="btn btn-outline-danger btn-sm" (click)="cancelBooking(selectedBooking)">
             <i class="fas fa-times-circle me-2"></i>Cancel Booking
         </button>

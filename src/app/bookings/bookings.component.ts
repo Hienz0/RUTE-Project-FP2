@@ -7,6 +7,7 @@ import { AuthService } from '../services/auth.service';
 
 declare const Swal: any;
 declare var bootstrap: any;
+declare var window: any;
 
 @Component({
   selector: 'app-bookings',
@@ -92,10 +93,28 @@ export class BookingsComponent implements OnInit {
     modal.show();
   }
 
-  payBooking(booking: any): void {
-    // Logic to verify the booking, e.g., update status, call API, etc.
-    console.log('Verifying booking:', booking);
-}
+  payForBooking(bookingId: string, amount: number, bookingType: string): void {
+    console.log("test", bookingId, amount, bookingType);
+    console.log("test", this.currentUser.userId);
+    this.bookingService.createTransaction(bookingId, amount, this.currentUser.userId).subscribe(response => {
+      console.log("test", bookingId)
+      
+        if (response.token) {
+            window.snap.pay(response.token, {
+                onSuccess: (result: any) => {
+                    alert('Payment successful!');
+                    this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
+                        () => alert('Booking status updated in the system.'),
+                        (error) => console.error('Failed to update booking status:', error)
+                    );
+                },
+                // Handle other payment responses...
+            });
+        } else {
+            alert('Failed to initiate payment. No token returned.');
+        }
+    });
+  }
 
 cancelBooking(booking: any): void {
     // Logic to cancel the booking, e.g., update status, call API, etc.
