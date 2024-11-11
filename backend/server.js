@@ -158,7 +158,7 @@ module.exports = Booking;
 
 
 // In your backend routes (e.g., bookingRoutes.js)
-app.get('/api/bookings/:serviceId', async (req, res) => {
+app.get('/api/bookings/accommodation/:serviceId', async (req, res) => {
   try {
       const bookings = await Booking.find({ serviceId: req.params.serviceId }).populate('userId accommodationId roomTypeId roomId');
       res.json(bookings);
@@ -166,6 +166,26 @@ app.get('/api/bookings/:serviceId', async (req, res) => {
       res.status(500).json({ message: 'Error fetching bookings', error });
   }
 });
+
+app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
+  try {
+      // Log the incoming request parameters
+      console.log(`Received request for userId: ${req.params.userId}`);
+
+      const bookings = await Booking.find({ userId: req.params.userId })
+                                    .populate('userId accommodationId roomTypeId roomId');
+      
+      // Log the response data
+      console.log('Bookings found:', bookings);
+
+      res.json(bookings);
+  } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.status(500).json({ message: 'Error fetching bookings', error });
+  }
+});
+
+
 
 
 

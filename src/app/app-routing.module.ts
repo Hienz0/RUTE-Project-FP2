@@ -18,6 +18,7 @@ import { ManageAccommodationComponent } from './manage-accommodation/manage-acco
 import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant.component';
 import { AccommodationBookingDetailComponent } from './accommodation-booking-detail/accommodation-booking-detail.component';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
+import { BookingsComponent } from './bookings/bookings.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -40,6 +41,7 @@ const routes: Routes = [
   {path: 'manage-restaurant/:serviceId', component: ManageRestaurantComponent },
   { path: 'accommodation-booking-detail/:bookingId', component: AccommodationBookingDetailComponent },
   { path: 'manage-bookings/:serviceId', component: ManageBookingsComponent },
+  { path: 'bookings/:userId', component: BookingsComponent },
 ];
 
 @NgModule({

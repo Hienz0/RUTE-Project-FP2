@@ -36,6 +36,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
+import { BookingsComponent } from './bookings/bookings.component';
 
 
 @NgModule({
@@ -61,7 +62,8 @@ import { ManageBookingsComponent } from './manage-bookings/manage-bookings.compo
     ManageRestaurantComponent,
     AccommodationBookingDetailComponent,
     SafeUrlPipe,
-    ManageBookingsComponent
+    ManageBookingsComponent,
+    BookingsComponent
   ],
   imports: [
     BrowserModule,

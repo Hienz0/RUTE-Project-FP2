@@ -1,16 +1,17 @@
-// manage-bookings.component.ts
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { AuthService } from '../services/auth.service';
+
 
 declare const Swal: any;
 declare var bootstrap: any;
 
 @Component({
-  selector: 'app-manage-bookings',
-  templateUrl: './manage-bookings.component.html',
-  styleUrls: ['./manage-bookings.component.css'],
+  selector: 'app-bookings',
+  templateUrl: './bookings.component.html',
+  styleUrls: ['./bookings.component.css'],
   animations: [
     trigger('fadeAnimation', [
       transition(':enter', [
@@ -23,7 +24,7 @@ declare var bootstrap: any;
     ])
   ]
 })
-export class ManageBookingsComponent implements OnInit {
+export class BookingsComponent implements OnInit {
   serviceId: string | null = null;
   bookings: any[] = [];
   filteredBookings: any[] = [];
@@ -31,22 +32,40 @@ export class ManageBookingsComponent implements OnInit {
   @ViewChild('bookingModal', { static: true }) bookingModal!: ElementRef;
   selectedBooking: any | null = null;
 
+  currentUser: any;
+  userId: string | null = null;
+
+
   constructor(
     private route: ActivatedRoute,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private authService: AuthService
+
   ) {}
 
   ngOnInit(): void {
-    this.serviceId = this.route.snapshot.paramMap.get('serviceId');
-    if (this.serviceId) {
-      this.loadBookings();
-    }
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+      this.userId = this.currentUser.userId;
+  
+      console.log('Current User', this.currentUser);
+      console.log('User ID:', this.userId);
+  
+      // Ensure loadBookings is called after userId is assigned
+      this.loadAccommodationBookings();
+    });
+  
+    // This line should be removed to avoid calling loadBookings prematurely
+    // this.loadBookings();
   }
+  
 
-  loadBookings(): void {
-    this.bookingService.getAccommodationBookingsByServiceId(this.serviceId).subscribe(
+  loadAccommodationBookings(): void {
+    console.log('testing');
+    this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
       (bookings) => {
         this.bookings = bookings;
+        console.log('Bookings:', this.bookings);
         this.filterBookings(this.selectedStatus); // Call filtering here after data is loaded
       },
       (error) => {
@@ -54,6 +73,7 @@ export class ManageBookingsComponent implements OnInit {
       }
     );
   }
+  
   
 
 
@@ -72,7 +92,7 @@ export class ManageBookingsComponent implements OnInit {
     modal.show();
   }
 
-  verifyBooking(booking: any): void {
+  payBooking(booking: any): void {
     // Logic to verify the booking, e.g., update status, call API, etc.
     console.log('Verifying booking:', booking);
 }

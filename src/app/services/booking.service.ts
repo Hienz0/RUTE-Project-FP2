@@ -32,8 +32,13 @@ export class BookingService {
         return this.http.get<string[]>(`${this.apiUrl}/booked-dates/${serviceId}/${roomTypeId}`);
     }
 
-    getBookingsByServiceId(serviceId: string | null): Observable<any[]> {
-      return this.http.get<any[]>(`${this.apiUrl}/${serviceId}`);
+    getAccommodationBookingsByServiceId(serviceId: string | null): Observable<any[]> {
+      return this.http.get<any[]>(`${this.apiUrl}/accommodation/${serviceId}`);
     }
+
+    getAccommodationBookingsByUserId(userId: string | null): Observable<any[]> {
+      return this.http.get<any[]>(`${this.apiUrl}/accommodation/user/${userId}`);
+    }
+    
     
 }
