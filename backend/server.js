@@ -518,6 +518,149 @@ app.get('/transportationService', async (req, res) => {
 
 
 
+
+
+
+const bookingTourSchema = new mongoose.Schema({
+    customerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    tourName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+
+    tourguideType: {
+      type: String,
+      required: true,
+      enum: ['With Guide', 'Tour Only']
+    },
+
+    tourDate: {
+        type: Date,
+        required: true,
+
+        validate: {
+          validator: function(value) {
+            const now = new Date();
+            return value >= now.setHours(0, 0, 0, 0);
+          },
+          message: 'Tour date must be in the future'
+      }
+
+    },
+
+    pickupLocation: {
+      type: String,
+      required: true,
+      
+    },
+
+    numberOfParticipants: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    specialRequest: {
+        type: String,
+        trim: true
+    },
+    bookingStatus: {
+        type: String,
+        default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+        enum: ['Booked', 'Cancelled', 'Completed']
+    },
+    serviceId: { // Add serviceId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true
+  },
+  userId: { // Add userId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  },
+
+  tourTime: { // Add the tourTime field
+    type: String,
+    required: true,
+    enum: ['9:00-11:00','13:00-15:00', '17:00-19:00'] // Restrict to available time options
+},
+
+paymentStatus: {
+  type: String,
+  default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+  enum: ['Pending', 'Paid', 'Failed']
+},
+
+}, { timestamps: true });
+
+// Create the Booking model
+const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
+
+
+
+// Define the accommodation booking schema
+const bookingAccommodationSchema = new mongoose.Schema({
+    guestName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    accommodationType: {
+        type: String,
+        required: true,
+        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
+    },
+    numberOfGuests: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    checkInDate: {
+        type: Date,
+        required: true
+    },
+    checkOutDate: {
+        type: Date,
+        required: true
+    },
+    specialRequest: {
+        type: String,
+        trim: true
+    },
+    bookingStatus: {
+        type: String,
+        default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
+        enum: ['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut']
+    },
+
+    serviceId: { // Add serviceId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true
+  },
+  userId: { // Add userId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  },
+  accommodationId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Accommodation', required: true }, // Reference to Accommodation
+  roomTypeId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    required: true }, // Reference to RoomType
+  roomId: { type: mongoose.Schema.Types.ObjectId, 
+    required: true } // Reference to Room
+}, { timestamps: true });
+
+// Create the Booking model
+const AccomodationBooking = mongoose.model('AccommodationBooking', bookingAccommodationSchema);
+
 // Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
 const bookingVehicleSchema = new mongoose.Schema({
   customerName: {
@@ -612,37 +755,79 @@ app.get('/transportationsDetails/:serviceId', async (req, res) => {
 
 
 
-// Function to check and update bookings immediately
-async function updateExpiredBookings() {
+// 1. Function to check and update TourBooking status
+async function updateTourBookings() {
+  const today = new Date();
   try {
-      const today = new Date();
+      const expiredTours = await TourBooking.find({
+          tourDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
 
-      // Find bookings where the dropoffDate has passed but the status is still "Booked"
-      const bookingsToUpdate = await VehicleBooking.find({
+      if (expiredTours.length > 0) {
+          await TourBooking.updateMany(
+              { _id: { $in: expiredTours.map(tour => tour._id) } },
+              { $set: { bookingStatus: 'Completed' } }
+          );
+          console.log(`${expiredTours.length} tour bookings marked as Completed.`);
+      }
+  } catch (error) {
+      console.error('Error updating tour bookings:', error);
+  }
+}
+
+// 2. Function to check and update AccommodationBooking status
+async function updateAccommodationBookings() {
+  const today = new Date();
+  try {
+      const expiredAccommodations = await AccomodationBooking.find({
+          checkOutDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
+
+      if (expiredAccommodations.length > 0) {
+          await AccomodationBooking.updateMany(
+              { _id: { $in: expiredAccommodations.map(acc => acc._id) } },
+              { $set: { bookingStatus: 'CheckedOut' } }
+          );
+          console.log(`${expiredAccommodations.length} accommodation bookings marked as CheckedOut.`);
+      }
+  } catch (error) {
+      console.error('Error updating accommodation bookings:', error);
+  }
+}
+
+// 3. Function to check and update VehicleBooking status
+async function updateVehicleBookings() {
+  const today = new Date();
+  try {
+      const expiredVehicles = await VehicleBooking.find({
           dropoffDate: { $lt: today },
           bookingStatus: 'Booked'
       });
 
-      // Update booking statuses to "Completed"
-      if (bookingsToUpdate.length > 0) {
+      if (expiredVehicles.length > 0) {
           await VehicleBooking.updateMany(
-              { _id: { $in: bookingsToUpdate.map(booking => booking._id) } },
+              { _id: { $in: expiredVehicles.map(veh => veh._id) } },
               { $set: { bookingStatus: 'Completed' } }
           );
-          console.log(`${bookingsToUpdate.length} bookings marked as Completed at startup.`);
-      } else {
-          console.log('No bookings to update at startup.');
+          console.log(`${expiredVehicles.length} vehicle bookings marked as Completed.`);
       }
   } catch (error) {
-      console.error('Error updating booking statuses at startup:', error);
+      console.error('Error updating vehicle bookings:', error);
   }
 }
 
-// Run the immediate check at server startup
-updateExpiredBookings();
+// Combined function to run all updates
+async function updateAllBookings() {
+  await updateTourBookings();
+  await updateAccommodationBookings();
+  await updateVehicleBookings();
+}
 
-// Schedule the cron job to run daily at a specified time, e.g., 9:46 PM
-cron.schedule('46 21 * * *', updateExpiredBookings);
+updateAllBookings()
+
+cron.schedule('0 0 * * *', updateAllBookings);  // Runs every day at midnight
 
 
 
