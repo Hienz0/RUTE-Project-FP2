@@ -36,6 +36,9 @@ export class BookingsComponent implements OnInit {
   currentUser: any;
   userId: string | null = null;
 
+  bookingId: string | null = null;
+
+
 
   constructor(
     private route: ActivatedRoute,
@@ -54,6 +57,9 @@ export class BookingsComponent implements OnInit {
   
       // Ensure loadBookings is called after userId is assigned
       this.loadAccommodationBookings();
+
+      this.bookingId = this.route.snapshot.paramMap.get('userId');
+      console.log('Booking ID:', this.bookingId);
     });
   
     // This line should be removed to avoid calling loadBookings prematurely
@@ -61,19 +67,29 @@ export class BookingsComponent implements OnInit {
   }
   
 
-  loadAccommodationBookings(): void {
-    console.log('testing');
-    this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
-      (bookings) => {
-        this.bookings = bookings;
-        console.log('Bookings:', this.bookings);
-        this.filterBookings(this.selectedStatus); // Call filtering here after data is loaded
-      },
-      (error) => {
-        console.error('Error loading bookings:', error);
-      }
-    );
-  }
+loadAccommodationBookings(): void {
+  console.log('Loading bookings...');
+  this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
+    (bookings) => {
+      this.bookings = bookings;
+      console.log('Bookings:', this.bookings);
+
+      // Filter bookings after loading
+      this.filterBookings(this.selectedStatus);
+
+      // Delay to ensure filteredBookings is fully populated before searching for a match
+      setTimeout(() => {
+        const matchingIndex = this.filteredBookings.findIndex(booking => booking._id === this.bookingId);
+        if (matchingIndex !== -1) {
+          this.openBookingModal(matchingIndex);
+        }
+      });
+    },
+    (error) => {
+      console.error('Error loading bookings:', error);
+    }
+  );
+}
   
   
 
@@ -93,12 +109,29 @@ export class BookingsComponent implements OnInit {
   
 
   openBookingModal(index: number): void {
+    console.log('modal called');
     this.selectedBooking = this.filteredBookings[index];
     
     // Use Bootstrap's modal API to open the modal
     const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
     modal.show();
   }
+
+  closeBookingModal(): void {
+    // Ensure the modal is defined and close it
+    if (this.bookingModal) {
+      const modal = new bootstrap.Modal(this.bookingModal.nativeElement, {
+        backdrop: 'static' // or you can set it to 'false' if you want to disable the backdrop
+      });
+      modal.hide();
+      // Manually remove the backdrop if it's still there
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+    }
+  }
+  
 
   payForBooking(bookingId: string, amount: number, bookingType: string): void {
     console.log("test", bookingId, amount, bookingType);
@@ -123,6 +156,9 @@ export class BookingsComponent implements OnInit {
                   );
                   
                     this.loadAccommodationBookings();
+                                    // Close the modal after payment is processed
+                const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
+                this.closeBookingModal(); // Close the modal
                 },
                 // Handle other payment responses...
             });

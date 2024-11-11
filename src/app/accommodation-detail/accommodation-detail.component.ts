@@ -474,26 +474,30 @@ onCheckOutDateChange(date: Date): void {
         // Submit the booking data
         this.bookingService.bookAccommodation(bookingData).subscribe(
           (response) => {
-            console.log('Booking Response:', response); // Log the response here
+            console.log('Booking Response:', response);
+        
             Swal.fire({
-              icon: 'success',
-              title: 'Booking Successful!',
-              text: 'Your accommodation has been booked successfully.',
+              title: 'Confirm Your Booking',
+              text: 'Would you like to book now or check the details again?',
+              icon: 'question',
+              showCancelButton: true,
               confirmButtonColor: '#3085d6',
-            });
-            this.closeModal();
-
-                  // Redirect to accommodation-booking-detail page with the booking ID
-                  const bookingId = response.booking._id;
-                  // Assume response contains bookingId
-      this.router.navigate([`/bookings/${bookingId}`]);
-          },
-          (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Booking Failed',
-              text: 'There was an error processing your booking. Please try again.',
-              confirmButtonColor: '#d33',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Book Now',
+              cancelButtonText: 'Check Again'
+            }).then((result: any) => { // Explicitly typing result as any
+              if (result.isConfirmed) {
+                // User confirmed to "Book Now"
+                this.closeModal();
+        
+                // Redirect to accommodation-booking-detail page with the booking ID
+                const bookingId = response.booking._id;
+                this.router.navigate([`/bookings/${bookingId}`]);
+              } else {
+                // User chose "Check Again"
+                console.log('User chose to check the details again.');
+                // Additional logic for "Check Again" (if needed) can go here
+              }
             });
           }
         );

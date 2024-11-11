@@ -89,6 +89,8 @@ export class ManageBookingsComponent implements OnInit {
             text: 'The booking status has been updated to Booked successfully.',
             confirmButtonColor: '#3085d6',
           });
+      this.loadAccommodationBookings();
+
         },
         (error) => {
           console.error('Failed to update booking status:', error);
