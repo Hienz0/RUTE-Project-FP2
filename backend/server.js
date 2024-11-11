@@ -127,7 +127,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
     bookingStatus: {
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
-        enum: ['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut']
+        enum: ['Booked', 'Complete', 'Waiting for payment','Cancelled', 'CheckedIn', 'CheckedOut']
     },
 
     serviceId: { // Add serviceId field
@@ -287,6 +287,7 @@ app.post('/api/bookings/accommodation', async (req, res) => {
       ...req.body,
       serviceId: req.body.serviceId,
       userId: req.body.userId,
+      bookingStatus: 'Waiting for payment'
     };
     
     // Step 1: Create the booking
@@ -329,6 +330,27 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
   }
 });
+
+
+// PUT route to update booking status
+app.put('/api/bookings/status/update/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { bookingStatus: req.body.bookingStatus },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking status', error });
+  }
+});
+
 
 
 // Route to check room availability for specific dates
@@ -2143,23 +2165,26 @@ app.post('/api/create-transaction', async (req, res) => {
 
 // Define the route to handle payment updates
 app.post('/api/payments/update-status', async (req, res) => {
-    const { bookingId, bookingType } = req.body;
+  const { bookingId, bookingType } = req.body;
 
-    // Identify the correct model based on booking type
-    let BookingModel;
-    if (bookingType === 'Accommodation') BookingModel = Booking;
-    else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
-    else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
-    else return res.status(400).json({ error: 'Invalid booking type' });
+  // Identify the correct model based on booking type
+  let BookingModel;
+  if (bookingType === 'Accommodation') BookingModel = Booking;
+  else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
+  else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
+  else return res.status(400).json({ error: 'Invalid booking type' });
 
-    try {
-        // Update payment status to 'Paid'
-        await BookingModel.findByIdAndUpdate(bookingId, { paymentStatus: 'Paid' });
-        res.status(200).json({ message: 'Payment status updated successfully.' });
-    } catch (error) {
-        console.error('Error updating payment status:', error);
-        res.status(500).json({ error: 'Failed to update payment status' });
-    }
+  try {
+      // Update payment status to 'Paid' and booking status to 'Pending'
+      await BookingModel.findByIdAndUpdate(bookingId, {
+          paymentStatus: 'Paid',
+          bookingStatus: 'Pending'
+      });
+      res.status(200).json({ message: 'Payment and booking status updated successfully.' });
+  } catch (error) {
+      console.error('Error updating payment and booking status:', error);
+      res.status(500).json({ error: 'Failed to update payment and booking status' });
+  }
 });
 
 

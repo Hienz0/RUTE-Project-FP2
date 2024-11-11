@@ -79,14 +79,17 @@
                                                 'bg-success': booking.bookingStatus === 'Booked',
                                                 'bg-warning': booking.bookingStatus === 'Pending',
                                                 'bg-secondary': booking.bookingStatus === 'Complete',
-                                                'bg-danger': booking.bookingStatus === 'Canceled'
+                                                'bg-danger': booking.bookingStatus === 'Canceled',
+                                                'bg-primary': booking.bookingStatus === 'Waiting for payment'
                                             }">
-                                                {{ booking.bookingStatus }}
+                                                 {{ booking.bookingStatus === 'Pending' ? 'Waiting for Verification' : booking.bookingStatus }}
                                             </span>
                                             <!-- <span class="badge rounded-pill" [ngClass]="{
                                                 'bg-success': booking.bookingStatus === 'Booked',
                                                 'bg-warning': booking.bookingStatus === 'CheckedIn',
                                                 'bg-secondary': booking.bookingStatus === 'CheckedOut',
+                                                'bg-warning': booking.bookingStatus === 'Pending' || booking.bookingStatus === 'Waiting for payment',
+
                                                 'bg-danger': booking.bookingStatus === 'Canceled'
                                             }">
                                                 {{ booking.bookingStatus }}
@@ -171,12 +174,22 @@
                         <span class="ms-auto">
                             <span class="badge rounded-pill" [ngClass]="{
                                 'bg-success': selectedBooking?.bookingStatus === 'Booked',
+                                'bg-danger': selectedBooking?.bookingStatus === 'Cancelled',
+                                'bg-primary': selectedBooking?.bookingStatus === 'Waiting for payment', 
+                                'bg-warning': selectedBooking?.bookingStatus === 'Pending',
+                                'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
+                            }">
+                                {{ selectedBooking?.bookingStatus === 'Pending' ? 'Waiting for Verification' : selectedBooking?.bookingStatus }}
+                            </span>
+                            
+                            <!-- <span class="badge rounded-pill" [ngClass]="{
+                                'bg-success': selectedBooking?.bookingStatus === 'Booked',
                                 'bg-warning': selectedBooking?.bookingStatus === 'CheckedIn',
                                 'bg-secondary': selectedBooking?.bookingStatus === 'CheckedOut',
                                 'bg-danger': selectedBooking?.bookingStatus === 'Cancelled'
                             }">
                                 {{ selectedBooking?.bookingStatus }}
-                            </span>
+                            </span> -->
                         </span>
                     </div>
                     <!-- Special Requests -->
@@ -191,23 +204,29 @@
 <!-- Modal Footer -->
 <div class="modal-footer border-0">
     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
-        <i class="fas fa-times-circle me-2"></i>Close
+      <i class="fas fa-times-circle me-2"></i>Close
     </button>
-
-    <!-- Conditionally Rendered Buttons for Pending Status -->
-    <ng-container *ngIf="selectedBooking?.bookingStatus === 'Pending'">
-        <button 
+  
+    <!-- Conditionally Rendered Buttons for 'Waiting for payment' and 'Pending' Status -->
+    <ng-container *ngIf="selectedBooking?.bookingStatus === 'Waiting for payment'">
+      <button 
         type="button" 
         class="btn btn-outline-success btn-sm" 
-        (click)="payForBooking(selectedBooking._id, selectedBooking.amount, selectedBooking.accommodationType)">
+        (click)="payForBooking(selectedBooking._id, selectedBooking.amount, 'Accommodation')">
         <i class="fas fa-check-circle me-2"></i>Pay Now
       </button>
-      
-        <button type="button" class="btn btn-outline-danger btn-sm" (click)="cancelBooking(selectedBooking)">
-            <i class="fas fa-times-circle me-2"></i>Cancel Booking
-        </button>
     </ng-container>
-</div>
+  
+    <ng-container *ngIf="['Pending', 'Waiting for payment'].includes(selectedBooking?.bookingStatus)">
+      <button 
+        type="button" 
+        class="btn btn-outline-danger btn-sm" 
+        (click)="cancelBooking(selectedBooking)">
+        <i class="fas fa-times-circle me-2"></i>Cancel Booking
+      </button>
+    </ng-container>
+  </div>
+  
 
         </div>
     </div>

@@ -51,6 +51,11 @@ export class BookingService {
           userId,
       });
     }
+
+      // Method to update booking status
+  updateBookingStatus(bookingId: string, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/status/update/${bookingId}`, { bookingStatus: status });
+  }
     
     
 }

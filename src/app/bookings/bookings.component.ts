@@ -80,10 +80,17 @@ export class BookingsComponent implements OnInit {
 
   filterBookings(status: string): void {
     this.selectedStatus = status;
-    this.filteredBookings = this.bookings.filter(booking => 
-      booking.bookingStatus === status
-    );
+  
+    this.filteredBookings = this.bookings
+      .filter(booking =>
+        status === 'Pending'
+          ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
+          : booking.bookingStatus === status
+      )
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
+  
+  
 
   openBookingModal(index: number): void {
     this.selectedBooking = this.filteredBookings[index];
@@ -102,11 +109,20 @@ export class BookingsComponent implements OnInit {
         if (response.token) {
             window.snap.pay(response.token, {
                 onSuccess: (result: any) => {
-                    alert('Payment successful!');
                     this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
-                        () => alert('Booking status updated in the system.'),
-                        (error) => console.error('Failed to update booking status:', error)
-                    );
+                      () => Swal.fire({
+                          icon: 'success',
+                          title: 'Payment successful!',
+                          text: 'We will let the provider know. Please wait for verification.'
+                      }),
+                      (error) => Swal.fire({
+                          icon: 'error',
+                          title: 'Error',
+                          text: 'Failed to update booking status. Please try again later.'
+                      })
+                  );
+                  
+                    this.loadAccommodationBookings();
                 },
                 // Handle other payment responses...
             });

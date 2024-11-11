@@ -39,11 +39,11 @@ export class ManageBookingsComponent implements OnInit {
   ngOnInit(): void {
     this.serviceId = this.route.snapshot.paramMap.get('serviceId');
     if (this.serviceId) {
-      this.loadBookings();
+      this.loadAccommodationBookings();
     }
   }
 
-  loadBookings(): void {
+  loadAccommodationBookings(): void {
     this.bookingService.getAccommodationBookingsByServiceId(this.serviceId).subscribe(
       (bookings) => {
         this.bookings = bookings;
@@ -59,10 +59,11 @@ export class ManageBookingsComponent implements OnInit {
 
   filterBookings(status: string): void {
     this.selectedStatus = status;
-    this.filteredBookings = this.bookings.filter(booking => 
-      booking.bookingStatus === status
-    );
+    this.filteredBookings = this.bookings
+      .filter(booking => booking.bookingStatus === status)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
+  
 
   openBookingModal(index: number): void {
     this.selectedBooking = this.filteredBookings[index];
@@ -73,9 +74,37 @@ export class ManageBookingsComponent implements OnInit {
   }
 
   verifyBooking(booking: any): void {
-    // Logic to verify the booking, e.g., update status, call API, etc.
     console.log('Verifying booking:', booking);
-}
+  
+    this.bookingService.updateBookingStatus(booking._id, 'Booked')
+      .subscribe(
+        (response) => {
+          console.log('Booking status updated to Booked:', response);
+          booking.bookingStatus = 'Booked'; // Update the status locally if needed
+  
+          // Show success message with SweetAlert2
+          Swal.fire({
+            icon: 'success',
+            title: 'Booking Successful!',
+            text: 'The booking status has been updated to Booked successfully.',
+            confirmButtonColor: '#3085d6',
+          });
+        },
+        (error) => {
+          console.error('Failed to update booking status:', error);
+  
+          // Show error message with SweetAlert2 if update fails
+          Swal.fire({
+            icon: 'error',
+            title: 'Update Failed',
+            text: 'Failed to update the booking status. Please try again.',
+            confirmButtonColor: '#d33',
+          });
+        }
+      );
+  }
+  
+  
 
 cancelBooking(booking: any): void {
     // Logic to cancel the booking, e.g., update status, call API, etc.

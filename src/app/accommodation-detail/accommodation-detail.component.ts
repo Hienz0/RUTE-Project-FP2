@@ -486,7 +486,7 @@ onCheckOutDateChange(date: Date): void {
                   // Redirect to accommodation-booking-detail page with the booking ID
                   const bookingId = response.booking._id;
                   // Assume response contains bookingId
-      this.router.navigate([`/accommodation-booking-detail/${bookingId}`]);
+      this.router.navigate([`/bookings/${bookingId}`]);
           },
           (error) => {
             Swal.fire({
