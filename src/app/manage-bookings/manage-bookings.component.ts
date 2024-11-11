@@ -59,9 +59,14 @@ export class ManageBookingsComponent implements OnInit {
 
   filterBookings(status: string): void {
     this.selectedStatus = status;
+  
     this.filteredBookings = this.bookings
-      .filter(booking => booking.bookingStatus === status)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        .filter(booking =>
+            status === 'Canceled'
+                ? ['Canceled by Traveller', 'Canceled by Provider'].includes(booking.bookingStatus)
+                : booking.bookingStatus === status
+        )
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
   
 
@@ -72,6 +77,23 @@ export class ManageBookingsComponent implements OnInit {
     const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
     modal.show();
   }
+
+  closeBookingModal(): void {
+    // Ensure the modal element and instance are defined
+    if (this.bookingModal && this.bookingModal.nativeElement) {
+        const modalElement = this.bookingModal.nativeElement;
+        const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+
+        // Hide the modal using the instance
+        modalInstance.hide();
+
+        // Manually remove the backdrop if it persists
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    }
+}
 
   verifyBooking(booking: any): void {
     console.log('Verifying booking:', booking);
@@ -85,11 +107,12 @@ export class ManageBookingsComponent implements OnInit {
           // Show success message with SweetAlert2
           Swal.fire({
             icon: 'success',
-            title: 'Booking Successful!',
-            text: 'The booking status has been updated to Booked successfully.',
+            title: 'Verification Successful!',
+            text: 'The booking verified successfully.',
             confirmButtonColor: '#3085d6',
           });
       this.loadAccommodationBookings();
+      this.closeBookingModal(); // Close the modal
 
         },
         (error) => {
@@ -108,9 +131,33 @@ export class ManageBookingsComponent implements OnInit {
   
   
 
-cancelBooking(booking: any): void {
-    // Logic to cancel the booking, e.g., update status, call API, etc.
-    console.log('Cancelling booking:', booking);
+  cancelBooking(booking: any): void {
+    const userType = 'Provider';
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to cancel this booking?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it'
+    }).then((result: any) => {
+        if (result.isConfirmed) {
+            this.bookingService.cancelBooking(booking._id, userType).subscribe({
+                next: () => {
+                    this.loadAccommodationBookings();
+                    this.closeBookingModal(); // Close the modal
+                },
+                error: (error) => {
+                    console.error('Error canceling booking:', error);
+                    Swal.fire('Error', 'Failed to cancel booking', 'error');
+                }
+            });
+        }
+    });
 }
+
 
 }

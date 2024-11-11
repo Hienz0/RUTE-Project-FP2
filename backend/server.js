@@ -351,6 +351,41 @@ app.put('/api/bookings/status/update/:id', async (req, res) => {
   }
 });
 
+app.put('/api/bookings/cancel', async (req, res) => {
+  const { bookingId, userType } = req.body;
+
+  // Determine the new booking status based on the user type
+  let newStatus;
+  if (userType === 'Traveller') {
+      newStatus = 'Canceled by Traveller';
+  } else if (userType === 'Provider') {
+      newStatus = 'Canceled by Provider';
+  } else {
+      return res.status(400).json({ message: 'Invalid user type' });
+  }
+
+  try {
+      // Update the booking status
+      const updatedBooking = await Booking.findByIdAndUpdate(
+          bookingId,
+          { bookingStatus: newStatus },
+          { new: true }
+      );
+
+      if (!updatedBooking) {
+          return res.status(404).json({ message: 'Booking not found' });
+      }
+
+      res.status(200).json({
+          message: 'Booking canceled successfully',
+          booking: updatedBooking
+      });
+  } catch (error) {
+      console.error('Error canceling booking:', error);
+      res.status(500).json({ message: 'Failed to cancel booking' });
+  }
+});
+
 
 
 // Route to check room availability for specific dates

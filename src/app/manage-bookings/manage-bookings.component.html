@@ -79,7 +79,7 @@
                                                 'bg-success': booking.bookingStatus === 'Booked',
                                                 'bg-warning': booking.bookingStatus === 'Pending',
                                                 'bg-secondary': booking.bookingStatus === 'Complete',
-                                                'bg-danger': booking.bookingStatus === 'Canceled'
+                                                'bg-danger': booking.bookingStatus === 'Canceled by Traveller' || booking.bookingStatus === 'Canceled by Provider',
                                             }">
                                                 {{ booking.bookingStatus }}
                                             </span>
@@ -171,9 +171,10 @@
                         <span class="ms-auto">
                             <span class="badge rounded-pill" [ngClass]="{
                                 'bg-success': selectedBooking?.bookingStatus === 'Booked',
-                                'bg-warning': selectedBooking?.bookingStatus === 'CheckedIn',
-                                'bg-secondary': selectedBooking?.bookingStatus === 'CheckedOut',
-                                'bg-danger': selectedBooking?.bookingStatus === 'Cancelled'
+                                'bg-danger': selectedBooking?.bookingStatus === 'Canceled by Traveller' || selectedBooking?.bookingStatus === 'Canceled by Provider',
+                                'bg-primary': selectedBooking?.bookingStatus === 'Waiting for payment', 
+                                'bg-warning': selectedBooking?.bookingStatus === 'Pending',
+                                'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
                             }">
                                 {{ selectedBooking?.bookingStatus }}
                             </span>

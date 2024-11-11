@@ -57,5 +57,14 @@ export class BookingService {
     return this.http.put(`${this.apiUrl}/status/update/${bookingId}`, { bookingStatus: status });
   }
     
+    // Method to cancel a booking
+    cancelBooking(bookingId: string, userType: string): Observable<any> {
+      const requestBody = {
+          bookingId,
+          userType
+      };
+      return this.http.put(`${this.apiUrl}/cancel`, requestBody);
+  }
+
     
 }

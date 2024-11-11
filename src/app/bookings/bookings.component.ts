@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 
 declare const Swal: any;
@@ -43,7 +44,8 @@ export class BookingsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private bookingService: BookingService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
 
   ) {}
 
@@ -76,6 +78,7 @@ loadAccommodationBookings(): void {
 
       // Filter bookings after loading
       this.filterBookings(this.selectedStatus);
+      console.log('Filtered Bookings:', this.filteredBookings);
 
       // Delay to ensure filteredBookings is fully populated before searching for a match
       setTimeout(() => {
@@ -94,17 +97,21 @@ loadAccommodationBookings(): void {
   
 
 
-  filterBookings(status: string): void {
-    this.selectedStatus = status;
-  
-    this.filteredBookings = this.bookings
+filterBookings(status: string): void {
+  this.selectedStatus = status;
+
+  this.filteredBookings = this.bookings
       .filter(booking =>
-        status === 'Pending'
-          ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
-          : booking.bookingStatus === status
+          status === 'Pending'
+              ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
+              : status === 'Canceled'
+              ? ['Canceled by Traveller', 'Canceled by Provider'].includes(booking.bookingStatus)
+              : booking.bookingStatus === status
       )
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }
+      this.cdr.detectChanges();
+}
+
   
   
 
@@ -117,20 +124,23 @@ loadAccommodationBookings(): void {
     modal.show();
   }
 
+
   closeBookingModal(): void {
-    // Ensure the modal is defined and close it
-    if (this.bookingModal) {
-      const modal = new bootstrap.Modal(this.bookingModal.nativeElement, {
-        backdrop: 'static' // or you can set it to 'false' if you want to disable the backdrop
-      });
-      modal.hide();
-      // Manually remove the backdrop if it's still there
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) {
-        backdrop.remove();
-      }
+    // Ensure the modal element and instance are defined
+    if (this.bookingModal && this.bookingModal.nativeElement) {
+        const modalElement = this.bookingModal.nativeElement;
+        const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+
+        // Hide the modal using the instance
+        modalInstance.hide();
+
+        // Manually remove the backdrop if it persists
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
     }
-  }
+}
   
 
   payForBooking(bookingId: string, amount: number, bookingType: string): void {
@@ -143,22 +153,15 @@ loadAccommodationBookings(): void {
             window.snap.pay(response.token, {
                 onSuccess: (result: any) => {
                     this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
-                      () => Swal.fire({
-                          icon: 'success',
-                          title: 'Payment successful!',
-                          text: 'We will let the provider know. Please wait for verification.'
-                      }),
-                      (error) => Swal.fire({
-                          icon: 'error',
-                          title: 'Error',
-                          text: 'Failed to update booking status. Please try again later.'
-                      })
+                      () => {
+                        console.log('testing masuk')
+                        this.loadAccommodationBookings();
+                        this.closeBookingModal();
+                        this.cdr.detectChanges();
+                    }
                   );
                   
-                    this.loadAccommodationBookings();
-                                    // Close the modal after payment is processed
-                const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
-                this.closeBookingModal(); // Close the modal
+
                 },
                 // Handle other payment responses...
             });
@@ -168,9 +171,32 @@ loadAccommodationBookings(): void {
     });
   }
 
-cancelBooking(booking: any): void {
-    // Logic to cancel the booking, e.g., update status, call API, etc.
-    console.log('Cancelling booking:', booking);
+  cancelBooking(booking: any): void {
+    const userType = 'Traveller';
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to cancel this booking?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it'
+    }).then((result: any) => {
+        if (result.isConfirmed) {
+            this.bookingService.cancelBooking(booking._id, userType).subscribe({
+                next: () => {
+                    this.loadAccommodationBookings();
+                },
+                error: (error) => {
+                    console.error('Error canceling booking:', error);
+                    Swal.fire('Error', 'Failed to cancel booking', 'error');
+                }
+            });
+        }
+    });
 }
+
 
 }
