@@ -40,9 +40,10 @@ export class BookingService {
       return this.http.get<any[]>(`${this.apiUrl}/accommodation/${serviceId}`);
     }
 
-    getAccommodationBookingsByUserId(userId: string | null): Observable<any[]> {
-      return this.http.get<any[]>(`${this.apiUrl}/accommodation/user/${userId}`);
+    getAccommodationBookingsByUserId(userId: string | null): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/accommodation/user/${userId}`);
     }
+    
 
     updatePaymentStatus(bookingId: string, bookingType: string): Observable<any> {
       return this.http.post<any>('http://localhost:3000/api/payments/update-status', { bookingId, bookingType });
@@ -69,6 +70,7 @@ export class BookingService {
       };
       return this.http.put(`${this.apiUrl}/cancel`, requestBody);
   }
+  
 
     
 }

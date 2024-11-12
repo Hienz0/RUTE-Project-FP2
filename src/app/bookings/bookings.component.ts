@@ -31,6 +31,7 @@ export class BookingsComponent implements OnInit {
   bookings: any[] = [];
   filteredBookings: any[] = [];
   selectedStatus: string = 'Pending'; // Default to Pending
+  selectedBookingType: string = ''; // Default to Pending
   @ViewChild('bookingModal', { static: true }) bookingModal!: ElementRef;
   selectedBooking: any | null = null;
 
@@ -58,7 +59,7 @@ export class BookingsComponent implements OnInit {
       console.log('User ID:', this.userId);
   
       // Ensure loadBookings is called after userId is assigned
-      this.loadAccommodationBookings();
+      this.loadAllBookings();
 
       this.bookingId = this.route.snapshot.paramMap.get('userId');
       console.log('Booking ID:', this.bookingId);
@@ -69,60 +70,80 @@ export class BookingsComponent implements OnInit {
   }
   
 
-loadAccommodationBookings(): void {
-  console.log('Loading bookings...');
-  this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
-    (bookings) => {
-      this.bookings = bookings;
-      console.log('Bookings:', this.bookings);
+  loadAllBookings(): void {
+    console.log('Loading all bookings...');
+    
+    this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
+      (response) => {
+        // Assuming 'response' contains the three booking categories
+        const { accommodationBookings, tourBookings, vehicleBookings } = response;
+    
+        // Combine all booking types into one array
+        this.bookings = [
+          ...accommodationBookings,
+          ...tourBookings,
+          ...vehicleBookings
+        ];
+        console.log('All Bookings:', this.bookings);
 
-      // Filter bookings after loading
-      this.filterBookings(this.selectedStatus);
-      console.log('Filtered Bookings:', this.filteredBookings);
-
-      // Delay to ensure filteredBookings is fully populated before searching for a match
-      setTimeout(() => {
-        const matchingIndex = this.filteredBookings.findIndex(booking => booking._id === this.bookingId);
-        if (matchingIndex !== -1) {
-          this.openBookingModal(matchingIndex);
-        }
-      });
-    },
-    (error) => {
-      console.error('Error loading bookings:', error);
-    }
-  );
-}
+        console.log('vadv', tourBookings)
+    
+        // Filter bookings after combining them
+        this.filterBookings(this.selectedStatus);
+        console.log('Filtered Bookings:', this.filteredBookings);
+    
+        // Delay to ensure filteredBookings is fully populated before searching for a match
+        setTimeout(() => {
+          const matchingIndex = this.filteredBookings.findIndex(booking => booking._id === this.bookingId);
+          if (matchingIndex !== -1) {
+            this.openBookingModal(matchingIndex);
+          }
+        });
+      },
+      (error) => {
+        console.error('Error loading bookings:', error);
+      }
+    );
+  }
   
+  filterBookings(status: string): void {
+    this.selectedStatus = status;
   
-
-
-filterBookings(status: string): void {
-  this.selectedStatus = status;
-
-  this.filteredBookings = this.bookings
+    this.filteredBookings = this.bookings
       .filter(booking =>
-          status === 'Pending'
-              ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
-              : status === 'Canceled'
-              ? ['Canceled by Traveller', 'Canceled by Provider'].includes(booking.bookingStatus)
-              : booking.bookingStatus === status
+        status === 'Pending'
+          ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
+          : status === 'Canceled'
+          ? ['Canceled by Traveller', 'Canceled by Provider'].includes(booking.bookingStatus)
+          : booking.bookingStatus === status
       )
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      this.cdr.detectChanges();
-}
+  
+    this.cdr.detectChanges();
+  }
+  
 
   
   
 
   openBookingModal(index: number): void {
-    console.log('modal called');
+    console.log('Opening booking modal');
     this.selectedBooking = this.filteredBookings[index];
-    
-    // Use Bootstrap's modal API to open the modal
+  
+    // Determine the booking type based on available fields
+    if (this.selectedBooking.accommodationType) {
+      this.selectedBookingType = 'Accommodation';
+    } else if (this.selectedBooking.vehicleBooking) {
+      this.selectedBookingType = 'Vehicle';
+    } else if (this.selectedBooking.tourName) {
+      this.selectedBookingType = 'Tour';
+    }
+  
+    // Open the modal using Bootstrap's API
     const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
     modal.show();
   }
+  
 
 
   closeBookingModal(): void {
@@ -155,7 +176,7 @@ filterBookings(status: string): void {
                     this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
                       () => {
                         console.log('testing masuk')
-                        this.loadAccommodationBookings();
+                        this.loadAllBookings();
                         this.closeBookingModal();
                         this.cdr.detectChanges();
                     }
@@ -187,7 +208,7 @@ filterBookings(status: string): void {
         if (result.isConfirmed) {
             this.bookingService.cancelBooking(booking._id, userType).subscribe({
                 next: () => {
-                    this.loadAccommodationBookings();
+                    this.loadAllBookings();
                     this.closeBookingModal();
                 },
                 error: (error) => {

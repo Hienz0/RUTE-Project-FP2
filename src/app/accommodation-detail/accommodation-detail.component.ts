@@ -525,7 +525,6 @@ onCheckOutDateChange(date: Date): void {
     );
   }
   
-  
 
   // Function to show image preview
   // Function to show image preview and open the modal
