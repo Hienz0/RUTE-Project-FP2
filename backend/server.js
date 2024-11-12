@@ -222,7 +222,7 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
     const bookings = await Booking.find({
       serviceId: serviceId,
       roomTypeId: roomTypeId,
-      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] }
     }, 'checkInDate checkOutDate roomId');
 
     // Count bookings per date
@@ -431,7 +431,7 @@ app.get('/api/bookings/check-availability', async (req, res) => {
     const overlappingBookings = await Booking.find({
       serviceId,
       roomNumber,
-      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] },
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] },
       $or: [
         { 
           checkInDate: { $lt: checkOut },
@@ -720,7 +720,7 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
 
       const overlappingBooking = await Booking.findOne({
         roomId: room._id,
-        bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }, // Exclude specific canceled bookings
+        bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] }, // Exclude specific canceled bookings
         $or: [
           {
             checkInDate: { $lte: checkOut }, // Prevents booking if check-in date <= new check-out
