@@ -216,8 +216,12 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
       return res.json([]); // No rooms available, no dates to lock
     }
 
-    // Find bookings for the specified service and room type
-    const bookings = await Booking.find({ serviceId: serviceId, roomTypeId: roomTypeId }, 'checkInDate checkOutDate roomId');
+    // Find bookings for the specified service and room type, excluding canceled bookings
+    const bookings = await Booking.find({
+      serviceId: serviceId,
+      roomTypeId: roomTypeId,
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }
+    }, 'checkInDate checkOutDate roomId');
 
     // Count bookings per date
     const dateCounts = {};
@@ -244,6 +248,7 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
     res.status(500).json({ message: 'Error fetching booked dates' });
   }
 });
+
 
 
 
@@ -420,10 +425,11 @@ app.get('/api/bookings/check-availability', async (req, res) => {
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
-    // Find overlapping bookings for the specified room and dates, allowing for a one-day gap
+    // Find overlapping bookings for the specified room and dates, excluding canceled bookings
     const overlappingBookings = await Booking.find({
       serviceId,
       roomNumber,
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] },
       $or: [
         { 
           checkInDate: { $lt: checkOut },
@@ -712,7 +718,7 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
 
       const overlappingBooking = await Booking.findOne({
         roomId: room._id,
-        bookingStatus: { $ne: 'Cancelled' }, // Exclude cancelled bookings
+        bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }, // Exclude specific canceled bookings
         $or: [
           {
             checkInDate: { $lte: checkOut }, // Prevents booking if check-in date <= new check-out
@@ -745,6 +751,7 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
     res.status(500).json({ message: 'Error finding available room', error });
   }
 });
+
 
 
 // Get booking by ID

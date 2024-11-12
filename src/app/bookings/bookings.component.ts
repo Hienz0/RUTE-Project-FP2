@@ -188,6 +188,7 @@ filterBookings(status: string): void {
             this.bookingService.cancelBooking(booking._id, userType).subscribe({
                 next: () => {
                     this.loadAccommodationBookings();
+                    this.closeBookingModal();
                 },
                 error: (error) => {
                     console.error('Error canceling booking:', error);
