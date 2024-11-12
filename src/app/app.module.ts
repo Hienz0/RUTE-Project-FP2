@@ -40,6 +40,12 @@ import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-gui
 import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
 import { ManageTourComponent } from './manage-tour/manage-tour.component';
 import { PaymentListComponent } from './payment-list/payment-list.component';
+import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
+import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
+import { BookTransportationComponent } from './book-transportation/book-transportation.component';
+
+import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
+import { RateServicesComponent } from './rate-services/rate-services.component';
 
 @NgModule({
   declarations: [
@@ -69,7 +75,12 @@ import { PaymentListComponent } from './payment-list/payment-list.component';
     BookingTourGuideComponent,
     BookingTourGuideDetailComponent,
     ManageTourComponent,
-    PaymentListComponent
+    PaymentListComponent,
+    CustomizeProfileComponent,
+    TransportationServicesComponent,
+    BookTransportationComponent,
+    ManageTransportationComponent,
+    RateServicesComponent
   ],
   imports: [
     BrowserModule,

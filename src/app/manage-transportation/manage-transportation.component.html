@@ -1,0 +1,145 @@
+<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
+  <h1 class="text-center mb-5" style="color: #343a40;">Transportation Management</h1>
+
+  <!-- Transportation Details Display or Edit Form -->
+  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+    <div class="card-body">
+      <div *ngIf="!isEditing">
+        <h3><i class="fas fa-bus icon"></i> {{ productName }}</h3>
+        <p class="text-muted">{{ productDescription }}</p>
+        <img [src]="productImages" class="img-fluid rounded mb-4" alt="Transportation Image" />
+        <p>
+          <i class="fas fa-map-marker-alt icon"></i>
+          <strong> Location:</strong>
+          <span id="location-address">{{ location }}</span>
+        </p>
+        
+        <button class="btn btn-primary mt-3" (click)="toggleEdit()">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+      </div>
+
+      <!-- Edit Transportation Details Form with Existing Values in Inputs -->
+      <div *ngIf="isEditing">
+        <h3><i class="fas fa-pencil-alt icon"></i> Edit Transportation Details</h3>
+        <div class="form-group mb-3">
+          <label for="transportationName"><i class="fas fa-building icon"></i> Name</label>
+          <input type="text" class="form-control" id="transportationName" [(ngModel)]="productName" required />
+        </div>
+        <div class="form-group mb-3">
+          <label for="transportationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
+          <textarea class="form-control" id="transportationDescription" [(ngModel)]="productDescription" rows="3"></textarea>
+        </div>
+        <div class="form-group mb-3">
+          <label for="transportationImage"><i class="fas fa-image icon"></i> Image URL</label>
+          <input type="text" class="form-control" id="transportationImage" [(ngModel)]="productImages" />
+        </div>
+        <!-- Pickup Location -->
+        <div class="mb-3">
+          <label for="pickupLocation" class="form-label">
+            Pickup Location <span style="color: red">*</span>
+          </label>
+
+          <!-- Pickup Map -->
+          <!-- HTML File -->
+        <div #pickupMapContainer id="pickupMap" style="height: 400px;"></div>
+
+
+
+          <!-- Pickup Address Input -->
+          <input
+            type="text"
+            id="pickupAddress"
+            [(ngModel)]="pickupAddress"
+            name="pickupAddress"
+            class="form-control"
+            placeholder="Pickup address"
+            readonly
+            required
+          />
+
+          
+        </div>
+        <button class="btn btn-primary mt-3" (click)="saveTransportation()">
+          <i class="fas fa-save"></i> Save
+        </button>
+        <button class="btn btn-secondary mt-3" (click)="toggleEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle Types Section -->
+<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card-body">
+    <h3><i class="fas fa-car icon"></i> Vehicle Types</h3>
+    
+    <!-- Existing Vehicle Types -->
+    <div *ngFor="let vehicleType of displayedProductSubCategories; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-car"></i> Existing Vehicle Type {{ i + 1 }}</h5>
+        <button class="btn btn-danger btn-sm" (click)="removeVehicleType(i, true)"><i class="fas fa-trash-alt"></i> Delete</button>
+      </div>
+
+      <div class="form-group mb-2">
+        <label for="vehicleTypeName"><i class="fas fa-car icon"></i> Vehicle Type Name</label>
+        <input type="text" class="form-control" [(ngModel)]="vehicleType.name" placeholder="Enter vehicle type name" />
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehicleCategory"><i class="fas fa-list icon"></i> Vehicle Category</label>
+        <select class="form-control" [(ngModel)]="vehicleType.type">
+          <option value="motorcycle">Motorcycle</option>
+          <option value="car">Car</option>
+          <option value="bicycle">Bicycle</option>
+        </select>
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehicleQuantity"><i class="fas fa-hashtag icon"></i> Quantity</label>
+        <input type="number" class="form-control" [(ngModel)]="vehicleType.quantity" placeholder="Enter quantity" />
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehiclePrice"><i class="fas fa-dollar-sign icon"></i> Price</label>
+        <input type="number" class="form-control" [(ngModel)]="vehicleType.price" placeholder="Enter price for this vehicle type" />
+      </div>
+    </div>
+
+    <!-- Add New Vehicle Types -->
+    <button class="btn btn-secondary mt-3" (click)="addVehicleType()">
+      <i class="fas fa-plus-circle"></i> Add Vehicle Type
+    </button>
+
+    <div *ngFor="let vehicleType of newProductSubCategory; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-car"></i> New Vehicle Type {{ i + 1 }}</h5>
+        <button class="btn btn-danger btn-sm" (click)="removeVehicleType(i, false)"><i class="fas fa-trash-alt"></i> Delete</button>
+      </div>
+
+      <div class="form-group mb-2">
+        <label for="vehicleTypeName"><i class="fas fa-car icon"></i> Vehicle Type Name</label>
+        <input type="text" class="form-control" [(ngModel)]="vehicleType.name" placeholder="Enter vehicle type name" />
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehicleCategory"><i class="fas fa-list icon"></i> Vehicle Category</label>
+        <select class="form-control" [(ngModel)]="vehicleType.type">
+          <option value="motorcycle">Motorcycle</option>
+          <option value="car">Car</option>
+          <option value="bicycle">Bicycle</option>
+        </select>
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehicleQuantity"><i class="fas fa-hashtag icon"></i> Quantity</label>
+        <input type="number" class="form-control" [(ngModel)]="vehicleType.quantity" placeholder="Enter quantity" />
+      </div>
+      <div class="form-group mb-2">
+        <label for="vehiclePrice"><i class="fas fa-dollar-sign icon"></i> Price</label>
+        <input type="number" class="form-control" [(ngModel)]="vehicleType.price" placeholder="Enter price for this vehicle type" />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Publish Button -->
+  <button class="btn btn-success mt-4" (click)="publishTransportation()">
+    <i class="fas fa-cloud-upload-alt"></i> Publish
+  </button>
+</div>

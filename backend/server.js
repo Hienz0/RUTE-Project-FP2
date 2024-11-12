@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { type } = require('os');
 const fs = require('fs');
+const cron = require('node-cron');
 
 const app = express();
 const PORT = 3000;
@@ -1159,94 +1160,9 @@ app.get('/api/services/bookings/user/:userId', async (req, res) => {
 
 
 ///////////
-// book transportation
-
-// Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
-const bookingVehicleSchema = new mongoose.Schema({
-    customerName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    vehicleType: {
-        type: String,
-        required: true,
-        enum: ['Car', 'Motorcycle']  // Restrict to car or motorcycle
-    },
-    vehicleModel: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    licensePlate: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    withDriver: {
-        type: Boolean,
-        required: true,  // Indicates whether the vehicle is rented with a driver
-        default: false
-    },
-    driverName: {
-        type: String,
-        trim: true,
-        required: function () {
-            return this.withDriver === true; // Only required if `withDriver` is true
-        }
-    },
-    pickupLocation: {
-        type: String,
-        trim: true,
-        required: function () {
-            return this.withDriver === true; // Only required if `withDriver` is true
-        }
-    },
-    dropoffLocation: {
-        type: String,
-        trim: true,
-        required: function () {
-            return this.withDriver === true; // Only required if `withDriver` is true
-        }
-    },
-    vehiclePickupLocation: {
-        type: String,
-        trim: true,
-        required: function () {
-            return this.withDriver === false; // Only required if `withDriver` is false (rental)
-        }
-    },
-    pickupDate: {
-        type: Date,
-        required: true
-    },
-    dropoffDate: {
-        type: Date,
-        required: true
-    },
-    rentalDuration: {
-        type: Number,
-        required: true  // Duration in hours or days
-    },
-    specialRequest: {
-        type: String,
-        trim: true
-    },
-    bookingStatus: {
-        type: String,
-        default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-        enum: ['Booked', 'Cancelled', 'Completed']
-    }
-}, { timestamps: true });
-
-// Create the Booking model
-const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
-
-module.exports = VehicleBooking;
 
 // ///////////
 
-//add admin account
 
 // Add admin account
 const adminData = {
@@ -1420,169 +1336,6 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
 });
 
 
-// app.post('/register-provider', authMiddleware, upload.fields([{ name: 'businessLicense' }, { name: 'imageSelf' }, { name: 'imageService' }]), async (req, res) => {
-//   const { businessName, businessLocation, businessDesc } = req.body;
-//   const name = req.user.name;
-//   const email = req.user.email;
-
-//   try {
-//     const newProvider = new Provider({
-//       name,
-//       email,
-//       businessName,
-//       businessLocation,
-//       businessDesc,
-//       businessLicense: req.files['businessLicense'][0].path,
-//       imageSelf: req.files['imageSelf'][0].path,
-//       imageService: req.files['imageService'][0].path
-//     });
-
-//     await newProvider.save();
-//     res.status(201).json({ message: 'Provider registration submitted successfully.' });
-//   } catch (error) {
-//     console.error('Error registering provider:', error);
-//     res.status(500).json({ message: 'Error registering provider.', error });
-//   }
-// });
-
-
-
-///////////////////////////////////////////////
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////
-//   const PendingProviderSchema = new Schema({
-//     userId: {
-//         type: Schema.Types.ObjectId,
-//         ref: 'User',
-//         required: true
-//     },
-//     userName: {
-//         type: String,
-//         required: true
-//     },
-//     businessName: {
-//         type: String,
-//         required: true
-//     },
-//     businessLocation: {
-//         type: String,
-//         required: true
-//     },
-//     businessDescription: {
-//         type: String,
-//         required: true
-//     },
-//     businessLicenseFile: {
-//         type: String, // Store the file path or URL
-//         required: true
-//     }
-// }, {
-//     timestamps: true
-// });
-
-// const PendingProvider = mongoose.model('PendingProvider', PendingProviderSchema);
-
-
-
-
-
-
-
-
-// // Provider registration route
-// app.post('/register-provider', authMiddleware, async (req, res) => {
-//     const { businessName, businessLocation, businessDescription, businessLicenseFile } = req.body;
-//     const userId = req.user.userId;
-//     const userName = req.user.name;
-  
-//     console.log('Received provider registration:', {
-//       userId,
-//       userName,
-//       businessName,
-//       businessLocation,
-//       businessDescription,
-//       businessLicenseFile
-//     });
-  
-//     try {
-//       const newProvider = new PendingProvider({
-//         userId,
-//         userName,
-//         businessName,
-//         businessLocation,
-//         businessDescription,
-//         businessLicenseFile
-//       });
-  
-//       await newProvider.save();
-//       console.log('Provider registration saved:', newProvider);
-//       res.status(201).json({ message: 'Provider registration submitted successfully.' });
-//     } catch (error) {
-//       console.error('Error registering provider:', error);
-//       res.status(500).json({ message: 'Error registering provider.', error });
-//     }
-//   });
-
-
-
-
-
-
-
-  
-  // Signup route
-  // Signup route
-// app.post('/signup', async (req, res) => {
-//     const { name, email, password } = req.body;
-  
-//     // Basic validation
-//     if (!name || !email || !password) {
-//       return res.status(400).json({ message: 'All fields are required' });
-//     }
-  
-//     // Log the received data
-//     console.log('Received data:', { name, email, password });
-  
-//     // Save the new user to the database
-//     try {
-//       const newUser = new User({ name, email, password, userType: 'user' });
-//       await newUser.save();
-//       console.log('User saved to database:', newUser);
-//       res.status(201).json({ message: 'User created successfully' });
-//     } catch (error) {
-//       console.error('Error creating user:', error);
-//       res.status(500).json({ message: 'Error creating user', error });
-//     }
-//   });
-
-// Signup route
-// app.post('/signup', async (req, res) => {
-//   const { name, email, password } = req.body;
-
-//   // Basic validation
-//   if (!name || !email || !password) {
-//     return res.status(400).json({ message: 'All fields are required' });
-//   }
-
-//   // Log the received data
-//   console.log('Received data:', { name, email, password });
-
-//   try {
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // Save the new user to the database
-//     const newUser = new User({ name, email, password: hashedPassword, userType: 'user' });
-//     await newUser.save();
-//     console.log('User saved to database:', newUser);
-//     res.status(201).json({ message: 'User created successfully' });
-//   } catch (error) {
-//     console.error('Error creating user:', error);
-//     res.status(500).json({ message: 'Error creating user', error });
-//   }
-// });
 
 // Signup route for creating a new RUTE account
 app.post('/signup', async (req, res) => {
@@ -1612,33 +1365,6 @@ app.post('/signup', async (req, res) => {
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// Signin route
-// app.post('/signin', async (req, res) => {
-//     const { email, password } = req.body;
-  
-//     // Log the received login data
-//     console.log('Received login data:', { email, password });
-  
-//     // Find the user by email
-//     const user = await User.findOne({ email });
-  
-//     // Check if the user exists and the password is correct
-//     if (!user || user.password !== password) {
-//       return res.status(401).json({ message: 'Invalid email or password' });
-//     }
-  
-//     // Generate a token
-//     const token = generateToken(user);
-  
-//     // Include user details in the response
-//     const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType } };
-//     console.log('Sending response:', response); // Debugging response from server
-//     res.status(200).json(response);
-//   });
 
 // Signin route to validate the user who will log in
 app.post('/signin', async (req, res) => {
@@ -1660,7 +1386,7 @@ app.post('/signin', async (req, res) => {
     const token = generateToken(user);
 
     // Include user details in the response
-    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType } };
+    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address } };
     console.log('Sending response:', response); // Debugging response from server
     res.status(200).json(response);
   } catch (error) {
@@ -1672,6 +1398,766 @@ app.post('/signin', async (req, res) => {
 
   //yuda
 //yuda
+// book transportation
+const transportationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  productName: { type: String, required: true },
+  productDescription: { type: String },
+  productImages: [{ type: String }],
+  productCategory: { type: String, required: true },
+  productSubcategory: [
+    {
+      name: {type: String},
+      type: { type: String, enum: ['car', 'motorcycle', 'bycycle'] },
+      quantity: { type: Number  },
+      price: { type: Number  }
+    }
+  ],
+  location: { type: String },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Transportation = mongoose.model('Transportation', transportationSchema);
+
+// get Transportation data by id
+// Get Transportation data by id including productSubcategory details
+app.get('/transportationService/:id', async (req, res) => {
+  try {
+    const transportId = req.params.id;
+
+    // Find the Service by _id
+    const service = await Service.findById(transportId);
+    if (!service) {
+      return res.status(404).json({ message: 'Provider not found' });
+    }
+
+    // Find Transportation documents that match the serviceId
+    const transportationData = await Transportation.findOne({ serviceId: transportId }).exec();
+
+    // Prepare the response object
+    const response = {
+      serviceDetails: service
+    };
+
+    // Add transportationData only if it exists
+    if (transportationData) {
+      response.transportationData = {
+        productSubcategory: transportationData.productSubcategory,
+      };
+    }
+
+    // Send the response
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error retrieving provider data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+app.post('/manage/transportation', async (req, res) => {
+  try {
+    const { userId, serviceId, productSubCategory } = req.body;
+    let { productName, productDescription, productImages, location } = req.body;
+
+    console.log('Request Data:', req.body);
+
+    // Verifikasi apakah user ada
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+    }
+
+    // Cari service berdasarkan ID
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Service tidak ditemukan' });
+    }
+
+    // Gunakan data service sebagai default jika field opsional tidak diisi
+    productName = productName || service.productName;
+    productDescription = productDescription || service.productDescription;
+    productImages = productImages || service.productImages;
+    location = location || service.location;
+
+    // Cek apakah transportation dengan serviceId ini sudah ada
+    let transportation = await Transportation.findOne({ serviceId: service._id });
+
+    // Siapkan data transportation
+    const transportationData = {
+      userId: user._id,
+      productName,
+      productDescription,
+      productImages,
+      productCategory: service.productCategory,
+      location,
+      serviceId: service._id,
+      productSubcategory: transportation ? transportation.productSubcategory : [],
+    };
+
+
+    console.log('Transportation Data:', productSubCategory);
+
+    // Proses update, add, atau delete pada productSubCategory
+    for (const newSubCategory of productSubCategory) {
+      const existingIndex = transportationData.productSubcategory.findIndex(
+        (existing) => existing._id?.toString() === newSubCategory._id?.toString()
+      );
+
+      if (newSubCategory.action === 'delete') {
+        // Hapus subkategori menggunakan splice jika ditemukan
+        if (existingIndex !== -1) {
+          transportationData.productSubcategory.splice(existingIndex, 1);
+        }
+      } else if (existingIndex !== -1) {
+        // Update subkategori jika sudah ada
+        transportationData.productSubcategory[existingIndex] = newSubCategory;
+      } else {
+        // Tambahkan subkategori baru
+        transportationData.productSubcategory.push(newSubCategory);
+      }
+    }
+
+    if (transportation) {
+      // Update dokumen transportation yang sudah ada
+      Object.assign(transportation, transportationData);
+      transportation.markModified('productSubcategory'); // Tandai array sebagai berubah
+      await transportation.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Transportation berhasil diperbarui',
+        data: transportation,
+      });
+    } else {
+      // Buat dan simpan transportation baru
+      const newTransportation = new Transportation(transportationData);
+      await newTransportation.save();
+
+      res.status(201).json({
+        success: true,
+        message: 'Transportation berhasil dibuat',
+        data: newTransportation,
+      });
+    }
+
+    // Update dokumen service jika ada perubahan
+    if (
+      productName !== service.productName ||
+      productDescription !== service.productDescription ||
+      JSON.stringify(productImages) !== JSON.stringify(service.productImages) ||
+      location !== service.location
+    ) {
+      service.productName = productName;
+      service.productDescription = productDescription;
+      service.productImages = productImages;
+      service.location = location;
+      service.status = 'published';
+      await service.save();
+    }
+  } catch (error) {
+    console.error('Error mengelola transportation:', error);
+    res.status(500).json({ success: false, message: 'Gagal mengelola transportation' });
+  }
+});
+
+
+
+
+
+
+
+app.get('/transportationService', async (req, res) => { 
+  try {
+    const transportationData = await Transportation.aggregate([
+      {
+        $lookup: {
+          from: 'services', // Name of the Service collection in MongoDB
+          localField: 'serviceId',
+          foreignField: '_id',
+          as: 'serviceDetails'
+        }
+      },
+      {
+        $unwind: '$serviceDetails' // Unwind to simplify accessing serviceDetails
+      },
+      {
+        $project: {
+          userId: 1,
+          productName: 1,
+          productDescription: 1,
+          productImages: 1,
+          productCategory: 1,
+          productSubcategory: 1,
+          location: 1,
+          createdAt: 1,
+          serviceId: 1,
+          averageRating: '$serviceDetails.averageRating', // Map average rating
+          totalReviews: '$serviceDetails.totalReviews'    // Map total reviews
+        }
+      }
+    ]);
+
+    res.json(transportationData);
+  } catch (error) {
+    console.error('Error retrieving transportation data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
+const bookingVehicleSchema = new mongoose.Schema({
+  customerName: {
+      type: String,
+      required: true,
+      trim: true
+  },
+  productName: {type: String, required: true},
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
+
+  vehicleBooking: [
+    {
+      name: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      quantity: {
+        type: Number,
+        required: true
+      },
+      selectedVehicleType:{
+        type: String,
+        required: true
+      },
+      pricePerVehicle: {
+        type: Number,
+        required: true
+      },
+      totalPrice: {
+        type: Number,
+        required: true
+      }
+    }
+  ],
+  vehicleDropoffLocation: {
+      type: String,
+      trim: true,
+  },
+  vehiclePickupLocation: {
+      type: String,
+      trim: true,
+  },
+  rentalDuration: {
+      type: Number,
+      required: true  // Duration in hours or days
+  },
+  pickupDate: {
+    type: Date, // Storing the pickup date
+    required: true
+  },
+  dropoffDate: {
+    type: Date, // Storing the dropoff date
+    required: true
+  },
+  specialRequest: {
+      type: String,
+      trim: true
+  },
+  bookingStatus: {
+      type: String,
+      default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+      enum: ['Booked', 'Cancelled', 'Completed']
+  }
+}, { timestamps: true });
+
+// Create the Booking model
+const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
+
+
+app.get('/transportationsDetails/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    
+    // Find a single transportation document matching the serviceId
+    const transportationData = await Transportation.findOne({ serviceId });
+
+    if (!transportationData) {
+      return res.status(404).json({ message: 'Transportation data not found for this service' });
+    }
+
+    res.json(transportationData);
+  } catch (error) {
+    console.error('Error retrieving transportation details:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+// 1. Function to check and update TourBooking status
+async function updateTourBookings() {
+  const today = new Date();
+  try {
+      const expiredTours = await TourBooking.find({
+          tourDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
+
+      if (expiredTours.length > 0) {
+          await TourBooking.updateMany(
+              { _id: { $in: expiredTours.map(tour => tour._id) } },
+              { $set: { bookingStatus: 'Completed' } }
+          );
+          console.log(`${expiredTours.length} tour bookings marked as Completed.`);
+      }
+  } catch (error) {
+      console.error('Error updating tour bookings:', error);
+  }
+}
+
+// 2. Function to check and update AccommodationBooking status
+async function updateAccommodationBookings() {
+  const today = new Date();
+  try {
+      const expiredAccommodations = await Booking.find({
+          checkOutDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
+
+      if (expiredAccommodations.length > 0) {
+          await Booking.updateMany(
+              { _id: { $in: expiredAccommodations.map(acc => acc._id) } },
+              { $set: { bookingStatus: 'CheckedOut' } }
+          );
+          console.log(`${expiredAccommodations.length} accommodation bookings marked as CheckedOut.`);
+      }
+  } catch (error) {
+      console.error('Error updating accommodation bookings:', error);
+  }
+}
+
+// 3. Function to check and update VehicleBooking status
+async function updateVehicleBookings() {
+  const today = new Date();
+  try {
+      const expiredVehicles = await VehicleBooking.find({
+          dropoffDate: { $lt: today },
+          bookingStatus: 'Booked'
+      });
+
+      if (expiredVehicles.length > 0) {
+          await VehicleBooking.updateMany(
+              { _id: { $in: expiredVehicles.map(veh => veh._id) } },
+              { $set: { bookingStatus: 'Completed' } }
+          );
+          console.log(`${expiredVehicles.length} vehicle bookings marked as Completed.`);
+      }
+  } catch (error) {
+      console.error('Error updating vehicle bookings:', error);
+  }
+}
+
+// Combined function to run all updates
+async function updateAllBookings() {
+  await updateTourBookings();
+  await updateAccommodationBookings();
+  await updateVehicleBookings();
+}
+
+updateAllBookings()
+
+cron.schedule('0 0 * * *', updateAllBookings);  // Runs every day at midnight
+
+
+
+// Route untuk booking transportasi
+app.post('/api/bookTransports', async (req, res) => {
+  console.log("Request received at /bookTransports");
+  
+  const {
+    serviceId,
+    userId,
+    pickupDate,
+    dropoffDate,
+    vehicleBooking,
+    specialRequest,
+    pickupLocation,
+    dropoffLocation,
+    totalBookingPrice
+  } = req.body;
+  
+  console.log("Booking Data:", {
+    serviceId,
+    userId,
+    pickupDate,
+    dropoffDate,
+    specialRequest,
+    pickupLocation,
+    dropoffLocation,
+    totalBookingPrice,
+    vehicleBooking
+  });
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const service = await Transportation.findOne({ serviceId: serviceId });
+
+    if (!service) {
+      console.log("Service not found");
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    if (!pickupDate || !dropoffDate) {
+      return res.status(400).json({ success: false, message: 'Pickup and Dropoff dates are required' });
+    }
+
+    const start = new Date(pickupDate);
+    const end = new Date(dropoffDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to 00:00 for date-only validation
+
+    if (start < today) {
+      return res.status(400).json({
+        success: false,
+        message: 'Booking for past dates is not allowed'
+      });
+    }
+
+    const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    if (rentalDuration <= 0) {
+      return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
+    }
+
+    // Loop through each vehicle in the booking to check quantity
+    for (const vehicle of vehicleBooking) {
+      const { name, quantity: requestedQuantity } = vehicle;
+
+      // Get the maximum quantity for this vehicle type in Transportation schema
+      const serviceVehicle = service.productSubcategory.find(v => v.name === name);
+      if (!serviceVehicle) {
+        return res.status(400).json({ success: false, message: `Vehicle ${name} not found in service.` });
+      }
+
+      // Check existing bookings for the same vehicle type
+      const existingBookings = await VehicleBooking.aggregate([
+        { $match: { serviceId: serviceId } },
+        { $unwind: "$vehicleBooking" },
+        { $match: {
+          "vehicleBooking.name": name,
+          $or: [
+            { pickupDate: { $lte: end, $gte: start } },
+            { dropoffDate: { $lte: end, $gte: start } },
+            { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
+          ]
+        }},
+        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" }}}
+      ]);
+
+      const totalBooked = existingBookings[0]?.totalBooked || 0;
+
+      // Check if the requested quantity exceeds the available quantity
+      if (totalBooked + requestedQuantity > serviceVehicle.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient quantity for ${name}. Only ${serviceVehicle.quantity - totalBooked} available.`
+        });
+      }
+    }
+
+    // If all checks pass, create the new booking
+    const newBooking = new VehicleBooking({
+      customerName: user.name,
+      productName: service.productName,
+      userId,
+      serviceId,
+      vehicleBooking,
+      vehiclePickupLocation: pickupLocation,
+      vehicleDropoffLocation: dropoffLocation,
+      rentalDuration,
+      pickupDate: start,
+      dropoffDate: end,
+      specialRequest,
+      bookingStatus: 'Booked',
+      totalBookingPrice
+    });
+
+    await newBooking.save();
+
+    // Add the booking to the user's booking history
+    user.bookingHistory.push({ bookingType: 'transportation', bookingId: newBooking._id });
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Transportation booked successfully!',
+      bookingDetails: newBooking
+    });
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+
+app.get('/api/bookedDates/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Dapatkan data transportation berdasarkan serviceId
+    const transportationData = await Transportation.findOne({ serviceId: id });
+    if (!transportationData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Data transportasi tidak ditemukan'
+      });
+    }
+
+    // Ambil data booking berdasarkan serviceId
+    const bookings = await VehicleBooking.find(
+      { serviceId: id },
+      'pickupDate dropoffDate vehicleBooking'
+    );
+
+    // Hitung jumlah kendaraan yang dipesan per tanggal
+    const dateCounts = {};
+    bookings.forEach(booking => {
+      booking.vehicleBooking.forEach(vehicle => {
+        let currentDate = new Date(booking.pickupDate);
+        const endDate = new Date(booking.dropoffDate);
+
+        // Iterasi setiap hari dari pickupDate ke dropoffDate
+        while (currentDate <= endDate) {
+          const dateString = currentDate.toISOString().split('T')[0]; // Format tanggal sebagai string
+          if (!dateCounts[dateString]) {
+            dateCounts[dateString] = 0;
+          }
+          dateCounts[dateString] += vehicle.quantity;
+
+          // Tambahkan satu hari
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      });
+    });
+
+    // Cari tanggal yang harus dinonaktifkan berdasarkan quantity di transportationData
+    const disabledDates = [];
+    for (const [date, count] of Object.entries(dateCounts)) {
+      if (count >= transportationData.productSubcategory.reduce((acc, item) => acc + item.quantity, 0)) {
+        disabledDates.push(date);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      disabledDates,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil tanggal yang sudah dibooking',
+      error: error.message
+    });
+  }
+});
+
+app.get('/remaining-quantity', async (req, res) => {
+  try {
+    const { serviceId, pickupDate, dropoffDate } = req.query;
+    const pickup = new Date(pickupDate);
+    const dropoff = new Date(dropoffDate);
+
+    // Ambil detail transportasi berdasarkan serviceId
+    const transportation = await Transportation.findOne({ serviceId });
+    if (!transportation) {
+      return res.status(404).json({ message: 'Layanan tidak ditemukan.' });
+    }
+
+    // Buat objek untuk menyimpan sisa kuantitas per subkategori
+    const availableQuantities = {};
+
+    // Iterasi setiap subkategori dalam productSubcategory
+    for (const subcategory of transportation.productSubcategory) {
+      // Inisialisasi kuantitas tersedia untuk setiap subkategori
+      let availableQuantity = subcategory.quantity || 0;
+
+      // Ambil pemesanan terkait dengan serviceId yang bertumpuk dengan tanggal yang dipilih
+      const bookings = await VehicleBooking.find({
+        serviceId,
+        bookingStatus: 'Booked',
+        $or: [
+          { pickupDate: { $lt: dropoff }, dropoffDate: { $gt: pickup } }
+        ],
+        'vehicleBooking.selectedVehicleType': subcategory.type
+      });
+
+      // Kurangi kuantitas berdasarkan pemesanan yang bertumpuk untuk tipe kendaraan spesifik
+      bookings.forEach((booking) => {
+        booking.vehicleBooking.forEach((vehicle) => {
+          if (vehicle.selectedVehicleType === subcategory.type) {
+            availableQuantity -= vehicle.quantity;
+          }
+        });
+      });
+
+      // Pastikan kuantitas tidak negatif
+      availableQuantities[subcategory._id] = Math.max(availableQuantity, 0);
+    }
+    console.log(availableQuantities);
+    res.json({ availableQuantities });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat menghitung sisa kuantitas.' });
+  }
+});
+
+
+
+
+
+
+// Book transportation endpoint
+
+
+
+
+const reviewSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who made the review
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true }, // Reference to the product being reviewed
+  rating: { type: Number, required: true, min: 1, max: 5 }, // Rating between 1 to 5 stars
+  comment: String, // Optional comment
+  createdAt: { type: Date, default: Date.now } // Timestamp for the review
+});
+
+const Review = mongoose.model('Review', reviewSchema);
+
+app.post('/add-review', async (req, res) => {
+ 
+    const { userId, productId, rating, comment } = req.body;
+  
+    // Validate the input
+    if (!userId || !productId || !rating) {
+      return res.status(400).json({ message: 'Missing required fields: userId, productId, or rating.' });
+    }
+  
+    try {
+      // // Check if the user has booked the product in any of the three booking types
+      // const accommodationBooking = await AccommodationBooking.findOne({ userId, productId, status: 'completed' });
+      // const tourGuideBooking = await TourGuideBooking.findOne({ userId, productId, status: 'completed' });
+      // const transportationBooking = await TransportationBooking.findOne({ userId, productId, status: 'completed' });
+  
+      // // If no booking found, restrict the review
+      // if (!accommodationBooking && !tourGuideBooking && !transportationBooking) {
+      //   return res.status(400).json({ message: 'You can only review products you have booked.' });
+      // }
+  
+       // Create the review
+    const review = new Review({ userId, productId, rating, comment });
+    await review.save();
+
+    // Find the product (service) to update its average rating
+    const service = await Service.findById(productId);
+
+    if (service) {
+      // Calculate new average rating
+      const newTotalReviews = service.totalReviews + 1;
+      let newAverageRating = ((service.averageRating * service.totalReviews) + rating) / newTotalReviews;
+
+      // Round to 1 decimal place
+      newAverageRating = parseFloat(newAverageRating.toFixed(1));
+
+      // Update service with new rating and review count
+      service.averageRating = newAverageRating;
+      service.totalReviews = newTotalReviews;
+      await service.save();
+    }
+
+    // Return success message
+    res.status(200).json({ message: 'Review added successfully and average rating updated' });
+
+  } catch (error) {
+    console.error('Error:', error); // Log the actual error
+    res.status(500).json({ message: 'Error adding review', error });
+  }
+});
+
+
+//Customize Profile
+app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
+  try {
+    const { userId, name, address, contact, currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    console.log(req.body);
+
+    // Cari pengguna berdasarkan userId
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update profil (jika ada perubahan)
+    if (name) user.name = name;
+    if (address) user.address = address;
+    if (contact) user.contact = contact;
+
+    // Jika foto profil diunggah
+    if (req.file) {
+      user.avatar = req.file.path;  // Simpan path foto di database
+    }
+
+    // Jika ingin mengganti password, lakukan validasi
+    if (currentPassword || newPassword || confirmNewPassword) {
+      // Pastikan semua kolom terkait password diberikan
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return res.status(400).json({ message: 'Please provide all password fields' });
+      }
+
+      // Periksa apakah currentPassword cocok dengan password lama
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+
+      // Pastikan newPassword dan confirmNewPassword cocok
+      if (newPassword !== confirmNewPassword) {
+        return res.status(400).json({ message: 'New password and confirm password do not match' });
+      }
+
+      // Hash password baru
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    // Simpan perubahan profil dan password (jika ada)
+    await user.save();
+    
+    if (name) {
+      await Provider.updateMany({ userId: userId }, { name: name });
+    }
+
+    res.status(200).json({ message: 'Profile and password updated successfully', user });
+
+  } catch (error) {
+    console.error('Error updating profile and password:', error);
+    res.status(500).json({ message: 'Error updating profile and password', error: error.message || error });
+  }
+});
+
+
 
 app.get('/pending-services', async (req, res) => {
   try {
@@ -2026,6 +2512,11 @@ try {
 
 
 
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -2049,7 +2540,10 @@ const serviceSchema = new mongoose.Schema({
   businessCoordinates: {
     type: { type: String, default: 'Point' },
     coordinates: { type: [Number], required: true }, // [lng, lat] format
-  }
+  },
+ 
+  averageRating: { type: Number, default: 0 }, // Store average rating for the product
+  totalReviews: { type: Number, default: 0 }   // Store the total number of reviews
 });
 
 
@@ -2095,7 +2589,7 @@ app.get('/api/services/:id', async (req, res) => {
 // GET services - Only return services with status 'accepted'
 app.get('/api/services', authMiddleware, async (req, res) => {
   try {
-    const services = await Service.find({ userId: req.user.userId, status: 'accepted' });
+    const services = await Service.find({ userId: req.user.userId, status:  {$in: ['accepted', 'published'] }  });
     res.json(services);
   } catch (err) {
     res.status(500).send(err);

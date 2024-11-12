@@ -48,4 +48,7 @@ export class DashboardComponent implements OnInit {
     this.selectedCategory = category;
     this.performSearch(); // Perform search when a category is selected
   }
+  getFullImagePath(image: string): string {
+    return `http://localhost:3000/${image}`;
+  }
 }

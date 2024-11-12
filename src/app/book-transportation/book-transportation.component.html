@@ -1,0 +1,459 @@
+<div class="container mt-5">
+  <!-- Loading state or error message -->
+  <div *ngIf="!transportationService">
+    <div class="alert alert-info text-center" role="alert">
+      Loading transportation service details...
+    </div>
+  </div>
+
+  <!-- Transportation Service Details Card -->
+  <!-- Transportation Service Details Card -->
+  <div *ngIf="transportationService" class="container my-5">
+    <!-- Transportation Service Section -->
+    <section
+      class="transportation-section container my-5 py-5 bg-light rounded shadow-sm"
+      aria-labelledby="transportation-title"
+    >
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 text-center">
+          <!-- Product Title with Fallback and Styling -->
+          <h1
+            id="transportation-title"
+            class="display-4 fw-bold text-primary mb-3"
+          >
+            {{
+              transportationService.productName ||
+                "Our Premium Transportation Service"
+            }}
+          </h1>
+
+          <!-- Product Description with Fallback -->
+          <p class="lead text-muted mx-auto description">
+            {{
+              transportationService.productDescription ||
+                "Enjoy a seamless travel experience with our reliable and comfortable transportation services tailored to meet your needs."
+            }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Carousel for Service Images -->
+    <div *ngIf="transportationService.productImages?.length" class="row my-5">
+      <div
+        id="transportationCarousel"
+        class="carousel slide col-12 shadow-lg rounded overflow-hidden"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-inner">
+          <div
+            *ngFor="
+              let image of transportationService.productImages;
+              let isFirst = first
+            "
+            [class.active]="isFirst"
+            class="carousel-item"
+          >
+            <img
+              [src]="getFullImagePath(image)"
+              class="d-block w-100 rounded-top"
+              alt="{{ transportationService.productName }}"
+              style="
+                height: 400px;
+                object-fit: cover;
+                border-bottom: 5px solid #f0f0f0;
+              "
+            />
+          </div>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#transportationCarousel"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#transportationCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Thumbnail Images Below Carousel -->
+    <div class="row my-3">
+      <div class="col-12 d-flex justify-content-between">
+        <div
+          class="small-image-wrapper"
+          *ngFor="let image of transportationService.productImages.slice(0, 3)"
+          style="flex: 1; margin-right: 5px"
+        >
+          <img
+            [src]="getFullImagePath(image)"
+            class="img-fluid rounded"
+            alt="{{ transportationService.productName }} small image"
+            style="object-fit: cover; height: 200px; width: 100%"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle Types as Cards -->
+    <div class="container mt-4">
+      <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-info">
+          <i class="fas fa-car me-2"></i>Available Vehicle Types
+        </h1>
+        <p class="text-muted">Explore our range of vehicles for your journey</p>
+      </div>
+      <div
+        class="row justify-content-center row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"
+      >
+        <div
+          class="col"
+          *ngFor="let subcategory of transportationService.productSubcategory"
+        >
+          <div class="card h-100 shadow-sm border-light rounded">
+            <div class="card-body">
+              <h5 class="card-title text-dark">{{ subcategory.name }}</h5>
+              <p class="card-text text-muted">
+                <strong>Type:</strong> {{ subcategory.type }}
+              </p>
+              <p class="card-text text-muted">
+                <strong>Quantity Available:</strong> {{ subcategory.quantity }}
+              </p>
+              <p class="card-text text-success">
+                <strong>Price:</strong>
+                {{ subcategory.price | currency : "IDR" : "symbol" }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price and Location -->
+    <div class="row text-center my-4">
+      <div class="col-12">
+        <p class="h5">
+          <strong>Location: </strong>
+          <span id="location-address">Fetching address...</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Map Display -->
+    <div
+      class="map-container my-3 rounded shadow-sm border"
+      id="map"
+      style="height: 400px"
+    ></div>
+
+    <!-- Optional Rating Display -->
+    <div
+      *ngIf="
+        transportationService.averageRating &&
+        transportationService.totalReviews
+      "
+      class="text-center mt-4"
+    >
+      <p>
+        <span class="badge bg-success me-2"
+          >★ {{ transportationService.averageRating }}</span
+        >
+        <span class="text-muted"
+          >({{ transportationService.totalReviews }} reviews)</span
+        >
+      </p>
+    </div>
+  </div>
+
+  <!-- Button to Open Modal -->
+  <div class="d-flex justify-content-center my-5">
+    <button
+      type="button"
+      class="btn btn-primary btn-lg shadow-sm px-5 py-3 mb-4"
+      (click)="openModal()"
+    >
+      Book This Transportation Service
+    </button>
+  </div>
+
+  <div *ngIf="isModalOpen" class="modal-backdrop fade show"></div>
+  <!-- Booking Modal -->
+  <div
+    class="modal fade"
+    [ngClass]="{ show: isModalOpen }"
+    [style.display]="isModalOpen ? 'block' : 'none'"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="bookingModalLabel"
+    aria-hidden="true"
+    style="background-color: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bookingModalLabel">
+            Book This Transportation Service
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeModal()"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <!-- Date Selection Section -->
+            <section class="mb-4">
+              <h6 class="text-secondary">1. Select Dates</h6>
+              <div class="row">
+                <!-- Pickup Date -->
+                <!-- Pickup Date -->
+                <div class="col-md-6 mb-3 position-relative">
+                  <label for="pickupDate" class="form-label"
+                    >Pickup Date <span class="text-danger">*</span></label
+                  >
+                  <div class="input-group position-relative">
+                    <input
+                      type="text"
+                      id="pickupDate"
+                      [(ngModel)]="pickupDate"
+                      name="pickupDate"
+                      class="form-control"
+                      readonly
+                      (focus)="openPickupCalendar()"
+                      (change)="onDateChange()"
+                      required
+                    />
+                    <span
+                      class="calendar-icon position-absolute"
+                      (click)="openPickupCalendar()"
+                    >
+                      <i class="fa fa-calendar"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Dropoff Date -->
+                <div class="col-md-6 mb-3 position-relative">
+                  <label for="dropoffDate" class="form-label"
+                    >Dropoff Date <span class="text-danger">*</span></label
+                  >
+                  <div class="input-group position-relative">
+                    <input
+                      type="text"
+                      id="dropoffDate"
+                      [(ngModel)]="dropoffDate"
+                      name="dropoffDate"
+                      class="form-control"
+                      readonly
+                      (focus)="openDropoffCalendar()"
+                      (change)="onDateChange()"
+                      required
+                    />
+                    <span
+                      class="calendar-icon position-absolute"
+                      (click)="openDropoffCalendar()"
+                    >
+                      <i class="fa fa-calendar"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Vehicle Type Section -->
+            <section class="mb-4">
+              <h6 class="text-secondary">2. Choose Vehicle Type</h6>
+              <div
+                *ngFor="
+                  let subcategory of transportationService?.productSubcategory
+                "
+                class="border p-3 rounded mb-3 shadow-sm"
+              >
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [value]="subcategory"
+                    (change)="onVehicleTypeChange($event, subcategory)"
+                    [id]="'vehicleType' + subcategory.name"
+                    [disabled]="(remainingQuantity?.[subcategory._id] || 0) === 0"
+                  />
+                  <label
+                    class="form-check-label fw-bold"
+                    [for]="'vehicleType' + subcategory.name"
+                  >
+                    {{ subcategory.name }} - {{ subcategory.type }}
+                  </label>
+                  <span class="badge bg-secondary ms-2">
+                    Available: {{ remainingQuantity?.[subcategory._id] || 0 }}
+                  </span>
+                </div>
+
+                <!-- Quantity and Pricing for Selected Vehicle Type -->
+                <div
+                  *ngIf="selectedVehicleTypes.includes(subcategory)"
+                  class="mt-3"
+                >
+                  <label
+                    class="form-label"
+                    [for]="'vehicleQuantity' + subcategory.name"
+                    >Quantity</label
+                  >
+                  <input
+                    type="number"
+                    min="1"
+                    [max]="remainingQuantity?.[subcategory._id] || subcategory.quantity"
+                    [(ngModel)]="vehicleQuantities[subcategory.name]"
+                    (input)="onQuantityInput(subcategory)"
+                    class="form-control"
+                    [id]="'vehicleQuantity' + subcategory.name"
+                    placeholder="Enter quantity"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+
+                  <p class="mt-2">
+                    <strong>Price per day:</strong>
+                    {{
+                      individualPricesPerDay[subcategory.name]
+                        | currency : "IDR" : "symbol"
+                    }}
+                  </p>
+                  <p>
+                    <strong>Total Price:</strong>
+                    {{
+                      individualPrices[subcategory.name]
+                        | currency : "IDR" : "symbol"
+                    }}
+                  </p>
+                  <p
+                    *ngIf="quantityWarnings[subcategory._id]"
+                    class="text-danger"
+                  >
+                    {{ quantityWarnings[subcategory._id] }}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Pickup and Dropoff Location Section -->
+            <section class="mb-4">
+              <h6 class="text-secondary">3. Locations</h6>
+
+              <!-- Pickup Location -->
+              <div class="mb-3">
+                <label for="pickupLocation" class="form-label"
+                  >Pickup Location <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  id="pickupAddress"
+                  [(ngModel)]="pickupAddress"
+                  name="pickupAddress"
+                  class="form-control"
+                  placeholder="Pickup address"
+                  readonly
+                  required
+                />
+                <div
+                  id="pickupMap"
+                  class="rounded border mt-2"
+                  style="height: 400px"
+                ></div>
+                <div class="form-check mt-2">
+                  <input
+                    type="checkbox"
+                    id="usePickupServiceLocation"
+                    class="form-check-input"
+                    (change)="useServiceLocation('pickup')"
+                  />
+                  <label for="usePickupServiceLocation" class="form-check-label"
+                    >Use Service Location</label
+                  >
+                </div>
+              </div>
+
+              <!-- Dropoff Location -->
+              <div class="mb-3">
+                <label for="dropoffLocation" class="form-label"
+                  >Dropoff Location <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  id="dropoffAddress"
+                  [(ngModel)]="dropoffAddress"
+                  name="dropoffAddress"
+                  class="form-control"
+                  placeholder="Dropoff address"
+                  readonly
+                  required
+                />
+                <div
+                  id="dropoffMap"
+                  class="rounded border mt-2"
+                  style="height: 400px"
+                ></div>
+                <div class="form-check mt-2">
+                  <input
+                    type="checkbox"
+                    id="useDropoffServiceLocation"
+                    class="form-check-input"
+                    (change)="useServiceLocation('dropoff')"
+                  />
+                  <label
+                    for="useDropoffServiceLocation"
+                    class="form-check-label"
+                    >Use Service Location</label
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- Special Request Section -->
+            <section class="mb-4">
+              <h6 class="text-secondary">4. Additional Information</h6>
+              <div class="mb-3">
+                <label for="specialRequest" class="form-label"
+                  >Special Request</label
+                >
+                <textarea
+                  id="specialRequest"
+                  [(ngModel)]="specialRequest"
+                  name="specialRequest"
+                  class="form-control"
+                  placeholder="Any special request..."
+                ></textarea>
+              </div>
+            </section>
+
+            <!-- Total Price and Submit Button -->
+            <div class="text-center">
+              <p class="lead">
+                <strong>Total Booking Price:</strong>
+                {{ totalBookingPrice | currency : "IDR" : "symbol" }}
+              </p>
+              <button
+                type="button"
+                class="btn btn-primary btn-lg px-4 py-2"
+                (click)="bookTransport()"
+              >
+                Submit Booking
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

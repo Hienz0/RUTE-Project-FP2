@@ -1,0 +1,53 @@
+/* Container styling */
+.container {
+    max-width: 800px;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+  
+  /* Profile card */
+  .profile-card {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  /* Profile form */
+  .profile-form {
+    border-radius: 12px;
+  }
+  
+  .form-label {
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-control {
+    border-radius: 8px;
+  }
+  
+  .btn-primary {
+    background-color: #ff6f61;
+    border-color: #ff6f61;
+  }
+  
+  .btn-primary:hover {
+    background-color: #ff856f;
+    border-color: #ff856f;
+  }
+  
+  .btn-light {
+    background-color: #f1f1f1;
+    color: #333;
+  }
+  
+  .btn-light:hover {
+    background-color: #e2e2e2;
+  }
+  

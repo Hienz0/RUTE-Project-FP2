@@ -18,7 +18,7 @@
               <a class="nav-link" href="/restaurant">Restaurant</a>
           </li>
           <li class="nav-item">
-              <a class="nav-link" href="#">Transportation</a>
+              <a class="nav-link" href="/transportationService">Transportation</a>
           </li>
           <li class="nav-item">
               <a class="nav-link" href="">Itinerary Planning</a>
@@ -29,12 +29,12 @@
           <li class="nav-item dropdown" id="navProfile">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                  <img src="../../assets/images/sample photo/1.jpeg" alt="Profile" class="rounded-circle"
+                  <img [src]="getFullImagePath(currentUser?.avatar)" alt="Profile" class="rounded-circle"
                     style="width: 30px; height: 30px;">
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                   <li *ngIf="currentUser"><span class="dropdown-item">{{ currentUser.name }}</span></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Customize User Profile</a></li>
+                  <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user"></i> Customize User Profile</a></li>
                   <li><a class="dropdown-item" href="#"><i class="fas fa-paint-brush"></i> Change Theme</a></li>
                   <li><a class="dropdown-item" href="#"><i class="fas fa-key"></i> Reset Password</a></li>
                   <li *ngIf="currentUser.userType === 'user'"><a class="dropdown-item" href="/provider-registration"><i class="fas fa-user-plus"></i> Register as Provider</a></li>

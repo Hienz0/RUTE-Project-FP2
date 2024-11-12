@@ -31,7 +31,7 @@ export class ManageServicesComponent implements OnInit {
   categories: string[] = ['Accommodation', 'Transportation', 'Tour Guide', 'Restaurant'];
   subcategoryMap: any = {
     'Accommodation': ['Villas', 'Guest Houses', 'Homestays', 'Hostels'],
-    'Transportation': ['Motorbikes', 'Cars', 'Bicycles'],
+    
   };
 
   constructor(private manageService: ManageService, private authService: AuthService, private snackBar: MatSnackBar,     private router: Router ) {}
@@ -47,7 +47,13 @@ export class ManageServicesComponent implements OnInit {
     this.manageService.getServices().subscribe(
       (data) => {
         console.log('Backend response:', data); // Log backend response
-        this.services = data.filter(service => service.status === 'accepted'); // Ensure only 'accepted' services are loaded
+
+        // Filter services to include only those with 'accepted' or 'published' status
+        this.services = data.filter(service => 
+          service.status === 'accepted' || service.status === 'published'
+        );
+
+        // Fetch images for each filtered service
         this.services.forEach((service, index) => {
           this.fetchImagesForService(service, index);
         });
@@ -57,6 +63,7 @@ export class ManageServicesComponent implements OnInit {
       }
     );
   }
+
 
   fetchImagesForService(service: any, index: number): void {
     // Assuming each service has a property 'productImages' which contains image paths
@@ -209,7 +216,7 @@ export class ManageServicesComponent implements OnInit {
   }
 
   shouldDisplaySubcategoryDropdown(): boolean {
-    const categoriesWithSubcategory = ['Accommodation', 'Transportation'];
+    const categoriesWithSubcategory = ['Accommodation'];
     return categoriesWithSubcategory.includes(this.newServiceCategory);
   }
 
@@ -368,6 +375,9 @@ export class ManageServicesComponent implements OnInit {
       }
       else if (service.productCategory === 'Tour Guide') {
         this.router.navigate([`/manage-tour/${service._id}`]);
+      }
+      else if (service.productCategory === 'Transportation') {
+        this.router.navigate([`/manageTransportation/${service._id}`]);
       }
     }
 }

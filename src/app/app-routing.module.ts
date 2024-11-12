@@ -23,6 +23,12 @@ import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-gui
 import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
 import { ManageTourComponent } from './manage-tour/manage-tour.component';
 import { PaymentListComponent } from './payment-list/payment-list.component';
+import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
+import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
+import { BookTransportationComponent } from './book-transportation/book-transportation.component';
+
+import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
+import { RateServicesComponent } from './rate-services/rate-services.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -38,6 +44,7 @@ const routes: Routes = [
   {path: 'search-results', component: SearchResultsComponent },
   {path: 'accommodation', component: AccommodationComponent },
   { path: 'accommodation/:id', component: AccommodationDetailComponent }, // Route for details page
+  { path: 'manage-accommodation/:serviceId', component: ManageAccommodationComponent },
   {path: 'booking-tour-guide', component: BookingTourGuideComponent},
   { path: 'tour-guide/:id', component: BookingTourGuideDetailComponent},
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
@@ -49,6 +56,14 @@ const routes: Routes = [
   { path: 'bookings/:userId', component: BookingsComponent },
   {path: 'manage-tour/:serviceId', component: ManageTourComponent},
   // {path: 'manage-tour', component: ManageTourComponent},
+  { path: 'search-results', component: SearchResultsComponent },
+  {path:'customizeProfile', component: CustomizeProfileComponent},
+ 
+  {path: 'transportationService', component: TransportationServicesComponent},
+  {path:'manageTransportation/:id', component: ManageTransportationComponent},
+  {path:'transportationDetail/:id', component: BookTransportationComponent},
+  {path:'rateServices', component: RateServicesComponent},
+  {path: 'payment-list', component: PaymentListComponent}
 ];
 
 @NgModule({

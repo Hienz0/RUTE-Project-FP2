@@ -1,0 +1,57 @@
+<div class="container mt-5">
+    <!-- Product Description Section -->
+    <div class="card mb-5 border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="row g-0">
+            <!-- Product Image -->
+            <div class="col-md-5 d-flex align-items-center justify-content-center" style="background-color: #f8f9fa; padding: 2rem;">
+                <img [src]="productImage" class="img-fluid rounded-3 shadow-sm" alt="Product Image" style="object-fit: cover; width: 100%; max-height: 350px;">
+            </div>
+            
+            <!-- Product Details -->
+            <div class="col-md-7 p-5 d-flex flex-column justify-content-center bg-white">
+                <h2 class="fw-bold text-dark mb-2">{{ productName }}</h2>
+                <p class="text-muted mb-2" style="font-size: 1rem; line-height: 1.6;">{{ productDescription }}</p>
+                <p class="text-muted mb-4"><small>Category: {{ productCategory }}</small></p>
+                
+                <!-- Star Rating Display for Product -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-warning fs-4">
+                        <i *ngFor="let star of [1, 2, 3, 4, 5]" 
+                           class="bi"
+                           [class.bi-star-fill]="star <= averageRating"
+                           [class.bi-star]="star > averageRating"></i>
+                    </div>
+                    <span class="ms-2 text-muted small">({{ totalReviews }} Reviews)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Form Section -->
+    <div class="card border-0 shadow-sm rounded-4 p-5">
+        <h4 class="fw-bold text-dark mb-3">Share Your Experience</h4>
+        <p class="text-secondary mb-4" style="font-size: 0.9rem;">Your feedback helps others make informed choices. We appreciate your insights!</p>
+
+        <!-- Rating Selection -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Your Rating</label>
+            <div class="fs-4 text-warning d-flex align-items-center gap-1">
+                <i *ngFor="let star of [1, 2, 3, 4, 5]" 
+                   class="bi star"
+                   (click)="selectRating(star)" 
+                   (mouseenter)="setHoveredRating(star)"
+                   (mouseleave)="resetHoveredRating()"
+                   [class.bi-star-fill]="star <= (hoveredRating || rating)"
+                   [class.bi-star]="star > (hoveredRating || rating)"></i>
+            </div>
+        </div>
+
+        <!-- Review Comment -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Your Comment</label>
+            <textarea class="form-control rounded-3 border-light shadow-sm" [(ngModel)]="reviewComment" rows="4" placeholder="Describe your experience..." style="resize: none; padding: 1rem; font-size: 1rem;"></textarea>
+        </div>
+
+        <button (click)="submitReview()" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm">Submit Review</button>
+    </div>
+</div>
