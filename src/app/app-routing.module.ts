@@ -19,6 +19,10 @@ import { ManageRestaurantComponent } from './manage-restaurant/manage-restaurant
 import { AccommodationBookingDetailComponent } from './accommodation-booking-detail/accommodation-booking-detail.component';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
 import { BookingsComponent } from './bookings/bookings.component';
+import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-guide.component';
+import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
+import { ManageTourComponent } from './manage-tour/manage-tour.component';
+import { PaymentListComponent } from './payment-list/payment-list.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -34,14 +38,17 @@ const routes: Routes = [
   {path: 'search-results', component: SearchResultsComponent },
   {path: 'accommodation', component: AccommodationComponent },
   { path: 'accommodation/:id', component: AccommodationDetailComponent }, // Route for details page
+  {path: 'booking-tour-guide', component: BookingTourGuideComponent},
+  { path: 'tour-guide/:id', component: BookingTourGuideDetailComponent},
   { path: '', redirectTo: '/accommodation', pathMatch: 'full' }, // Default route
   {path: 'restaurant', component: RestaurantComponent },
   { path: 'restaurant-detail/:id', component: RestaurantDetailComponent },
-  { path: 'manage-accommodation/:serviceId', component: ManageAccommodationComponent },
   {path: 'manage-restaurant/:serviceId', component: ManageRestaurantComponent },
   { path: 'accommodation-booking-detail/:bookingId', component: AccommodationBookingDetailComponent },
   { path: 'manage-bookings/:serviceId', component: ManageBookingsComponent },
   { path: 'bookings/:userId', component: BookingsComponent },
+  {path: 'manage-tour/:serviceId', component: ManageTourComponent},
+  // {path: 'manage-tour', component: ManageTourComponent},
 ];
 
 @NgModule({

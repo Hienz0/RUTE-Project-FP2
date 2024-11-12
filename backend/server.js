@@ -10,6 +10,7 @@ const path = require('path');
 const providerControll = require('./controller/provider');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { type } = require('os');
 const fs = require('fs');
 
 const app = express();
@@ -1039,10 +1040,33 @@ const bookingTourSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+
+    tourguideType: {
+      type: String,
+      required: true,
+      enum: ['With Guide', 'Tour Only']
+    },
+
     tourDate: {
         type: Date,
-        required: true
+        required: true,
+
+        validate: {
+          validator: function(value) {
+            const now = new Date();
+            return value >= now.setHours(0, 0, 0, 0);
+          },
+          message: 'Tour date must be in the future'
+      }
+
     },
+
+    pickupLocation: {
+      type: String,
+      required: true,
+      
+    },
+
     numberOfParticipants: {
         type: Number,
         required: true,
@@ -1056,13 +1080,81 @@ const bookingTourSchema = new mongoose.Schema({
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
         enum: ['Booked', 'Cancelled', 'Completed']
-    }
+    },
+    serviceId: { // Add serviceId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true
+  },
+  userId: { // Add userId field
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  },
+
+  tourTime: { // Add the tourTime field
+    type: String,
+    required: true,
+    enum: ['9:00-11:00','13:00-15:00', '17:00-19:00'] // Restrict to available time options
+},
+
+paymentStatus: {
+  type: String,
+  default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+  enum: ['Pending', 'Paid', 'Failed']
+},
+
 }, { timestamps: true });
 
 // Create the Booking model
 const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
 
 module.exports = TourBooking;
+
+// Route to handle booking tour guide
+
+app.post('/api/bookings/tour-guide', async (req, res) => {
+  try {
+    const bookingData = {
+      ...req.body,
+      serviceId: req.body.serviceId, // Make sure these are passed from the client side
+      userId: req.body.userId,      // or set here if you have access to current user
+      // tourTime: req.body.tourTime
+    };
+    const booking = new TourBooking(bookingData);
+    await booking.save();
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error('Error details:', error); // Log error details for debugging
+    res.status(400).json({ error: 'Error creating booking', details: error });
+  }
+});
+
+// GET route to fetch bookings by userId
+app.get('/api/services/bookings/user/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const bookings = await TourBooking.find({ userId: userId });
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ error: 'Error fetching bookings' });
+  }
+});
+
+
+
+
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//     const booking = new TourBooking(req.body);
+//     await booking.save();
+//     res.status(201).json(booking);
+//   } catch (error) {
+//     console.error('Error details:', error); // Log error details for debugging
+//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
+//   }
+// });
 
 
 
@@ -1974,6 +2066,16 @@ app.get('/api/services/accommodation', async (req, res) => {
   }
 });
 
+// Route to get services with productCategory "tour guide"
+app.get('/api/services/tour-guide', async (req, res) => {
+  try {
+    const services = await Service.find({ productCategory: 'Tour Guide' });
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching services' });
+  }
+});
+
 // Route to get a specific service by ID
 app.get('/api/services/:id', async (req, res) => {
   try {
@@ -2302,6 +2404,56 @@ app.post('/api/payments/update-status', async (req, res) => {
 
 
   
+
+app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10), async (req, res) => {
+  // console.log(req.body);
+  try {
+    const { productName, productDescription, productPrice, location } = req.body;
+
+    // Initialize an array to hold processed image URLs
+    let processedImages = [];
+
+    // Check if productImages is in the request body
+    if (req.body.productImages) {
+      for (let image of req.body.productImages) {
+        // Check if the image is a Base64 string
+        if (image.startsWith('data:image/')) {
+          const base64Data = image.split(',')[1];
+          const buffer = Buffer.from(base64Data, 'base64');
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`; // Generate a unique file name
+          const filePath = path.join(__dirname, 'uploads', fileName);
+
+          // Write the buffer to the file system
+          await fs.promises.writeFile(filePath, buffer);
+          // Push the URL of the saved image to processedImages
+          processedImages.push(`uploads/${fileName}`);
+        } else {
+          // If it's not a Base64 string, assume it's a URL from the request
+          processedImages.push(image);
+        }
+      }
+    }
+
+    // Update the service with the new product images and other details
+    const updatedService = await Service.findByIdAndUpdate(
+      req.params.id,
+      { productName, productDescription, productPrice, productImages: processedImages, location },
+      { new: true }
+    );
+
+    if (!updatedService) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Respond with a success message and the updated service
+    res.json({
+      message: 'Service updated successfully',
+      service: updatedService
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 app.listen(PORT, () => {

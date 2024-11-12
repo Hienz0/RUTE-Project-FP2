@@ -158,4 +158,42 @@ export class ServicesService {
 
 
     
+  getTourGuideServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${'tour-guide'}`);
+  }
+
+  getTourGuideServiceById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  // Add this method in your existing ServicesService
+
+  deleteTourGuideService(serviceId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${serviceId}`);
+  }
+
+  
+  updateTourGuideService(id: string, tourGuide: any): Observable<any> {
+
+    return this.http.put<any>(`${this.apiUrl}/update/tourGuide/${id}`, tourGuide);
+  }
+
+  // GET booking
+  getUserBookings(userId: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/bookings/user/${userId}`);
+  }
+
+updatePaymentStatus(bookingId: string, bookingType: string): Observable<any> {
+  return this.http.post<any>('http://localhost:3000/api/payments/update-status', { bookingId, bookingType });
+}
+
+createTransaction(bookingId: string, amount: number, userId: string): Observable<any> {
+  return this.http.post<any>('http://localhost:3000/api/create-transaction', {
+      bookingId,
+      amount,
+      userId,
+  });
+}
+
+
 }

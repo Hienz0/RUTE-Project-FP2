@@ -6,7 +6,6 @@ import { RouterModule } from '@angular/router'; // Import RouterModule
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -37,7 +36,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
 import { BookingsComponent } from './bookings/bookings.component';
-
+import { BookingTourGuideComponent } from './booking-tour-guide/booking-tour-guide.component';
+import { BookingTourGuideDetailComponent } from './booking-tour-guide-detail/booking-tour-guide-detail.component';
+import { ManageTourComponent } from './manage-tour/manage-tour.component';
+import { PaymentListComponent } from './payment-list/payment-list.component';
 
 @NgModule({
   declarations: [
@@ -63,7 +65,11 @@ import { BookingsComponent } from './bookings/bookings.component';
     AccommodationBookingDetailComponent,
     SafeUrlPipe,
     ManageBookingsComponent,
-    BookingsComponent
+    BookingsComponent,
+    BookingTourGuideComponent,
+    BookingTourGuideDetailComponent,
+    ManageTourComponent,
+    PaymentListComponent
   ],
   imports: [
     BrowserModule,
@@ -91,6 +97,7 @@ import { BookingsComponent } from './bookings/bookings.component';
       { path: 'accommodation', component: AccommodationComponent },
       {path: 'restaurant', component: RestaurantComponent },
       { path: 'restaurant-detail/:id', component: RestaurantDetailComponent }
+      { path: 'booking-tour-guide', component: BookingTourGuideComponent}
 
     ]), BrowserAnimationsModule
   ],

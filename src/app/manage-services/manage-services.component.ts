@@ -104,8 +104,8 @@ export class ManageServicesComponent implements OnInit {
           this.resetForm();
         },
         (error) => {
-          console.error('Failed to add service:', error);
-          this.showNotification('Failed to add service', 'Close', 5000);
+          console.error('Failed to add service, or you need to register to provider and switch to provider:', error);
+          this.showNotification('Failed to add service or you need to register to provider and switch to provider', 'Close', 5000);
         }
       );
     }
@@ -365,6 +365,9 @@ export class ManageServicesComponent implements OnInit {
       }
       else if (service.productCategory === 'Restaurant') {
         this.router.navigate([`/manage-restaurant/${service._id}`]);
+      }
+      else if (service.productCategory === 'Tour Guide') {
+        this.router.navigate([`/manage-tour/${service._id}`]);
       }
     }
 }
