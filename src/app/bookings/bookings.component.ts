@@ -86,7 +86,8 @@ export class BookingsComponent implements OnInit {
         ];
         console.log('All Bookings:', this.bookings);
 
-        console.log('vadv', tourBookings)
+        console.log('tour', tourBookings);
+        console.log('vehicle', vehicleBookings);
     
         // Filter bookings after combining them
         this.filterBookings(this.selectedStatus);
@@ -164,33 +165,61 @@ export class BookingsComponent implements OnInit {
 }
   
 
-  payForBooking(bookingId: string, amount: number, bookingType: string): void {
-    console.log("test", bookingId, amount, bookingType);
-    console.log("test", this.currentUser.userId);
-    this.bookingService.createTransaction(bookingId, amount, this.currentUser.userId).subscribe(response => {
-      console.log("test", bookingId)
-      
-        if (response.token) {
-            window.snap.pay(response.token, {
-                onSuccess: (result: any) => {
-                    this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
-                      () => {
-                        console.log('testing masuk')
-                        this.loadAllBookings();
-                        this.closeBookingModal();
-                        this.cdr.detectChanges();
-                    }
-                  );
-                  
+payForBooking(bookingId: string, amount: number, bookingType: string): void {
+  console.log(bookingType);
+    // Check if the booking type is "Transportation"
+    if (bookingType === 'Vehicle') {
+      const selectedVehicleBooking = this.bookings.find(
+        (booking) => booking._id === bookingId
+      );
 
-                },
-                // Handle other payment responses...
-            });
-        } else {
-            alert('Failed to initiate payment. No token returned.');
+      console.log('Selected vehicle', selectedVehicleBooking);
+  
+      if (selectedVehicleBooking && selectedVehicleBooking.vehicleBooking?.length > 0) {
+        console.log('masuk');
+        // Update the amount to the totalPrice from the vehicleBooking array
+        amount = selectedVehicleBooking.vehicleBooking[0].totalPrice;
+      }
+    }
+  
+  console.log('Initiating payment for', bookingId, amount, bookingType);
+
+  this.bookingService.createTransaction(bookingId, amount, this.currentUser.userId, bookingType).subscribe(response => {
+    if (response.token) {
+      window.snap.pay(response.token, {
+        onSuccess: (result: any) => {
+          console.log('Payment successful:', result);
+          this.bookingService.updatePaymentStatus(bookingId, bookingType).subscribe(
+            () => {
+              console.log(`${bookingType} booking updated successfully.`);
+              this.loadAllBookings();
+              this.closeBookingModal();
+              this.cdr.detectChanges();
+            },
+            error => {
+              console.error('Failed to update booking status:', error);
+            }
+          );
+        },
+        onPending: (result: any) => {
+          console.log('Payment is pending:', result);
+        },
+        onError: (result: any) => {
+          console.error('Payment failed:', result);
+        },
+        onClose: () => {
+          console.warn('Payment popup was closed before completion.');
         }
-    });
-  }
+      });
+    } else {
+      alert('Failed to initiate payment. No token returned.');
+    }
+  }, error => {
+    console.error('Error creating transaction:', error);
+    alert('Transaction creation failed. Please try again.');
+  });
+}
+
 
   cancelBooking(booking: any): void {
     const userType = 'Traveller';

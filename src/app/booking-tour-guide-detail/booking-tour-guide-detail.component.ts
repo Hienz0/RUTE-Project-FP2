@@ -27,6 +27,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     tourguideType: 'With Guide',
     numberOfParticipants: 1,
     tourDate: '',
+    amount: 0,
     tourTime: '',
     specialRequest: '',
     pickupLocation: ''
@@ -111,6 +112,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
         this.tourguideDetail = data;
         this.bookingDetails.tourName = this.tourguideDetail.productName;
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
+        this.bookingDetails.amount = this.tourguideDetail.productPrice;
+        console.log('testing', this.bookingDetails);
         this.initMap(); // Try initializing the map again after loading data
       },
       (error) => {

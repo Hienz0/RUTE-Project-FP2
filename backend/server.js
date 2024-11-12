@@ -1091,6 +1091,11 @@ const bookingTourSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0
+  },
     bookingStatus: {
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
@@ -2793,17 +2798,20 @@ const snap = new midtransClient.Snap({
 
 // Create transaction route
 app.post('/api/create-transaction', async (req, res) => {
-  const { bookingId, amount, userId } = req.body;
-  if (!bookingId || !amount || !userId) {
+  const { bookingId, amount, userId, bookingType } = req.body;
+
+  const shortTimestamp = Date.now().toString().slice(-6);
+
+  if (!bookingId || !amount || !userId || !bookingType) {
     return res.status(400).json({ error: 'Required parameters missing' });
   }
 
   try {
-    // Define the transaction payload
+    // Define the transaction payload for Midtrans
     const midtransTransaction = {
       transaction_details: {
-        order_id: `order-${bookingId}-${Date.now()}`, // Unique order ID
-        gross_amount: amount, // Total amount to be charged
+        order_id: `ord-${bookingType.slice(0, 3)}-${bookingId.slice(-6)}-${shortTimestamp}`, // Unique order ID with booking type
+        gross_amount: amount,
       },
       customer_details: {
         user_id: userId,
@@ -2813,10 +2821,10 @@ app.post('/api/create-transaction', async (req, res) => {
     // Create the transaction with Midtrans
     const transaction = await snap.createTransaction(midtransTransaction);
     res.json({ token: transaction.token });
-    console.log(transaction);
+    console.log(`Transaction created successfully for ${bookingType}:`, transaction);
   } catch (error) {
-    console.error("Midtrans transaction creation failed:", error);
-    res.status(500).json({ error: "Transaction creation failed", details: error });
+    console.error('Midtrans transaction creation failed:', error);
+    res.status(500).json({ error: 'Transaction creation failed', details: error });
   }
 });
 
@@ -2824,23 +2832,43 @@ app.post('/api/create-transaction', async (req, res) => {
 app.post('/api/payments/update-status', async (req, res) => {
   const { bookingId, bookingType } = req.body;
 
-  // Identify the correct model based on booking type
+  // Select the appropriate booking model based on the booking type
   let BookingModel;
-  if (bookingType === 'Accommodation') BookingModel = Booking;
-  else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
-  else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
-  else return res.status(400).json({ error: 'Invalid booking type' });
+  switch (bookingType) {
+    case 'Accommodation':
+      BookingModel = Booking;
+      break;
+    case 'Tour Guide':
+      BookingModel = TourBooking;
+      break;
+    case 'Transportation':
+      BookingModel = VehicleBooking;
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid booking type' });
+  }
 
   try {
-      // Update payment status to 'Paid' and booking status to 'Pending'
-      await BookingModel.findByIdAndUpdate(bookingId, {
-          paymentStatus: 'Paid',
-          bookingStatus: 'Pending'
-      });
-      res.status(200).json({ message: 'Payment and booking status updated successfully.' });
+    // Common status update
+    const updateData = {
+      paymentStatus: 'Paid',
+      bookingStatus: 'Pending',
+    };
+
+    // Additional custom updates per booking type (if needed)
+    if (bookingType === 'Tour Guide') {
+      updateData.confirmationStatus = 'Awaiting Guide Confirmation';
+    } else if (bookingType === 'Transportation') {
+      updateData.vehicleStatus = 'Reserved';
+    }
+
+    // Update the booking in the database
+    await BookingModel.findByIdAndUpdate(bookingId, updateData);
+    res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
+    console.log(`${bookingType} booking updated successfully: ${bookingId}`);
   } catch (error) {
-      console.error('Error updating payment and booking status:', error);
-      res.status(500).json({ error: 'Failed to update payment and booking status' });
+    console.error('Error updating payment and booking status:', error);
+    res.status(500).json({ error: 'Failed to update payment and booking status' });
   }
 });
 
