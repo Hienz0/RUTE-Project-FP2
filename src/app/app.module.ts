@@ -107,7 +107,7 @@ import { RateServicesComponent } from './rate-services/rate-services.component';
       { path: 'search-results', component: SearchResultsComponent },
       { path: 'accommodation', component: AccommodationComponent },
       {path: 'restaurant', component: RestaurantComponent },
-      { path: 'restaurant-detail/:id', component: RestaurantDetailComponent }
+      { path: 'restaurant-detail/:id', component: RestaurantDetailComponent },
       { path: 'booking-tour-guide', component: BookingTourGuideComponent}
 
     ]), BrowserAnimationsModule

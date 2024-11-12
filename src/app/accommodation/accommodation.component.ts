@@ -20,11 +20,11 @@ export class AccommodationComponent implements OnInit {
       this.currentUser = user;
     });
     
-    this.loadTourGuideServices();
+    this.loadAccommodationServices();
   }
 
-  loadTourGuideServices(): void {
-    this.servicesService.getTourGuideServices().subscribe(
+  loadAccommodationServices(): void {
+    this.servicesService.getAccommodationServices().subscribe(
       (data) => {
         this.accommodationServices = data;
       },
@@ -36,6 +36,6 @@ export class AccommodationComponent implements OnInit {
 
   // Navigate to the details page when a service is clicked
   goToDetail(id: string): void {
-    this.router.navigate(['/tour-guide', id]);
+    this.router.navigate(['/accommodation', id]);
   }
 }
