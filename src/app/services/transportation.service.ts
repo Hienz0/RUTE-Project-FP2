@@ -45,4 +45,10 @@ export class TransportationService {
   getRemainingQuantity(serviceId: string, pickupDate: string, dropoffDate: string): Observable<any> {
     return this.http.get<any>(`${this.getUrl}?serviceId=${serviceId}&pickupDate=${pickupDate}&dropoffDate=${dropoffDate}`);
   }
+
+   // Fungsi untuk mendapatkan data service berdasarkan ID
+   getServiceById(serviceId: string): Observable<any> {
+    const url = `${this.url}/getServiceById/${serviceId}`;
+    return this.http.get<any>(url);
+  }
 }

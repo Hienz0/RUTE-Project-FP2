@@ -2583,6 +2583,24 @@ app.get('/api/services/:id', async (req, res) => {
   }
 });
 
+// Route to get service by serviceId
+app.get('/getServiceById/:serviceId', async (req, res) => {
+  try {
+    const serviceId = req.params.serviceId;
+    const service = await Service.findById(serviceId);
+
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    res.json(service);
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 // 
 
 // API routes for services
