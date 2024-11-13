@@ -36,9 +36,10 @@ export class BookingService {
         return this.http.get<string[]>(`${this.apiUrl}/booked-dates/${serviceId}/${roomTypeId}`);
     }
 
-    getAccommodationBookingsByServiceId(serviceId: string | null): Observable<any[]> {
-      return this.http.get<any[]>(`${this.apiUrl}/accommodation/${serviceId}`);
+    getAccommodationBookingsByServiceId(serviceId: string | null): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/accommodation/service/${serviceId}`);
     }
+    
 
     getAccommodationBookingsByUserId(userId: string | null): Observable<any> {
       return this.http.get<any>(`${this.apiUrl}/accommodation/user/${userId}`);
@@ -61,18 +62,25 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
 }
 
       // Method to update booking status
-  updateBookingStatus(bookingId: string, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/status/update/${bookingId}`, { bookingStatus: status });
-  }
+      updateBookingStatus(bookingId: string, status: string, bookingType: string): Observable<any> {
+        const requestBody = {
+            bookingStatus: status,
+            bookingType: bookingType
+        };
+        return this.http.put(`${this.apiUrl}/status/update/${bookingId}`, requestBody);
+    }
+    
     
     // Method to cancel a booking
-    cancelBooking(bookingId: string, userType: string): Observable<any> {
+    cancelBooking(bookingId: string, userType: string, bookingType: string): Observable<any> {
       const requestBody = {
           bookingId,
-          userType
+          userType,
+          bookingType
       };
       return this.http.put(`${this.apiUrl}/cancel`, requestBody);
   }
+  
   
 
     

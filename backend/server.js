@@ -170,14 +170,41 @@ module.exports = Booking;
 
 
 // In your backend routes (e.g., bookingRoutes.js)
-app.get('/api/bookings/accommodation/:serviceId', async (req, res) => {
+app.get('/api/bookings/accommodation/service/:serviceId', async (req, res) => {
+  const serviceId = req.params.serviceId;
+
   try {
-      const bookings = await Booking.find({ serviceId: req.params.serviceId }).populate('userId accommodationId roomTypeId roomId');
-      res.json(bookings);
+      console.log('Fetching all bookings for serviceId:', serviceId);
+
+      // Define the condition to exclude 'Waiting for payment' status
+      const statusFilter = { serviceId, bookingStatus: { $ne: 'Waiting for payment' } };
+
+      // Retrieve all tour bookings for the service, excluding 'Waiting for payment'
+      const allTourBookings = await TourBooking.find(statusFilter);
+
+      // Retrieve all accommodation bookings for the service, excluding 'Waiting for payment'
+      const allAccommodationBookings = await Booking.find(statusFilter);
+
+      // Retrieve all vehicle bookings for the service, excluding 'Waiting for payment'
+      const allVehicleBookings = await VehicleBooking.find(statusFilter);
+
+      console.log("Tour bookings:", allTourBookings);
+      console.log("Accommodation bookings:", allAccommodationBookings);
+      console.log("Vehicle bookings:", allVehicleBookings);
+
+      // Combine and send the response with all types of bookings
+      return res.status(200).json({
+          tourBookings: allTourBookings,
+          accommodationBookings: allAccommodationBookings,
+          vehicleBookings: allVehicleBookings,
+      });
+
   } catch (error) {
-      res.status(500).json({ message: 'Error fetching bookings', error });
+      console.error("Error fetching bookings:", error);
+      return res.status(500).json({ message: "Error fetching bookings", error });
   }
 });
+
 
 app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
   const userId = req.params.userId;
@@ -354,26 +381,49 @@ app.post('/api/bookings/accommodation', async (req, res) => {
 
 
 // PUT route to update booking status
+// PUT route to update booking status
 app.put('/api/bookings/status/update/:id', async (req, res) => {
+  const { bookingStatus, bookingType } = req.body;
+
+  // Select the appropriate booking model based on the booking type
+  let BookingModel;
+  switch (bookingType) {
+      case 'Accommodation':
+          BookingModel = Booking;
+          break;
+      case 'Tour':
+          BookingModel = TourBooking;
+          break;
+      case 'Vehicle':
+          BookingModel = VehicleBooking;
+          break;
+      default:
+          return res.status(400).json({ message: 'Invalid booking type' });
+  }
+
   try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { bookingStatus: req.body.bookingStatus },
-      { new: true }
-    );
+      // Update the booking status
+      const updatedBooking = await BookingModel.findByIdAndUpdate(
+          req.params.id,
+          { bookingStatus },
+          { new: true }
+      );
 
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
+      if (!updatedBooking) {
+          return res.status(404).json({ message: 'Booking not found' });
+      }
 
-    res.json(booking);
+      res.json(updatedBooking);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating booking status', error });
+      console.error('Error updating booking status:', error);
+      res.status(500).json({ message: 'Error updating booking status', error });
   }
 });
 
+
+// API route to handle booking cancellation
 app.put('/api/bookings/cancel', async (req, res) => {
-  const { bookingId, userType } = req.body;
+  const { bookingId, userType, bookingType } = req.body;
 
   // Determine the new booking status based on the user type
   let newStatus;
@@ -385,9 +435,25 @@ app.put('/api/bookings/cancel', async (req, res) => {
       return res.status(400).json({ message: 'Invalid user type' });
   }
 
+  // Select the appropriate booking model based on the booking type
+  let BookingModel;
+  switch (bookingType) {
+      case 'Accommodation':
+          BookingModel = Booking;
+          break;
+      case 'Tour':
+          BookingModel = TourBooking;
+          break;
+      case 'Vehicle':
+          BookingModel = VehicleBooking;
+          break;
+      default:
+          return res.status(400).json({ error: 'Invalid booking type' });
+  }
+
   try {
       // Update the booking status
-      const updatedBooking = await Booking.findByIdAndUpdate(
+      const updatedBooking = await BookingModel.findByIdAndUpdate(
           bookingId,
           { bookingStatus: newStatus },
           { new: true }
@@ -406,6 +472,7 @@ app.put('/api/bookings/cancel', async (req, res) => {
       res.status(500).json({ message: 'Failed to cancel booking' });
   }
 });
+
 
 
 
@@ -1099,7 +1166,7 @@ const bookingTourSchema = new mongoose.Schema({
     bookingStatus: {
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-        enum: ['Booked', 'Cancelled', 'Completed']
+        enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment']
     },
     serviceId: { // Add serviceId field
       type: mongoose.Schema.Types.ObjectId,
@@ -1139,6 +1206,7 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
       ...req.body,
       serviceId: req.body.serviceId, // Make sure these are passed from the client side
       userId: req.body.userId,      // or set here if you have access to current user
+      bookingStatus: 'Waiting for payment', // Set booking status here
       // tourTime: req.body.tourTime
     };
     const booking = new TourBooking(bookingData);
@@ -1149,6 +1217,7 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
     res.status(400).json({ error: 'Error creating booking', details: error });
   }
 });
+
 
 // GET route to fetch bookings by userId
 app.get('/api/services/bookings/user/:userId', async (req, res) => {

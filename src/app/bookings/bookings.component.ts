@@ -221,33 +221,35 @@ payForBooking(bookingId: string, amount: number, bookingType: string): void {
 }
 
 
-  cancelBooking(booking: any): void {
-    const userType = 'Traveller';
+cancelBooking(booking: any): void {
+  const userType = 'Traveller';
+  const bookingType = this.selectedBookingType; // Get the type of booking (Accommodation, Tour Guide, Transportation)
 
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you really want to cancel this booking?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep it'
-    }).then((result: any) => {
-        if (result.isConfirmed) {
-            this.bookingService.cancelBooking(booking._id, userType).subscribe({
-                next: () => {
-                    this.loadAllBookings();
-                    this.closeBookingModal();
-                },
-                error: (error) => {
-                    console.error('Error canceling booking:', error);
-                    Swal.fire('Error', 'Failed to cancel booking', 'error');
-                }
-            });
-        }
-    });
+  Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to cancel this booking?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, cancel it!',
+      cancelButtonText: 'No, keep it'
+  }).then((result: any) => {
+      if (result.isConfirmed) {
+          this.bookingService.cancelBooking(booking._id, userType, bookingType).subscribe({
+              next: () => {
+                  this.loadAllBookings();
+                  this.closeBookingModal();
+              },
+              error: (error) => {
+                  console.error('Error canceling booking:', error);
+                  Swal.fire('Error', 'Failed to cancel booking', 'error');
+              }
+          });
+      }
+  });
 }
+
 
 
 }

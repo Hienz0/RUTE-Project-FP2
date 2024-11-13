@@ -170,6 +170,10 @@ export class BookingTourGuideDetailComponent implements OnInit {
       });
       return;
     }
+
+      // Calculate total amount based on participants
+  this.bookingDetails.amount = this.bookingDetails.amount * this.bookingDetails.numberOfParticipants;
+
   
     // Process booking if validation passes
     const bookingData = {
@@ -183,14 +187,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
     this.bookingService.bookTourGuide(bookingData).subscribe(
       (response) => {
         console.log('Booking successful', response);
-        Swal.fire({
-          icon: 'success',
-          title: 'Booking Successful!',
-          text: 'Your tour or guide has been booked successfully.',
-          confirmButtonColor: '#3085d6',
-        });
         this.closeModal();
-        const bookingId = response.booking._id;
+        const bookingId = response._id;
         this.router.navigate([`/bookings/${bookingId}`]);
       },
       (error) => {
