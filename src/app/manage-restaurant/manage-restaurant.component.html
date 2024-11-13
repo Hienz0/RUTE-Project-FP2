@@ -1,0 +1,292 @@
+<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
+  <h1 class="text-center mb-5" style="color: #343a40;">Restaurant Management</h1>
+
+  <!-- Accommodation Details Display or Edit Form -->
+  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+    <div class="card-body">
+      <div *ngIf="!isEditing">
+        <h3><i class="fas fa-hotel icon"></i> {{ restaurant.name }}</h3>
+        <p class="text-muted">{{ restaurant.description }}</p>
+        <!-- Display Product Images -->
+        <div id="accommodationCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+          <!-- Indicators -->
+          <div class="carousel-indicators">
+            <button *ngFor="let image of restaurant.productImages; let i = index" type="button"
+              data-bs-target="#accommodationCarousel" [attr.data-bs-slide-to]="i" [class.active]="i === 0"
+              aria-current="i === 0 ? 'true' : undefined" [attr.aria-label]="'Slide ' + (i + 1)">
+            </button>
+          </div>
+
+          <!-- Carousel inner with images -->
+          <div class="carousel-inner">
+            <div *ngFor="let image of restaurant.productImages; let i = index" class="carousel-item"
+              [class.active]="i === 0">
+              <img [src]="isBase64Image(image) ? image : 'http://localhost:3000/' + image"
+                class="d-block w-100 img-fluid rounded" alt="Product Image" style="height: 400px; object-fit: cover;" />
+            </div>
+
+          </div>
+
+          <!-- Controls -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+
+        <p><i class="fas fa-map-marker-alt icon"></i><strong> Location:</strong> {{ restaurant.location }}</p>
+        <button class="btn btn-primary mt-3" (click)="toggleEdit()">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+      </div>
+
+      <!-- Edit Accommodation Details Form with Existing Values in Inputs -->
+      <div *ngIf="isEditing">
+        <h3><i class="fas fa-pencil-alt icon"></i> Edit Accommodation Details</h3>
+        <form>
+          <div class="form-group mb-3">
+            <label for="accommodationName"><i class="fas fa-building icon"></i> Name</label>
+            <input type="text" class="form-control" id="accommodationName" [(ngModel)]="restaurant.name" name="name"
+              required />
+          </div>
+          <div class="form-group mb-3">
+            <label for="accommodationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
+            <textarea class="form-control" id="accommodationDescription" [(ngModel)]="restaurant.description"
+              name="description" rows="3"></textarea>
+          </div>
+          <div class="form-group mb-3">
+            <label><i class="fas fa-image icon"></i> Upload Images</label>
+            <input type="file" (change)="onImageSelectService($event)" multiple class="form-control-file"
+              id="fileUpload" hidden />
+            <div class="upload-drop-zone" (drop)="onDropService($event)" (dragover)="onDragOverService($event)"
+              (dragleave)="onDragLeaveService($event)" (click)="triggerFileInputService()"
+              [class.drag-over]="isDragging">
+              <p>Click or drag images here to upload</p>
+            </div>
+          </div>
+
+          <!-- Image Preview with Delete Button -->
+          <div class="image-preview-container">
+            <div class="image-preview" *ngFor="let image of restaurant.productImages; let i = index">
+              <img [src]="isBase64Image(image) ? image : 'http://localhost:3000/' + image" class="img-fluid rounded"
+                alt="Product Image" />
+              <button type="button" class="delete-btn" (click)="removeImageService(i)">×</button>
+              <!-- <input type="text" class="form-control mt-2" [(ngModel)]="accommodation.productImages[i]" name="productImages" /> -->
+            </div>
+          </div>
+
+
+
+          <div class="form-group mb-3">
+            <label for="accommodationLocation"><i class="fas fa-map-marker-alt icon"></i> Location</label>
+            <input type="text" class="form-control" id="accommodationLocation" [(ngModel)]="restaurant.location"
+              name="location" />
+          </div>
+          <button class="btn btn-primary mt-3" (click)="saveRestaurant()">
+            <i class="fas fa-save"></i> Save
+          </button>
+          <button class="btn btn-secondary mt-3" (click)="toggleEdit()">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- Add Menu Item Form -->
+<div class="card p-4 my-4 border-light shadow-sm" style="border-radius: 8px;">
+<div class="card-body">
+  <h3 class="card-title text-center mb-4">
+    <i class="fas fa-utensils icon"></i> Add New Menu Item
+  </h3>
+  <form (ngSubmit)="addMenuItem()">
+    <!-- Menu Item Name -->
+    <div class="form-group mb-3">
+      <label for="menuItemName">
+        <i class="fas fa-tag icon"></i> Menu Item Name
+      </label>
+      <input type="text" class="form-control" id="menuItemName" [(ngModel)]="restaurantMenu.name" name="name" required placeholder="Enter menu item name" />
+    </div>
+
+    <!-- Menu Item Image Upload -->
+<!-- Menu Item Image Upload -->
+<div class="form-group mb-3">
+<label><i class="fas fa-image icon"></i> Upload Image or PDF</label>
+<div
+  class="file-upload"
+  id="fileUploadArea"
+  (click)="triggerFileInput()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+  [ngClass]="{'dragging': isDragging}"
+  style="cursor: pointer;"
+>
+  <input
+    type="file"
+    accept=".jpg, .jpeg, .png, .gif, .pdf"
+    (change)="onFileSelected($event)"
+    id="menuItemImage"
+    class="file-upload-input"
+    style="display: none;"
+  />
+  <div class="file-upload-text" *ngIf="!restaurantMenu.file">
+    <p>Click or drag an image or PDF here to upload</p>
+  </div>
+  <div *ngIf="restaurantMenu.file && fileIsImage(restaurantMenu.file)">
+    <img [src]="restaurantMenu.file" alt="Preview" class="img-preview mt-2" style="max-width: 100px;" />
+  </div>
+  <div *ngIf="restaurantMenu.file && fileIsPDF(restaurantMenu.file)">
+    <p>PDF file uploaded</p>
+  </div>
+</div>
+<small class="form-text text-muted mt-2">Accepted formats: .jpg, .png, .gif, .pdf</small>
+</div>
+
+
+
+
+    <button type="submit" class="btn btn-primary btn-block mt-3">
+      <i class="fas fa-plus"></i> Add Menu Item
+    </button>
+  </form>
+</div>
+<!-- Display Added Menu Items -->
+<!-- Display Added Menu Items -->
+<div *ngIf="menuItems.length > 0" class="mt-4">
+<h3 class="text-primary mb-3">Added Menu Items</h3>
+
+<!-- Bootstrap Grid System for Two Columns -->
+<div class="row">
+  <!-- Updated *ngFor loop with trackBy -->
+  <div
+    *ngFor="let item of menuItems; let i = index; trackBy: trackByIndex"
+    class="col-md-6 mb-4"
+  >
+    <div class="card shadow-sm p-3 h-100">
+      <div class="card-body d-flex align-items-center position-relative">
+        <div class="me-4" (click)="openPreviewModal(item)">
+          <!-- Display Item Icon based on file type -->
+          <ng-container *ngIf="fileIsImage(item.file); else pdfIcon">
+            <img
+              [src]="getFileUrl(item.file)"
+              alt="Menu Item Image"
+              class="img-fluid rounded"
+              style="width: 180px; height: 100px; object-fit: cover; cursor: pointer;"
+            />
+          </ng-container>
+          <ng-template #pdfIcon>
+            <i class="fas fa-file-pdf fa-4x text-danger" style="cursor: pointer;"></i>
+            <p class="text-muted fs-5 mb-0">PDF file</p>
+          </ng-template>
+          <!-- <ng-template #pdfPreview>
+            PDF preview using iframe
+            <iframe
+              [src]="sanitizeUrl(getFileUrl(item.file))"
+              width="180px"
+              height="100px"
+              class="border rounded"
+              style="object-fit: cover; cursor: pointer;"
+            ></iframe>
+            <p class="text-muted fs-5 mb-0 mt-2">PDF file added</p>
+          </ng-template> -->
+        </div>
+
+        <div>
+          <h4 class="card-title mb-1 fw-bold">{{ item.name }}</h4>
+          <p class="text-muted fs-6">Uploaded Menu Item</p>
+        </div>
+
+        <!-- Remove X button with class -->
+        <button
+          (click)="removeMenuItem(i)"
+          class="btn btn-danger btn-sm ms-auto"
+          aria-label="Remove Menu Item"
+          style="position: absolute; top: 10px; right: 10px;"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Preview Modal for Images and PDFs -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-content rounded-3 shadow">
+    <div class="modal-header">
+      <h5 class="modal-title" id="imagePreviewModalLabel">
+        <i [class]="selectedItem?.isImage ? 'fas fa-image' : 'fas fa-file-pdf'" class="me-2"></i> Preview
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body text-center">
+      <!-- Dynamic Content: Image or PDF -->
+      <ng-container *ngIf="selectedItem?.isImage; else pdfPreview">
+        <img [src]="selectedItem?.fileUrl || ''" alt="Preview Image" class="img-fluid rounded mb-3" />
+      </ng-container>
+      <ng-template #pdfPreview>
+        <iframe [src]="selectedItem?.fileUrl || ''" width="100%" height="500px" class="rounded border"></iframe>
+      </ng-template>
+    </div>
+    <div class="modal-footer justify-content-between">
+      <a [href]="selectedItem?.fileUrl || ''" download class="btn btn-primary btn-sm">
+        <i class="fas fa-download me-1"></i> Download
+      </a>
+      <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<!-- Display Added Menu Items -->
+
+
+
+
+
+
+
+<!-- Add Menu Item Form
+<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+<div class="card-body">
+  <h3><i class="fas fa-utensils icon"></i> Add New Menu Item</h3>
+  <form>
+    Menu Item Name
+    <div class="form-group mb-3">
+      <label for="menuItemName"><i class="fas fa-tag icon"></i> Menu Item Name</label>
+      <input type="text" class="form-control" id="menuItemName" [(ngModel)]="newMenuItem.name" name="name" required />
+    </div>
+
+    Menu Item Image Upload
+    <div class="form-group mb-3">
+      <label><i class="fas fa-image icon"></i> Upload Image</label>
+      <input type="file" (change)="onMenuImageSelect($event)" class="form-control-file" id="menuItemImage" />
+      <p class="mt-2">Click or drag an image here to upload</p>
+    </div>
+
+    <button class="btn btn-primary mt-3" (click)="addMenuItem()">
+      <i class="fas fa-plus"></i> Add Menu Item
+    </button>
+  </form>
+</div>
+</div> -->
+
+  <!-- Publish Button -->
+  <button class="btn btn-success mt-4" (click)="publishMenu()">
+    <i class="fas fa-cloud-upload-alt"></i> Publish
+  </button>
+</div>

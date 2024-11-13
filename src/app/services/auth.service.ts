@@ -28,6 +28,16 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  updateCurrentUser(updatedUser: any): void {
+    // Update the current user subject with the new user data
+    this.currentUserSubject.next(updatedUser);
+  
+    // Update the local storage to persist changes
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    console.log('Updated user in localStorage:', updatedUser);
+  }
+  
+
   // login(email: string, password: string): Observable<any> {
   //   console.log('Login data:', { email, password }); // Log the login data
   //   return this.http.post<any>(`${this.authUrl}/signin`, { email, password }).pipe(
@@ -104,4 +114,11 @@ export class AuthService {
     this.currentUserSubject.next(null);
     console.log('currentUserSubject after logout:', this.currentUserSubject.value); // Debugging BehaviorSubject after logout
   }
+
+  // New method to get current user ID NEW
+  public getCurrentUserId(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.id : null; // Assuming `id` is the identifier in the user object
+  }
+
 }

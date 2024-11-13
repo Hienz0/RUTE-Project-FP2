@@ -1,0 +1,14 @@
+<div *ngIf="bookingData">
+    <h2>Booking Details for {{ bookingData.guestName }}</h2>
+    <p><strong>Accommodation Type:</strong> {{ bookingData.accommodationType }}</p>
+    <p><strong>Number of Guests:</strong> {{ bookingData.numberOfGuests }}</p>
+    <p><strong>Check-in Date:</strong> {{ bookingData.checkInDate | date }}</p>
+    <p><strong>Check-out Date:</strong> {{ bookingData.checkOutDate | date }}</p>
+    <p><strong>Special Request:</strong> {{ bookingData.specialRequest || 'None' }}</p>
+    <p><strong>Status:</strong> {{ bookingData.bookingStatus }}</p>
+  </div>
+  
+  <div *ngIf="!bookingData">
+    <p>Loading booking details...</p>
+  </div>
+  

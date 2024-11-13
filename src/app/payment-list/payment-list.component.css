@@ -1,0 +1,36 @@
+.payment-container {
+    padding: 16px;
+  }
+  
+  .payment-title {
+    font-size: 2em;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  
+  .payment-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  
+  .booking-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .booking-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .card-body {
+    padding: 16px;
+  }
+  
+  .card-title {
+    font-size: 1.5em;
+    margin-bottom: 8px;
+  }
+  

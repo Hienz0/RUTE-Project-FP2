@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ManageService } from '../services/manage.service';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-manage-services',
@@ -30,10 +31,10 @@ export class ManageServicesComponent implements OnInit {
   categories: string[] = ['Accommodation', 'Transportation', 'Tour Guide', 'Restaurant'];
   subcategoryMap: any = {
     'Accommodation': ['Villas', 'Guest Houses', 'Homestays', 'Hostels'],
-    'Transportation': ['Motorbikes', 'Cars', 'Bicycles'],
+    
   };
 
-  constructor(private manageService: ManageService, private authService: AuthService, private snackBar: MatSnackBar) {}
+  constructor(private manageService: ManageService, private authService: AuthService, private snackBar: MatSnackBar,     private router: Router ) {}
 
   ngOnInit() {
     this.loadServices();
@@ -46,7 +47,13 @@ export class ManageServicesComponent implements OnInit {
     this.manageService.getServices().subscribe(
       (data) => {
         console.log('Backend response:', data); // Log backend response
-        this.services = data.filter(service => service.status === 'accepted'); // Ensure only 'accepted' services are loaded
+
+        // Filter services to include only those with 'accepted' or 'published' status
+        this.services = data.filter(service => 
+          service.status === 'accepted' || service.status === 'published'
+        );
+
+        // Fetch images for each filtered service
         this.services.forEach((service, index) => {
           this.fetchImagesForService(service, index);
         });
@@ -56,6 +63,7 @@ export class ManageServicesComponent implements OnInit {
       }
     );
   }
+
 
   fetchImagesForService(service: any, index: number): void {
     // Assuming each service has a property 'productImages' which contains image paths
@@ -103,8 +111,8 @@ export class ManageServicesComponent implements OnInit {
           this.resetForm();
         },
         (error) => {
-          console.error('Failed to add service:', error);
-          this.showNotification('Failed to add service', 'Close', 5000);
+          console.error('Failed to add service, or you need to register to provider and switch to provider:', error);
+          this.showNotification('Failed to add service or you need to register to provider and switch to provider', 'Close', 5000);
         }
       );
     }
@@ -208,7 +216,7 @@ export class ManageServicesComponent implements OnInit {
   }
 
   shouldDisplaySubcategoryDropdown(): boolean {
-    const categoriesWithSubcategory = ['Accommodation', 'Transportation'];
+    const categoriesWithSubcategory = ['Accommodation'];
     return categoriesWithSubcategory.includes(this.newServiceCategory);
   }
 
@@ -355,4 +363,21 @@ export class ManageServicesComponent implements OnInit {
       return `http://localhost:3000/${imagePath}`;
     }
   }
+
+    // Method to navigate to manage-accommodation route if the productCategory is Accommodation
+    navigateToService(service: any) {
+      console.log(service);
+      if (service.productCategory === 'Accommodation') {
+        this.router.navigate([`/manage-accommodation/${service._id}`]);
+      }
+      else if (service.productCategory === 'Restaurant') {
+        this.router.navigate([`/manage-restaurant/${service._id}`]);
+      }
+      else if (service.productCategory === 'Tour Guide') {
+        this.router.navigate([`/manage-tour/${service._id}`]);
+      }
+      else if (service.productCategory === 'Transportation') {
+        this.router.navigate([`/manageTransportation/${service._id}`]);
+      }
+    }
 }

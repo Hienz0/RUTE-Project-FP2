@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -15,6 +15,7 @@ export class SearchResultsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private authService: AuthService
   ) {}
 
@@ -41,6 +42,16 @@ export class SearchResultsComponent implements OnInit {
       this.searchResults = results;
       console.log('search result: ', this.searchResults);
     });
+  }
+
+  redirectToAccommodation(serviceId: string, category: string): void {
+    if (category === 'Accommodation') {
+      // If category is 'accommodation', navigate to /accommodation/{serviceId}
+      this.router.navigate([`/accommodation/${serviceId}`]);
+    } else if (category === 'Restaurant') {
+      // If category is 'restaurant', navigate to /restaurant/{serviceId}
+      this.router.navigate([`/restaurant-detail/${serviceId}`]);
+    }
   }
   
 }
