@@ -387,6 +387,8 @@ export class BookTransportationComponent implements OnInit {
           'Your transportation service has been booked successfully.',
           '/transportationService'
         );
+        const bookingId = response.booking._id;
+        this.router.navigate([`/bookings/${bookingId}`]);
       },
       (error) => {
         // Show error message
