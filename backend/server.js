@@ -2215,6 +2215,28 @@ app.post('/add-review', async (req, res) => {
 });
 
 
+// In your service controller
+app.get('/api/services/:id/rating', async (req, res) => {
+  try {
+    const serviceId = req.params.id;
+    const reviews = await Review.find({ serviceId });
+    
+    // If no reviews exist for this service, return 0 for both averageRating and reviewCount
+    if (reviews.length === 0) return res.json({ averageRating: 0, reviewCount: 0 });
+
+    // Calculate the average rating
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+
+    // Send response with averageRating and reviewCount
+    res.json({ averageRating, reviewCount: reviews.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching rating', error });
+  }
+});
+
+
+
+
 
 
 //Customize Profile
@@ -3300,6 +3322,68 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 //     console.error('Error injecting dummy data:', error);
 //   }
 // }
+
+
+// async function injectDummyReviews() {
+//   const dummyReviews = [
+//     // Service 665f51fb893ed90d8a93012d
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Outstanding service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Good, would use again.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Satisfactory, but could improve.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Highly recommended!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Very good experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceptional service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Average, could be better.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Enjoyable experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Perfect, no complaints.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'It was okay.' },
+
+//     // Service 671917ef7a8909e7ed0bdbbc
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Friendly staff, would recommend.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Absolutely loved it!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be improved in some areas.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceeded my expectations!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Good service, will book again.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceptional experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Okay, but could use improvements.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Nice experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Highly recommend this service.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Satisfactory overall.' },
+
+//     // Service 671c95c3108fdbc05b68056c
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Great experience, worth it!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Superb quality service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Not bad, but could be better.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'The best I have experienced!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Very good overall.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Wonderful and smooth.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be better with some improvements.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Satisfactory experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'A great choice!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Just okay, not great.' },
+
+//     // Service 671ca1ca58cb132eb1dc6d8c
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Flawless experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Definitely good quality.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be better, but was okay.' },
+//     // Add more reviews similarly as needed up to 10-20
+
+//     // Service 670b61778db9a43e3f9c82d3
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Worth the money.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Excellent!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'It was alright.' },
+//     // Continue similarly with 10-20 total reviews for each service
+//   ];
+
+//   try {
+//     await Review.insertMany(dummyReviews);
+//     console.log('Dummy reviews inserted successfully!');
+//   } catch (error) {
+//     console.error('Error inserting dummy reviews:', error);
+//   }
+// }
+
+// injectDummyReviews();
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TransportationService } from '../services/transportation.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ServicesService } from '../services/services.service';
 
 @Component({
   selector: 'app-transportation-services',
@@ -9,20 +10,38 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class TransportationServicesComponent implements OnInit {
   services: any[] = [];
-  constructor(private service : TransportationService, private router: Router, private route: ActivatedRoute){}
+  Math = Math;
+  constructor(private service : TransportationService, private servicesService: ServicesService, private router: Router, private route: ActivatedRoute){}
   ngOnInit(): void {
-
-      this.service.getTransportationService().subscribe(
-        (data) => {
-          this.services = data;
-          console.log(data);
-        },
-        (error) => {
-          console.error('Error fetching transportation service:', error);
-        }
-      );
-   
+    this.service.getTransportationService().subscribe(
+      async (data) => {
+        this.services = await Promise.all(data.map(async (service: any) => {
+          const ratingData = await this.servicesService.getServiceRating(service.serviceId).toPromise();
+          return { 
+            ...service, 
+            averageRating: ratingData?.averageRating ?? 0, 
+            reviewCount: ratingData?.reviewCount ?? 0 
+          };
+        }));
+      },
+      (error) => {
+        console.error('Error fetching transportation service:', error);
+      }
+    );
   }
+  
+  
+  getStarIcons(rating: number): string[] {
+    const filledStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - filledStars - halfStar;
+    return [
+      ...Array(filledStars).fill('★'),
+      ...Array(halfStar).fill('☆'),
+      ...Array(emptyStars).fill('✩')
+    ];
+  }
+
 
 
   getFullImagePath(image: string): string {

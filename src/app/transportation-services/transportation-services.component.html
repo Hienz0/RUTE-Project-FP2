@@ -68,8 +68,30 @@
             <div *ngIf="service.productSubcategory?.length > 0">
               <p><strong>Vehicle Avalaible: </strong> {{ getUniqueSubcategories(service) }}</p>
             </div>
+            <div class="rating">
+              <ng-container *ngIf="service.averageRating > 0; else noRating">
+                <!-- Full Stars -->
+                <i *ngFor="let _ of [].constructor(Math.floor(service.averageRating))" class="fas fa-star star"></i>
+            
+                <!-- Half Star (only one if rating has a half part) -->
+                <i *ngIf="service.averageRating % 1 >= 0.5" class="fas fa-star-half-alt star"></i>
+            
+                <!-- Empty Stars (always ensures 5 stars are displayed) -->
+                <i *ngFor="let _ of [].constructor(5 - Math.floor(service.averageRating) - (service.averageRating % 1 >= 0.5 ? 1 : 0))" class="far fa-star star"></i>
+            
+                <!-- Display Average Rating and Review Count in Format "4.3 (15)" -->
+                <span>{{ service.averageRating | number: '1.1-1' }} ({{ service.reviewCount }})</span>
+              </ng-container>
+            
+              <!-- Fallback message if there is no rating -->
+              <ng-template #noRating>
+                <span class="text-muted">No ratings yet</span>
+              </ng-template>
+            </div>
+            
+            
+      
             <p>
-              <strong>Rating:</strong> {{ service.averageRating }} ({{ service.totalReviews }} reviews)
             </p>
           </div>
         </div>

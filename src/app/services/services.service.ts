@@ -195,5 +195,9 @@ createTransaction(bookingId: string, amount: number, userId: string): Observable
   });
 }
 
+getServiceRating(serviceId: string): Observable<{ averageRating: number, reviewCount: number }> {
+  return this.http.get<{ averageRating: number, reviewCount: number }>(`${this.apiUrl}/${serviceId}/rating`);
+}
+
 
 }
