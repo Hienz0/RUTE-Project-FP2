@@ -23,6 +23,12 @@ export class SearchComponent implements OnInit {
     else if (this.router.url === '/restaurant') {
       this.selectedCategory = 'Restaurant';
     }
+    else if (this.router.url === '/transportationService') {
+      this.selectedCategory = 'Transportation';
+    }
+    else if (this.router.url === '/booking-tour-guide') {
+      this.selectedCategory = 'Tour & Guide';
+    }
   }
 
   performSearch(): void {
