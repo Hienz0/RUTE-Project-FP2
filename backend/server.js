@@ -2608,21 +2608,46 @@ app.get('/api/services/:id', async (req, res) => {
 });
 
 // Route to get service by serviceId
-app.get('/getServiceById/:serviceId', async (req, res) => {
+app.get('/getServiceById/:bookingId', async (req, res) => { 
   try {
-    const serviceId = req.params.serviceId;
+    const bookingId = req.params.bookingId;
+
+    // Cek bookingId di ketiga koleksi
+    const [booking, tourBooking, vehicleBooking] = await Promise.all([
+      Booking.findById(bookingId),
+      TourBooking.findById(bookingId),
+      VehicleBooking.findById(bookingId),
+    ]);
+
+    // Tentukan sumber data berdasarkan hasil pencarian
+    const foundBooking = booking || tourBooking || vehicleBooking;
+
+    if (!foundBooking) {
+      return res.status(404).json({ message: 'Booking not found in any schema' });
+    }
+
+    // Ambil serviceId dari dokumen yang ditemukan
+    const { serviceId } = foundBooking;
+
+    if (!serviceId) {
+      return res.status(404).json({ message: 'Service ID not found in booking' });
+    }
+
+    // Cari data layanan berdasarkan serviceId
     const service = await Service.findById(serviceId);
 
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
 
+    // Kirim data layanan sebagai respons
     res.json(service);
   } catch (error) {
     console.error('Error fetching service:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 // 

@@ -20,6 +20,7 @@ export class RateServicesComponent implements OnInit {
   rating = 0; // User's selected rating
   hoveredRating = 0; // Current hover rating
   reviewComment = ''; // User's review comment
+  serviceId: string = '';
 
   constructor(
     private service: TransportationService,
@@ -28,10 +29,10 @@ export class RateServicesComponent implements OnInit {
 
   ngOnInit(): void {
     // Dapatkan serviceId dari URL atau gunakan ID contoh untuk testing
-    const serviceId = this.route.snapshot.paramMap.get('serviceId') || '6728123734ac03d88dd3ecff';
+    this.serviceId = this.route.snapshot.paramMap.get('id')!;
   
     // Panggil service untuk mendapatkan detail produk berdasarkan serviceId
-    this.service.getServiceById(serviceId).subscribe({
+    this.service.getServiceById(this.serviceId).subscribe({
       next: (data) => {
         this.productName = data.productName;
         this.productDescription = data.productDescription;

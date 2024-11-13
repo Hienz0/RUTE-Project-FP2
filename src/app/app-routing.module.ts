@@ -62,7 +62,7 @@ const routes: Routes = [
   {path: 'transportationService', component: TransportationServicesComponent},
   {path:'manageTransportation/:id', component: ManageTransportationComponent},
   {path:'transportationDetail/:id', component: BookTransportationComponent},
-  {path:'rateServices', component: RateServicesComponent},
+  {path:'rateServices/:id', component: RateServicesComponent},
   {path: 'payment-list', component: PaymentListComponent}
 ];
 

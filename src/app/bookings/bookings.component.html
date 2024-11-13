@@ -1,277 +1,451 @@
 <div class="container my-5">
-    <!-- Section Title -->
-    <h2 class="text-center mb-5 text-dark display-4 fw-bold">
-        <i class="fas fa-calendar-alt me-3"></i>Bookings for User ID: {{ userId }}
-    </h2>
+  <!-- Section Title -->
+  <h2 class="text-center mb-5 text-dark display-4 fw-bold">
+    <i class="fas fa-calendar-alt me-3"></i>Bookings for User ID: {{ userId }}
+  </h2>
 
-    <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-3">
-            <nav class="nav flex-column bg-light p-3 rounded shadow-sm">
-                <a 
-                    class="nav-link text-dark py-2" 
-                    [ngClass]="{ 'active fw-bold text-primary': selectedStatus === 'Pending' }" 
-                    (click)="filterBookings('Pending')"
-                >
-                    <i class="fas fa-exclamation-circle me-2"></i> Pending Bookings
-                </a>
-                <a 
-                    class="nav-link text-dark py-2" 
-                    [ngClass]="{ 'active fw-bold text-primary': selectedStatus === 'Booked' }" 
-                    (click)="filterBookings('Booked')"
-                >
-                    <i class="fas fa-check-circle me-2"></i> Verified Bookings
-                </a>
-                <a 
-                    class="nav-link text-dark py-2" 
-                    [ngClass]="{ 'active fw-bold text-primary': selectedStatus === 'Complete' }" 
-                    (click)="filterBookings('Complete')"
-                >
-                    <i class="fas fa-history me-2"></i> Past Bookings
-                </a>
-                <a 
-                    class="nav-link text-dark py-2" 
-                    [ngClass]="{ 'active fw-bold text-primary': selectedStatus === 'Canceled' }" 
-                    (click)="filterBookings('Canceled')"
-                >
-                    <i class="fas fa-ban me-2"></i> Canceled Bookings
-                </a>
-            </nav>
-        </div>
-
-        <!-- Booking List Section -->
-<!-- Booking List Section -->
-<div class="col-md-9">
-    <div *ngIf="filteredBookings.length > 0; else noBookings" @fadeAnimation>
-        <div class="row">
-            <div *ngFor="let booking of filteredBookings; let i = index" class="col-12 col-md-6 mb-4">
-                <div class="card border-0 shadow-lg rounded-4">
-                    <div class="card-body">
-                        <!-- Guest Information -->
-                        <h5 class="card-title text-primary d-flex align-items-center mb-3">
-                            <i class="fas fa-user me-3 text-muted"></i>{{ booking.guestName || booking.customerName }}
-                        </h5>
-                        <p class="card-subtitle text-muted mb-4">
-                            <i class="fas fa-info-circle me-2 text-warning"></i>
-                            {{ booking.accommodationType || booking.tourName || booking.productName }}
-                        </p>
-
-                        <!-- Common Booking Details -->
-                        <ul class="list-unstyled">
-                            <!-- Accommodation Specific Fields -->
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.numberOfGuests">
-                                <i class="fas fa-users text-secondary me-3"></i>
-                                <strong>Guests:</strong>
-                                <span class="ms-auto text-dark">{{ booking.numberOfGuests }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.checkInDate">
-                                <i class="fas fa-calendar-check text-success me-3"></i>
-                                <strong>Check-In:</strong>
-                                <span class="ms-auto text-dark">{{ booking.checkInDate | date:'mediumDate' }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.checkOutDate">
-                                <i class="fas fa-calendar-times text-danger me-3"></i>
-                                <strong>Check-Out:</strong>
-                                <span class="ms-auto text-dark">{{ booking.checkOutDate | date:'mediumDate' }}</span>
-                            </li>
-
-                            <!-- Vehicle Specific Fields -->
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.selectedVehicleType">
-                                <i class="fas fa-car text-secondary me-3"></i>
-                                <strong>Vehicle Type:</strong>
-                                <span class="ms-auto text-dark">{{ booking.selectedVehicleType }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehiclePickupLocation">
-                                <i class="fas fa-map-marker-alt text-info me-3"></i>
-                                <strong>Pickup Location:</strong>
-                                <span class="ms-auto text-dark">{{ booking.vehiclePickupLocation }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleDropoffLocation">
-                                <i class="fas fa-map-marker-alt text-warning me-3"></i>
-                                <strong>Dropoff Location:</strong>
-                                <span class="ms-auto text-dark">{{ booking.vehicleDropoffLocation }}</span>
-                            </li>
-
-                            <!-- Tour Specific Fields -->
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.tourName">
-                                <i class="fas fa-route text-primary me-3"></i>
-                                <strong>Tour Name:</strong>
-                                <span class="ms-auto text-dark">{{ booking.tourName }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.tourguideType">
-                                <i class="fas fa-user-tie text-secondary me-3"></i>
-                                <strong>Tour Guide:</strong>
-                                <span class="ms-auto text-dark">{{ booking.tourguideType }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.tourDate">
-                                <i class="fas fa-calendar-alt text-success me-3"></i>
-                                <strong>Tour Date:</strong>
-                                <span class="ms-auto text-dark">{{ booking.tourDate | date:'mediumDate' }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.tourTime">
-                                <i class="fas fa-clock text-info me-3"></i>
-                                <strong>Tour Time:</strong>
-                                <span class="ms-auto text-dark">{{ booking.tourTime }}</span>
-                            </li>
-
-                            <!-- Booking Status -->
-                            <li class="mb-3 d-flex align-items-center">
-                                <i class="fas fa-info-circle text-info me-3"></i>
-                                <strong>Status:</strong>
-                                <span class="ms-auto">
-                                    <span class="badge rounded-pill" [ngClass]="{
-                                        'bg-success': booking.bookingStatus === 'Booked',
-                                        'bg-warning': booking.bookingStatus === 'Pending',
-                                        'bg-secondary': booking.bookingStatus === 'Complete' || booking.bookingStatus === 'Completed',
-                                        'bg-danger': booking.bookingStatus.includes('Canceled'),
-                                        'bg-primary': booking.bookingStatus === 'Waiting for payment'
-                                    }">
-                                         {{ booking.bookingStatus === 'Pending' ? 'Waiting for Verification' : booking.bookingStatus }}
-                                    </span>
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Card Footer -->
-                    <div class="card-footer text-center bg-light">
-                        <button class="btn btn-outline-secondary btn-sm px-3 py-1" (click)="openBookingModal(i)">
-                            Details
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3">
+      <nav class="nav flex-column bg-light p-3 rounded shadow-sm">
+        <a
+          class="nav-link text-dark py-2"
+          [ngClass]="{
+            'active fw-bold text-primary': selectedStatus === 'Pending'
+          }"
+          (click)="filterBookings('Pending')"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i> Pending Bookings
+        </a>
+        <a
+          class="nav-link text-dark py-2"
+          [ngClass]="{
+            'active fw-bold text-primary': selectedStatus === 'Booked'
+          }"
+          (click)="filterBookings('Booked')"
+        >
+          <i class="fas fa-check-circle me-2"></i> Verified Bookings
+        </a>
+        <a
+          class="nav-link text-dark py-2"
+          [ngClass]="{
+            'active fw-bold text-primary': selectedStatus === 'Completed'
+          }"
+          (click)="filterBookings('Completed')"
+        >
+          <i class="fas fa-history me-2"></i> Past Bookings
+        </a>
+        <a
+          class="nav-link text-dark py-2"
+          [ngClass]="{
+            'active fw-bold text-primary': selectedStatus === 'Canceled'
+          }"
+          (click)="filterBookings('Canceled')"
+        >
+          <i class="fas fa-ban me-2"></i> Canceled Bookings
+        </a>
+      </nav>
     </div>
 
-    <!-- No Bookings Message -->
-    <ng-template #noBookings>
-        <div class="alert alert-warning text-center mt-4">
-            <strong>No bookings available for this category.</strong>
-        </div>
-    </ng-template>
-</div>
+    <!-- Booking List Section -->
+    <!-- Booking List Section -->
+    <div class="col-md-9">
+      <div *ngIf="filteredBookings.length > 0; else noBookings" @fadeAnimation>
+        <div class="row">
+          <div
+            *ngFor="let booking of filteredBookings; let i = index"
+            class="col-12 col-md-6 mb-4"
+          >
+            <div class="card border-0 shadow-lg rounded-4">
+              <div class="card-body">
+                <!-- Guest Information -->
+                <h5
+                  class="card-title text-primary d-flex align-items-center mb-3"
+                >
+                  <i class="fas fa-user me-3 text-muted"></i
+                  >{{ booking.guestName || booking.customerName }}
+                </h5>
+                <p class="card-subtitle text-muted mb-4">
+                  <i class="fas fa-info-circle me-2 text-warning"></i>
+                  {{
+                    booking.accommodationType ||
+                      booking.tourName ||
+                      booking.productName
+                  }}
+                </p>
 
+                <!-- Common Booking Details -->
+                <ul class="list-unstyled">
+                  <!-- Accommodation Specific Fields -->
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.numberOfGuests"
+                  >
+                    <i class="fas fa-users text-secondary me-3"></i>
+                    <strong>Guests:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.numberOfGuests
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.checkInDate"
+                  >
+                    <i class="fas fa-calendar-check text-success me-3"></i>
+                    <strong>Check-In:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.checkInDate | date : "mediumDate"
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.checkOutDate"
+                  >
+                    <i class="fas fa-calendar-times text-danger me-3"></i>
+                    <strong>Check-Out:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.checkOutDate | date : "mediumDate"
+                    }}</span>
+                  </li>
 
+                  <!-- Vehicle Specific Fields -->
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.selectedVehicleType"
+                  >
+                    <i class="fas fa-car text-secondary me-3"></i>
+                    <strong>Vehicle Type:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.selectedVehicleType
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.vehiclePickupLocation"
+                  >
+                    <i class="fas fa-map-marker-alt text-info me-3"></i>
+                    <strong>Pickup Location:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.vehiclePickupLocation
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.vehicleDropoffLocation"
+                  >
+                    <i class="fas fa-map-marker-alt text-warning me-3"></i>
+                    <strong>Dropoff Location:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.vehicleDropoffLocation
+                    }}</span>
+                  </li>
 
+                  <!-- Tour Specific Fields -->
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.tourName"
+                  >
+                    <i class="fas fa-route text-primary me-3"></i>
+                    <strong>Tour Name:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.tourName
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.tourguideType"
+                  >
+                    <i class="fas fa-user-tie text-secondary me-3"></i>
+                    <strong>Tour Guide:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.tourguideType
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.tourDate"
+                  >
+                    <i class="fas fa-calendar-alt text-success me-3"></i>
+                    <strong>Tour Date:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.tourDate | date : "mediumDate"
+                    }}</span>
+                  </li>
+                  <li
+                    class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.tourTime"
+                  >
+                    <i class="fas fa-clock text-info me-3"></i>
+                    <strong>Tour Time:</strong>
+                    <span class="ms-auto text-dark">{{
+                      booking.tourTime
+                    }}</span>
+                  </li>
 
+                  <!-- Booking Status -->
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="fas fa-info-circle text-info me-3"></i>
+                    <strong>Status:</strong>
+                    <span class="ms-auto">
+                      <span
+                        class="badge rounded-pill"
+                        [ngClass]="{
+                          'bg-success': booking.bookingStatus === 'Booked',
+                          'bg-warning': booking.bookingStatus === 'Pending',
+                          'bg-secondary':
+                            booking.bookingStatus === 'Completed' ||
+                            booking.bookingStatus === 'Completed',
+                          'bg-danger':
+                            booking.bookingStatus.includes('Canceled'),
+                          'bg-primary':
+                            booking.bookingStatus === 'Waiting for payment'
+                        }"
+                      >
+                        {{
+                          booking.bookingStatus === "Pending"
+                            ? "Waiting for Verification"
+                            : booking.bookingStatus
+                        }}
+                      </span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
 
-
-<!-- Bootstrap Modal for Booking Details -->
-<!-- Bootstrap Modal for Booking Details -->
-<div #bookingModal class="modal fade" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg rounded-3">
-        <!-- Modal Header -->
-        <div class="modal-header bg-dark text-white border-0">
-          <h5 class="modal-title d-flex align-items-center" id="bookingModalLabel">
-            <i class="fas fa-calendar-check me-3"></i>{{ selectedBookingType }} Booking Details
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-  
-        <!-- Modal Body -->
-        <div class="modal-body">
-          <div class="list-group list-group-flush">
-            <!-- Common Fields -->
-            <div class="list-group-item d-flex align-items-center border-0 py-3">
-              <i class="fas fa-user me-3 text-muted"></i>
-              <strong class="text-muted">Guest/Customer Name:</strong>
-              <span class="ms-auto text-dark">{{ selectedBooking?.guestName || selectedBooking?.customerName }}</span>
-            </div>
-  
-            <!-- Accommodation Fields -->
-            <ng-container *ngIf="selectedBookingType === 'Accommodation'">
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-bed me-3 text-muted"></i>
-                <strong class="text-muted">Accommodation Type:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.accommodationType }}</span>
+              <!-- Card Footer -->
+              <div class="card-footer text-center bg-light">
+                <button
+                  class="btn btn-outline-secondary btn-sm px-3 py-1 me-2"
+                  (click)="openBookingModal(i)"
+                >
+                  Details
+                </button>
+                <button
+                  *ngIf="booking.bookingStatus === 'Completed'"
+                  class="btn btn-outline-primary btn-sm px-3 py-1"
+                  (click)="navigateToReview(booking._id)"
+                >
+                  Review
+                </button>
               </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-calendar-check me-3 text-muted"></i>
-                <strong class="text-muted">Check-In Date:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.checkInDate | date:'mediumDate' }}</span>
-              </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-calendar-times me-3 text-muted"></i>
-                <strong class="text-muted">Check-Out Date:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.checkOutDate | date:'mediumDate' }}</span>
-              </div>
-            </ng-container>
-  
-            <!-- Vehicle Fields -->
-            <ng-container *ngIf="selectedBookingType === 'Vehicle'">
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-car me-3 text-muted"></i>
-                <strong class="text-muted">Vehicle Type:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.selectedVehicleType }}</span>
-              </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-map-marker-alt me-3 text-muted"></i>
-                <strong class="text-muted">Pickup Location:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.vehiclePickupLocation }}</span>
-              </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-clock me-3 text-muted"></i>
-                <strong class="text-muted">Rental Duration:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.rentalDuration }} hours</span>
-              </div>
-            </ng-container>
-  
-            <!-- Tour Fields -->
-            <ng-container *ngIf="selectedBookingType === 'Tour'">
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-map me-3 text-muted"></i>
-                <strong class="text-muted">Tour Name:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.tourName }}</span>
-              </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-calendar-day me-3 text-muted"></i>
-                <strong class="text-muted">Tour Date:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.tourDate | date:'mediumDate' }}</span>
-              </div>
-              <div class="list-group-item d-flex align-items-center border-0 py-3">
-                <i class="fas fa-clock me-3 text-muted"></i>
-                <strong class="text-muted">Tour Time:</strong>
-                <span class="ms-auto text-dark">{{ selectedBooking?.tourTime }}</span>
-              </div>
-            </ng-container>
-  
-            <!-- Booking Status -->
-            <div class="list-group-item d-flex align-items-center border-0 py-3">
-              <i class="fas fa-info-circle me-3 text-muted"></i>
-              <strong class="text-muted">Status:</strong>
-              <span class="ms-auto">
-                <span class="badge rounded-pill" [ngClass]="{
-                  'bg-success': selectedBooking?.bookingStatus === 'Booked',
-                  'bg-danger': ['Cancelled', 'Canceled by Traveller', 'Canceled by Provider'].includes(selectedBooking?.bookingStatus),
-                  'bg-primary': selectedBooking?.bookingStatus === 'Waiting for payment',
-                  'bg-warning': selectedBooking?.bookingStatus === 'Pending',
-                  'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
-                }">
-                  {{ selectedBooking?.bookingStatus }}
-                </span>
-              </span>
             </div>
           </div>
         </div>
-  
-        <!-- Modal Footer -->
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
-            <i class="fas fa-times-circle me-2"></i>Close
-          </button>
-          <button *ngIf="selectedBooking?.bookingStatus === 'Waiting for payment'" type="button" class="btn btn-outline-success btn-sm" (click)="payForBooking(selectedBooking._id, selectedBooking.amount, selectedBookingType)">
-            <i class="fas fa-check-circle me-2"></i>Pay Now
-          </button>
-          <button *ngIf="['Pending', 'Waiting for payment'].includes(selectedBooking?.bookingStatus)" type="button" class="btn btn-outline-danger btn-sm" (click)="cancelBooking(selectedBooking)">
-            <i class="fas fa-times-circle me-2"></i>Cancel Booking
-          </button>
+      </div>
+
+      <!-- No Bookings Message -->
+      <ng-template #noBookings>
+        <div class="alert alert-warning text-center mt-4">
+          <strong>No bookings available for this category.</strong>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Bootstrap Modal for Booking Details -->
+    <!-- Bootstrap Modal for Booking Details -->
+    <div
+      #bookingModal
+      class="modal fade"
+      tabindex="-1"
+      aria-labelledby="bookingModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <!-- Modal Header -->
+          <div class="modal-header bg-dark text-white border-0">
+            <h5
+              class="modal-title d-flex align-items-center"
+              id="bookingModalLabel"
+            >
+              <i class="fas fa-calendar-check me-3"></i
+              >{{ selectedBookingType }} Booking Details
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <div class="list-group list-group-flush">
+              <!-- Common Fields -->
+              <div
+                class="list-group-item d-flex align-items-center border-0 py-3"
+              >
+                <i class="fas fa-user me-3 text-muted"></i>
+                <strong class="text-muted">Guest/Customer Name:</strong>
+                <span class="ms-auto text-dark">{{
+                  selectedBooking?.guestName || selectedBooking?.customerName
+                }}</span>
+              </div>
+
+              <!-- Accommodation Fields -->
+              <ng-container *ngIf="selectedBookingType === 'Accommodation'">
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-bed me-3 text-muted"></i>
+                  <strong class="text-muted">Accommodation Type:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.accommodationType
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-calendar-check me-3 text-muted"></i>
+                  <strong class="text-muted">Check-In Date:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.checkInDate | date : "mediumDate"
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-calendar-times me-3 text-muted"></i>
+                  <strong class="text-muted">Check-Out Date:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.checkOutDate | date : "mediumDate"
+                  }}</span>
+                </div>
+              </ng-container>
+
+              <!-- Vehicle Fields -->
+              <ng-container *ngIf="selectedBookingType === 'Vehicle'">
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-car me-3 text-muted"></i>
+                  <strong class="text-muted">Vehicle Type:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.vehicleBooking[0]?.selectedVehicleType
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+                  <strong class="text-muted">Pickup Location:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.vehiclePickupLocation
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-clock me-3 text-muted"></i>
+                  <strong class="text-muted">Rental Duration:</strong>
+                  <span class="ms-auto text-dark"
+                    >{{ selectedBooking?.rentalDuration }} hours</span
+                  >
+                </div>
+              </ng-container>
+
+              <!-- Tour Fields -->
+              <ng-container *ngIf="selectedBookingType === 'Tour'">
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-map me-3 text-muted"></i>
+                  <strong class="text-muted">Tour Name:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.tourName
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-calendar-day me-3 text-muted"></i>
+                  <strong class="text-muted">Tour Date:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.tourDate | date : "mediumDate"
+                  }}</span>
+                </div>
+                <div
+                  class="list-group-item d-flex align-items-center border-0 py-3"
+                >
+                  <i class="fas fa-clock me-3 text-muted"></i>
+                  <strong class="text-muted">Tour Time:</strong>
+                  <span class="ms-auto text-dark">{{
+                    selectedBooking?.tourTime
+                  }}</span>
+                </div>
+              </ng-container>
+
+              <!-- Booking Status -->
+              <div
+                class="list-group-item d-flex align-items-center border-0 py-3"
+              >
+                <i class="fas fa-info-circle me-3 text-muted"></i>
+                <strong class="text-muted">Status:</strong>
+                <span class="ms-auto">
+                  <span
+                    class="badge rounded-pill"
+                    [ngClass]="{
+                      'bg-success': selectedBooking?.bookingStatus === 'Booked',
+                      'bg-danger': [
+                        'Cancelled',
+                        'Canceled by Traveller',
+                        'Canceled by Provider'
+                      ].includes(selectedBooking?.bookingStatus),
+                      'bg-primary':
+                        selectedBooking?.bookingStatus ===
+                        'Waiting for payment',
+                      'bg-warning':
+                        selectedBooking?.bookingStatus === 'Pending',
+                      'bg-secondary':
+                        selectedBooking?.bookingStatus === 'Completed'
+                    }"
+                  >
+                    {{ selectedBooking?.bookingStatus }}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer border-0">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times-circle me-2"></i>Close
+            </button>
+            <button
+              *ngIf="selectedBooking?.bookingStatus === 'Waiting for payment'"
+              type="button"
+              class="btn btn-outline-success btn-sm"
+              (click)="
+                payForBooking(
+                  selectedBooking._id,
+                  selectedBooking.amount,
+                  selectedBookingType
+                )
+              "
+            >
+              <i class="fas fa-check-circle me-2"></i>Pay Now
+            </button>
+            <button
+              *ngIf="
+                ['Pending', 'Waiting for payment'].includes(
+                  selectedBooking?.bookingStatus
+                )
+              "
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="cancelBooking(selectedBooking)"
+            >
+              <i class="fas fa-times-circle me-2"></i>Cancel Booking
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  
-
-
 </div>
