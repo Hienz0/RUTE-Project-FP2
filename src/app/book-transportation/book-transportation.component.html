@@ -288,7 +288,7 @@
                     [value]="subcategory"
                     (change)="onVehicleTypeChange($event, subcategory)"
                     [id]="'vehicleType' + subcategory.name"
-                    [disabled]="(remainingQuantity?.[subcategory._id] || 0) === 0"
+                    [disabled]="(remainingQuantity[subcategory._id] || 0) === 0"
                   />
                   <label
                     class="form-check-label fw-bold"
@@ -297,7 +297,7 @@
                     {{ subcategory.name }} - {{ subcategory.type }}
                   </label>
                   <span class="badge bg-secondary ms-2">
-                    Available: {{ remainingQuantity?.[subcategory._id] || 0 }}
+                    Available: {{ remainingQuantity[subcategory._id] || 0 }}
                   </span>
                 </div>
 
@@ -314,7 +314,7 @@
                   <input
                     type="number"
                     min="1"
-                    [max]="remainingQuantity?.[subcategory._id] || subcategory.quantity"
+                    [max]="remainingQuantity[subcategory._id] || subcategory.quantity"
                     [(ngModel)]="vehicleQuantities[subcategory.name]"
                     (input)="onQuantityInput(subcategory)"
                     class="form-control"

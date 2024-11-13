@@ -1668,6 +1668,10 @@ const bookingVehicleSchema = new mongoose.Schema({
       }
     }
   ],
+  totalBookingPrice: {
+      type: Number,
+      required: true
+  },
   vehicleDropoffLocation: {
       type: String,
       trim: true,
@@ -1682,7 +1686,7 @@ const bookingVehicleSchema = new mongoose.Schema({
   },
   pickupDate: {
     type: Date, // Storing the pickup date
-    required: true
+    required: truega
   },
   dropoffDate: {
     type: Date, // Storing the dropoff date
