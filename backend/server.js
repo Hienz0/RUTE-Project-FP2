@@ -2150,6 +2150,7 @@ const Review = mongoose.model('Review', reviewSchema);
 
 app.post('/add-review', async (req, res) => {
   const { userId, bookingId, rating, comment } = req.body;
+  console.log(req.body);
 
   // Validasi input
   if (!userId || !bookingId || !rating) {
@@ -2977,10 +2978,10 @@ app.post('/api/payments/update-status', async (req, res) => {
     case 'Accommodation':
       BookingModel = Booking;
       break;
-    case 'Tour Guide':
+    case 'Tour':
       BookingModel = TourBooking;
       break;
-    case 'Transportation':
+    case 'Vehicle':
       BookingModel = VehicleBooking;
       break;
     default:

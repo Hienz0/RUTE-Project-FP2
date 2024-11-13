@@ -23,15 +23,14 @@
           <li class="nav-item">
               <a class="nav-link" href="">Itinerary Planning</a>
           </li>
-          <li class="nav-item">
-              <a class="nav-link" href="/payment-list">TRY Payment List</a>
-          </li>
           <li class="nav-item dropdown" id="navProfile">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                  <img [src]="getFullImagePath(currentUser?.avatar)" alt="Profile" class="rounded-circle"
-                    style="width: 30px; height: 30px;">
-              </a>
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
+            aria-expanded="false">
+           <img [src]="currentUser?.avatar ? getFullImagePath(currentUser.avatar) : 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png'" 
+                alt="Profile" class="rounded-circle"
+                style="width: 30px; height: 30px;">
+         </a>
+         
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                   <li *ngIf="currentUser"><span class="dropdown-item">{{ currentUser.name }}</span></li>
                   <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user"></i> Customize User Profile</a></li>

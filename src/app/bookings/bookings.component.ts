@@ -144,6 +144,7 @@ export class BookingsComponent implements OnInit {
     // Open the modal using Bootstrap's API
     const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
     modal.show();
+    this.cdr.detectChanges();
   }
   
 

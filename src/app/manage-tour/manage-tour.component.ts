@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 
 
@@ -24,6 +24,8 @@ interface TourGuide {
 export class ManageTourComponent implements OnInit {
   originalTourGuideDetail: TourGuide[] = [];
   isEditing: boolean = false; // To toggle edit mode
+  serviceId: string | null = null;
+
 
   tourGuide: TourGuide = {
     name: '',
@@ -36,15 +38,16 @@ export class ManageTourComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private servicesService: ServicesService
+    private servicesService: ServicesService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    const serviceId = this.route.snapshot.paramMap.get('serviceId');
-    console.log('Service ID:', serviceId); // Log the serviceId
+    this.serviceId = this.route.snapshot.paramMap.get('serviceId');
+    console.log('Service ID:', this.serviceId); // Log the serviceId
     
-    if (serviceId) {
-      this.servicesService.getTourGuideServiceById(serviceId).subscribe((data) => {
+    if (this.serviceId) {
+      this.servicesService.getTourGuideServiceById(this.serviceId).subscribe((data) => {
         this.tourGuide = {
           name: data.productName,
           description: data.productDescription,
@@ -157,6 +160,12 @@ export class ManageTourComponent implements OnInit {
               });
             }
           );
+        }
+      }
+
+      viewBookings(): void {
+        if (this.serviceId) {
+          this.router.navigate(['/manage-bookings', this.serviceId]);
         }
       }
       

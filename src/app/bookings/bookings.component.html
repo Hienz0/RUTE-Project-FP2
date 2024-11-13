@@ -256,7 +256,8 @@
                   'bg-warning': selectedBooking?.bookingStatus === 'Pending',
                   'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
                 }">
-                    {{ selectedBooking?.bookingStatus }}
+                  {{ selectedBooking?.bookingStatus === 'Pending' ? 'Waiting for Verification' : selectedBooking?.bookingStatus }}
+
                   </span>
                 </span>
               </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet'; // Import Leaflet.js
@@ -47,7 +47,8 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private service: TransportationService,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     
   }
@@ -375,6 +376,12 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       .catch((error) => {
         console.error('Error with reverse geocoding:', error);
       });
+  }
+
+  viewBookings(): void {
+    if (this.transportID) {
+      this.router.navigate(['/manage-bookings', this.transportID]);
+    }
   }
   
 }
