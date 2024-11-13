@@ -921,4 +921,31 @@
   margin-top: 80px;
   }
   }
+
+  
+  .dropdown-menu {
+    position: absolute;  /* Keeps the dropdown in the same position relative to its parent */
+    left: -100px;         /* Moves the dropdown 10px to the left (adjust this value as needed) */
+    top: 100%;           /* Positions it directly below the button */
+    z-index: 1000;       /* Ensures it appears above other elements */
+    display: block;
+    width: 240px;      /* Keeps it visible when opened */
+  }
+  
+  .dropdown-menu .dropdown-item {
+    padding: 8px 16px;   /* Adjust for visual consistency */
+  }
+  
+  /* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .dropdown-menu {
+      left: 0;              /* Aligns the dropdown menu with the button on smaller screens */
+      width: 100%;          /* Makes the dropdown take the full width on mobile */
+      margin-left: 0;       /* Removes any margin to the left */
+    }
+    
+    .dropdown-menu .dropdown-item {
+      padding: 12px 16px;   /* Adjusts padding for better touch targets on mobile */
+    }
+  }
   

@@ -76,7 +76,6 @@ export class BookingsComponent implements OnInit {
     
     this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
       (response) => {
-        // Assuming 'response' contains the three booking categories
         const { accommodationBookings, tourBookings, vehicleBookings } = response;
     
         // Combine all booking types into one array
@@ -85,12 +84,13 @@ export class BookingsComponent implements OnInit {
           ...tourBookings,
           ...vehicleBookings
         ];
-        console.log('All Bookings:', this.bookings);
-
-        console.log('tour', tourBookings);
-        console.log('vehicle', vehicleBookings);
+  
+        // Sort combined bookings by 'updatedAt'
+        this.bookings.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  
+        console.log('All Sorted Bookings:', this.bookings);
     
-        // Filter bookings after combining them
+        // Filter bookings after sorting them
         this.filterBookings(this.selectedStatus);
         console.log('Filtered Bookings:', this.filteredBookings);
     
@@ -107,6 +107,7 @@ export class BookingsComponent implements OnInit {
       }
     );
   }
+  
   
   filterBookings(status: string): void {
     this.selectedStatus = status;

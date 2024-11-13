@@ -2,10 +2,10 @@
 <app-search></app-search>
 
 <div class="container my-5">
-  <h2 class="text-center mb-5">Accommodation Services</h2>
+  <h2 class="text-center mb-4 text-secondary" style="font-weight: 700; font-size: 2rem;">Accommodation Services</h2>
 
   <div *ngIf="accommodationServices.length === 0" class="text-center text-muted">
-    <p>No accommodation services found.</p>
+    <p><i class="fas fa-info-circle"></i> No accommodation services found.</p>
   </div>
 
   <div *ngIf="accommodationServices.length > 0" class="row">
@@ -13,44 +13,49 @@
       *ngFor="let service of accommodationServices"
       class="col-md-6 col-lg-4 mb-4"
       (click)="goToDetail(service._id)"
+      style="cursor: pointer; text-decoration: none; color: inherit;"
     >
-      <div class="card h-100 shadow-sm hover-shadow">
-        <div *ngIf="service.productImages?.length">
+      <div class="card h-100 border-0 shadow-sm" style="border-radius: 10px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
+        <!-- Card Image Section -->
+        <div *ngIf="service.productImages?.length" class="position-relative">
           <img
             [src]="'http://localhost:3000/' + service.productImages[0]"
             alt="{{ service.productName }}"
-            class="card-img-top img-fluid"
-            style="height: 300px; object-fit: cover;"
+            class="card-img-top"
+            style="height: 250px; object-fit: cover;"
           />
+          <div class="position-absolute top-0 end-0 p-2">
+            <span class="badge bg-primary"><i class="fas fa-map-marker-alt"></i> {{ service.location }}</span>
+          </div>
         </div>
-        <div class="card-body">
-          <h3 class="card-title">{{ service.productName }}</h3>
-          <p class="card-text">{{ service.productDescription }}</p>
-          <p><strong>Location:</strong> {{ service.location }}</p>
-          <div class="rating">
+
+        <!-- Card Body Section -->
+        <div class="card-body" style="padding: 1.25rem;">
+          <h5 class="card-title text-dark mb-2" style="font-weight: 600; font-size: 1.15rem;">
+            <i class="fas fa-hotel me-2 text-secondary"></i>{{ service.productName }}
+          </h5>
+          <p class="card-text text-muted" style="font-size: 0.95rem; line-height: 1.4;">{{ service.productDescription }}</p>
+
+          <!-- Rating Section -->
+          <div class="d-flex align-items-center mt-3">
             <ng-container *ngIf="service.averageRating > 0; else noRating">
-              <!-- Full Stars -->
-              <i *ngFor="let _ of [].constructor(Math.floor(service.averageRating))" class="fas fa-star star"></i>
-          
-              <!-- Half Star (only one if rating has a half part) -->
-              <i *ngIf="service.averageRating % 1 >= 0.5" class="fas fa-star-half-alt star"></i>
-          
-              <!-- Empty Stars (always ensures 5 stars are displayed) -->
-              <i *ngFor="let _ of [].constructor(5 - Math.floor(service.averageRating) - (service.averageRating % 1 >= 0.5 ? 1 : 0))" class="far fa-star star"></i>
-          
-              <!-- Display Average Rating and Review Count in Format "4.3 (15)" -->
-              <span>{{ service.averageRating | number: '1.1-1' }} ({{ service.reviewCount }})</span>
+              <div class="d-flex align-items-center">
+                <!-- Full Stars -->
+                <i *ngFor="let _ of [].constructor(Math.floor(service.averageRating))" class="fas fa-star text-warning"></i>
+                <!-- Half Star -->
+                <i *ngIf="service.averageRating % 1 >= 0.5" class="fas fa-star-half-alt text-warning"></i>
+                <!-- Empty Stars -->
+                <i *ngFor="let _ of [].constructor(5 - Math.floor(service.averageRating) - (service.averageRating % 1 >= 0.5 ? 1 : 0))" class="far fa-star text-warning"></i>
+              </div>
+              <span class="text-muted ms-2">{{ service.averageRating | number: '1.1-1' }} ({{ service.reviewCount }})</span>
             </ng-container>
-          
-            <!-- Fallback message if there is no rating -->
             <ng-template #noRating>
-              <span class="text-muted">No ratings yet</span>
+              <span class="text-muted"><i class="far fa-star text-warning"></i> No ratings yet</span>
             </ng-template>
           </div>
-          
-          
         </div>
       </div>
     </div>
   </div>
 </div>
+
