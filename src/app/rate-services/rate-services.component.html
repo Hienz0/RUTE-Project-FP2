@@ -1,57 +1,186 @@
 <div class="container mt-5">
-    <!-- Product Description Section -->
-    <div class="card mb-5 border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="row g-0">
-            <!-- Product Image -->
-            <div class="col-md-5 d-flex align-items-center justify-content-center" style="background-color: #f8f9fa; padding: 2rem;">
-                <img [src]="productImage" class="img-fluid rounded-3 shadow-sm" alt="Product Image" style="object-fit: cover; width: 100%; max-height: 350px;">
-            </div>
-            
-            <!-- Product Details -->
-            <div class="col-md-7 p-5 d-flex flex-column justify-content-center bg-white">
-                <h2 class="fw-bold text-dark mb-2">{{ productName }}</h2>
-                <p class="text-muted mb-2" style="font-size: 1rem; line-height: 1.6;">{{ productDescription }}</p>
-                <p class="text-muted mb-4"><small>Category: {{ productCategory }}</small></p>
-                
-                <!-- Star Rating Display for Product -->
-                <div class="d-flex align-items-center mb-3">
-                    <div class="text-warning fs-4">
-                        <i *ngFor="let star of [1, 2, 3, 4, 5]" 
-                           class="bi"
-                           [class.bi-star-fill]="star <= averageRating"
-                           [class.bi-star]="star > averageRating"></i>
-                    </div>
-                    <span class="ms-2 text-muted small">({{ totalReviews }} Reviews)</span>
-                </div>
-            </div>
+  <!-- Product Description Section -->
+  <div
+    class="card mb-5 border-0 rounded-4 overflow-hidden"
+    style="
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05), 0 3px 6px rgba(0, 0, 0, 0.02);
+    "
+  >
+    <div class="row g-0">
+      <!-- Product Image -->
+      <div
+        class="col-md-5 d-flex align-items-center justify-content-center bg-light position-relative"
+        style="padding: 2rem"
+      >
+        <!-- Previous Button -->
+        <button
+          (click)="previousImage()"
+          style="
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #6c757d;
+            font-size: 1.5rem;
+            padding: 0.8rem;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+          "
+          
+        >
+          &#10094;
+        </button>
+
+        <!-- Product Image -->
+        <img
+          [src]="productImages[currentImageIndex]"
+          alt="Product Image"
+          class="rounded-3"
+          style="
+            object-fit: cover;
+            width: 100%;
+            max-height: 250px;
+            height: 250px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+          "
+        />
+
+        <!-- Next Button -->
+        <button
+          (click)="nextImage()"
+          style="
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #6c757d;
+            font-size: 1.5rem;
+            padding: 0.8rem;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+          "
+          
+        >
+          &#10095;
+        </button>
+      </div>
+
+      <!-- Product Details -->
+      <div class="col-md-7 p-5" style="background: #ffffff">
+        <h1 class="fw-bold text-dark mb-3">{{ productName }}</h1>
+        <p
+          class="text-secondary mb-3"
+          style="font-size: 1rem; line-height: 1.8"
+        >
+          {{ productDescription }}
+        </p>
+        <p class="text-muted mb-4">
+          <span
+            class="badge py-2 px-3"
+            style="
+              background: linear-gradient(135deg, #42a5f5, #007bff); 
+              color: #ffffff;
+              font-weight: bold;
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+              transition: transform 0.2s, box-shadow 0.3s;
+            "
+          >
+            Category: {{ productCategory }}
+          </span>
+        </p>
+
+        <!-- Star Rating -->
+        <div class="d-flex align-items-center mb-4">
+          <div class="text-warning fs-5">
+            <i
+              *ngFor="let star of [1, 2, 3, 4, 5]"
+              class="bi"
+              [class.bi-star-fill]="star <= averageRating"
+              [class.bi-star]="star > averageRating"
+              style="margin-right: 0.2rem"
+            ></i>
+          </div>
+          <span class="ms-2 text-secondary small"
+            >({{ totalReviews }} Reviews)</span
+          >
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Form Section -->
+  <div
+    class="card border-0 rounded-4 p-5"
+    style="background: #ffffff; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05)"
+  >
+    <h4 class="fw-bold text-dark mb-4">Share Your Experience</h4>
+    <p class="text-secondary mb-4" style="font-size: 0.95rem">
+      Your feedback helps others make informed choices. We value your opinion!
+    </p>
+
+    <!-- Rating Selection -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Your Rating</label>
+      <div class="fs-4 text-warning d-flex align-items-center gap-1">
+        <i
+          *ngFor="let star of [1, 2, 3, 4, 5]"
+          class="bi star"
+          (click)="selectRating(star)"
+          (mouseenter)="setHoveredRating(star)"
+          (mouseleave)="resetHoveredRating()"
+          [class.bi-star-fill]="star <= (hoveredRating || rating)"
+          [class.bi-star]="star > (hoveredRating || rating)"
+          style="
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 0.2rem;
+          "
+          onmouseover="this.style.transform='scale(1.2)';"
+          onmouseout="this.style.transform='scale(1)';"
+        ></i>
+      </div>
     </div>
 
-    <!-- Review Form Section -->
-    <div class="card border-0 shadow-sm rounded-4 p-5">
-        <h4 class="fw-bold text-dark mb-3">Share Your Experience</h4>
-        <p class="text-secondary mb-4" style="font-size: 0.9rem;">Your feedback helps others make informed choices. We appreciate your insights!</p>
-
-        <!-- Rating Selection -->
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Your Rating</label>
-            <div class="fs-4 text-warning d-flex align-items-center gap-1">
-                <i *ngFor="let star of [1, 2, 3, 4, 5]" 
-                   class="bi star"
-                   (click)="selectRating(star)" 
-                   (mouseenter)="setHoveredRating(star)"
-                   (mouseleave)="resetHoveredRating()"
-                   [class.bi-star-fill]="star <= (hoveredRating || rating)"
-                   [class.bi-star]="star > (hoveredRating || rating)"></i>
-            </div>
-        </div>
-
-        <!-- Review Comment -->
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Your Comment</label>
-            <textarea class="form-control rounded-3 border-light shadow-sm" [(ngModel)]="reviewComment" rows="4" placeholder="Describe your experience..." style="resize: none; padding: 1rem; font-size: 1rem;"></textarea>
-        </div>
-
-        <button (click)="submitReview()" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm">Submit Review</button>
+    <!-- Review Comment -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Your Comment</label>
+      <textarea
+        class="form-control rounded-3 border-light"
+        [(ngModel)]="reviewComment"
+        rows="4"
+        placeholder="Describe your experience..."
+        style="
+          resize: none;
+          padding: 1rem;
+          font-size: 1rem;
+          box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.05);
+        "
+      ></textarea>
     </div>
+
+    <button
+      (click)="submitReview()"
+      class="btn w-100 py-3 fw-bold rounded-3"
+      style="
+        background: linear-gradient(135deg, #66bb6a, #388e3c);
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.3s;
+      "
+      onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 8px 14px rgba(0, 128, 0, 0.2)';"
+      onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 12px rgba(0, 128, 0, 0.1)';"
+    >
+      Submit Review
+    </button>
+  </div>
 </div>

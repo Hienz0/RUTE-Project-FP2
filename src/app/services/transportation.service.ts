@@ -45,4 +45,16 @@ export class TransportationService {
   getRemainingQuantity(serviceId: string, pickupDate: string, dropoffDate: string): Observable<any> {
     return this.http.get<any>(`${this.getUrl}?serviceId=${serviceId}&pickupDate=${pickupDate}&dropoffDate=${dropoffDate}`);
   }
+
+   // Fungsi untuk mendapatkan data service berdasarkan ID
+   getServiceById(serviceId: string): Observable<any> {
+    const url = `${this.url}/getServiceById/${serviceId}`;
+    return this.http.get<any>(url);
+  }
+
+  addReview(reviewData: { userId: string; bookingId: string; rating: number; comment?: string }): Observable<any> {
+    const url = `${this.url}/add-review`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, reviewData, { headers });
+  }
 }

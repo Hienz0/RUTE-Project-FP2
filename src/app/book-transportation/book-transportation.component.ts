@@ -380,15 +380,16 @@ export class BookTransportationComponent implements OnInit {
     this.service.bookTransport(bookingData).subscribe(
       (response) => {
         console.log('Transportation booked successfully:', response);
-         // Show success message with redirect
+        const bookingId = response.bookingDetails._id;
+        console.log(bookingId);
+        
+        // Show success message with redirect
         this.showAlert(
           'success',
           'Booking Successful!',
           'Your transportation service has been booked successfully.',
-          '/transportationService'
+          `/bookings/${bookingId}` // Use backticks for template string
         );
-        const bookingId = response._id;
-        this.router.navigate([`/bookings/${bookingId}`]);
       },
       (error) => {
         // Show error message

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
@@ -46,7 +46,8 @@ export class BookingsComponent implements OnInit {
     private route: ActivatedRoute,
     private bookingService: BookingService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
 
   ) {}
 
@@ -248,6 +249,12 @@ cancelBooking(booking: any): void {
           });
       }
   });
+}
+
+
+navigateToReview(bookingId: string): void {
+  this.router.navigate(['rateServices/', bookingId]);
+  console.log(bookingId);
 }
 
 
