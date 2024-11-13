@@ -1686,7 +1686,7 @@ const bookingVehicleSchema = new mongoose.Schema({
   },
   pickupDate: {
     type: Date, // Storing the pickup date
-    required: truega
+    required: true
   },
   dropoffDate: {
     type: Date, // Storing the dropoff date
