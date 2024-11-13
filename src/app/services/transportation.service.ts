@@ -51,4 +51,10 @@ export class TransportationService {
     const url = `${this.url}/getServiceById/${serviceId}`;
     return this.http.get<any>(url);
   }
+
+  addReview(reviewData: { userId: string; bookingId: string; rating: number; comment?: string }): Observable<any> {
+    const url = `${this.url}/add-review`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, reviewData, { headers });
+  }
 }

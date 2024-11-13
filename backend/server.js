@@ -160,6 +160,8 @@ const bookingAccommodationSchema = new mongoose.Schema({
     default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
     enum: ['Pending', 'Paid', 'Failed']
   },
+
+  isReviewed: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Create the Booking model
@@ -1124,6 +1126,8 @@ paymentStatus: {
   enum: ['Pending', 'Paid', 'Failed']
 },
 
+isReviewed: { type: Boolean, default: false },
+
 }, { timestamps: true });
 
 // Create the Booking model
@@ -1693,11 +1697,14 @@ const bookingVehicleSchema = new mongoose.Schema({
       default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
       enum: ['Booked', 'Cancelled', 'Completed']
   },
+  isReviewed: { type: Boolean, default: false },
   paymentStatus: {
     type: String,
     default: 'Pending',  // Possible statuses: 'Pending', 'Paid', 'Failed'
     enum: ['Pending', 'Paid', 'Failed']
   }
+
+  
 }, { timestamps: true });
 
 // Create the Booking model
@@ -2060,64 +2067,82 @@ app.get('/remaining-quantity', async (req, res) => {
 
 
 const reviewSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who made the review
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true }, // Reference to the product being reviewed
-  rating: { type: Number, required: true, min: 1, max: 5 }, // Rating between 1 to 5 stars
-  comment: String, // Optional comment
-  createdAt: { type: Date, default: Date.now } // Timestamp for the review
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
+  bookingId: { type: mongoose.Schema.Types.ObjectId, required: true }, // ID dari booking terkait
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: String,
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Review = mongoose.model('Review', reviewSchema);
 
 app.post('/add-review', async (req, res) => {
- 
-    const { userId, productId, rating, comment } = req.body;
-  
-    // Validate the input
-    if (!userId || !productId || !rating) {
-      return res.status(400).json({ message: 'Missing required fields: userId, productId, or rating.' });
+  const { userId, bookingId, rating, comment } = req.body;
+
+  // Validasi input
+  if (!userId || !bookingId || !rating) {
+    return res.status(400).json({
+      message: 'Missing required fields: userId, bookingId, or rating.',
+    });
+  }
+
+  try {
+    let booking; // Untuk menyimpan data booking yang ditemukan
+    let serviceId; // Untuk menyimpan serviceId terkait booking
+
+    // Cari bookingId di tiga skema
+    booking = await Booking.findOne({ _id: bookingId });
+    if (!booking) booking = await TourBooking.findOne({ _id: bookingId });
+    if (!booking) booking = await VehicleBooking.findOne({ _id: bookingId });
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
     }
-  
-    try {
-      // // Check if the user has booked the product in any of the three booking types
-      // const accommodationBooking = await AccommodationBooking.findOne({ userId, productId, status: 'completed' });
-      // const tourGuideBooking = await TourGuideBooking.findOne({ userId, productId, status: 'completed' });
-      // const transportationBooking = await TransportationBooking.findOne({ userId, productId, status: 'completed' });
-  
-      // // If no booking found, restrict the review
-      // if (!accommodationBooking && !tourGuideBooking && !transportationBooking) {
-      //   return res.status(400).json({ message: 'You can only review products you have booked.' });
-      // }
-  
-       // Create the review
-    const review = new Review({ userId, productId, rating, comment });
+
+    // Pastikan booking belum direview
+    if (booking.isReviewed) {
+      return res.status(400).json({ message: 'Booking has already been reviewed' });
+    }
+
+    // Ambil serviceId terkait dari booking
+    serviceId = booking.serviceId;
+
+    if (!serviceId) {
+      return res.status(400).json({ message: 'Service ID is missing from booking data.' });
+    }
+
+    // Buat review baru dengan bookingId dan serviceId
+    const review = new Review({ userId, bookingId, serviceId, rating, comment });
     await review.save();
 
-    // Find the product (service) to update its average rating
-    const service = await Service.findById(productId);
-
+    // Cari service berdasarkan serviceId dan hitung rata-rata rating baru
+    const service = await Service.findById(serviceId);
     if (service) {
-      // Calculate new average rating
       const newTotalReviews = service.totalReviews + 1;
-      let newAverageRating = ((service.averageRating * service.totalReviews) + rating) / newTotalReviews;
+      let newAverageRating =
+        (service.averageRating * service.totalReviews + rating) / newTotalReviews;
 
-      // Round to 1 decimal place
       newAverageRating = parseFloat(newAverageRating.toFixed(1));
-
-      // Update service with new rating and review count
       service.averageRating = newAverageRating;
       service.totalReviews = newTotalReviews;
       await service.save();
     }
 
-    // Return success message
-    res.status(200).json({ message: 'Review added successfully and average rating updated' });
+    // Tandai booking sebagai telah direview
+    booking.isReviewed = true;
+    await booking.save();
 
+    res.status(200).json({
+      message: 'Review added successfully and average rating updated',
+    });
   } catch (error) {
-    console.error('Error:', error); // Log the actual error
+    console.error('Error:', error);
     res.status(500).json({ message: 'Error adding review', error });
   }
 });
+
+
 
 
 //Customize Profile

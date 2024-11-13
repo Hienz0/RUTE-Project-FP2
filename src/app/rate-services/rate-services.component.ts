@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router'; // Untuk mendapatkan serviceId dari URL
 import { TransportationService } from '../services/transportation.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-rate-services',
@@ -21,14 +22,17 @@ export class RateServicesComponent implements OnInit {
   hoveredRating = 0; // Current hover rating
   reviewComment = ''; // User's review comment
   serviceId: string = '';
+  currentUser: any;
 
   constructor(
     private service: TransportationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     // Dapatkan serviceId dari URL atau gunakan ID contoh untuk testing
+    this.currentUser = this.authService.currentUserValue;
     this.serviceId = this.route.snapshot.paramMap.get('id')!;
   
     // Panggil service untuk mendapatkan detail produk berdasarkan serviceId
@@ -69,8 +73,30 @@ export class RateServicesComponent implements OnInit {
   }
 
   submitReview() {
-    console.log('Rating:', this.rating);
-    console.log('Comment:', this.reviewComment);
+    if (this.rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+
+    const reviewData = {
+      userId: this.currentUser.userId,
+      bookingId: this.serviceId,
+      rating: this.rating,
+      comment: this.reviewComment
+    };
+
+    console.log(reviewData);
+
+    this.service.addReview(reviewData).subscribe({
+      next: (response) => {
+        console.log(response.message);
+        alert('Review submitted successfully');
+      },
+      error: (error) => {
+        console.error('Error submitting review:', error);
+        alert('Failed to submit review');
+      }
+    });
   }
 
   previousImage(): void {
