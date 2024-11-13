@@ -3028,95 +3028,95 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 
 
 ////////////////////////////
-async function injectDummyData() {
-  try {
-    // Count existing vehicle bookings
-    const existingCount = await VehicleBooking.countDocuments();
+// async function injectDummyData() {
+//   try {
+//     // Count existing vehicle bookings
+//     const existingCount = await VehicleBooking.countDocuments();
     
-    if (existingCount >= 10) {
-      console.log('There are already 10 or more vehicle bookings. No new data injected.');
-      return; // Exit if there are already 10 or more bookings
-    }
+//     if (existingCount >= 10) {
+//       console.log('There are already 10 or more vehicle bookings. No new data injected.');
+//       return; // Exit if there are already 10 or more bookings
+//     }
 
-    const dummyData = [];
+//     const dummyData = [];
 
-    for (let i = 1; i <= 10; i++) {
-      const booking = new VehicleBooking({
-        customerName: `Customer ${i}`,
-        productName: `Product ${i}`,
-        userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
-        serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
-        vehicleBooking: [
-          {
-            name: `Vehicle ${i}`,
-            quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
-            selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
-            pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
-            totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
-          },
-        ],
-        vehicleDropoffLocation: `Location ${i}`,
-        vehiclePickupLocation: `Location ${i}`,
-        rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
-        pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
-        dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
-        specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
-        bookingStatus: 'Booked',
-        paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
-      });
+//     for (let i = 1; i <= 10; i++) {
+//       const booking = new VehicleBooking({
+//         customerName: `Customer ${i}`,
+//         productName: `Product ${i}`,
+//         userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
+//         serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
+//         vehicleBooking: [
+//           {
+//             name: `Vehicle ${i}`,
+//             quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
+//             selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
+//             pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
+//             totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
+//           },
+//         ],
+//         vehicleDropoffLocation: `Location ${i}`,
+//         vehiclePickupLocation: `Location ${i}`,
+//         rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
+//         pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
+//         dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
+//         specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
+//         bookingStatus: 'Booked',
+//         paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
+//       });
 
-      dummyData.push(booking);
-    }
+//       dummyData.push(booking);
+//     }
 
-    await VehicleBooking.insertMany(dummyData);
-    console.log('Dummy vehicle booking data injected successfully!');
-  } catch (error) {
-    console.error('Error injecting dummy data:', error);
-  }
-}
+//     await VehicleBooking.insertMany(dummyData);
+//     console.log('Dummy vehicle booking data injected successfully!');
+//   } catch (error) {
+//     console.error('Error injecting dummy data:', error);
+//   }
+// }
 
 
-async function injectDummyData() {
+// async function injectDummyData() {
 
-  const dummyData = [];
+//   const dummyData = [];
 
-  for (let i = 1; i <= 10; i++) {
-    const booking = new VehicleBooking({
-      customerName: `Customer ${i}`,
-      productName: `Product ${i}`,
-      userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
-      serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
-      vehicleBooking: [
-        {
-          name: `Vehicle ${i}`,
-          quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
-          selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
-          pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
-          totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
-        },
-      ],
-      vehicleDropoffLocation: `Location ${i}`,
-      vehiclePickupLocation: `Location ${i}`,
-      rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
-      pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
-      dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
-      specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
-      bookingStatus: 'Booked',
-      paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
-    });
+//   for (let i = 1; i <= 10; i++) {
+//     const booking = new VehicleBooking({
+//       customerName: `Customer ${i}`,
+//       productName: `Product ${i}`,
+//       userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
+//       serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
+//       vehicleBooking: [
+//         {
+//           name: `Vehicle ${i}`,
+//           quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
+//           selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
+//           pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
+//           totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
+//         },
+//       ],
+//       vehicleDropoffLocation: `Location ${i}`,
+//       vehiclePickupLocation: `Location ${i}`,
+//       rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
+//       pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
+//       dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
+//       specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
+//       bookingStatus: 'Booked',
+//       paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
+//     });
 
-    dummyData.push(booking);
-  }
+//     dummyData.push(booking);
+//   }
 
-  try {
-    await VehicleBooking.insertMany(dummyData);
-    console.log('Dummy data injected successfully!');
-  } catch (error) {
-    console.error('Error injecting dummy data:', error);
-  }
-}
+//   try {
+//     await VehicleBooking.insertMany(dummyData);
+//     console.log('Dummy data injected successfully!');
+//   } catch (error) {
+//     console.error('Error injecting dummy data:', error);
+//   }
+// }
 
-injectDummyData();
+// injectDummyData();
 
 
 
