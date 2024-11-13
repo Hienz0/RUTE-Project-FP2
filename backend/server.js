@@ -1695,7 +1695,7 @@ const bookingVehicleSchema = new mongoose.Schema({
   bookingStatus: {
       type: String,
       default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-      enum: ['Booked', 'Cancelled', 'Completed']
+      enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment']
   },
   isReviewed: { type: Boolean, default: false },
   paymentStatus: {
@@ -1746,7 +1746,7 @@ async function updateTourBookings() {
       if (expiredTours.length > 0) {
           await TourBooking.updateMany(
               { _id: { $in: expiredTours.map(tour => tour._id) } },
-              { $set: { bookingStatus: 'Completed' } }
+              { $set: { bookingStatus: 'Complete' } }
           );
           console.log(`${expiredTours.length} tour bookings marked as Completed.`);
       }
@@ -1767,7 +1767,7 @@ async function updateAccommodationBookings() {
       if (expiredAccommodations.length > 0) {
           await Booking.updateMany(
               { _id: { $in: expiredAccommodations.map(acc => acc._id) } },
-              { $set: { bookingStatus: 'CheckedOut' } }
+              { $set: { bookingStatus: 'Complete' } }
           );
           console.log(`${expiredAccommodations.length} accommodation bookings marked as CheckedOut.`);
       }
@@ -1788,7 +1788,7 @@ async function updateVehicleBookings() {
       if (expiredVehicles.length > 0) {
           await VehicleBooking.updateMany(
               { _id: { $in: expiredVehicles.map(veh => veh._id) } },
-              { $set: { bookingStatus: 'Completed' } }
+              { $set: { bookingStatus: 'Complete' } }
           );
           console.log(`${expiredVehicles.length} vehicle bookings marked as Completed.`);
       }
@@ -1922,15 +1922,13 @@ app.post('/api/bookTransports', async (req, res) => {
       pickupDate: start,
       dropoffDate: end,
       specialRequest,
-      bookingStatus: 'Booked',
+      bookingStatus: 'Waiting for payment',
       totalBookingPrice
     });
 
     await newBooking.save();
 
-    // Add the booking to the user's booking history
-    user.bookingHistory.push({ bookingType: 'transportation', bookingId: newBooking._id });
-    await user.save();
+   
 
     res.status(201).json({
       success: true,

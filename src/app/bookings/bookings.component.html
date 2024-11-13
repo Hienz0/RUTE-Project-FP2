@@ -29,9 +29,9 @@
         <a
           class="nav-link text-dark py-2"
           [ngClass]="{
-            'active fw-bold text-primary': selectedStatus === 'Completed'
+            'active fw-bold text-primary': selectedStatus === 'Complete'
           }"
-          (click)="filterBookings('Completed')"
+          (click)="filterBookings('Complete')"
         >
           <i class="fas fa-history me-2"></i> Past Bookings
         </a>
@@ -193,8 +193,8 @@
                           'bg-success': booking.bookingStatus === 'Booked',
                           'bg-warning': booking.bookingStatus === 'Pending',
                           'bg-secondary':
-                            booking.bookingStatus === 'Completed' ||
-                            booking.bookingStatus === 'Completed',
+                            booking.bookingStatus === 'Complete' ||
+                            booking.bookingStatus === 'Complete',
                           'bg-danger':
                             booking.bookingStatus.includes('Canceled'),
                           'bg-primary':
@@ -222,7 +222,7 @@
                 </button>
                 <button
                   *ngIf="
-                    booking.bookingStatus === 'Completed' && !booking.isReviewed
+                    booking.bookingStatus === 'Complete' && !booking.isReviewed
                   "
                   class="btn btn-outline-primary btn-sm px-3 py-1"
                   (click)="navigateToReview(booking._id)"
@@ -232,7 +232,7 @@
 
                 <button
                   *ngIf="
-                    booking.bookingStatus === 'Completed' && booking.isReviewed
+                    booking.bookingStatus === 'Complete' && booking.isReviewed
                   "
                   class="btn btn-outline-secondary btn-sm px-3 py-1"
                   disabled
@@ -410,7 +410,7 @@
                       'bg-warning':
                         selectedBooking?.bookingStatus === 'Pending',
                       'bg-secondary':
-                        selectedBooking?.bookingStatus === 'Completed'
+                        selectedBooking?.bookingStatus === 'Complete'
                     }"
                   >
                     {{ selectedBooking?.bookingStatus }}
