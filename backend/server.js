@@ -180,20 +180,34 @@ app.get('/api/bookings/accommodation/:serviceId', async (req, res) => {
 });
 
 app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
   try {
-      // Log the incoming request parameters
-      console.log(`Received request for userId: ${req.params.userId}`);
+    console.log('Fetching all bookings for userId :', userId);
 
-      const bookings = await Booking.find({ userId: req.params.userId })
-                                    .populate('userId accommodationId roomTypeId roomId');
-      
-      // Log the response data
-      console.log('Bookings found:', bookings);
+    // Retrieve all tour bookings for the user, without using populate
+    const allTourBookings = await TourBooking.find({ userId: userId });
 
-      res.json(bookings);
+    // Retrieve all accommodation bookings for the user, without using populate
+    const allAccommodationBookings = await Booking.find({ userId: userId });
+
+    // Retrieve all vehicle bookings for the user, without using populate
+    const allVehicleBookings = await VehicleBooking.find({ userId: userId });
+
+    console.log("Tour bookings:", allTourBookings);
+    console.log("Accommodation bookings:", allAccommodationBookings);
+    console.log("Vehicle bookings:", allVehicleBookings);
+
+    // Combine and send the response with all types of bookings
+    return res.status(200).json({
+      tourBookings: allTourBookings,
+      accommodationBookings: allAccommodationBookings,
+      vehicleBookings: allVehicleBookings
+    });
+    
   } catch (error) {
-      console.error('Error fetching bookings:', error);
-      res.status(500).json({ message: 'Error fetching bookings', error });
+    console.error("Error fetching bookings:", error);
+    return res.status(500).json({ message: "Error fetching bookings", error });
   }
 });
 
@@ -222,7 +236,7 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
     const bookings = await Booking.find({
       serviceId: serviceId,
       roomTypeId: roomTypeId,
-      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] }
     }, 'checkInDate checkOutDate roomId');
 
     // Count bookings per date
@@ -431,7 +445,7 @@ app.get('/api/bookings/check-availability', async (req, res) => {
     const overlappingBookings = await Booking.find({
       serviceId,
       roomNumber,
-      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] },
+      bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] },
       $or: [
         { 
           checkInDate: { $lt: checkOut },
@@ -720,7 +734,7 @@ app.get('/api/services/rooms/available/:roomTypeId', async (req, res) => {
 
       const overlappingBooking = await Booking.findOne({
         roomId: room._id,
-        bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller'] }, // Exclude specific canceled bookings
+        bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] }, // Exclude specific canceled bookings
         $or: [
           {
             checkInDate: { $lte: checkOut }, // Prevents booking if check-in date <= new check-out
@@ -1077,6 +1091,11 @@ const bookingTourSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0
+  },
     bookingStatus: {
         type: String,
         default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
@@ -1673,6 +1692,11 @@ const bookingVehicleSchema = new mongoose.Schema({
       type: String,
       default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
       enum: ['Booked', 'Cancelled', 'Completed']
+  },
+  paymentStatus: {
+    type: String,
+    default: 'Pending',  // Possible statuses: 'Pending', 'Paid', 'Failed'
+    enum: ['Pending', 'Paid', 'Failed']
   }
 }, { timestamps: true });
 
@@ -2792,17 +2816,20 @@ const snap = new midtransClient.Snap({
 
 // Create transaction route
 app.post('/api/create-transaction', async (req, res) => {
-  const { bookingId, amount, userId } = req.body;
-  if (!bookingId || !amount || !userId) {
+  const { bookingId, amount, userId, bookingType } = req.body;
+
+  const shortTimestamp = Date.now().toString().slice(-6);
+
+  if (!bookingId || !amount || !userId || !bookingType) {
     return res.status(400).json({ error: 'Required parameters missing' });
   }
 
   try {
-    // Define the transaction payload
+    // Define the transaction payload for Midtrans
     const midtransTransaction = {
       transaction_details: {
-        order_id: `order-${bookingId}-${Date.now()}`, // Unique order ID
-        gross_amount: amount, // Total amount to be charged
+        order_id: `ord-${bookingType.slice(0, 3)}-${bookingId.slice(-6)}-${shortTimestamp}`, // Unique order ID with booking type
+        gross_amount: amount,
       },
       customer_details: {
         user_id: userId,
@@ -2812,10 +2839,10 @@ app.post('/api/create-transaction', async (req, res) => {
     // Create the transaction with Midtrans
     const transaction = await snap.createTransaction(midtransTransaction);
     res.json({ token: transaction.token });
-    console.log(transaction);
+    console.log(`Transaction created successfully for ${bookingType}:`, transaction);
   } catch (error) {
-    console.error("Midtrans transaction creation failed:", error);
-    res.status(500).json({ error: "Transaction creation failed", details: error });
+    console.error('Midtrans transaction creation failed:', error);
+    res.status(500).json({ error: 'Transaction creation failed', details: error });
   }
 });
 
@@ -2823,23 +2850,43 @@ app.post('/api/create-transaction', async (req, res) => {
 app.post('/api/payments/update-status', async (req, res) => {
   const { bookingId, bookingType } = req.body;
 
-  // Identify the correct model based on booking type
+  // Select the appropriate booking model based on the booking type
   let BookingModel;
-  if (bookingType === 'Accommodation') BookingModel = Booking;
-  else if (bookingType === 'Tour Guide') BookingModel = TourBooking;
-  else if (bookingType === 'Transportation') BookingModel = VehicleBooking;
-  else return res.status(400).json({ error: 'Invalid booking type' });
+  switch (bookingType) {
+    case 'Accommodation':
+      BookingModel = Booking;
+      break;
+    case 'Tour Guide':
+      BookingModel = TourBooking;
+      break;
+    case 'Transportation':
+      BookingModel = VehicleBooking;
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid booking type' });
+  }
 
   try {
-      // Update payment status to 'Paid' and booking status to 'Pending'
-      await BookingModel.findByIdAndUpdate(bookingId, {
-          paymentStatus: 'Paid',
-          bookingStatus: 'Pending'
-      });
-      res.status(200).json({ message: 'Payment and booking status updated successfully.' });
+    // Common status update
+    const updateData = {
+      paymentStatus: 'Paid',
+      bookingStatus: 'Pending',
+    };
+
+    // Additional custom updates per booking type (if needed)
+    if (bookingType === 'Tour Guide') {
+      updateData.confirmationStatus = 'Awaiting Guide Confirmation';
+    } else if (bookingType === 'Transportation') {
+      updateData.vehicleStatus = 'Reserved';
+    }
+
+    // Update the booking in the database
+    await BookingModel.findByIdAndUpdate(bookingId, updateData);
+    res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
+    console.log(`${bookingType} booking updated successfully: ${bookingId}`);
   } catch (error) {
-      console.error('Error updating payment and booking status:', error);
-      res.status(500).json({ error: 'Failed to update payment and booking status' });
+    console.error('Error updating payment and booking status:', error);
+    res.status(500).json({ error: 'Failed to update payment and booking status' });
   }
 });
 
@@ -2967,6 +3014,170 @@ app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10),
   }
 });
 
+
+
+// //////////////////////////////////////////////////////////////////
+
+//changes after merge 1
+
+// Define the route for fetching transportation bookings by user ID
+app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
+  try {
+      // Log the incoming request parameter
+      console.log(`Received request for transportation bookings with userId: ${req.params.userId}`);
+
+      // Find bookings by userId and populate relevant fields if needed
+      const bookings = await VehicleBooking.find({ userId: req.params.userId })
+                                           .populate('userId serviceId'); // Populate references to User and Service
+
+      // Log the response data
+      console.log('Transportation bookings found:', bookings);
+
+      // Send the bookings as JSON
+      res.json(bookings);
+  } catch (error) {
+      console.error('Error fetching transportation bookings:', error);
+      res.status(500).json({ message: 'Error fetching transportation bookings', error });
+  }
+});
+
+
+
+
+
+////////////////////////////
+// async function injectDummyData() {
+//   try {
+//     // Count existing vehicle bookings
+//     const existingCount = await VehicleBooking.countDocuments();
+    
+//     if (existingCount >= 10) {
+//       console.log('There are already 10 or more vehicle bookings. No new data injected.');
+//       return; // Exit if there are already 10 or more bookings
+//     }
+
+//     const dummyData = [];
+
+//     for (let i = 1; i <= 10; i++) {
+//       const booking = new VehicleBooking({
+//         customerName: `Customer ${i}`,
+//         productName: `Product ${i}`,
+//         userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
+//         serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
+//         vehicleBooking: [
+//           {
+//             name: `Vehicle ${i}`,
+//             quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
+//             selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
+//             pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
+//             totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
+//           },
+//         ],
+//         vehicleDropoffLocation: `Location ${i}`,
+//         vehiclePickupLocation: `Location ${i}`,
+//         rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
+//         pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
+//         dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
+//         specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
+//         bookingStatus: 'Booked',
+//         paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
+//       });
+
+//       dummyData.push(booking);
+//     }
+
+//     await VehicleBooking.insertMany(dummyData);
+//     console.log('Dummy vehicle booking data injected successfully!');
+//   } catch (error) {
+//     console.error('Error injecting dummy data:', error);
+//   }
+// }
+
+
+// async function injectDummyData() {
+
+//   const dummyData = [];
+
+//   for (let i = 1; i <= 10; i++) {
+//     const booking = new VehicleBooking({
+//       customerName: `Customer ${i}`,
+//       productName: `Product ${i}`,
+//       userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
+//       serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
+//       vehicleBooking: [
+//         {
+//           name: `Vehicle ${i}`,
+//           quantity: Math.floor(Math.random() * 3) + 1, // Quantity between 1 and 3
+//           selectedVehicleType: i % 2 === 0 ? 'Car' : 'Motorcycle',
+//           pricePerVehicle: Math.floor(Math.random() * 100) + 50, // Price between 50 and 150
+//           totalPrice: Math.floor(Math.random() * 300) + 100, // Total price between 100 and 400
+//         },
+//       ],
+//       vehicleDropoffLocation: `Location ${i}`,
+//       vehiclePickupLocation: `Location ${i}`,
+//       rentalDuration: Math.floor(Math.random() * 7) + 1, // Duration between 1 and 7 days
+//       pickupDate: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // Pickup dates spread over 10 days
+//       dropoffDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000), // Dropoff dates spread over 10 days
+//       specialRequest: i % 2 === 0 ? 'No special requests' : 'Add GPS',
+//       bookingStatus: 'Booked',
+//       paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternates between Paid and Pending
+//     });
+
+//     dummyData.push(booking);
+//   }
+
+//   try {
+//     await VehicleBooking.insertMany(dummyData);
+//     console.log('Dummy data injected successfully!');
+//   } catch (error) {
+//     console.error('Error injecting dummy data:', error);
+//   }
+// }
+
+// injectDummyData();
+
+
+
+
+// async function injectDummyData() {
+//   try {
+//     // Count existing tour bookings
+//     const existingCount = await TourBooking.countDocuments();
+    
+//     if (existingCount >= 10) {
+//       console.log('There are already 10 or more tour bookings. No new data injected.');
+//       return; // Exit if there are already 10 or more bookings
+//     }
+
+//     const dummyData = [];
+
+//     for (let i = 1; i <= 10; i++) {
+//       const tourDate = new Date(Date.now() + (i * 24 * 60 * 60 * 1000)); // Tour dates spread over 10 days
+
+//       const booking = new TourBooking({
+//         customerName: `Tourist ${i}`,
+//         tourName: `Tour ${i}`,
+//         tourguideType: i % 2 === 0 ? 'With Guide' : 'Tour Only',
+//         tourDate: tourDate,
+//         pickupLocation: `Pickup Location ${i}`,
+//         numberOfParticipants: Math.floor(Math.random() * 10) + 1, // Between 1 and 10 participants
+//         specialRequest: i % 2 === 0 ? 'No special requests' : 'Vegetarian meals only',
+//         bookingStatus: 'Booked',
+//         serviceId: new mongoose.Types.ObjectId(), // Replace with actual service IDs if available
+//         userId: new mongoose.Types.ObjectId(), // Replace with actual user IDs if available
+//         tourTime: i % 3 === 0 ? '9:00-11:00' : i % 3 === 1 ? '13:00-15:00' : '17:00-19:00', // Rotate tour times
+//         paymentStatus: i % 3 === 0 ? 'Paid' : 'Pending', // Alternate between Paid and Pending
+//       });
+
+//       dummyData.push(booking);
+//     }
+
+//     await TourBooking.insertMany(dummyData);
+//     console.log('Dummy tour booking data injected successfully!');
+//   } catch (error) {
+//     console.error('Error injecting dummy data:', error);
+//   }
+// }
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

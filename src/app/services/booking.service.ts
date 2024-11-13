@@ -40,21 +40,25 @@ export class BookingService {
       return this.http.get<any[]>(`${this.apiUrl}/accommodation/${serviceId}`);
     }
 
-    getAccommodationBookingsByUserId(userId: string | null): Observable<any[]> {
-      return this.http.get<any[]>(`${this.apiUrl}/accommodation/user/${userId}`);
-    }
-
-    updatePaymentStatus(bookingId: string, bookingType: string): Observable<any> {
-      return this.http.post<any>('http://localhost:3000/api/payments/update-status', { bookingId, bookingType });
+    getAccommodationBookingsByUserId(userId: string | null): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/accommodation/user/${userId}`);
     }
     
-    createTransaction(bookingId: string, amount: number, userId: string): Observable<any> {
-      return this.http.post<any>('http://localhost:3000/api/create-transaction', {
-          bookingId,
-          amount,
-          userId,
-      });
-    }
+
+// Update payment status based on booking type
+updatePaymentStatus(bookingId: string, bookingType: string): Observable<any> {
+  return this.http.post<any>('http://localhost:3000/api/payments/update-status', { bookingId, bookingType });
+}
+    
+// Create a transaction for Midtrans
+createTransaction(bookingId: string, amount: number, userId: string, bookingType: string): Observable<any> {
+  return this.http.post<any>('http://localhost:3000/api/create-transaction', {
+    bookingId,
+    amount,
+    userId,
+    bookingType,
+  });
+}
 
       // Method to update booking status
   updateBookingStatus(bookingId: string, status: string): Observable<any> {
@@ -69,6 +73,7 @@ export class BookingService {
       };
       return this.http.put(`${this.apiUrl}/cancel`, requestBody);
   }
+  
 
     
 }

@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+
 
 declare var Swal: any;
 import * as L from 'leaflet';
@@ -27,6 +29,7 @@ export class BookingTourGuideDetailComponent implements OnInit {
     tourguideType: 'With Guide',
     numberOfParticipants: 1,
     tourDate: '',
+    amount: 0,
     tourTime: '',
     specialRequest: '',
     pickupLocation: ''
@@ -39,7 +42,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
     private servicesService: ServicesService,
     private bookingService: BookingService,
     private authService: AuthService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -111,6 +115,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
         this.tourguideDetail = data;
         this.bookingDetails.tourName = this.tourguideDetail.productName;
         this.bookingDetails.tourguideType = this.tourguideDetail.productSubcategory;
+        this.bookingDetails.amount = this.tourguideDetail.productPrice;
+        console.log('testing', this.bookingDetails);
         this.initMap(); // Try initializing the map again after loading data
       },
       (error) => {
@@ -184,6 +190,8 @@ export class BookingTourGuideDetailComponent implements OnInit {
           confirmButtonColor: '#3085d6',
         });
         this.closeModal();
+        const bookingId = response.booking._id;
+        this.router.navigate([`/bookings/${bookingId}`]);
       },
       (error) => {
         console.error('Error submitting booking', error);
