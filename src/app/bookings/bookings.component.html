@@ -221,11 +221,23 @@
                   Details
                 </button>
                 <button
-                  *ngIf="booking.bookingStatus === 'Completed'"
+                  *ngIf="
+                    booking.bookingStatus === 'Completed' && !booking.isReviewed
+                  "
                   class="btn btn-outline-primary btn-sm px-3 py-1"
                   (click)="navigateToReview(booking._id)"
                 >
                   Review
+                </button>
+
+                <button
+                  *ngIf="
+                    booking.bookingStatus === 'Completed' && booking.isReviewed
+                  "
+                  class="btn btn-outline-secondary btn-sm px-3 py-1"
+                  disabled
+                >
+                  Reviewed
                 </button>
               </div>
             </div>

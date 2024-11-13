@@ -48,8 +48,8 @@ export class RateServicesComponent implements OnInit {
         console.log('Processed Image URLs:', this.productImages);
 
         this.productCategory = data.productCategory;
-        this.averageRating = data.averageRating || 3;
-        this.totalReviews = data.totalReviews || 120;
+        this.averageRating = data.averageRating ;
+        this.totalReviews = data.totalReviews ;
       },
       error: (error) => {
         console.error('Error fetching service:', error);
