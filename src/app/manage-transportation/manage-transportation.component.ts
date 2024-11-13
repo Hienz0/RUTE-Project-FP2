@@ -22,7 +22,8 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
   isEditing: boolean = false;
   productName: string = '';
   productDescription: string = '';
-  productImages: string = '';
+  productImages: string[] = []; // Array to store URLs or paths of images
+  newImages: File[] = []; // Array to store newly added images
   location: string = '';
   newProductSubCategory: any[] = []; // New variable for productSubCategory
   // Add this property to hold the existing or editable productSubcategory items
@@ -240,7 +241,20 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     );
   }
   
+  onFileSelected(event: any): void {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // Prepend the 'uploads\\' directory to each file name
+        this.productImages.push(`uploads\\${file.name}`);
+    }
+}
 
+
+  
+  removeImage(index: number): void {
+    this.productImages.splice(index, 1); // Remove the image URL from productImages array
+  }
 
   
   
@@ -384,6 +398,11 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     }
   }
   
+getFullImagePath(image: string): string {
+  return `http://localhost:3000/${image}`;
+}
+
+
 }
 
   
