@@ -29,7 +29,7 @@
             class="carousel-item" 
             [class.active]="i === 0">
             <img 
-              [src]="  getFullImagePath(image)" 
+              [src]="getFullImagePath(image)"
               class="d-block w-100 img-fluid rounded" 
               alt="Product Image" 
               style="height: 400px; object-fit: cover;" 
@@ -69,14 +69,17 @@
           <label for="transportationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
           <textarea class="form-control" id="transportationDescription" [(ngModel)]="productDescription" rows="3"></textarea>
         </div>
-        <div class="form-group mb-3">
-          <label for="transportationImages"><i class="fas fa-image icon"></i> Images</label>
-          <div *ngFor="let image of productImages; let i = index" class="mb-2">
-            <img [src]="  getFullImagePath(image)"  alt="Image preview" style="width: 100px; height: auto;" />
-            <button class="btn btn-danger btn-sm" (click)="removeImage(i)">Remove</button>
+        <div>
+          <label for="productImages">Product Images</label>
+          <input type="file" (change)="onImagesSelected($event)" multiple />
+        
+          <div *ngFor="let imagePath of productImages; let i = index">
+            <img [src]="getFullImagePath(imagePath)" alt="Product Image" width="100" />
+            <button type="button" (click)="removeImage(i)">Remove</button>
           </div>
-          <input type="file" class="form-control" id="transportationImages" (change)="onFileSelected($event)" multiple />
         </div>
+        
+        
         
         <!-- Pickup Location -->
         <div class="mb-3">

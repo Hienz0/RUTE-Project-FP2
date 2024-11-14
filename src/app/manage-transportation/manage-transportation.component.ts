@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import * as L from 'leaflet'; // Import Leaflet.js
 import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
@@ -22,7 +23,9 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
   isEditing: boolean = false;
   productName: string = '';
   productDescription: string = '';
-  productImages: string[] = []; // Array to store URLs or paths of images
+  productImages: string[] = []; // Array to store server paths of uploaded images
+  selectedFiles: File[] = [];   // Temporary storage for files before uploading // Change to store string URLs instead of SafeUrl // Array to store URLs or paths of images
+  deletedImages: string[] = []; // Array untuk menyimpan path gambar yang dihapus
   newImages: File[] = []; // Array to store newly added images
   location: string = '';
   newProductSubCategory: any[] = []; // New variable for productSubCategory
@@ -49,7 +52,8 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     private service: TransportationService,
     private route: ActivatedRoute,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {
     
   }
@@ -65,6 +69,7 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
           this.productName = this.transportationData.serviceDetails.productName;
           this.productDescription = this.transportationData.serviceDetails.productDescription;
           this.productImages = this.transportationData.serviceDetails.productImages;
+          console.log('foto',this.transportationData)
             // Ambil location dan pisahkan menjadi latitude dan longitude
         const location = this.transportationData.serviceDetails.location;
         const [lat, lng] = location.split(',').map((coord: string) => parseFloat(coord.trim())); // Tambahkan tipe string di sini
@@ -204,7 +209,14 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       return;
     }
   
-    // Gabungkan semua subkategori: aktif dan dihapus
+    const formData = new FormData();
+  
+    // Tambahkan file gambar baru
+    this.selectedFiles.forEach((file) => {
+      formData.append('productImages', file);
+    });
+  
+    // Gabungkan semua subkategori: aktif, baru, dan dihapus
     const allProductSubCategories = [
       ...this.displayedProductSubCategories.map((sub) => ({
         ...sub,
@@ -214,7 +226,7 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
         ...sub,
         action: 'add',
       })),
-      ...this.deletedProductSubCategories, // Sertakan subkategori yang dihapus
+      ...this.deletedProductSubCategories,
     ];
   
     const publishData = {
@@ -222,14 +234,17 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       userId: this.currentUser.userId,
       productName: this.productName,
       productDescription: this.productDescription,
-      productImages: this.productImages,
+      productImages: this.productImages, // Gambar yang sudah ada
+      deletedImages: this.deletedImages, // Gambar yang dihapus
       location: this.location,
-      productSubCategory: allProductSubCategories, // Kirim semua subkategori
+      productSubCategory: allProductSubCategories,
     };
+  
+    formData.append('data', JSON.stringify(publishData));
   
     console.log('Publish data:', publishData);
   
-    this.service.saveTransportation(publishData).subscribe(
+    this.service.saveTransportation(formData).subscribe(
       (response) => {
         console.log('Transportation published successfully:', response);
         this.message = 'Transportation published successfully';
@@ -241,19 +256,26 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     );
   }
   
-  onFileSelected(event: any): void {
-    const files = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        // Prepend the 'uploads\\' directory to each file name
-        this.productImages.push(`uploads\\${file.name}`);
+  onImagesSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+      this.selectedFiles = Array.from(target.files);
+      console.log('Selected files:', this.selectedFiles);
     }
-}
-
-
+  }
   
+  
+
   removeImage(index: number): void {
-    this.productImages.splice(index, 1); // Remove the image URL from productImages array
+    const removedImage = this.productImages[index];
+    // Tambahkan ke daftar gambar yang dihapus jika masih ada di daftar yang sudah ada
+    if (removedImage && !this.deletedImages.includes(removedImage)) {
+      this.deletedImages.push(removedImage);
+    }
+  
+    // Hapus gambar dari daftar yang akan dikirim
+    this.productImages.splice(index, 1);
+    console.log('Deleted images:', this.deletedImages);
   }
 
   
