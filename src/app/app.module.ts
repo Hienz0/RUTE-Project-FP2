@@ -46,6 +46,7 @@ import { BookTransportationComponent } from './book-transportation/book-transpor
 
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
+import { ReviewListComponent } from './review-list/review-list.component';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,8 @@ import { RateServicesComponent } from './rate-services/rate-services.component';
     TransportationServicesComponent,
     BookTransportationComponent,
     ManageTransportationComponent,
-    RateServicesComponent
+    RateServicesComponent,
+    ReviewListComponent
   ],
   imports: [
     BrowserModule,

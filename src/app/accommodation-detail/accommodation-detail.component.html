@@ -330,34 +330,8 @@
 </div>
 
 <!-- Rating and Review Section -->
-<div class="container my-5">
-  <h2>Rating & Reviews</h2>
-  <div class="mb-4">
-    <h4>Your Rating:</h4>
-    <div class="star-rating">
-      <span class="star" data-value="1">★</span>
-      <span class="star" data-value="2">★</span>
-      <span class="star" data-value="3">★</span>
-      <span class="star" data-value="4">★</span>
-      <span class="star" data-value="5">★</span>
-    </div>
-    <textarea class="form-control mt-2" rows="3" placeholder="Leave your review..."></textarea>
-    <button class="btn btn-primary mt-2">Submit Review</button>
-  </div>
-  <div class="reviews-list">
-    <h4>Reviews:</h4>
-    <div class="review">
-      <p><strong>John Doe</strong> - ⭐⭐⭐⭐⭐</p>
-      <p>Great place to stay! Highly recommend.</p>
-      <p><small>Posted on: 2024-10-26</small></p>
-    </div>
-    <div class="review">
-      <p><strong>Jane Smith</strong> - ⭐⭐⭐</p>
-      <p>Decent accommodation but could use some improvements.</p>
-      <p><small>Posted on: 2024-10-25</small></p>
-    </div>
-  </div>
-</div>
+<app-review-list [serviceId]="serviceId ?? ''"></app-review-list>
+
 
 <!-- FAQ Section -->
 <div class="container my-5">

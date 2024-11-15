@@ -2239,6 +2239,31 @@ app.post('/add-review', async (req, res) => {
   }
 });
 
+app.get('/review/list/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
+
+  try {
+    // Fetch reviews for the given serviceId
+    const reviews = await Review.find({ serviceId });
+    
+    // For each review, fetch the corresponding user's name and avatar
+    const reviewsWithUserData = await Promise.all(reviews.map(async (review) => {
+      const user = await User.findById(review.userId, 'name avatar');
+      return {
+        ...review.toObject(),
+        userName: user ? user.name : null,
+        userAvatar: user ? user.avatar : null,
+      };
+    }));
+
+    res.status(200).json(reviewsWithUserData);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Error fetching reviews" });
+  }
+});
+
+
 
 
 
