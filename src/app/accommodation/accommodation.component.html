@@ -18,12 +18,43 @@
       <div class="card h-100 border-0 shadow-sm" style="border-radius: 10px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
         <!-- Card Image Section -->
         <div *ngIf="service.productImages?.length" class="position-relative">
-          <img
-            [src]="'http://localhost:3000/' + service.productImages[0]"
-            alt="{{ service.productName }}"
-            class="card-img-top"
-            style="height: 250px; object-fit: cover;"
-          />
+          <div id="carousel-{{ service._id }}" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              <div
+                *ngFor="let image of service.productImages.slice(0, 3); let i = index"
+                class="carousel-item"
+                [class.active]="i === 0"
+              >
+                <img
+                  [src]="'http://localhost:3000/' + image"
+                  alt="{{ service.productName }}"
+                  class="card-img-top"
+                  style="height: 250px; object-fit: cover;"
+                />
+              </div>
+            </div>
+            <button
+              class="carousel-control-prev"
+              type="button"
+              [attr.data-bs-target]="'#carousel-' + service._id"
+              data-bs-slide="prev"
+              (click)="$event.stopPropagation()"
+            >
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button
+              class="carousel-control-next"
+              type="button"
+              [attr.data-bs-target]="'#carousel-' + service._id"
+              data-bs-slide="next"
+              (click)="$event.stopPropagation()"
+            >
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+          
           <div class="position-absolute top-0 end-0 p-2">
             <span class="badge bg-primary"><i class="fas fa-map-marker-alt"></i> {{ service.location }}</span>
           </div>
