@@ -1770,30 +1770,53 @@ app.get('/transportationService/:id', async (req, res) => {
 
 
 
-app.post('/manage/transportation', async (req, res) => {
+app.post('/manage/transportation', upload.array('productImages', 10), async (req, res) => {
   try {
-    const { userId, serviceId, productSubCategory } = req.body;
-    let { productName, productDescription, productImages, location } = req.body;
+    /// Parse JSON dari properti `data`
+    const parsedData = JSON.parse(req.body.data);
+    const { userId, serviceId, productSubCategory, deletedImages } = parsedData;
+    let { productName, productDescription, location } = parsedData;
 
-    console.log('Request Data:', req.body);
+
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
 
     // Verifikasi apakah user ada
     const user = await User.findById(userId);
     if (!user) {
+      console.log('User ID tidak ditemukan di database:', userId);
       return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
     }
+
 
     // Cari service berdasarkan ID
     const service = await Service.findById(serviceId);
     if (!service) {
+      console.log('Service tidak ditemukan');
       return res.status(404).json({ success: false, message: 'Service tidak ditemukan' });
     }
+
+        // Ambil gambar yang ada dari service jika tidak ada di request
+    let existingImages = service.productImages || [];
+
+    // Ambil gambar baru yang diunggah
+    const newImages = req.files.length > 0 ? req.files.map((file) => file.path) : [];
+
+    // Menggabungkan gambar yang sudah ada dengan gambar baru
+    let productImages = [...existingImages, ...newImages];
+
 
     // Gunakan data service sebagai default jika field opsional tidak diisi
     productName = productName || service.productName;
     productDescription = productDescription || service.productDescription;
     productImages = productImages || service.productImages;
     location = location || service.location;
+
+
+    // Filter gambar yang ada dengan menghapus gambar dari `deletedImages`
+    if (deletedImages && deletedImages.length > 0) {
+      productImages = productImages.filter((imgPath) => !deletedImages.includes(imgPath));
+    }
 
     // Cek apakah transportation dengan serviceId ini sudah ada
     let transportation = await Transportation.findOne({ serviceId: service._id });
@@ -1803,13 +1826,12 @@ app.post('/manage/transportation', async (req, res) => {
       userId: user._id,
       productName,
       productDescription,
-      productImages,
+      productImages, // Gambar yang sudah di-filter
       productCategory: service.productCategory,
       location,
       serviceId: service._id,
       productSubcategory: transportation ? transportation.productSubcategory : [],
     };
-
 
     console.log('Transportation Data:', productSubCategory);
 
@@ -1870,11 +1892,14 @@ app.post('/manage/transportation', async (req, res) => {
       service.status = 'published';
       await service.save();
     }
+
+    
   } catch (error) {
     console.error('Error mengelola transportation:', error);
     res.status(500).json({ success: false, message: 'Gagal mengelola transportation' });
   }
 });
+
 
 
 
@@ -2433,6 +2458,31 @@ app.post('/add-review', async (req, res) => {
     res.status(500).json({ message: 'Error adding review', error });
   }
 });
+
+app.get('/review/list/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
+
+  try {
+    // Fetch reviews for the given serviceId
+    const reviews = await Review.find({ serviceId });
+    
+    // For each review, fetch the corresponding user's name and avatar
+    const reviewsWithUserData = await Promise.all(reviews.map(async (review) => {
+      const user = await User.findById(review.userId, 'name avatar');
+      return {
+        ...review.toObject(),
+        userName: user ? user.name : null,
+        userAvatar: user ? user.avatar : null,
+      };
+    }));
+
+    res.status(200).json(reviewsWithUserData);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Error fetching reviews" });
+  }
+});
+
 
 
 // In your service controller

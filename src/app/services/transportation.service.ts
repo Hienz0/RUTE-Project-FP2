@@ -35,7 +35,7 @@ export class TransportationService {
   saveTransportation(data: any): Observable<any> {
     return this.http.post(`${this.url}/manage/transportation`, data);
   }
-
+  
   // Fungsi untuk mendapatkan tanggal yang sudah dibooking
   getBookedDates(serviceId: any): Observable<any> {
     const data = `${this.url}/api/bookedDates/${serviceId}`;
@@ -56,5 +56,10 @@ export class TransportationService {
     const url = `${this.url}/add-review`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(url, reviewData, { headers });
+  }
+
+  getReviewList(serviceId: any): Observable<any> {
+    const url = `${this.url}/review/list/${serviceId}`;
+    return this.http.get<any>(url);
   }
 }

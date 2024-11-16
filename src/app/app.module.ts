@@ -47,6 +47,7 @@ import { BookTransportationComponent } from './book-transportation/book-transpor
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
 import { UserNavbarComponent } from './user-navbar/user-navbar.component';
+import { ReviewListComponent } from './review-list/review-list.component';
 
 @NgModule({
   declarations: [
@@ -82,7 +83,8 @@ import { UserNavbarComponent } from './user-navbar/user-navbar.component';
     BookTransportationComponent,
     ManageTransportationComponent,
     RateServicesComponent,
-    UserNavbarComponent
+    UserNavbarComponent,
+    ReviewListComponent
   ],
   imports: [
     BrowserModule,

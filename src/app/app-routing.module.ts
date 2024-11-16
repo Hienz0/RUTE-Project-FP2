@@ -29,6 +29,7 @@ import { BookTransportationComponent } from './book-transportation/book-transpor
 
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
+import { ReviewListComponent } from './review-list/review-list.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -58,6 +59,7 @@ const routes: Routes = [
   // {path: 'manage-tour', component: ManageTourComponent},
   { path: 'search-results', component: SearchResultsComponent },
   {path:'customizeProfile', component: CustomizeProfileComponent},
+  {path:'review-list/:serviceId', component: ReviewListComponent},
  
   {path: 'transportationService', component: TransportationServicesComponent},
   {path:'manageTransportation/:id', component: ManageTransportationComponent},

@@ -1,0 +1,107 @@
+/* Compact Gradient Divider under Title */
+.compact-gradient-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #007bff, #6c757d);
+    top: 100%;
+    margin-top: 0.2rem; /* Makes it closer to the title text */
+}
+
+/* Hover Effects for Cards */
+.review-card {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.review-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Text Style */
+.italic-text {
+    line-height: 1.7;
+    font-style: italic;
+    transition: color 0.3s;
+}
+
+/* Divider Styling */
+.divider {
+    border-top: 1px solid #e9ecef;
+    opacity: 0.7;
+}
+
+/* Avatar Styling */
+.avatar {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Star Rating with Hover Animation */
+.star-rating .star-icon {
+    font-size: 1.2rem;
+    transition: color 0.3s ease, transform 0.2s ease;
+    color: #ffcd3c; /* Default star color */
+}
+.star-rating .star-icon:hover {
+    color: #ffc107; /* Brighter yellow on hover */
+    transform: scale(1.2); /* Slight zoom on hover */
+}
+
+/* No Reviews Template Icon Hover */
+.no-reviews i {
+    transition: transform 0.3s ease;
+}
+.no-reviews i:hover {
+    transform: scale(1.1);
+}
+
+.pagination-container {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .pagination-btn {
+    background-color: #f5f5f5; /* Soft grey */
+    color: #333; /* Darker text color */
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 16px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  
+  .pagination-btn:hover {
+    background-color: #e0e0e0; /* Slightly darker on hover */
+    color: #222;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .pagination-btn:disabled {
+    background-color: #fafafa;
+    color: #bbb;
+    border-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .pagination-btn.active {
+    background-color: #4CAF50; /* Muted green for active */
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+    transform: scale(1.05);
+  }
+  
+  .ellipsis {
+    color: #888;
+    font-size: 1.2rem;
+  }
+  
+  
+
+
+  
+  
