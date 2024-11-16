@@ -104,6 +104,11 @@
             <input type="text" class="form-control" id="accommodationLocation" [(ngModel)]="accommodation.location"
               name="location" />
           </div>
+          
+          <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
+
+
           <button class="btn btn-primary mt-3" (click)="saveAccommodation()">
             <i class="fas fa-save"></i> Save
           </button>

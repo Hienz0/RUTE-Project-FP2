@@ -79,4 +79,16 @@
   justify-content: center;
 }
 
+#map {
+  height: 400px !important;
+  width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  #map {
+    height: 300px; /* Adjust map height for smaller screens */
+  }
+}
+
+
 
