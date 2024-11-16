@@ -80,6 +80,28 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
       };
       return this.http.put(`${this.apiUrl}/cancel`, requestBody);
   }
+
+    // Method to update the booking status to 'Complete' for early checkout
+    earlyCheckout(bookingId: string) {
+      const url = `${this.apiUrl}/accommodation/${bookingId}/early-checkout`;
+      return this.http.patch(url, {});
+    }
+
+    getAvailableRooms(serviceId: string, roomTypeId: string, checkInDate: string, checkOutDate: string): Observable<any> {
+      const url = `${this.apiUrl}/available-rooms/${serviceId}/${roomTypeId}?checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`;
+      return this.http.get(url);
+    }
+
+    changeRoom(updateData: { bookingId: string, newRoomId: string }): Observable<any> {
+      return this.http.put(`${this.apiUrl}/change-room`, updateData);
+    }
+
+    getRoomById(roomId: string): Observable<any> {
+      return this.http.get(`${this.apiUrl}/rooms/${roomId}`);
+    }
+    
+    
+    
   
   
 

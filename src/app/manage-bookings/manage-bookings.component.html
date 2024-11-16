@@ -64,6 +64,16 @@
                                 <strong>Guests:</strong>
                                 <span class="ms-auto text-dark">{{ booking.numberOfGuests }}</span>
                             </li>
+                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.roomType">
+                                <i class="fas fa-bed text-secondary me-3"></i>
+                                <strong>Room Type:</strong>
+                                <span class="ms-auto text-dark">{{ booking.roomType }}</span>
+                              </li>
+                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.roomNumber">
+                                <i class="fas fa-door-open text-primary me-3"></i>
+                                <strong>Room Number:</strong>
+                                <span class="ms-auto text-dark">{{ booking.roomNumber }}</span>
+                            </li>
                             <li class="mb-3 d-flex align-items-center" *ngIf="booking.checkInDate">
                                 <i class="fas fa-calendar-check text-success me-3"></i>
                                 <strong>Check-In:</strong>
@@ -187,6 +197,17 @@
                             <span class="ms-auto text-dark">{{ selectedBooking?.accommodationType }}</span>
                         </div>
                         <div class="list-group-item d-flex align-items-center border-0 py-3">
+                            <i class="fas fa-tag me-3 text-muted"></i> <!-- Updated to 'tag' icon -->
+                            <strong class="text-muted">Room Type:</strong>
+                            <span class="ms-auto text-dark">{{ selectedBooking?.roomType }}</span>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center border-0 py-3">
+                            <i class="fas fa-key me-3 text-muted"></i> <!-- Updated to 'key' icon -->
+                            <strong class="text-muted">Room Number:</strong>
+                            <span class="ms-auto text-dark">{{ selectedBooking?.roomNumber }}</span>
+                        </div>
+                        
+                        <div class="list-group-item d-flex align-items-center border-0 py-3">
                             <i class="fas fa-calendar-check me-3 text-muted"></i>
                             <strong class="text-muted">Check-In Date:</strong>
                             <span class="ms-auto text-dark">{{ selectedBooking?.checkInDate | date:'mediumDate' }}</span>
@@ -257,6 +278,14 @@
 
             <!-- Modal Footer -->
             <div class="modal-footer border-0">
+                <!-- Manage Button for Accommodation Bookings -->
+<!-- Manage Button for Accommodation Bookings with Status 'Booked' -->
+<ng-container *ngIf="selectedBookingType === 'Accommodation' && selectedBooking?.bookingStatus === 'Booked'">
+    <button type="button" class="btn btn-outline-primary btn-sm" (click)="openManageAccommodationModal(selectedBooking)">
+        <i class="fas fa-cog me-2"></i>Manage
+    </button>
+</ng-container>
+
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
                     <i class="fas fa-times-circle me-2"></i>Close
                 </button>
@@ -274,6 +303,108 @@
         </div>
     </div>
 </div>
+
+
+
+
+<!-- Manage Accommodation Modal -->
+<div class="modal fade" id="manageAccommodationModal" tabindex="-1" aria-labelledby="manageAccommodationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <!-- Modal Header -->
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title d-flex align-items-center" id="manageAccommodationModalLabel">
+                    <i class="fas fa-cog me-3"></i>Manage Accommodation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Choose an action for the current booking:</p>
+
+                <!-- Early Checkout Button -->
+                <button type="button" class="btn btn-outline-warning w-100 mb-3" (click)="earlyCheckout(selectedBooking)">
+                    <i class="fas fa-sign-out-alt me-2"></i>Early Checkout
+                </button>
+
+<!-- Change Room Button -->
+<button type="button" class="btn btn-outline-info w-100" (click)="openChangeRoomModal()">
+    <i class="fas fa-exchange-alt me-2"></i>Change Room
+  </button>
+  
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times-circle me-2"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Change Room Modal -->
+<div class="modal fade" id="changeRoomModal" tabindex="-1" aria-labelledby="changeRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="changeRoomModalLabel">
+                    <i class="fas fa-exchange-alt me-2"></i> Change Room
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Current room type and number display with icons -->
+                <div class="mb-4">
+                    <h6 class="text-muted mb-2">Current Room</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-bed text-info me-2"></i>
+                        <strong>Room Type:</strong>
+                        <span class="ms-2 text-dark">{{ selectedBooking?.roomType }}</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-door-open text-info me-2"></i>
+                        <strong>Room Number:</strong>
+                        <span class="ms-2 text-dark">{{ selectedBooking?.roomNumber }}</span>
+                    </div>
+                </div>
+
+                <!-- Room selection dropdown with styled select -->
+                <div class="mb-4">
+                    <h6 class="text-muted">Choose a New Room</h6>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                        <select class="form-select" [(ngModel)]="selectedRoomId">
+                            <option value="" disabled>Select a room</option>
+                            <option *ngFor="let room of availableRooms" [value]="room._id">
+                                {{ room.number }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times-circle me-2"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-outline-success btn-sm" (click)="confirmRoomChange()">
+                    <i class="fas fa-check-circle me-2"></i> Confirm Room Change
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+  
+
 
 
 

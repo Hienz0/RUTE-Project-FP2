@@ -295,6 +295,181 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
 });
 
 
+// Update booking status to 'Complete' for early checkout
+app.patch('/api/bookings/accommodation/:bookingId/early-checkout', async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    // Find the booking by ID and update its status
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { bookingStatus: 'Complete' },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.status(200).json({ message: 'Booking status updated to Complete', booking: updatedBooking });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ message: 'Failed to update booking status', error });
+  }
+});
+
+
+
+// Get available rooms for a specific room type
+app.get('/api/bookings/available-rooms/:serviceId/:roomTypeId', async (req, res) => {
+  const { serviceId, roomTypeId } = req.params;
+  const { checkInDate, checkOutDate } = req.query;
+
+  console.log('Received request with params:', req.params);
+  console.log(`Service ID: ${serviceId}`);
+  console.log(`Room Type ID: ${roomTypeId}`);
+  console.log(`Check-in Date: ${checkInDate}, Check-out Date: ${checkOutDate}`);
+
+  try {
+    // Validate date inputs
+    if (!checkInDate || !checkOutDate) {
+      return res.status(400).json({ message: 'Check-in and check-out dates are required' });
+    }
+
+    const parsedCheckInDate = new Date(checkInDate);
+    const parsedCheckOutDate = new Date(checkOutDate);
+
+    if (parsedCheckInDate >= parsedCheckOutDate) {
+      return res.status(400).json({ message: 'Check-in date must be before check-out date' });
+    }
+
+    // Fetch accommodation using the serviceId
+    const accommodation = await Accommodation.findOne({ serviceId });
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    // Find the room type that matches the roomTypeId
+    const roomType = accommodation.roomTypes.find(rt => rt._id.toString() === roomTypeId);
+    if (!roomType) {
+      return res.status(404).json({ message: 'Room type not found' });
+    }
+
+    // Filter available rooms
+    const availableRooms = [];
+
+    for (const room of roomType.rooms) {
+      if (room.status !== 'available' || room.isLocked) {
+        continue;
+      }
+
+      // Check if the room is booked for the given date range
+      const overlappingBooking = await Booking.findOne({
+        roomId: room._id,
+        bookingStatus: { 
+          $nin: ['Canceled by Traveller', 'Canceled by Provider'] // Exclude canceled bookings
+        },
+        $or: [
+          {
+            checkInDate: { $lt: parsedCheckOutDate },
+            checkOutDate: { $gt: parsedCheckInDate },
+          },
+        ],
+      });
+      
+
+      if (!overlappingBooking) {
+        availableRooms.push(room);
+      }
+    }
+
+    console.log(`Available rooms count after date check: ${availableRooms.length}`);
+    res.json(availableRooms);
+  } catch (error) {
+    console.error('Error fetching available rooms:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+app.put('/api/bookings/change-room', async (req, res) => {
+  const { bookingId, newRoomId } = req.body;
+
+  try {
+    // Find the booking by ID and update the roomId
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { roomId: newRoomId },
+      { new: true } // Return the updated booking document
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json(updatedBooking);
+  } catch (error) {
+    console.error('Error changing room:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// Get room details by roomId
+// Get room details by roomId
+app.get('/api/bookings/rooms/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  // Log roomId received from the URL
+  console.log('Received roomId:', roomId);
+
+  try {
+    // Log the search criteria for the database query
+    console.log('Searching for room with roomId in accommodation document:', roomId);
+    
+    const accommodation = await Accommodation.findOne(
+      { 'roomTypes.rooms._id': roomId },
+      { 'roomTypes.rooms.$': 1, 'roomTypes.name': 1 }
+    );
+
+    // Log the result of the database query
+    console.log('Database query result:', accommodation);
+
+    if (!accommodation || !accommodation.roomTypes[0]?.rooms[0]) {
+      // If room is not found, log the error and return a 404
+      console.error('Room not found for roomId:', roomId);
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    // Extract room details including status and lock reason
+    const room = accommodation.roomTypes[0].rooms[0];
+    const roomDetails = {
+      roomNumber: room.number,
+      roomType: accommodation.roomTypes[0].name,  // Get the roomType from the parent (roomTypeSchema)
+      status: room.status,
+      isLocked: room.isLocked,
+      lockReason: room.lockReason,
+    };
+
+    // Log the details of the room found
+    console.log('Room details:', roomDetails);
+
+    // Return the room details as JSON
+    res.json(roomDetails);
+  } catch (error) {
+    // Log any errors during the process
+    console.error('Error fetching room details for roomId:', roomId, error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
 
 
 
@@ -355,11 +530,6 @@ app.post('/api/bookings/accommodation', async (req, res) => {
         'roomTypes.rooms._id': roomId,
       },
       {
-        $set: {
-          'roomTypes.$[type].rooms.$[room].status': 'booked'
-        }
-      },
-      {
         arrayFilters: [
           { 'type._id': roomTypeId },
           { 'room._id': roomId }
@@ -380,6 +550,57 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
   }
 });
+// app.post('/api/bookings/accommodation', async (req, res) => {
+//   console.log('Request body:', req.body);
+  
+//   try {
+//     const bookingData = {
+//       ...req.body,
+//       serviceId: req.body.serviceId,
+//       userId: req.body.userId,
+//       bookingStatus: 'Waiting for payment'
+//     };
+    
+//     // Step 1: Create the booking
+//     const booking = new Booking(bookingData);
+//     await booking.save();
+    
+//     // Step 2: Update the room status to 'booked' in the accommodation collection
+//     const { accommodationId, roomTypeId, roomId } = req.body;
+    
+//     // Find the accommodation by its ID and update the room status
+//     const accommodation = await Accommodation.findOneAndUpdate(
+//       {
+//         _id: accommodationId,
+//         'roomTypes._id': roomTypeId,
+//         'roomTypes.rooms._id': roomId,
+//       },
+//       {
+//         $set: {
+//           'roomTypes.$[type].rooms.$[room].status': 'booked'
+//         }
+//       },
+//       {
+//         arrayFilters: [
+//           { 'type._id': roomTypeId },
+//           { 'room._id': roomId }
+//         ],
+//         new: true,
+//       }
+//     );
+
+//     // If accommodation not found, handle the error
+//     if (!accommodation) {
+//       return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
+//     }
+
+//     // Step 3: Return the created booking and updated accommodation
+//     res.status(201).json({ booking, accommodation });
+//   } catch (error) {
+//     console.error('Error details:', error);
+//     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
+//   }
+// });
 
 
 // PUT route to update booking status
