@@ -91,6 +91,9 @@
             <input type="text" class="form-control" id="accommodationLocation" [(ngModel)]="restaurant.location"
               name="location" />
           </div>
+
+          <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
           <button class="btn btn-primary mt-3" (click)="saveRestaurant()">
             <i class="fas fa-save"></i> Save
           </button>
