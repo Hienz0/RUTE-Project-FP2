@@ -109,16 +109,29 @@
                     <strong>Status:</strong>
                     <span class="ms-auto">
                       <span class="badge rounded-pill" [ngClass]="{
-                                        'bg-success': booking.bookingStatus === 'Booked',
+                                        'bg-success': booking.bookingStatus === 'Booked' || booking.bookingStatus === 'Served',
                                         'bg-warning': booking.bookingStatus === 'Pending',
                                         'bg-secondary': booking.bookingStatus === 'Complete' || booking.bookingStatus === 'Completed',
-                                        'bg-danger': booking.bookingStatus.includes('Canceled'),
+                                        'bg-danger': booking.bookingStatus.includes('Canceled') || booking.bookingStatus === 'Expired',
                                         'bg-primary': booking.bookingStatus === 'Waiting for payment'
                                     }">
                         {{ booking.bookingStatus === 'Pending' ? 'Waiting for Verification' : booking.bookingStatus }}
                       </span>
                     </span>
                   </li>
+                  <li
+                  class="mb-3 d-flex align-items-center"
+                  *ngIf="booking.paymentExpiration && booking.bookingStatus === 'Waiting for payment'"
+                >
+                  <i class="fas fa-clock text-warning me-3"></i>
+                  <strong>Expires In:</strong>
+                  <span class="ms-auto text-dark">
+                    <ng-container *ngIf="remainingTimes[booking._id] > 0; else expired">
+                      {{ formatRemainingTime(remainingTimes[booking._id]) }}
+                    </ng-container>
+                    <ng-template #expired>Expired</ng-template>
+                  </span>
+                </li>
                 </ul>
               </div>
 
@@ -251,8 +264,8 @@
                 <strong class="text-muted">Status:</strong>
                 <span class="ms-auto">
                   <span class="badge rounded-pill" [ngClass]="{
-                  'bg-success': selectedBooking?.bookingStatus === 'Booked',
-                  'bg-danger': ['Cancelled', 'Canceled by Traveller', 'Canceled by Provider'].includes(selectedBooking?.bookingStatus),
+                  'bg-success': selectedBooking?.bookingStatus === 'Booked' || selectedBooking?.bookingStatus === 'Served',
+                  'bg-danger': ['Cancelled', 'Canceled by Traveller', 'Canceled by Provider,', 'Expired'].includes(selectedBooking?.bookingStatus),
                   'bg-primary': selectedBooking?.bookingStatus === 'Waiting for payment',
                   'bg-warning': selectedBooking?.bookingStatus === 'Pending',
                   'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
@@ -262,6 +275,17 @@
                   </span>
                 </span>
               </div>
+              <!-- Payment Countdown Timer -->
+<div class="list-group-item d-flex align-items-center border-0 py-3" *ngIf="selectedBooking?.paymentExpiration && selectedBooking?.bookingStatus === 'Waiting for payment'">
+  <i class="fas fa-clock me-3 text-warning"></i>
+  <strong class="text-muted">Expires In:</strong>
+  <span class="ms-auto text-dark">
+    <ng-container *ngIf="remainingTimes[selectedBooking._id] > 0; else expired">
+      {{ formatRemainingTime(remainingTimes[selectedBooking._id]) }}
+    </ng-container>
+    <ng-template #expired>Expired</ng-template>
+  </span>
+</div>
             </div>
           </div>
 
