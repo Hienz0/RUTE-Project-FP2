@@ -510,15 +510,32 @@ app.get('/api/services/restaurant/:id', async (req, res) => {
 cron.schedule('*/1 * * * *', async () => { // Runs every minute
   const now = new Date();
   try {
-    const result = await Booking.updateMany(
+    // Update accommodation bookings
+    const accommodationResult = await Booking.updateMany(
       { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
       { $set: { bookingStatus: 'Expired' } }
     );
-    console.log(`Updated ${result.nModified} expired bookings.`);
+    console.log(`Updated ${accommodationResult.nModified} expired accommodation bookings.`);
+
+    // Update vehicle bookings
+    const vehicleResult = await VehicleBooking.updateMany(
+      { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+      { $set: { bookingStatus: 'Expired' } }
+    );
+    console.log(`Updated ${vehicleResult.nModified} expired vehicle bookings.`);
+
+    // Update tour guide bookings
+    const tourGuideResult = await TourBooking.updateMany(
+      { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+      { $set: { bookingStatus: 'Expired' } }
+    );
+    console.log(`Updated ${tourGuideResult.nModified} expired tour guide bookings.`);
+
   } catch (error) {
     console.error('Error updating expired bookings:', error);
   }
 });
+
 
 
 
@@ -1438,6 +1455,7 @@ const bookingTourSchema = new mongoose.Schema({
   },
 
   isReviewed: { type: Boolean, default: false },
+  paymentExpiration: { type: Date },
 
 }, { timestamps: true });
 
@@ -1450,11 +1468,16 @@ module.exports = TourBooking;
 
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
+        // Calculate payment expiration (15 minutes from now)
+        const now = new Date();
+        const paymentExpiration = new Date(now.getTime() +60000);
+
     const bookingData = {
       ...req.body,
       serviceId: req.body.serviceId, // Make sure these are passed from the client side
       userId: req.body.userId,      // or set here if you have access to current user
       bookingStatus: 'Waiting for payment', // Set booking status here
+      paymentExpiration
       // tourTime: req.body.tourTime
     };
     const booking = new TourBooking(bookingData);
@@ -2019,7 +2042,8 @@ const bookingVehicleSchema = new mongoose.Schema({
     type: String,
     default: 'Pending',  // Possible statuses: 'Pending', 'Paid', 'Failed'
     enum: ['Pending', 'Paid', 'Failed']
-  }
+  },
+  paymentExpiration: { type: Date },
 
 
 }, { timestamps: true });
@@ -2274,6 +2298,11 @@ app.post('/api/bookTransports', async (req, res) => {
       }
     }
 
+        // Calculate payment expiration (15 minutes from now)
+        const now = new Date();
+        const paymentExpiration = new Date(now.getTime() + 60000);
+    
+
     // If all checks pass, create the new booking
     const newBooking = new VehicleBooking({
       customerName: user.name,
@@ -2288,7 +2317,8 @@ app.post('/api/bookTransports', async (req, res) => {
       dropoffDate: end,
       specialRequest,
       bookingStatus: 'Waiting for payment',
-      totalBookingPrice
+      totalBookingPrice,
+      paymentExpiration
     });
 
     await newBooking.save();

@@ -377,30 +377,41 @@ export class BookTransportationComponent implements OnInit {
     };
 
     console.log(bookingData);
-    this.service.bookTransport(bookingData).subscribe(
-      (response) => {
-        console.log('Transportation booked successfully:', response);
-        const bookingId = response.bookingDetails._id;
-        console.log(bookingId);
-        
-        // Show success message with redirect
-        this.showAlert(
-          'success',
-          'Booking Successful!',
-          'Your transportation service has been booked successfully.',
-          `/bookings/${bookingId}` // Use backticks for template string
+    Swal.fire({
+      title: 'Confirm Booking',
+      text: 'Are you sure you want to submit this booking?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, book it',
+      cancelButtonText: 'No, cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // If user confirms, proceed with booking
+        this.service.bookTransport(bookingData).subscribe(
+          (response) => {
+            console.log('Transportation booked successfully:', response);
+            const bookingId = response.bookingDetails._id;
+            console.log(bookingId);
+    
+            // Redirect directly to booking details page
+            this.router.navigate([`/bookings/${bookingId}`]);
+          },
+          (error) => {
+            // Show error message
+            Swal.fire(
+              'Booking Failed',
+              'An error occurred while booking the transportation service. Please try again.',
+              'error'
+            );
+            console.error('Error booking transportation:', error);
+          }
         );
-      },
-      (error) => {
-        // Show error message
-        this.showAlert(
-          'error',
-          'Booking Failed',
-          'An error occurred while booking the transportation service. Please try again.'
-        );
-        console.error('Error booking transportation:', error);
+      } else {
+        // Handle if user cancels
+        console.log('Booking submission canceled by user.');
       }
-    );
+    });
+    
   }
 
   getUniqueSubcategories(service: any): string {
