@@ -354,6 +354,16 @@ roomCustomReason: string = '';
   
 
   publishAccommodation() {
+      // Check if roomTypes is empty
+  if (!this.accommodation.roomTypes || this.accommodation.roomTypes.length === 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'You must add at least one room type before publishing.',
+      icon: 'error',
+      confirmButtonText: 'Okay',
+    });
+    return; // Prevent further execution
+  }
     // SweetAlert2 confirmation prompt
     Swal.fire({
       title: 'Are you sure?',
@@ -444,6 +454,39 @@ roomCustomReason: string = '';
   removeExistingRoomType(accommodationIndex: number, roomTypeIndex: number): void {
     const accommodation = this.accommodationDetail[accommodationIndex];
     const roomType = accommodation.roomTypes[roomTypeIndex];
+    console.log('Removing room type:', roomType);
+
+      // Step 1: Check for active bookings using the API
+  this.servicesService.checkRoomTypeActiveBookings(roomType._id).subscribe(
+    (response) => {
+      if (response.hasActiveBookings) {
+        Swal.fire({
+          title: 'Cannot Delete Room Type',
+          html: `
+<p>This room type cannot be deleted because it has active bookings. Here are your options:</p>
+<ul>
+  <li>Lock this room type and wait for all current bookings to be completed.</li>
+  <li>Contact the customers to discuss canceling their bookings, then lock the room type.</li>
+</ul>
+<p>Would you like to lock this room type now?</p>
+
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, lock it!',
+          cancelButtonText: 'Cancel',
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+            // Call the lockRoomType method
+            // this.selectedAccommodationIndex = accommodationIndex;
+            // this.selectedRoomTypeIndex = roomTypeIndex;
+            this.openLockModal(accommodationIndex, roomTypeIndex);
+          }
+        });
+        return;
+      }
   
     // SweetAlert2 confirmation prompt
     Swal.fire({
@@ -471,10 +514,86 @@ roomCustomReason: string = '';
         );
       }
     });
+  },
+  (error) => {
+    console.error('Error checking active bookings:', error);
+    Swal.fire('Error', 'Unable to verify bookings for this room type.', 'error');
+  }
+);
   }
   
   
+  removeExistingRoom(accommodationIndex: number, roomTypeIndex: number, roomIndex: number): void {
+    const accommodation = this.accommodationDetail[accommodationIndex];
+    const roomType = accommodation.roomTypes[roomTypeIndex];
+    const room = roomType.rooms[roomIndex];
 
+    console.log('Removing room:', room);
+    console.log('RoomTyoe:', roomType);
+    console.log('accommodation:', accommodation);
+
+      // Step 1: Check for active bookings using the API
+  this.servicesService.checkRoomActiveBookings(room._id).subscribe(
+    (response) => {
+      if (response.hasActiveBookings) {
+        Swal.fire({
+          title: 'Cannot Delete Room',
+          html: `
+            <p>This room cannot be deleted because it has active bookings. Here are your options:</p>
+            <ul>
+              <li>Lock this room and wait for all current bookings to be completed.</li>
+              <li>Contact the customers to discuss canceling their bookings, then lock the room.</li>
+            </ul>
+            <p>Would you like to lock this room now?</p>
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, lock it!',
+          cancelButtonText: 'Cancel',
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+            // Open the lock room modal
+            this.openLockRoomModal(accommodationIndex, roomTypeIndex, roomIndex);
+          }
+        });
+        return;
+      }
+  
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to delete room ${room.number}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.servicesService.deleteRoom(accommodation._id, roomType._id, room._id).subscribe(
+          (response) => {
+            console.log('Room deleted successfully:', response);
+            // Remove the room locally after successful deletion
+            roomType.rooms.splice(roomIndex, 1);
+            Swal.fire('Deleted!', 'The room has been deleted successfully.', 'success');
+          },
+          (error) => {
+            console.error('Error deleting room:', error);
+            Swal.fire('Error', 'There was an issue deleting the room.', 'error');
+          }
+        );
+      }
+    });
+  },
+  (error) => {
+    console.error('Error checking active bookings:', error);
+    Swal.fire('Error', 'Unable to verify bookings for this room.', 'error');
+  }
+);
+  }
+
+  
   // Method to remove a room from a specific room type by index
   removeRoom(roomType: RoomType, roomIndex: number): void {
     // SweetAlert2 confirmation prompt
@@ -1170,6 +1289,7 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
       this.selectedAccommodationIndex = accommodationIndex;
       this.selectedRoomTypeIndex = roomTypeIndex;
       this.selectedRoomIndex = roomIndex;
+      
     
       const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
       const room = roomType.rooms[roomIndex];
@@ -1678,6 +1798,7 @@ viewBookings(): void {
     this.router.navigate(['/manage-bookings', this.serviceId]);
   }
 }
+
 
 
 

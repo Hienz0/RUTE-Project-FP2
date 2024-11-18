@@ -1358,6 +1358,80 @@ app.get('/api/services/restaurantMenu/:serviceId', async (req, res) => {
 });
 
 
+// Route to check if roomType has active bookings
+app.get('/api/services/bookings/roomType/:roomTypeId/hasActiveBookings', async (req, res) => {
+  const { roomTypeId } = req.params;
+
+  try {
+    // Find bookings with the specified roomTypeId and the relevant statuses
+    const activeBookings = await Booking.find({
+      roomTypeId,
+      bookingStatus: { $in: ['Booked', 'Served'] },
+    });
+
+    // Check if there are any active bookings
+    const hasActiveBookings = activeBookings.length > 0;
+
+    res.status(200).json({ hasActiveBookings });
+  } catch (error) {
+    console.error('Error checking active bookings:', error);
+    res.status(500).json({ message: 'Error checking active bookings.' });
+  }
+});
+
+
+// Delete a specific room from a room type
+app.delete('/api/services/:accommodationId/roomType/:roomTypeId/room/:roomId', async (req, res) => {
+  const { accommodationId, roomTypeId, roomId } = req.params;
+
+  try {
+    // Find the accommodation
+    const accommodation = await Accommodation.findById(accommodationId);
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    // Find the room type
+    const roomType = accommodation.roomTypes.id(roomTypeId);
+    if (!roomType) {
+      return res.status(404).json({ message: 'Room type not found' });
+    }
+
+    // Use pull to remove the room by its _id
+    roomType.rooms.pull(roomId);
+
+    // Save the updated accommodation document
+    await accommodation.save();
+
+    res.status(200).json({ message: 'Room deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    res.status(500).json({ message: 'Error deleting room', error });
+  }
+});
+
+// Route to check if room has active bookings
+app.get('/api/services/bookings/room/:roomId/hasActiveBookings', async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // Find bookings with the specified roomId and relevant statuses
+    const activeBookings = await Booking.find({
+      roomId,
+      bookingStatus: { $in: ['Booked', 'Served'] },
+    });
+
+    // Check if there are any active bookings
+    const hasActiveBookings = activeBookings.length > 0;
+
+    res.status(200).json({ hasActiveBookings });
+  } catch (error) {
+    console.error('Error checking active bookings:', error);
+    res.status(500).json({ message: 'Error checking active bookings.' });
+  }
+});
+
+
 
 // white space
 

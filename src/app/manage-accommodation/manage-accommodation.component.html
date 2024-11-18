@@ -263,9 +263,10 @@
 </button>
 
 
-                <button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </button>
+<button *ngIf="roomType.isEditing" class="btn btn-danger btn-sm" (click)="removeExistingRoom(accommodationIndex, i, j)">
+  <i class="fas fa-trash-alt"></i> Delete
+</button>
+
               </div>
               <input type="text" class="form-control" [(ngModel)]="room.number" [disabled]="!roomType.isEditing" />
             </div>
