@@ -4,6 +4,7 @@ import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
+import axios from 'axios'; // Import axios for reverse geocoding
 
 
 declare const Swal: any;
@@ -41,6 +42,9 @@ export class BookingsComponent implements OnInit, OnDestroy  {
   bookingId: string | null = null;
   remainingTimes: { [key: string]: number } = {}; // Track remaining times for each booking
 interval: any;
+location: string = '';
+ pickupAddress: string = '';
+  dropoffAddress: string = '';
 
 
 
@@ -101,6 +105,22 @@ interval: any;
         // Filter bookings after sorting them
         this.filterBookings(this.selectedStatus);
         console.log('Filtered Bookings:', this.filteredBookings);
+
+          // Fetch addresses for each booking
+        this.bookings.forEach((booking) => {
+          if (booking.vehiclePickupLocation) {
+            const [pickupLat, pickupLng] = booking.vehiclePickupLocation
+              .split(',')
+              .map((coord: string) => parseFloat(coord.trim())); // Explicit type added
+            this.reverseGeocode(pickupLat, pickupLng, 'pickup', booking);
+          }
+          if (booking.vehicleDropoffLocation) {
+            const [dropoffLat, dropoffLng] = booking.vehicleDropoffLocation
+              .split(',')
+              .map((coord: string) => parseFloat(coord.trim())); // Explicit type added
+            this.reverseGeocode(dropoffLat, dropoffLng, 'dropoff', booking);
+          }
+        });
     
         // Delay to ensure filteredBookings is fully populated before searching for a match
         setTimeout(() => {
@@ -310,6 +330,37 @@ navigateToReview(bookingId: string): void {
   this.router.navigate(['rateServices/', bookingId]);
   console.log(bookingId);
 }
+
+
+reverseGeocode(
+  lat: number,
+  lng: number,
+  type: 'pickup' | 'dropoff' | 'location',
+  booking: any
+): void {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+  axios
+    .get(url)
+    .then((response) => {
+      let address = response.data.display_name;
+
+      // Shorten the address to first three elements
+      const shortAddress = address.split(',').slice(0, 3).join(',').trim();
+
+      if (type === 'pickup') {
+        booking.vehiclePickupLocation = shortAddress; // Use the shortened address
+      } else if (type === 'dropoff') {
+        booking.vehicleDropoffLocation = shortAddress; // Use the shortened address
+      }
+    })
+    .catch((error) => {
+      console.error('Error with reverse geocoding:', error);
+    });
+}
+
+
+
 
 
 
