@@ -57,4 +57,10 @@ export class TransportationService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(url, reviewData, { headers });
   }
+
+  
+  getReviewList(serviceId: any): Observable<any> {
+    const url = `${this.url}/review/list/${serviceId}`;
+    return this.http.get<any>(url);
+  }
 }

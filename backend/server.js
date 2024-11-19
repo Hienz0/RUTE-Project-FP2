@@ -515,21 +515,21 @@ cron.schedule('*/1 * * * *', async () => { // Runs every minute
       { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
       { $set: { bookingStatus: 'Expired' } }
     );
-    console.log(`Updated ${accommodationResult.nModified} expired accommodation bookings.`);
+    // console.log(`Updated ${accommodationResult.nModified} expired accommodation bookings.`);
 
     // Update vehicle bookings
     const vehicleResult = await VehicleBooking.updateMany(
       { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
       { $set: { bookingStatus: 'Expired' } }
     );
-    console.log(`Updated ${vehicleResult.nModified} expired vehicle bookings.`);
+    // console.log(`Updated ${vehicleResult.nModified} expired vehicle bookings.`);
 
     // Update tour guide bookings
     const tourGuideResult = await TourBooking.updateMany(
       { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
       { $set: { bookingStatus: 'Expired' } }
     );
-    console.log(`Updated ${tourGuideResult.nModified} expired tour guide bookings.`);
+    // console.log(`Updated ${tourGuideResult.nModified} expired tour guide bookings.`);
 
   } catch (error) {
     console.error('Error updating expired bookings:', error);
@@ -2631,7 +2631,29 @@ app.get('/api/services/:id/rating', async (req, res) => {
 });
 
 
+app.get('/review/list/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
 
+  try {
+    // Fetch reviews for the given serviceId
+    const reviews = await Review.find({ serviceId });
+    
+    // For each review, fetch the corresponding user's name and avatar
+    const reviewsWithUserData = await Promise.all(reviews.map(async (review) => {
+      const user = await User.findById(review.userId, 'name avatar');
+      return {
+        ...review.toObject(),
+        userName: user ? user.name : null,
+        userAvatar: user ? user.avatar : null,
+      };
+    }));
+
+    res.status(200).json(reviewsWithUserData);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Error fetching reviews" });
+  }
+});
 
 
 

@@ -174,7 +174,10 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
             status: room.status,
           })),
         }));
+      console.log(data);
+
       },
+
       (error) => {
         console.error('Error loading accommodation details:', error);
       }
@@ -327,11 +330,23 @@ onCheckOutDateChange(date: Date): void {
   initMap(): void {
     console.log('map called');
     // Initialize the map with placeholder coordinates
-    this.map = L.map(this.mapContainer.nativeElement).setView([-8.5069, 115.2624], 13); // Placeholder or default location
+    this.map = L.map(this.mapContainer.nativeElement).setView([-8.5069, 115.2624], 15); // Placeholder or default location
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
+
+      // Set default marker icon
+  const defaultIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+
+  L.Marker.prototype.options.icon = defaultIcon;
     
     // Ensure the map resizes correctly after initialization
     setTimeout(() => {
