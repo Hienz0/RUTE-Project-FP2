@@ -48,6 +48,7 @@ import { ManageTransportationComponent } from './manage-transportation/manage-tr
 import { RateServicesComponent } from './rate-services/rate-services.component';
 import { UserNavbarComponent } from './user-navbar/user-navbar.component';
 import { ReviewListComponent } from './review-list/review-list.component';
+import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,8 @@ import { ReviewListComponent } from './review-list/review-list.component';
     ManageTransportationComponent,
     RateServicesComponent,
     UserNavbarComponent,
-    ReviewListComponent
+    ReviewListComponent,
+    ProviderNavbarComponent
   ],
   imports: [
     BrowserModule,

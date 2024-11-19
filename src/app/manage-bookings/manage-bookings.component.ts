@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ChangeDetectorRef } from '@angular/core';
+import { ServicesService } from '../services/services.service';
 
 
 declare const Swal: any;
@@ -42,7 +43,8 @@ selectedRoomId: string = '';
   constructor(
     private route: ActivatedRoute,
     private bookingService: BookingService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private servicesService: ServicesService
 
   ) {}
 
@@ -50,6 +52,7 @@ selectedRoomId: string = '';
     this.serviceId = this.route.snapshot.paramMap.get('serviceId');
     if (this.serviceId) {
       this.loadAllBookings();
+      // this.servicesService.get
     }
   }
 

@@ -104,6 +104,11 @@ const bookingAccommodationSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  accommodationName: {
+    type: String, // New field for accommodation name
+    required: true,
+    trim: true
+  },
   accommodationType: {
     type: String,
     required: true,

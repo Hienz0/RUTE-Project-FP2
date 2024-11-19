@@ -32,7 +32,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   isModalOpen = false; // State for controlling modal visibility
   bookingDetails = {
     guestName: '',
-    accommodationType: 'Hotel',
+    accommodationName: '',
+    accommodationType: '',
     numberOfGuests: 1,
     checkInDate: '',
     checkOutDate: '',
@@ -144,6 +145,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         
         // Set the accommodationType in bookingDetails based on productSubcategory
         this.bookingDetails.accommodationType = this.accommodationDetail.productSubcategory;
+        this.bookingDetails.accommodationName = this.accommodationDetail.productName;
         if (this.map && this.accommodationDetail.businessCoordinates) {
           // Update map center with restaurant coordinates
           const { coordinates } = this.accommodationDetail.businessCoordinates;
