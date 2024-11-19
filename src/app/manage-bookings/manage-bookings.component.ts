@@ -38,6 +38,9 @@ export class ManageBookingsComponent implements OnInit {
   availableRooms: any[] = [];
 selectedRoomId: string = '';
 
+serviceName: string | null = null;
+
+
 
 
   constructor(
@@ -66,6 +69,20 @@ selectedRoomId: string = '';
         console.log('Accommodation bookings:', accommodationBookings);
         console.log('Tour bookings:', tourBookings);
         console.log('Vehicle bookings:', vehicleBookings);
+
+
+              // Determine serviceName based on booking types
+      if (accommodationBookings.length > 0) {
+        this.serviceName = accommodationBookings[0].accommodationName;
+      } else if (tourBookings.length > 0) {
+        this.serviceName = tourBookings[0].tourName;
+      } else if (vehicleBookings.length > 0) {
+        this.serviceName = vehicleBookings[0].productName;
+      } else {
+        this.serviceName = 'Unknown Service';
+      }
+      console.log('Service Name:', this.serviceName);
+
   
         // Load room number and room type for accommodation bookings
         for (const booking of accommodationBookings) {

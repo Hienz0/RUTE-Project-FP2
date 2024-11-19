@@ -1,7 +1,7 @@
 <div class="container my-5">
     <!-- Section Title -->
     <h2 class="text-center mb-5 text-dark display-4 fw-bold">
-        <i class="fas fa-calendar-alt me-3"></i>Bookings for Service ID: {{ serviceId }}
+        <i class="fas fa-calendar-alt me-3"></i>Bookings for Service: {{ serviceName }}
     </h2>
 
     <div class="row">
@@ -297,7 +297,9 @@
                                 'bg-warning': selectedBooking?.bookingStatus === 'Pending',
                                 'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
                             }">
-                                {{ selectedBooking?.bookingStatus }}
+                                <!-- {{ selectedBooking?.bookingStatus }} -->
+                                {{ selectedBooking?.bookingStatus === 'Pending' ? 'Waiting for Verification' : selectedBooking?.bookingStatus }}
+
                             </span>
                         </span>
                     </div>
