@@ -53,7 +53,7 @@
                         </h5>
                         <p class="card-subtitle text-muted mb-4">
                             <i class="fas fa-info-circle me-2 text-warning"></i>
-                            {{ booking.accommodationType || booking.tourName || booking.productName || 'Unknown Service' }}
+                            {{ booking.accommodationName || booking.tourName || booking.productName || 'Unknown Service' }}
                         </p>
 
                         <!-- Common Booking Details -->
@@ -86,11 +86,23 @@
                             </li>
 
                             <!-- Vehicle Specific Fields -->
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.selectedVehicleType">
+                            <!-- <li class="mb-3 d-flex align-items-center" *ngIf="booking.selectedVehicleType">
                                 <i class="fas fa-car text-secondary me-3"></i>
                                 <strong>Vehicle Type:</strong>
                                 <span class="ms-auto text-dark">{{ booking.selectedVehicleType }}</span>
-                            </li>
+                            </li> -->
+                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.name">
+                                <i class="fas fa-truck text-primary me-3"></i> <!-- Vehicle icon -->
+                                <strong>Vehicle Name:</strong>
+                                <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.name }}</span>
+                              </li>
+                              
+                              <!-- Vehicle Type (Optional) -->
+                              <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.selectedVehicleType">
+                                <i class="fas fa-car text-secondary me-3"></i>
+                                <strong>Vehicle Type:</strong>
+                                <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.selectedVehicleType }}</span>
+                              </li>
                             <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehiclePickupLocation">
                                 <i class="fas fa-map-marker-alt text-info me-3"></i>
                                 <strong>Pickup Location:</strong>
@@ -192,6 +204,11 @@
                     <!-- Accommodation Fields -->
                     <ng-container *ngIf="selectedBookingType === 'Accommodation'">
                         <div class="list-group-item d-flex align-items-center border-0 py-3">
+                            <i class="fas fa-building me-3 text-muted"></i>
+                            <strong class="text-muted">Accommodation Name:</strong>
+                            <span class="ms-auto text-dark">{{ selectedBooking?.accommodationName }}</span>
+                          </div>
+                        <div class="list-group-item d-flex align-items-center border-0 py-3">
                             <i class="fas fa-bed me-3 text-muted"></i>
                             <strong class="text-muted">Accommodation Type:</strong>
                             <span class="ms-auto text-dark">{{ selectedBooking?.accommodationType }}</span>
@@ -222,10 +239,21 @@
                     <!-- Vehicle Fields -->
                     <ng-container *ngIf="selectedBookingType === 'Vehicle'">
                         <div class="list-group-item d-flex align-items-center border-0 py-3">
+                            <i class="fas fa-tag me-3 text-muted"></i>
+                            <strong class="text-muted">Services Name:</strong>
+                            <span class="ms-auto text-dark">{{ selectedBooking?.productName }}</span>
+                          </div>
+                        <div class="list-group-item d-flex align-items-center border-0 py-3">
                             <i class="fas fa-car me-3 text-muted"></i>
                             <strong class="text-muted">Vehicle Type:</strong>
                             <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.selectedVehicleType }}</span>
                         </div>
+                          <!-- Vehicle Name -->
+  <div class="list-group-item d-flex align-items-center border-0 py-3">
+    <i class="fas fa-truck me-3 text-muted"></i> <!-- Add an icon for vehicle name -->
+    <strong class="text-muted">Vehicle Name:</strong>
+    <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.name }}</span>
+  </div>
                         <div class="list-group-item d-flex align-items-center border-0 py-3">
                             <i class="fas fa-map-marker-alt me-3 text-muted"></i>
                             <strong class="text-muted">Pickup Location:</strong>
