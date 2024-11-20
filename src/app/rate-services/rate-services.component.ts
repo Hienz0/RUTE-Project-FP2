@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router'; // Untuk mendapatkan serviceId
 import { TransportationService } from '../services/transportation.service';
 import { AuthService } from '../services/auth.service';
 
+declare var Swal: any;
+
 @Component({
   selector: 'app-rate-services',
   templateUrl: './rate-services.component.html',
@@ -74,27 +76,42 @@ export class RateServicesComponent implements OnInit {
 
   submitReview() {
     if (this.rating === 0) {
-      alert('Please select a rating');
+      Swal.fire({
+        icon: 'error',
+        title: 'Rating Required',
+        text: 'Please select a rating.',
+        confirmButtonColor: '#d33',
+      });
       return;
     }
-
+  
     const reviewData = {
       userId: this.currentUser.userId,
       bookingId: this.serviceId,
       rating: this.rating,
       comment: this.reviewComment
     };
-
+  
     console.log(reviewData);
-
+  
     this.service.addReview(reviewData).subscribe({
       next: (response) => {
         console.log(response.message);
-        alert('Review submitted successfully');
+        Swal.fire({
+          icon: 'success',
+          title: 'Review Submitted',
+          text: 'Your review was submitted successfully!',
+          confirmButtonColor: '#28a745',
+        });
       },
       error: (error) => {
         console.error('Error submitting review:', error);
-        alert('Failed to submit review');
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Failed',
+          text: 'Failed to submit review. Please try again.',
+          confirmButtonColor: '#d33',
+        });
       }
     });
   }

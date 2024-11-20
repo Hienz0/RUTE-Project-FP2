@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy  } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -26,7 +26,7 @@ declare var window: any;
     ])
   ]
 })
-export class BookingsComponent implements OnInit {
+export class BookingsComponent implements OnInit, OnDestroy  {
   serviceId: string | null = null;
   bookings: any[] = [];
   filteredBookings: any[] = [];
@@ -39,6 +39,8 @@ export class BookingsComponent implements OnInit {
   userId: string | null = null;
 
   bookingId: string | null = null;
+  remainingTimes: { [key: string]: number } = {}; // Track remaining times for each booking
+interval: any;
 
 
 
@@ -65,9 +67,15 @@ export class BookingsComponent implements OnInit {
       this.bookingId = this.route.snapshot.paramMap.get('userId');
       console.log('Booking ID:', this.bookingId);
     });
+
+    this.startCountdown();
   
     // This line should be removed to avoid calling loadBookings prematurely
     // this.loadBookings();
+  }
+
+  ngOnDestroy(): void {
+    this.clearCountdown();
   }
   
 
@@ -76,7 +84,6 @@ export class BookingsComponent implements OnInit {
     
     this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
       (response) => {
-        // Assuming 'response' contains the three booking categories
         const { accommodationBookings, tourBookings, vehicleBookings } = response;
     
         // Combine all booking types into one array
@@ -85,12 +92,13 @@ export class BookingsComponent implements OnInit {
           ...tourBookings,
           ...vehicleBookings
         ];
-        console.log('All Bookings:', this.bookings);
-
-        console.log('tour', tourBookings);
-        console.log('vehicle', vehicleBookings);
+  
+        // Sort combined bookings by 'updatedAt'
+        this.bookings.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  
+        console.log('All Sorted Bookings:', this.bookings);
     
-        // Filter bookings after combining them
+        // Filter bookings after sorting them
         this.filterBookings(this.selectedStatus);
         console.log('Filtered Bookings:', this.filteredBookings);
     
@@ -108,15 +116,18 @@ export class BookingsComponent implements OnInit {
     );
   }
   
+  
   filterBookings(status: string): void {
     this.selectedStatus = status;
   
     this.filteredBookings = this.bookings
       .filter(booking =>
         status === 'Pending'
-          ? ['Waiting for payment', 'Pending'].includes(booking.bookingStatus)
+          ? ['Waiting for payment', 'Pending', 'Expired'].includes(booking.bookingStatus)
           : status === 'Canceled'
           ? ['Canceled by Traveller', 'Canceled by Provider'].includes(booking.bookingStatus)
+          : status === 'Booked'
+          ? ['Booked', 'Served'].includes(booking.bookingStatus)
           : booking.bookingStatus === status
       )
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -124,7 +135,49 @@ export class BookingsComponent implements OnInit {
     this.cdr.detectChanges();
   }
   
+  startCountdown(): void {
+    this.interval = setInterval(() => {
+      if (this.selectedBooking) { // Check if a booking is selected
+        if (this.selectedBooking.paymentExpiration) {
+          const remainingTime = this.getRemainingTime(this.selectedBooking.paymentExpiration);
+          this.remainingTimes[this.selectedBooking._id] = remainingTime;
+  
+          // If the selected booking has expired, update its status locally
+          if (remainingTime === 0 && this.selectedBooking.bookingStatus === 'Waiting for payment') {
+            this.selectedBooking.bookingStatus = 'Expired'; // Update status locally
+            console.log(`Booking ${this.selectedBooking._id} has expired.`);
+            this.cdr.detectChanges();
+          }
+        }
+      }
+    }, 1000);
+  }
+  
+  
+  clearCountdown(): void {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
+  
+  getRemainingTime(expirationTime: string): number {
+    const now = new Date().getTime();
+    const expiration = new Date(expirationTime).getTime();
+    return Math.max(expiration - now, 0); // Return remaining time in milliseconds
+  }
 
+  formatRemainingTime(milliseconds: number): string {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+  
+    // Pad minutes and seconds with leading zeroes if needed
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+  
+    return `${formattedMinutes}:${formattedSeconds}`;
+  }
+  
   
   
 
@@ -257,6 +310,7 @@ navigateToReview(bookingId: string): void {
   this.router.navigate(['rateServices/', bookingId]);
   console.log(bookingId);
 }
+
 
 
 

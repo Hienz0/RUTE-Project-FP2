@@ -195,5 +195,29 @@ createTransaction(bookingId: string, amount: number, userId: string): Observable
   });
 }
 
+getServiceRating(serviceId: string): Observable<{ averageRating: number, reviewCount: number }> {
+  return this.http.get<{ averageRating: number, reviewCount: number }>(`${this.apiUrl}/${serviceId}/rating`);
+}
+
+// Check if a room type has active bookings
+checkRoomTypeActiveBookings(roomTypeId: string): Observable<{ hasActiveBookings: boolean }> {
+  return this.http.get<{ hasActiveBookings: boolean }>(
+    `${this.apiUrl}/bookings/roomType/${roomTypeId}/hasActiveBookings`
+  );
+}
+
+checkRoomActiveBookings(roomId: string): Observable<{ hasActiveBookings: boolean }> {
+  return this.http.get<{ hasActiveBookings: boolean }>(
+    `${this.apiUrl}/bookings/room/${roomId}/hasActiveBookings`
+  );
+}
+
+
+deleteRoom(accommodationId: string, roomTypeId: string, roomId: string): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/${accommodationId}/roomType/${roomTypeId}/room/${roomId}`);
+}
+
+
+
 
 }

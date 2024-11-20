@@ -5,6 +5,8 @@ import { BookingService } from '../services/booking.service'; // Import the book
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import * as L from 'leaflet';
+
 
 
 
@@ -40,6 +42,7 @@ interface Accommodation {
   location: string;
   roomTypes: RoomType[];
   productImages: string[];
+  businessCoordinates?: { type: string; coordinates: [number, number] };
 }
 
 @Component({
@@ -82,7 +85,12 @@ roomCustomReason: string = '';
     location: '',
     roomTypes: [],
     productImages: [],
+    businessCoordinates: {
+      type: 'Point',
+      coordinates: [0, 0], // Default coordinates (longitude, latitude)
+    },
   };
+  
 
 
 
@@ -108,6 +116,10 @@ roomCustomReason: string = '';
   bookingModal: any;
   bookedDates: string[] = [];
   minCheckOutDate: Date | null = null;
+  businessCoordinates: { lat: number, lng: number } | null = null;
+  map: any; // Add this to your component class
+
+
   
 
 
@@ -148,10 +160,10 @@ roomCustomReason: string = '';
           description: data.productDescription,
           imageUrl: data.productImages[0] || '',
           location: data.location,
-          roomTypes: data.roomTypes || [], // Ensure roomTypes is an array
+          roomTypes: data.roomTypes || [],
           productImages: data.productImages || [],
+          businessCoordinates: data.businessCoordinates,
         };
-
         this.bookingDetails.accommodationType = data.productSubcategory;
         console.log('productSubcategory:', this.bookingDetails.accommodationType);
       });
@@ -171,6 +183,9 @@ roomCustomReason: string = '';
       overlayContainer.style.zIndex = '1200';
     }
     console.log('ngAfterViewInit called');
+    if (this.isEditing) {
+      this.initializeMap();
+    }
   }
   
   // Method to load accommodation details
@@ -182,6 +197,7 @@ roomCustomReason: string = '';
   
         // Set a default index if needed
         this.selectedAccommodationIndex = this.accommodationDetail.length > 0 ? 0 : null;
+        console.log('selectedAccommodationIndex:', this.selectedAccommodationIndex);
   
         // Initialize editing states
         this.accommodationDetail.forEach((accommodation: Accommodation) => {
@@ -189,6 +205,8 @@ roomCustomReason: string = '';
             roomType.isEditing = false;
           });
         });
+
+        console.log('accommodationDetail:', this.accommodationDetail);
 
               // Deep copy of accommodationDetail to store original data
       this.originalAccommodationDetail = JSON.parse(JSON.stringify(this.accommodationDetail));
@@ -199,6 +217,58 @@ roomCustomReason: string = '';
     );
   }
 
+  initializeMap() {
+    const initialCoordinates: [number, number] = [-8.5069, 115.2624]; // Default coordinates (Ubud, Bali)
+    const zoomLevel = 13;
+  
+    // Initialize the map and set the initial view
+    const map = L.map('map').setView(initialCoordinates, zoomLevel);
+    console.log('Map Initialized:', map);
+  
+    // Add the tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+  
+    // Initialize the marker at default coordinates
+    const marker = L.marker(initialCoordinates).addTo(map);
+  
+    // Check if businessCoordinates exist and are valid
+    const businessCoordinates = this.accommodation?.businessCoordinates;
+    if (
+      businessCoordinates &&
+      businessCoordinates.coordinates &&
+      businessCoordinates.coordinates[0] !== 0 &&
+      businessCoordinates.coordinates[1] !== 0
+    ) {
+      const [lng, lat] = businessCoordinates.coordinates;
+      marker.setLatLng([lat, lng]); // Set marker to the saved coordinates
+      map.setView([lat, lng], zoomLevel); // Focus the map on the saved marker location
+    }
+  
+    // Add a click event listener for the map
+    map.on('click', (e: any) => {
+      const { lat, lng } = e.latlng;
+      marker.setLatLng([lat, lng]); // Update marker position
+  
+      // Update accommodation businessCoordinates
+      if (this.accommodation?.businessCoordinates) {
+        this.accommodation.businessCoordinates.coordinates = [lng, lat]; // GeoJSON format requires [lng, lat]
+        console.log('Updated coordinates:', this.accommodation.businessCoordinates.coordinates);
+      } else {
+        console.warn('Accommodation or businessCoordinates is undefined');
+      }
+  
+      // Center the map on the new marker position
+      map.flyTo([lat, lng], zoomLevel);
+    });
+  
+    // Ensure the map resizes correctly when the window is resized
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+  }
+  
 
 
   
@@ -206,16 +276,21 @@ roomCustomReason: string = '';
 
   toggleEdit(): void {
     if (this.isEditing) {
-      // Revert to original data if canceling
       this.accommodation = this.originalAccommodationDetail
         ? JSON.parse(JSON.stringify(this.originalAccommodationDetail))
         : this.accommodation;
     } else {
-      // Enter edit mode
       this.originalAccommodationDetail = JSON.parse(JSON.stringify(this.accommodation));
     }
+
     this.isEditing = !this.isEditing;
+
+    // Initialize the map if entering edit mode
+    if (this.isEditing && !this.map) {
+      setTimeout(() => this.initializeMap(), 0); // Delay map initialization
+    }
   }
+  
 
   // toggleEdit() {
   //   this.isEditing = !this.isEditing;
@@ -232,14 +307,15 @@ roomCustomReason: string = '';
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, save it!',
-      }).then((result: any) => { // Explicitly typing result as any
+      }).then((result: any) => {
         if (result.isConfirmed) {
-          // Prepare the accommodation object with only the necessary fields
+          // Prepare the accommodation object with the necessary fields
           const accommodationData = {
-            productName: this.accommodation.name, // Map to productName
-            productDescription: this.accommodation.description, // Map to productDescription
-            productImages: this.accommodation.productImages, // Map to productImages
-            location: this.accommodation.location // Map to location
+            productName: this.accommodation.name,
+            productDescription: this.accommodation.description,
+            productImages: this.accommodation.productImages,
+            location: this.accommodation.location,
+            businessCoordinates: this.accommodation.businessCoordinates, // Include coordinates
           };
   
           // Call the update service function
@@ -261,6 +337,7 @@ roomCustomReason: string = '';
   
   
   
+  
 
   addRoomType() {
     this.accommodation.roomTypes.push({ name: '', price: 0, rooms: [], amenities: [], images: [] });
@@ -277,6 +354,16 @@ roomCustomReason: string = '';
   
 
   publishAccommodation() {
+      // Check if roomTypes is empty
+  if (!this.accommodation.roomTypes || this.accommodation.roomTypes.length === 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'You must add at least one room type before publishing.',
+      icon: 'error',
+      confirmButtonText: 'Okay',
+    });
+    return; // Prevent further execution
+  }
     // SweetAlert2 confirmation prompt
     Swal.fire({
       title: 'Are you sure?',
@@ -367,6 +454,39 @@ roomCustomReason: string = '';
   removeExistingRoomType(accommodationIndex: number, roomTypeIndex: number): void {
     const accommodation = this.accommodationDetail[accommodationIndex];
     const roomType = accommodation.roomTypes[roomTypeIndex];
+    console.log('Removing room type:', roomType);
+
+      // Step 1: Check for active bookings using the API
+  this.servicesService.checkRoomTypeActiveBookings(roomType._id).subscribe(
+    (response) => {
+      if (response.hasActiveBookings) {
+        Swal.fire({
+          title: 'Cannot Delete Room Type',
+          html: `
+<p>This room type cannot be deleted because it has active bookings. Here are your options:</p>
+<ul>
+  <li>Lock this room type and wait for all current bookings to be completed.</li>
+  <li>Contact the customers to discuss canceling their bookings, then lock the room type.</li>
+</ul>
+<p>Would you like to lock this room type now?</p>
+
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, lock it!',
+          cancelButtonText: 'Cancel',
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+            // Call the lockRoomType method
+            // this.selectedAccommodationIndex = accommodationIndex;
+            // this.selectedRoomTypeIndex = roomTypeIndex;
+            this.openLockModal(accommodationIndex, roomTypeIndex);
+          }
+        });
+        return;
+      }
   
     // SweetAlert2 confirmation prompt
     Swal.fire({
@@ -394,10 +514,86 @@ roomCustomReason: string = '';
         );
       }
     });
+  },
+  (error) => {
+    console.error('Error checking active bookings:', error);
+    Swal.fire('Error', 'Unable to verify bookings for this room type.', 'error');
+  }
+);
   }
   
   
+  removeExistingRoom(accommodationIndex: number, roomTypeIndex: number, roomIndex: number): void {
+    const accommodation = this.accommodationDetail[accommodationIndex];
+    const roomType = accommodation.roomTypes[roomTypeIndex];
+    const room = roomType.rooms[roomIndex];
 
+    console.log('Removing room:', room);
+    console.log('RoomTyoe:', roomType);
+    console.log('accommodation:', accommodation);
+
+      // Step 1: Check for active bookings using the API
+  this.servicesService.checkRoomActiveBookings(room._id).subscribe(
+    (response) => {
+      if (response.hasActiveBookings) {
+        Swal.fire({
+          title: 'Cannot Delete Room',
+          html: `
+            <p>This room cannot be deleted because it has active bookings. Here are your options:</p>
+            <ul>
+              <li>Lock this room and wait for all current bookings to be completed.</li>
+              <li>Contact the customers to discuss canceling their bookings, then lock the room.</li>
+            </ul>
+            <p>Would you like to lock this room now?</p>
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, lock it!',
+          cancelButtonText: 'Cancel',
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+            // Open the lock room modal
+            this.openLockRoomModal(accommodationIndex, roomTypeIndex, roomIndex);
+          }
+        });
+        return;
+      }
+  
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to delete room ${room.number}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.servicesService.deleteRoom(accommodation._id, roomType._id, room._id).subscribe(
+          (response) => {
+            console.log('Room deleted successfully:', response);
+            // Remove the room locally after successful deletion
+            roomType.rooms.splice(roomIndex, 1);
+            Swal.fire('Deleted!', 'The room has been deleted successfully.', 'success');
+          },
+          (error) => {
+            console.error('Error deleting room:', error);
+            Swal.fire('Error', 'There was an issue deleting the room.', 'error');
+          }
+        );
+      }
+    });
+  },
+  (error) => {
+    console.error('Error checking active bookings:', error);
+    Swal.fire('Error', 'Unable to verify bookings for this room.', 'error');
+  }
+);
+  }
+
+  
   // Method to remove a room from a specific room type by index
   removeRoom(roomType: RoomType, roomIndex: number): void {
     // SweetAlert2 confirmation prompt
@@ -1093,6 +1289,7 @@ saveChanges(accommodationIndex: number, roomTypeIndex: number): void {
       this.selectedAccommodationIndex = accommodationIndex;
       this.selectedRoomTypeIndex = roomTypeIndex;
       this.selectedRoomIndex = roomIndex;
+      
     
       const roomType = this.accommodationDetail[accommodationIndex].roomTypes[roomTypeIndex];
       const room = roomType.rooms[roomIndex];
@@ -1601,6 +1798,7 @@ viewBookings(): void {
     this.router.navigate(['/manage-bookings', this.serviceId]);
   }
 }
+
 
 
 

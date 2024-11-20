@@ -46,6 +46,11 @@ import { BookTransportationComponent } from './book-transportation/book-transpor
 
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
+import { UserNavbarComponent } from './user-navbar/user-navbar.component';
+import { ReviewListComponent } from './review-list/review-list.component';
+import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
+import { TruncateLocationPipe } from './truncate-location.pipe';
+import { TruncatePipe } from './truncate.pipe';
 
 @NgModule({
   declarations: [
@@ -80,7 +85,12 @@ import { RateServicesComponent } from './rate-services/rate-services.component';
     TransportationServicesComponent,
     BookTransportationComponent,
     ManageTransportationComponent,
-    RateServicesComponent
+    RateServicesComponent,
+    UserNavbarComponent,
+    ReviewListComponent,
+    ProviderNavbarComponent,
+    TruncateLocationPipe,
+    TruncatePipe
   ],
   imports: [
     BrowserModule,

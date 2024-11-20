@@ -135,3 +135,19 @@
 }
 
 
+  /* Add hover effect */
+  .upload-drop-zone:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Bootstrap primary color hover effect */
+    cursor: pointer;
+  }
+
+  /* Optional: Add custom styles for when dragging over */
+  .upload-drop-zone.drag-over {
+    background-color: rgba(0, 123, 255, 0.2); /* Light primary color */
+    border-color: rgba(0, 123, 255, 0.5);  /* Darker primary color */
+  }
+
+  #map {
+    height: 400px !important;
+    width: 100% !important;
+  }

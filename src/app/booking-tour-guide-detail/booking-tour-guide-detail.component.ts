@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 
 
 declare var Swal: any;
+declare var bootstrap: any;
+
 import * as L from 'leaflet';
 
 @Component({
@@ -14,9 +16,10 @@ import * as L from 'leaflet';
   templateUrl: './booking-tour-guide-detail.component.html',
   styleUrls: ['./booking-tour-guide-detail.component.css']
 })
-export class BookingTourGuideDetailComponent implements OnInit {
+export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
   
-  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef; // Reference to the map container
+  @ViewChild('mapContainer', { static: false }) mapContainer?: ElementRef;
+ // Reference to the map container
   map: any;
   currentUser: any;
   serviceId: string | null = null;
@@ -60,11 +63,6 @@ export class BookingTourGuideDetailComponent implements OnInit {
       this.loadTourGuideDetail(this.serviceId);
     }
 
-    // Adding Tailwind CDN dynamically
-    const script = this.renderer.createElement('script');
-    script.src = 'https://cdn.tailwindcss.com';
-    script.id = 'tailwindScript';
-    this.renderer.appendChild(document.body, script);
   }
 
   ngAfterViewChecked(): void {
@@ -74,36 +72,69 @@ export class BookingTourGuideDetailComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit(): void {
+    if (this.mapContainer) {
+      this.initMap();
+    } else {
+      console.error('Map container not initialized');
+    }
+  }
+
   initMap(latitude: number = -8.506534, longitude: number = 115.262588): void {
+    // Check for the existence of the map container and map instance
     if (!this.mapContainer || !this.mapContainer.nativeElement) {
+      console.error('Map container element not found');
       return;
     }
   
-    const zoomLevel = 15;
+    // If a map instance already exists, destroy it
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+  
+    const zoomLevel = 20;
+  
+    // Initialize the map
     this.map = L.map(this.mapContainer.nativeElement, {
-      center: [latitude, longitude], 
+      center: [latitude, longitude],
       zoom: zoomLevel,
+      zoomControl: true, // Ensure zoom controls are enabled
     });
   
+    // Add a tile layer to the map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
   
+    // Create a marker with a custom icon
     const defaultIcon = L.icon({
       iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     });
-    L.marker([latitude, longitude], { icon: defaultIcon }).addTo(this.map).bindPopup('Pickup Location').openPopup();
   
-    // Force the map to recenter after rendering is complete
+    // Add the marker to the map
+    const marker = L.marker([latitude, longitude], { icon: defaultIcon })
+      .addTo(this.map)
+      .bindPopup('Pickup Location')
+      .openPopup();
+  
+    // Focus the map on the marker location after rendering
+    this.map.once('load', () => {
+      this.map.setView([latitude, longitude], zoomLevel); // Ensure focus on the marker
+    });
+  
+    // Trigger map resizing to avoid display issues
     setTimeout(() => {
       this.map.invalidateSize();
-      this.map.setView([latitude, longitude], zoomLevel);
-    }, 100);
+    }, 200); // Slight delay ensures proper rendering
   
+    // Save the pickup location details
     this.bookingDetails.pickupLocation = `${latitude}, ${longitude}`;
     this.isMapInitialized = true;
   }
+  
   
   
   
@@ -126,13 +157,33 @@ export class BookingTourGuideDetailComponent implements OnInit {
   }
 
 
-  openModal(): void {
-    this.isModalOpen = true;
+openModal(): void {
+  const modalElement = document.getElementById('bookingModal');
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+
+    // Listen for the 'shown.bs.modal' event
+    modalElement.addEventListener('shown.bs.modal', () => {
+      if (this.mapContainer) {
+        this.initMap(); // Initialize the map after modal is fully rendered
+      } else {
+        console.error('Map container not found');
+      }
+    });
+
+    modal.show(); // Show the modal
   }
+}
+
 
   closeModal(): void {
-    this.isModalOpen = false;
+    const modalElement = document.getElementById('bookingModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
   }
+  
 
   submitBooking(): void {
     const currentDate = new Date();

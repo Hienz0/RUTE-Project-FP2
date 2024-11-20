@@ -1,0 +1,16 @@
+.rating {
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+  }
+  
+  .star {
+    color: gold;
+    margin-right: 2px;
+  }
+  
+  .text-muted {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+  

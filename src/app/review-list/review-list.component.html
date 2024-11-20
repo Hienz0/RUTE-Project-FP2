@@ -1,0 +1,110 @@
+<div class="container my-5" style="max-width: 600px">
+    <h3
+      class="fw-bold text-dark text-center mb-5 position-relative"
+      style="font-size: 1.8rem"
+    >
+      Customer Reviews
+      <span
+        class="position-absolute start-50 translate-middle-x compact-gradient-divider"
+      ></span>
+    </h3>
+  
+    <!-- Tampilkan Ulasan Halaman Saat Ini -->
+    <div *ngIf="reviews.length > 0; else noReviews">
+      <div
+        *ngFor="let review of getCurrentPageReviews()"
+        class="card review-card mb-4 border-0 shadow-sm rounded-4 overflow-hidden"
+      >
+        <div class="card-body p-4">
+          <p class="card-text text-secondary fs-6 mb-3 italic-text">
+            "{{ review.comment }}"
+          </p>
+          <hr class="my-3 divider" />
+          <div class="d-flex align-items-center">
+            <img
+              [src]="
+               review.userAvatar ? getFullImagePath(review.userAvatar) : 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png'
+              "
+              alt="User profile image"
+              class="avatar"
+            />
+            <div class="ms-3" style="flex: 1">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="fw-bold text-dark mb-0" style="font-size: 1.2rem">
+                  {{ review.userName || "Anonymous" }}
+                </h6>
+                <div class="star-rating">
+                  <ng-container
+                    *ngFor="let star of getStarsArray(review.rating)"
+                  >
+                    <i
+                      class="bi"
+                      [ngClass]="star ? 'bi-star-fill' : 'bi-star'"
+                      class="star-icon"
+                    ></i>
+                  </ng-container>
+                </div>
+              </div>
+              <small class="text-muted" style="font-size: 0.9rem">{{
+                review.createdAt | date : "mediumDate"
+              }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="reviews.length > reviewsPerPage" class="pagination-container d-flex justify-content-center align-items-center mt-4">
+        <!-- Tombol First -->
+        <button
+          class="btn pagination-btn mx-1"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(1)"
+        >
+          First
+        </button>
+      
+        <!-- Ellipsis Sebelum Halaman Pertama -->
+        <span *ngIf="getPaginationButtons()[0] > 1" class="ellipsis mx-1">...</span>
+      
+        <!-- Tombol Halaman -->
+        <button
+          *ngFor="let page of getPaginationButtons()"
+          class="btn pagination-btn mx-1"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      
+        <!-- Ellipsis Setelah Halaman Terakhir -->
+        <span *ngIf="getPaginationButtons().slice(-1)[0] < totalPages" class="ellipsis mx-1">...</span>
+      
+        <!-- Tombol Last -->
+        <button
+          class="btn pagination-btn mx-1"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(totalPages)"
+        >
+          Last
+        </button>
+      </div>
+      
+      
+      
+  
+  
+    <!-- Template Tidak Ada Ulasan -->
+    <ng-template #noReviews>
+      <div class="text-center rounded shadow-sm">
+        <i
+          class="bi bi-emoji-smile fs-1"
+          style="color: #f39c12; margin-bottom: 1rem;"
+        ></i>
+        <p class="mt-4 text-muted fs-5">
+          No reviews are available for this service yet.
+        </p>
+      </div>
+    </ng-template>
+  </div>
+  

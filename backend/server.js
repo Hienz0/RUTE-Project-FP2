@@ -31,8 +31,8 @@ app.use(bodyParser.json());
 
 // Connect to MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/rute', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
+  //   useNewUrlParser: true,
+  //   useUnifiedTopology: true,
 });
 
 const db = mongoose.connection;
@@ -59,18 +59,18 @@ function generateToken(user) {
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     cb(null, 'uploads/');
   },
-  filename: function(req, file, cb) {
+  filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
-const upload = multer({ 
+const upload = multer({
   storage: storage,
-  limits: { 
+  limits: {
     fieldSize: 1024 * 1024 * 100 // 100MB for field values in bytes
-  } 
+  }
 });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -83,83 +83,93 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define user schema and model
 const userSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String,
-    address: String,
-    contact: String,
-    avatar: String,
-    userType: { type: String, default: 'user' },  // Add userType with default value 'user'
-  });
- 
-  const User = mongoose.model('User', userSchema);
- 
+  name: String,
+  email: String,
+  password: String,
+  address: String,
+  contact: String,
+  avatar: String,
+  userType: { type: String, default: 'user' },  // Add userType with default value 'user'
+});
+
+const User = mongoose.model('User', userSchema);
+
 /////////////////////////////////////////////////////////
 // booking accomodation
 
 // Define the accommodation booking schema
 const bookingAccommodationSchema = new mongoose.Schema({
-    guestName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    accommodationType: {
-        type: String,
-        required: true,
-        enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
-    },
-    numberOfGuests: {
-        type: Number,
-        required: true,
-        min: 1
-    },
-    checkInDate: {
-        type: Date,
-        required: true
-    },
-    checkOutDate: {
-        type: Date,
-        required: true
-    },
-    specialRequest: {
-        type: String,
-        trim: true
-    },
-    bookingStatus: {
-        type: String,
-        default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
-        enum: ['Booked', 'Complete', 'Waiting for payment','Cancelled', 'CheckedIn', 'CheckedOut']
-    },
+  guestName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  accommodationName: {
+    type: String, // New field for accommodation name
+    required: true,
+    trim: true
+  },
+  accommodationType: {
+    type: String,
+    required: true,
+    enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
+  },
+  numberOfGuests: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  checkInDate: {
+    type: Date,
+    required: true
+  },
+  checkOutDate: {
+    type: Date,
+    required: true
+  },
+  specialRequest: {
+    type: String,
+    trim: true
+  },
+  bookingStatus: {
+    type: String,
+    default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
+    enum: ['Booked', 'Complete', 'Waiting for payment', 'Cancelled', 'CheckedIn', 'CheckedOut']
+  },
 
-    serviceId: { // Add serviceId field
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Service',
-      required: true
+  serviceId: { // Add serviceId field
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true
   },
   userId: { // Add userId field
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  accommodationId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Accommodation', required: true }, // Reference to Accommodation
-  roomTypeId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    required: true }, // Reference to RoomType
-  roomId: { type: mongoose.Schema.Types.ObjectId, 
-    required: true }, // Reference to Room
+  accommodationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Accommodation', required: true
+  }, // Reference to Accommodation
+  roomTypeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  }, // Reference to RoomType
+  roomId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  }, // Reference to Room
   amount: {
     type: Number,
     required: true,
     min: 0
-},
+  },
   paymentStatus: {
     type: String,
     default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
     enum: ['Pending', 'Paid', 'Failed']
   },
+  paymentExpiration: { type: Date },
 
   isReviewed: { type: Boolean, default: false },
 }, { timestamps: true });
@@ -176,34 +186,34 @@ app.get('/api/bookings/accommodation/service/:serviceId', async (req, res) => {
   const serviceId = req.params.serviceId;
 
   try {
-      console.log('Fetching all bookings for serviceId:', serviceId);
+    console.log('Fetching all bookings for serviceId:', serviceId);
 
-      // Define the condition to exclude 'Waiting for payment' status
-      const statusFilter = { serviceId, bookingStatus: { $ne: 'Waiting for payment' } };
+    // Define the condition to exclude 'Waiting for payment' status
+    const statusFilter = { serviceId, bookingStatus: { $ne: 'Waiting for payment' } };
 
-      // Retrieve all tour bookings for the service, excluding 'Waiting for payment'
-      const allTourBookings = await TourBooking.find(statusFilter);
+    // Retrieve all tour bookings for the service, excluding 'Waiting for payment'
+    const allTourBookings = await TourBooking.find(statusFilter);
 
-      // Retrieve all accommodation bookings for the service, excluding 'Waiting for payment'
-      const allAccommodationBookings = await Booking.find(statusFilter);
+    // Retrieve all accommodation bookings for the service, excluding 'Waiting for payment'
+    const allAccommodationBookings = await Booking.find(statusFilter);
 
-      // Retrieve all vehicle bookings for the service, excluding 'Waiting for payment'
-      const allVehicleBookings = await VehicleBooking.find(statusFilter);
+    // Retrieve all vehicle bookings for the service, excluding 'Waiting for payment'
+    const allVehicleBookings = await VehicleBooking.find(statusFilter);
 
-      console.log("Tour bookings:", allTourBookings);
-      console.log("Accommodation bookings:", allAccommodationBookings);
-      console.log("Vehicle bookings:", allVehicleBookings);
+    console.log("Tour bookings:", allTourBookings);
+    console.log("Accommodation bookings:", allAccommodationBookings);
+    console.log("Vehicle bookings:", allVehicleBookings);
 
-      // Combine and send the response with all types of bookings
-      return res.status(200).json({
-          tourBookings: allTourBookings,
-          accommodationBookings: allAccommodationBookings,
-          vehicleBookings: allVehicleBookings,
-      });
+    // Combine and send the response with all types of bookings
+    return res.status(200).json({
+      tourBookings: allTourBookings,
+      accommodationBookings: allAccommodationBookings,
+      vehicleBookings: allVehicleBookings,
+    });
 
   } catch (error) {
-      console.error("Error fetching bookings:", error);
-      return res.status(500).json({ message: "Error fetching bookings", error });
+    console.error("Error fetching bookings:", error);
+    return res.status(500).json({ message: "Error fetching bookings", error });
   }
 });
 
@@ -233,7 +243,7 @@ app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
       accommodationBookings: allAccommodationBookings,
       vehicleBookings: allVehicleBookings
     });
-    
+
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return res.status(500).json({ message: "Error fetching bookings", error });
@@ -295,6 +305,181 @@ app.get('/api/bookings/booked-dates/:serviceId/:roomTypeId', async (req, res) =>
 });
 
 
+// Update booking status to 'Complete' for early checkout
+app.patch('/api/bookings/accommodation/:bookingId/early-checkout', async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    // Find the booking by ID and update its status
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { bookingStatus: 'Complete' },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.status(200).json({ message: 'Booking status updated to Complete', booking: updatedBooking });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ message: 'Failed to update booking status', error });
+  }
+});
+
+
+
+// Get available rooms for a specific room type
+app.get('/api/bookings/available-rooms/:serviceId/:roomTypeId', async (req, res) => {
+  const { serviceId, roomTypeId } = req.params;
+  const { checkInDate, checkOutDate } = req.query;
+
+  console.log('Received request with params:', req.params);
+  console.log(`Service ID: ${serviceId}`);
+  console.log(`Room Type ID: ${roomTypeId}`);
+  console.log(`Check-in Date: ${checkInDate}, Check-out Date: ${checkOutDate}`);
+
+  try {
+    // Validate date inputs
+    if (!checkInDate || !checkOutDate) {
+      return res.status(400).json({ message: 'Check-in and check-out dates are required' });
+    }
+
+    const parsedCheckInDate = new Date(checkInDate);
+    const parsedCheckOutDate = new Date(checkOutDate);
+
+    if (parsedCheckInDate >= parsedCheckOutDate) {
+      return res.status(400).json({ message: 'Check-in date must be before check-out date' });
+    }
+
+    // Fetch accommodation using the serviceId
+    const accommodation = await Accommodation.findOne({ serviceId });
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    // Find the room type that matches the roomTypeId
+    const roomType = accommodation.roomTypes.find(rt => rt._id.toString() === roomTypeId);
+    if (!roomType) {
+      return res.status(404).json({ message: 'Room type not found' });
+    }
+
+    // Filter available rooms
+    const availableRooms = [];
+
+    for (const room of roomType.rooms) {
+      if (room.status !== 'available' || room.isLocked) {
+        continue;
+      }
+
+      // Check if the room is booked for the given date range
+      const overlappingBooking = await Booking.findOne({
+        roomId: room._id,
+        bookingStatus: {
+          $nin: ['Canceled by Traveller', 'Canceled by Provider'] // Exclude canceled bookings
+        },
+        $or: [
+          {
+            checkInDate: { $lt: parsedCheckOutDate },
+            checkOutDate: { $gt: parsedCheckInDate },
+          },
+        ],
+      });
+
+
+      if (!overlappingBooking) {
+        availableRooms.push(room);
+      }
+    }
+
+    console.log(`Available rooms count after date check: ${availableRooms.length}`);
+    res.json(availableRooms);
+  } catch (error) {
+    console.error('Error fetching available rooms:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+app.put('/api/bookings/change-room', async (req, res) => {
+  const { bookingId, newRoomId } = req.body;
+
+  try {
+    // Find the booking by ID and update the roomId
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { roomId: newRoomId },
+      { new: true } // Return the updated booking document
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json(updatedBooking);
+  } catch (error) {
+    console.error('Error changing room:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// Get room details by roomId
+// Get room details by roomId
+app.get('/api/bookings/rooms/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  // Log roomId received from the URL
+  console.log('Received roomId:', roomId);
+
+  try {
+    // Log the search criteria for the database query
+    console.log('Searching for room with roomId in accommodation document:', roomId);
+
+    const accommodation = await Accommodation.findOne(
+      { 'roomTypes.rooms._id': roomId },
+      { 'roomTypes.rooms.$': 1, 'roomTypes.name': 1 }
+    );
+
+    // Log the result of the database query
+    console.log('Database query result:', accommodation);
+
+    if (!accommodation || !accommodation.roomTypes[0]?.rooms[0]) {
+      // If room is not found, log the error and return a 404
+      console.error('Room not found for roomId:', roomId);
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    // Extract room details including status and lock reason
+    const room = accommodation.roomTypes[0].rooms[0];
+    const roomDetails = {
+      roomNumber: room.number,
+      roomType: accommodation.roomTypes[0].name,  // Get the roomType from the parent (roomTypeSchema)
+      status: room.status,
+      isLocked: room.isLocked,
+      lockReason: room.lockReason,
+    };
+
+    // Log the details of the room found
+    console.log('Room details:', roomDetails);
+
+    // Return the room details as JSON
+    res.json(roomDetails);
+  } catch (error) {
+    // Log any errors during the process
+    console.error('Error fetching room details for roomId:', roomId, error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
 
 
 
@@ -327,37 +512,68 @@ app.get('/api/services/restaurant/:id', async (req, res) => {
 
 // 
 
+cron.schedule('*/1 * * * *', async () => { // Runs every minute
+  const now = new Date();
+  try {
+    // Update accommodation bookings
+    const accommodationResult = await Booking.updateMany(
+      { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+      { $set: { bookingStatus: 'Expired' } }
+    );
+    // console.log(`Updated ${accommodationResult.nModified} expired accommodation bookings.`);
+
+    // Update vehicle bookings
+    const vehicleResult = await VehicleBooking.updateMany(
+      { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+      { $set: { bookingStatus: 'Expired' } }
+    );
+    // console.log(`Updated ${vehicleResult.nModified} expired vehicle bookings.`);
+
+    // Update tour guide bookings
+    const tourGuideResult = await TourBooking.updateMany(
+      { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+      { $set: { bookingStatus: 'Expired' } }
+    );
+    // console.log(`Updated ${tourGuideResult.nModified} expired tour guide bookings.`);
+
+  } catch (error) {
+    console.error('Error updating expired bookings:', error);
+  }
+});
+
+
+
+
 // 
 // Route to handle booking accommodation
 app.post('/api/bookings/accommodation', async (req, res) => {
   console.log('Request body:', req.body);
-  
+
   try {
+    const now = new Date();
+    const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
+
     const bookingData = {
       ...req.body,
       serviceId: req.body.serviceId,
       userId: req.body.userId,
-      bookingStatus: 'Waiting for payment'
+      bookingStatus: 'Waiting for payment',
+      paymentExpiration,
     };
-    
+
     // Step 1: Create the booking
     const booking = new Booking(bookingData);
     await booking.save();
-    
+
     // Step 2: Update the room status to 'booked' in the accommodation collection
     const { accommodationId, roomTypeId, roomId } = req.body;
-    
+
     // Find the accommodation by its ID and update the room status
     const accommodation = await Accommodation.findOneAndUpdate(
       {
         _id: accommodationId,
         'roomTypes._id': roomTypeId,
         'roomTypes.rooms._id': roomId,
-      },
-      {
-        $set: {
-          'roomTypes.$[type].rooms.$[room].status': 'booked'
-        }
       },
       {
         arrayFilters: [
@@ -380,6 +596,57 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
   }
 });
+// app.post('/api/bookings/accommodation', async (req, res) => {
+//   console.log('Request body:', req.body);
+
+//   try {
+//     const bookingData = {
+//       ...req.body,
+//       serviceId: req.body.serviceId,
+//       userId: req.body.userId,
+//       bookingStatus: 'Waiting for payment'
+//     };
+
+//     // Step 1: Create the booking
+//     const booking = new Booking(bookingData);
+//     await booking.save();
+
+//     // Step 2: Update the room status to 'booked' in the accommodation collection
+//     const { accommodationId, roomTypeId, roomId } = req.body;
+
+//     // Find the accommodation by its ID and update the room status
+//     const accommodation = await Accommodation.findOneAndUpdate(
+//       {
+//         _id: accommodationId,
+//         'roomTypes._id': roomTypeId,
+//         'roomTypes.rooms._id': roomId,
+//       },
+//       {
+//         $set: {
+//           'roomTypes.$[type].rooms.$[room].status': 'booked'
+//         }
+//       },
+//       {
+//         arrayFilters: [
+//           { 'type._id': roomTypeId },
+//           { 'room._id': roomId }
+//         ],
+//         new: true,
+//       }
+//     );
+
+//     // If accommodation not found, handle the error
+//     if (!accommodation) {
+//       return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
+//     }
+
+//     // Step 3: Return the created booking and updated accommodation
+//     res.status(201).json({ booking, accommodation });
+//   } catch (error) {
+//     console.error('Error details:', error);
+//     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
+//   }
+// });
 
 
 // PUT route to update booking status
@@ -390,35 +657,35 @@ app.put('/api/bookings/status/update/:id', async (req, res) => {
   // Select the appropriate booking model based on the booking type
   let BookingModel;
   switch (bookingType) {
-      case 'Accommodation':
-          BookingModel = Booking;
-          break;
-      case 'Tour':
-          BookingModel = TourBooking;
-          break;
-      case 'Vehicle':
-          BookingModel = VehicleBooking;
-          break;
-      default:
-          return res.status(400).json({ message: 'Invalid booking type' });
+    case 'Accommodation':
+      BookingModel = Booking;
+      break;
+    case 'Tour':
+      BookingModel = TourBooking;
+      break;
+    case 'Vehicle':
+      BookingModel = VehicleBooking;
+      break;
+    default:
+      return res.status(400).json({ message: 'Invalid booking type' });
   }
 
   try {
-      // Update the booking status
-      const updatedBooking = await BookingModel.findByIdAndUpdate(
-          req.params.id,
-          { bookingStatus },
-          { new: true }
-      );
+    // Update the booking status
+    const updatedBooking = await BookingModel.findByIdAndUpdate(
+      req.params.id,
+      { bookingStatus },
+      { new: true }
+    );
 
-      if (!updatedBooking) {
-          return res.status(404).json({ message: 'Booking not found' });
-      }
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
 
-      res.json(updatedBooking);
+    res.json(updatedBooking);
   } catch (error) {
-      console.error('Error updating booking status:', error);
-      res.status(500).json({ message: 'Error updating booking status', error });
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ message: 'Error updating booking status', error });
   }
 });
 
@@ -430,48 +697,48 @@ app.put('/api/bookings/cancel', async (req, res) => {
   // Determine the new booking status based on the user type
   let newStatus;
   if (userType === 'Traveller') {
-      newStatus = 'Canceled by Traveller';
+    newStatus = 'Canceled by Traveller';
   } else if (userType === 'Provider') {
-      newStatus = 'Canceled by Provider';
+    newStatus = 'Canceled by Provider';
   } else {
-      return res.status(400).json({ message: 'Invalid user type' });
+    return res.status(400).json({ message: 'Invalid user type' });
   }
 
   // Select the appropriate booking model based on the booking type
   let BookingModel;
   switch (bookingType) {
-      case 'Accommodation':
-          BookingModel = Booking;
-          break;
-      case 'Tour':
-          BookingModel = TourBooking;
-          break;
-      case 'Vehicle':
-          BookingModel = VehicleBooking;
-          break;
-      default:
-          return res.status(400).json({ error: 'Invalid booking type' });
+    case 'Accommodation':
+      BookingModel = Booking;
+      break;
+    case 'Tour':
+      BookingModel = TourBooking;
+      break;
+    case 'Vehicle':
+      BookingModel = VehicleBooking;
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid booking type' });
   }
 
   try {
-      // Update the booking status
-      const updatedBooking = await BookingModel.findByIdAndUpdate(
-          bookingId,
-          { bookingStatus: newStatus },
-          { new: true }
-      );
+    // Update the booking status
+    const updatedBooking = await BookingModel.findByIdAndUpdate(
+      bookingId,
+      { bookingStatus: newStatus },
+      { new: true }
+    );
 
-      if (!updatedBooking) {
-          return res.status(404).json({ message: 'Booking not found' });
-      }
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
 
-      res.status(200).json({
-          message: 'Booking canceled successfully',
-          booking: updatedBooking
-      });
+    res.status(200).json({
+      message: 'Booking canceled successfully',
+      booking: updatedBooking
+    });
   } catch (error) {
-      console.error('Error canceling booking:', error);
-      res.status(500).json({ message: 'Failed to cancel booking' });
+    console.error('Error canceling booking:', error);
+    res.status(500).json({ message: 'Failed to cancel booking' });
   }
 });
 
@@ -502,7 +769,7 @@ app.put('/api/bookings/cancel', async (req, res) => {
 // });
 
 // Route to check room availability for specific dates
-app.get('/api/bookings/check-availability', async (req, res) => {  
+app.get('/api/bookings/check-availability', async (req, res) => {
   try {
     const { serviceId, roomNumber, checkInDate, checkOutDate } = req.query;
 
@@ -516,11 +783,11 @@ app.get('/api/bookings/check-availability', async (req, res) => {
       roomNumber,
       bookingStatus: { $nin: ['Canceled by Provider', 'Canceled by Traveller', 'Complete'] },
       $or: [
-        { 
+        {
           checkInDate: { $lt: checkOut },
           checkOutDate: { $gt: checkIn }
         },
-        { 
+        {
           checkOutDate: checkIn // Block same-day check-in by matching checkIn date to existing checkOut date
         }
       ]
@@ -576,12 +843,12 @@ app.post('/api/services/accommodations', upload.array('images', 10), async (req,
     // Parse room types from request body
     const roomTypes = req.body.roomTypes.map((roomType, index) => {
       const parsedRoomType = JSON.parse(roomType);
-      
+
       // Get images associated with this room type
       const images = req.files
         .filter((file) => file.fieldname === 'images' && file.originalname.includes(`image_${index}_`)) // Filter for images of the current room type
         .map((file) => `/uploads/${file.filename}`);
-        
+
       return { ...parsedRoomType, images }; // Return the room type with its associated images
     });
 
@@ -659,8 +926,8 @@ app.put('/api/services/accommodations/:id/roomtype', upload.array('images'), asy
       roomTypeData.images = existingImages;
     }
 
-    accommodation.roomTypes[roomTypeIndex] = { 
-      ...accommodation.roomTypes[roomTypeIndex]._doc, 
+    accommodation.roomTypes[roomTypeIndex] = {
+      ...accommodation.roomTypes[roomTypeIndex]._doc,
       ...roomTypeData,
       images: roomTypeData.images
     };
@@ -700,38 +967,37 @@ app.delete('/api/services/accommodations/:accommodationId/room-types/:roomTypeId
 // Update service by ID
 // Update service by ID
 app.put('/api/services/update/:id', upload.array('productImages', 10), async (req, res) => {
-  // console.log(req.body);
   try {
-    const { productName, productDescription, location } = req.body;
+    const { productName, productDescription, location, businessCoordinates } = req.body;
 
-    // Initialize an array to hold processed image URLs
+    // Process productImages as before
     let processedImages = [];
-
-    // Check if productImages is in the request body
     if (req.body.productImages) {
       for (let image of req.body.productImages) {
-        // Check if the image is a Base64 string
         if (image.startsWith('data:image/')) {
           const base64Data = image.split(',')[1];
           const buffer = Buffer.from(base64Data, 'base64');
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`; // Generate a unique file name
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
           const filePath = path.join(__dirname, 'uploads', fileName);
 
-          // Write the buffer to the file system
           await fs.promises.writeFile(filePath, buffer);
-          // Push the URL of the saved image to processedImages
           processedImages.push(`uploads/${fileName}`);
         } else {
-          // If it's not a Base64 string, assume it's a URL from the request
           processedImages.push(image);
         }
       }
     }
 
-    // Update the service with the new product images and other details
+    // Update the service with the new data
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
-      { productName, productDescription, productImages: processedImages, location },
+      {
+        productName,
+        productDescription,
+        productImages: processedImages,
+        location,
+        businessCoordinates, // Update the businessCoordinates field
+      },
       { new: true }
     );
 
@@ -739,20 +1005,20 @@ app.put('/api/services/update/:id', upload.array('productImages', 10), async (re
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    // Respond with a success message and the updated service
     res.json({
       message: 'Service updated successfully',
-      service: updatedService
+      service: updatedService,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+
 // Get accommodation by serviceId
 app.get('/api/services/accommodations/service/:serviceId', async (req, res) => {
   const { serviceId } = req.params;
-  
+
   try {
     const accommodation = await Accommodation.findOne({ serviceId })
       .select('roomTypes') // Only fetch room types field
@@ -1097,6 +1363,80 @@ app.get('/api/services/restaurantMenu/:serviceId', async (req, res) => {
 });
 
 
+// Route to check if roomType has active bookings
+app.get('/api/services/bookings/roomType/:roomTypeId/hasActiveBookings', async (req, res) => {
+  const { roomTypeId } = req.params;
+
+  try {
+    // Find bookings with the specified roomTypeId and the relevant statuses
+    const activeBookings = await Booking.find({
+      roomTypeId,
+      bookingStatus: { $in: ['Booked', 'Served'] },
+    });
+
+    // Check if there are any active bookings
+    const hasActiveBookings = activeBookings.length > 0;
+
+    res.status(200).json({ hasActiveBookings });
+  } catch (error) {
+    console.error('Error checking active bookings:', error);
+    res.status(500).json({ message: 'Error checking active bookings.' });
+  }
+});
+
+
+// Delete a specific room from a room type
+app.delete('/api/services/:accommodationId/roomType/:roomTypeId/room/:roomId', async (req, res) => {
+  const { accommodationId, roomTypeId, roomId } = req.params;
+
+  try {
+    // Find the accommodation
+    const accommodation = await Accommodation.findById(accommodationId);
+    if (!accommodation) {
+      return res.status(404).json({ message: 'Accommodation not found' });
+    }
+
+    // Find the room type
+    const roomType = accommodation.roomTypes.id(roomTypeId);
+    if (!roomType) {
+      return res.status(404).json({ message: 'Room type not found' });
+    }
+
+    // Use pull to remove the room by its _id
+    roomType.rooms.pull(roomId);
+
+    // Save the updated accommodation document
+    await accommodation.save();
+
+    res.status(200).json({ message: 'Room deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    res.status(500).json({ message: 'Error deleting room', error });
+  }
+});
+
+// Route to check if room has active bookings
+app.get('/api/services/bookings/room/:roomId/hasActiveBookings', async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // Find bookings with the specified roomId and relevant statuses
+    const activeBookings = await Booking.find({
+      roomId,
+      bookingStatus: { $in: ['Booked', 'Served'] },
+    });
+
+    // Check if there are any active bookings
+    const hasActiveBookings = activeBookings.length > 0;
+
+    res.status(200).json({ hasActiveBookings });
+  } catch (error) {
+    console.error('Error checking active bookings:', error);
+    res.status(500).json({ message: 'Error checking active bookings.' });
+  }
+});
+
+
 
 // white space
 
@@ -1114,86 +1454,87 @@ app.get('/api/services/restaurantMenu/:serviceId', async (req, res) => {
 
 // Define the tour booking schema
 const bookingTourSchema = new mongoose.Schema({
-    customerName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    tourName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-
-    tourguideType: {
-      type: String,
-      required: true,
-      enum: ['With Guide', 'Tour Only']
-    },
-
-    tourDate: {
-        type: Date,
-        required: true,
-
-        validate: {
-          validator: function(value) {
-            const now = new Date();
-            return value >= now.setHours(0, 0, 0, 0);
-          },
-          message: 'Tour date must be in the future'
-      }
-
-    },
-
-    pickupLocation: {
-      type: String,
-      required: true,
-      
-    },
-
-    numberOfParticipants: {
-        type: Number,
-        required: true,
-        min: 1
-    },
-    specialRequest: {
-        type: String,
-        trim: true
-    },
-    amount: {
-      type: Number,
-      required: true,
-      min: 0
+  customerName: {
+    type: String,
+    required: true,
+    trim: true
   },
-    bookingStatus: {
-        type: String,
-        default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-        enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment']
-    },
-    serviceId: { // Add serviceId field
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Service',
-      required: true
+  tourName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+
+  tourguideType: {
+    type: String,
+    required: true,
+    enum: ['With Guide', 'Tour Only']
+  },
+
+  tourDate: {
+    type: Date,
+    required: true,
+
+    validate: {
+      validator: function (value) {
+        const now = new Date();
+        return value >= now.setHours(0, 0, 0, 0);
+      },
+      message: 'Tour date must be in the future'
+    }
+
+  },
+
+  pickupLocation: {
+    type: String,
+    required: true,
+
+  },
+
+  numberOfParticipants: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  specialRequest: {
+    type: String,
+    trim: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  bookingStatus: {
+    type: String,
+    default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+    enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment']
+  },
+  serviceId: { // Add serviceId field
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true
   },
   userId: { // Add userId field
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
 
   tourTime: { // Add the tourTime field
     type: String,
     required: true,
-    enum: ['9:00-11:00','13:00-15:00', '17:00-19:00'] // Restrict to available time options
-},
+    enum: ['9:00-11:00', '13:00-15:00', '17:00-19:00'] // Restrict to available time options
+  },
 
-paymentStatus: {
-  type: String,
-  default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
-  enum: ['Pending', 'Paid', 'Failed']
-},
+  paymentStatus: {
+    type: String,
+    default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+    enum: ['Pending', 'Paid', 'Failed']
+  },
 
-isReviewed: { type: Boolean, default: false },
+  isReviewed: { type: Boolean, default: false },
+  paymentExpiration: { type: Date },
 
 }, { timestamps: true });
 
@@ -1206,11 +1547,16 @@ module.exports = TourBooking;
 
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
+        // Calculate payment expiration (15 minutes from now)
+        const now = new Date();
+        const paymentExpiration = new Date(now.getTime() +3600000);
+
     const bookingData = {
       ...req.body,
       serviceId: req.body.serviceId, // Make sure these are passed from the client side
       userId: req.body.userId,      // or set here if you have access to current user
       bookingStatus: 'Waiting for payment', // Set booking status here
+      paymentExpiration
       // tourTime: req.body.tourTime
     };
     const booking = new TourBooking(bookingData);
@@ -1293,44 +1639,44 @@ addAdminIfNotExists();
 // Define provider schema
 const ProviderSchema = new mongoose.Schema({
 
-    providerID: Number,
+  providerID: Number,
 
-    businessType: {type: String},
+  businessType: { type: String },
 
-    businessSubcategory: {type: String},
+  businessSubcategory: { type: String },
 
-    name: {type: String},
+  name: { type: String },
 
-    email: {type: String},
+  email: { type: String },
 
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    businessName: {type: String},
+  businessName: { type: String },
 
-    businessLocation: {type: String},
+  businessLocation: { type: String },
 
-    businessCoordinates: { 
-      type: { type: String, default: 'Point' }, 
-      coordinates: [Number] // [longitude, latitude]
-    },
+  businessCoordinates: {
+    type: { type: String, default: 'Point' },
+    coordinates: [Number] // [longitude, latitude]
+  },
 
-    businessDesc: {type: String},
+  businessDesc: { type: String },
 
-    price: { type: Number },
+  price: { type: Number },
 
-    businessLicense: {type: String},
+  businessLicense: { type: String },
 
-    imageSelf: {type: String},
+  imageSelf: { type: String },
 
-    imageService: [{ type: String }],
+  imageService: [{ type: String }],
 
-    status : {type: Number, default: 0},
+  status: { type: Number, default: 0 },
 
-   
+
 
 });
 // Apply autoIncrement plugin to the schema
-ProviderSchema.plugin(autoIncrement, {inc_field : 'providerID'});
+ProviderSchema.plugin(autoIncrement, { inc_field: 'providerID' });
 // Create the model using the schema
 Provider = mongoose.model('Provider', ProviderSchema);
 
@@ -1350,7 +1696,7 @@ function authMiddleware(req, res, next) {
         return res.status(401).json({ message: 'Unauthorized access' });
       } else {
 
-      console.log(decoded);
+        console.log(decoded);
         req.user = decoded;
         next();
       }
@@ -1382,14 +1728,14 @@ app.post('/api/register-provider', authMiddleware, upload.fields([
     } catch (err) {
       return res.status(400).json({ message: 'Invalid coordinates format' });
     }
-    
+
     // Check if lat and lng exist in the parsed coordinates
     if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
       return res.status(400).json({ message: 'Invalid coordinates provided' });
     }
 
     const imageServiceFiles = req.files['imageService'];
-    
+
     // Check if at least 3 service images are uploaded
     if (!imageServiceFiles || imageServiceFiles.length < 3) {
       return res.status(400).json({ message: 'You must upload at least 3 service images.' });
@@ -1488,7 +1834,7 @@ app.post('/signin', async (req, res) => {
 });
 
 
-  //yuda
+//yuda
 //yuda
 // book transportation
 const transportationSchema = new mongoose.Schema({
@@ -1499,10 +1845,10 @@ const transportationSchema = new mongoose.Schema({
   productCategory: { type: String, required: true },
   productSubcategory: [
     {
-      name: {type: String},
+      name: { type: String },
       type: { type: String, enum: ['car', 'motorcycle', 'bycycle'] },
-      quantity: { type: Number  },
-      price: { type: Number  }
+      quantity: { type: Number },
+      price: { type: Number }
     }
   ],
   location: { type: String },
@@ -1550,30 +1896,53 @@ app.get('/transportationService/:id', async (req, res) => {
 
 
 
-app.post('/manage/transportation', async (req, res) => {
+app.post('/manage/transportation', upload.array('productImages', 10), async (req, res) => {
   try {
-    const { userId, serviceId, productSubCategory } = req.body;
-    let { productName, productDescription, productImages, location } = req.body;
+    /// Parse JSON dari properti `data`
+    const parsedData = JSON.parse(req.body.data);
+    const { userId, serviceId, productSubCategory, deletedImages } = parsedData;
+    let { productName, productDescription, location } = parsedData;
 
-    console.log('Request Data:', req.body);
+
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
 
     // Verifikasi apakah user ada
     const user = await User.findById(userId);
     if (!user) {
+      console.log('User ID tidak ditemukan di database:', userId);
       return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
     }
+
 
     // Cari service berdasarkan ID
     const service = await Service.findById(serviceId);
     if (!service) {
+      console.log('Service tidak ditemukan');
       return res.status(404).json({ success: false, message: 'Service tidak ditemukan' });
     }
+
+        // Ambil gambar yang ada dari service jika tidak ada di request
+    let existingImages = service.productImages || [];
+
+    // Ambil gambar baru yang diunggah
+    const newImages = req.files.length > 0 ? req.files.map((file) => file.path) : [];
+
+    // Menggabungkan gambar yang sudah ada dengan gambar baru
+    let productImages = [...existingImages, ...newImages];
+
 
     // Gunakan data service sebagai default jika field opsional tidak diisi
     productName = productName || service.productName;
     productDescription = productDescription || service.productDescription;
     productImages = productImages || service.productImages;
     location = location || service.location;
+
+
+    // Filter gambar yang ada dengan menghapus gambar dari `deletedImages`
+    if (deletedImages && deletedImages.length > 0) {
+      productImages = productImages.filter((imgPath) => !deletedImages.includes(imgPath));
+    }
 
     // Cek apakah transportation dengan serviceId ini sudah ada
     let transportation = await Transportation.findOne({ serviceId: service._id });
@@ -1583,13 +1952,12 @@ app.post('/manage/transportation', async (req, res) => {
       userId: user._id,
       productName,
       productDescription,
-      productImages,
+      productImages, // Gambar yang sudah di-filter
       productCategory: service.productCategory,
       location,
       serviceId: service._id,
       productSubcategory: transportation ? transportation.productSubcategory : [],
     };
-
 
     console.log('Transportation Data:', productSubCategory);
 
@@ -1650,6 +2018,8 @@ app.post('/manage/transportation', async (req, res) => {
       service.status = 'published';
       await service.save();
     }
+
+    
   } catch (error) {
     console.error('Error mengelola transportation:', error);
     res.status(500).json({ success: false, message: 'Gagal mengelola transportation' });
@@ -1662,7 +2032,7 @@ app.post('/manage/transportation', async (req, res) => {
 
 
 
-app.get('/transportationService', async (req, res) => { 
+app.get('/transportationService', async (req, res) => {
   try {
     const transportationData = await Transportation.aggregate([
       {
@@ -1704,11 +2074,11 @@ app.get('/transportationService', async (req, res) => {
 // Define the vehicle booking schema (for car and motorcycle with conditional pickup/dropoff)
 const bookingVehicleSchema = new mongoose.Schema({
   customerName: {
-      type: String,
-      required: true,
-      trim: true
+    type: String,
+    required: true,
+    trim: true
   },
-  productName: {type: String, required: true},
+  productName: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
 
@@ -1723,7 +2093,7 @@ const bookingVehicleSchema = new mongoose.Schema({
         type: Number,
         required: true
       },
-      selectedVehicleType:{
+      selectedVehicleType: {
         type: String,
         required: true
       },
@@ -1738,20 +2108,28 @@ const bookingVehicleSchema = new mongoose.Schema({
     }
   ],
   totalBookingPrice: {
-      type: Number,
-      required: true
+    type: Number,
+    required: true
   },
   vehicleDropoffLocation: {
-      type: String,
-      trim: true,
+    type: String,
+    trim: true,
   },
   vehiclePickupLocation: {
-      type: String,
-      trim: true,
+    type: String,
+    trim: true,
+  },
+  pickupStreetName: {
+    type: String,
+    trim: true,
+  },
+  dropoffStreetName: { 
+    type: String,
+    trim: true,
   },
   rentalDuration: {
-      type: Number,
-      required: true  // Duration in hours or days
+    type: Number,
+    required: true  // Duration in hours or days
   },
   pickupDate: {
     type: Date, // Storing the pickup date
@@ -1762,22 +2140,23 @@ const bookingVehicleSchema = new mongoose.Schema({
     required: true
   },
   specialRequest: {
-      type: String,
-      trim: true
+    type: String,
+    trim: true
   },
   bookingStatus: {
-      type: String,
-      default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-      enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment']
+    type: String,
+    default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+    enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment']
   },
   isReviewed: { type: Boolean, default: false },
   paymentStatus: {
     type: String,
     default: 'Pending',  // Possible statuses: 'Pending', 'Paid', 'Failed'
     enum: ['Pending', 'Paid', 'Failed']
-  }
+  },
+  paymentExpiration: { type: Date },
 
-  
+
 }, { timestamps: true });
 
 // Create the Booking model
@@ -1787,7 +2166,7 @@ const VehicleBooking = mongoose.model('VehicleBooking', bookingVehicleSchema);
 app.get('/transportationsDetails/:serviceId', async (req, res) => {
   try {
     const { serviceId } = req.params;
-    
+
     // Find a single transportation document matching the serviceId
     const transportationData = await Transportation.findOne({ serviceId });
 
@@ -1811,41 +2190,75 @@ app.get('/transportationsDetails/:serviceId', async (req, res) => {
 async function updateTourBookings() {
   const today = new Date();
   try {
-      const expiredTours = await TourBooking.find({
-          tourDate: { $lt: today },
-          bookingStatus: 'Booked'
-      });
+    const isBookedToday = await TourBooking.find({
+      tourDate: { $lt: today },
+      bookingStatus: 'Booked'
+    });
 
-      if (expiredTours.length > 0) {
-          await TourBooking.updateMany(
-              { _id: { $in: expiredTours.map(tour => tour._id) } },
-              { $set: { bookingStatus: 'Complete' } }
-          );
-          console.log(`${expiredTours.length} tour bookings marked as Completed.`);
-      }
+    if (isBookedToday.length > 0) {
+      await TourBooking.updateMany(
+        { _id: { $in: isBookedToday.map(tour => tour._id) } },
+        { $set: { bookingStatus: 'Served' } }
+      );
+      console.log(`${isBookedToday.length} tour bookings marked as Completed.`);
+    }
+
+// Calculate yesterday's date
+const yesterday = new Date(today);
+yesterday.setDate(today.getDate() - 1);
+
+const expiredTours = await TourBooking.find({
+  tourDate: { $lt: yesterday },
+  bookingStatus: 'Booked'
+});
+
+if (expiredTours.length > 0) {
+  await TourBooking.updateMany(
+    { _id: { $in: expiredTours.map(tour => tour._id) } },
+    { $set: { bookingStatus: 'Complete' } }
+  );
+  console.log(`${expiredTours.length} tour bookings marked as Completed.`);
+}
   } catch (error) {
-      console.error('Error updating tour bookings:', error);
+    console.error('Error updating tour bookings:', error);
   }
 }
 
 // 2. Function to check and update AccommodationBooking status
 async function updateAccommodationBookings() {
   const today = new Date();
+  console.log(today);
   try {
-      const expiredAccommodations = await Booking.find({
-          checkOutDate: { $lt: today },
-          bookingStatus: 'Booked'
-      });
 
-      if (expiredAccommodations.length > 0) {
-          await Booking.updateMany(
-              { _id: { $in: expiredAccommodations.map(acc => acc._id) } },
-              { $set: { bookingStatus: 'Complete' } }
-          );
-          console.log(`${expiredAccommodations.length} accommodation bookings marked as CheckedOut.`);
-      }
+    const isBookedToday = await Booking.find({
+      checkInDate: { $lt: today },
+      bookingStatus: 'Booked'
+    });
+
+    console.log(isBookedToday);
+
+    if (isBookedToday.length > 0) {
+      await Booking.updateMany(
+        { _id: { $in: isBookedToday.map(acc => acc._id) } },
+        { $set: { bookingStatus: 'Served' } }
+      );
+      console.log(`${isBookedToday.length} accommodation bookings marked as CheckedOut.`);
+    }
+
+    const expiredAccommodations = await Booking.find({
+      checkOutDate: { $lt: today },
+      bookingStatus: 'Booked'
+    });
+
+    if (expiredAccommodations.length > 0) {
+      await Booking.updateMany(
+        { _id: { $in: expiredAccommodations.map(acc => acc._id) } },
+        { $set: { bookingStatus: 'Complete' } }
+      );
+      console.log(`${expiredAccommodations.length} accommodation bookings marked as CheckedOut.`);
+    }
   } catch (error) {
-      console.error('Error updating accommodation bookings:', error);
+    console.error('Error updating accommodation bookings:', error);
   }
 }
 
@@ -1853,20 +2266,32 @@ async function updateAccommodationBookings() {
 async function updateVehicleBookings() {
   const today = new Date();
   try {
-      const expiredVehicles = await VehicleBooking.find({
-          dropoffDate: { $lt: today },
-          bookingStatus: 'Booked'
-      });
+    const isBookedToday = await VehicleBooking.find({
+      pickupDate: { $lt: today },
+      bookingStatus: 'Booked'
+    });
+    if (isBookedToday.length > 0) {
+      await VehicleBooking.updateMany(
+        { _id: { $in: isBookedToday.map(veh => veh._id) } },
+        { $set: { bookingStatus: 'Served' } }
+      );
+      console.log(`${isBookedToday.length} vehicle bookings marked as Completed.`);
+    }
 
-      if (expiredVehicles.length > 0) {
-          await VehicleBooking.updateMany(
-              { _id: { $in: expiredVehicles.map(veh => veh._id) } },
-              { $set: { bookingStatus: 'Complete' } }
-          );
-          console.log(`${expiredVehicles.length} vehicle bookings marked as Completed.`);
-      }
+    const expiredVehicles = await VehicleBooking.find({
+      dropoffDate: { $lt: today },
+      bookingStatus: 'Booked'
+    });
+
+    if (expiredVehicles.length > 0) {
+      await VehicleBooking.updateMany(
+        { _id: { $in: expiredVehicles.map(veh => veh._id) } },
+        { $set: { bookingStatus: 'Complete' } }
+      );
+      console.log(`${expiredVehicles.length} vehicle bookings marked as Completed.`);
+    }
   } catch (error) {
-      console.error('Error updating vehicle bookings:', error);
+    console.error('Error updating vehicle bookings:', error);
   }
 }
 
@@ -1884,9 +2309,10 @@ cron.schedule('0 0 * * *', updateAllBookings);  // Runs every day at midnight
 
 
 // Route untuk booking transportasi
+// Route untuk booking transportasi
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
-  
+
   const {
     serviceId,
     userId,
@@ -1896,9 +2322,11 @@ app.post('/api/bookTransports', async (req, res) => {
     specialRequest,
     pickupLocation,
     dropoffLocation,
-    totalBookingPrice
+    totalBookingPrice,
+    pickupStreetName,
+    dropoffStreetName,
   } = req.body;
-  
+
   console.log("Booking Data:", {
     serviceId,
     userId,
@@ -1908,7 +2336,9 @@ app.post('/api/bookTransports', async (req, res) => {
     pickupLocation,
     dropoffLocation,
     totalBookingPrice,
-    vehicleBooking
+    vehicleBooking,
+    pickupStreetName,
+    dropoffStreetName,
   });
 
   try {
@@ -1960,15 +2390,17 @@ app.post('/api/bookTransports', async (req, res) => {
       const existingBookings = await VehicleBooking.aggregate([
         { $match: { serviceId: serviceId } },
         { $unwind: "$vehicleBooking" },
-        { $match: {
-          "vehicleBooking.name": name,
-          $or: [
-            { pickupDate: { $lte: end, $gte: start } },
-            { dropoffDate: { $lte: end, $gte: start } },
-            { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
-          ]
-        }},
-        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" }}}
+        {
+          $match: {
+            "vehicleBooking.name": name,
+            $or: [
+              { pickupDate: { $lte: end, $gte: start } },
+              { dropoffDate: { $lte: end, $gte: start } },
+              { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
+            ]
+          }
+        },
+        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" } } }
       ]);
 
       const totalBooked = existingBookings[0]?.totalBooked || 0;
@@ -1981,6 +2413,11 @@ app.post('/api/bookTransports', async (req, res) => {
         });
       }
     }
+
+        // Calculate payment expiration (15 minutes from now)
+        const now = new Date();
+        const paymentExpiration = new Date(now.getTime() + 3600000);
+    
 
     // If all checks pass, create the new booking
     const newBooking = new VehicleBooking({
@@ -1996,12 +2433,16 @@ app.post('/api/bookTransports', async (req, res) => {
       dropoffDate: end,
       specialRequest,
       bookingStatus: 'Waiting for payment',
-      totalBookingPrice
+      totalBookingPrice,
+      paymentExpiration,
+      pickupStreetName,
+      dropoffStreetName,
+      
     });
 
     await newBooking.save();
 
-   
+
 
     res.status(201).json({
       success: true,
@@ -2013,6 +2454,7 @@ app.post('/api/bookTransports', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 
 
@@ -2215,6 +2657,50 @@ app.post('/add-review', async (req, res) => {
 });
 
 
+// In your service controller
+app.get('/api/services/:id/rating', async (req, res) => {
+  try {
+    const serviceId = req.params.id;
+    const reviews = await Review.find({ serviceId });
+
+    // If no reviews exist for this service, return 0 for both averageRating and reviewCount
+    if (reviews.length === 0) return res.json({ averageRating: 0, reviewCount: 0 });
+
+    // Calculate the average rating
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+
+    // Send response with averageRating and reviewCount
+    res.json({ averageRating, reviewCount: reviews.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching rating', error });
+  }
+});
+
+
+app.get('/review/list/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
+
+  try {
+    // Fetch reviews for the given serviceId
+    const reviews = await Review.find({ serviceId });
+    
+    // For each review, fetch the corresponding user's name and avatar
+    const reviewsWithUserData = await Promise.all(reviews.map(async (review) => {
+      const user = await User.findById(review.userId, 'name avatar');
+      return {
+        ...review.toObject(),
+        userName: user ? user.name : null,
+        userAvatar: user ? user.avatar : null,
+      };
+    }));
+
+    res.status(200).json(reviewsWithUserData);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Error fetching reviews" });
+  }
+});
+
 
 
 //Customize Profile
@@ -2265,7 +2751,7 @@ app.put('/customizeProfile', upload.single('avatar'), async (req, res) => {
 
     // Simpan perubahan profil dan password (jika ada)
     await user.save();
-    
+
     if (name) {
       await Provider.updateMany({ userId: userId }, { name: name });
     }
@@ -2284,7 +2770,7 @@ app.get('/pending-services', async (req, res) => {
   try {
     // Dapatkan layanan dengan status 'pending' dan sertakan informasi nama pengguna (userId)
     const services = await Service.find({ status: 'pending' }).populate('userId', 'name');
-  
+
     res.json(services);
   } catch (error) {
     console.error('Error retrieving pending services:', error);
@@ -2322,60 +2808,60 @@ app.get('/getProviderStatus0', async (req, res) => {
   }
 });
 
-app.get('/getProvider/:providerID', async (req,res) =>{
-try {
-  const providerID = req.params.providerID;
-  console.log('Requested providerID:', providerID);
+app.get('/getProvider/:providerID', async (req, res) => {
+  try {
+    const providerID = req.params.providerID;
+    console.log('Requested providerID:', providerID);
 
-  // Temukan provider berdasarkan ID
-  const providerData = await Provider.findOne({ providerID });
-  console.log('Found providerData:', providerData);
+    // Temukan provider berdasarkan ID
+    const providerData = await Provider.findOne({ providerID });
+    console.log('Found providerData:', providerData);
 
-  if (!providerData) {
-    return res.status(404).json({ message: 'Provider tidak ditemukan' });
+    if (!providerData) {
+      return res.status(404).json({ message: 'Provider tidak ditemukan' });
+    }
+
+    res.json(providerData);
+  } catch (error) {
+    console.error('Error mengambil data provider:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-
-  res.json(providerData);
-} catch (error) {
-  console.error('Error mengambil data provider:', error);
-  res.status(500).json({ message: 'Internal Server Error' });
-}
 });
 
 ////////////////////////////////////////
 const sendEmail = (email, name) => {
-// Pastikan email penerima (recipients) telah didefinisikan
-if (!email) {
+  // Pastikan email penerima (recipients) telah didefinisikan
+  if (!email) {
     console.error('No recipients defined');
     return;
-}
+  }
 
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'madeyudaadiwinata@gmail.com',
-        pass: 'hncq lgcx hkhz hjlq',
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
     },
     secure: true,
     tls: {
       rejectUnauthorized: false,
     },
-});
+  });
 
-const mailOptions = {
+  const mailOptions = {
     from: 'madeyudaadiwinata@gmail.com',
     to: email,
     subject: 'Provider Approval',
     text: `Dear ${name},\n\nYour provider request has been approved.\nBest Regards,\nRUTE`,
-};
+  };
 
-transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-        console.error('Error sending email:', error);
+      console.error('Error sending email:', error);
     } else {
-        console.log('Email sent:', info.response);
+      console.log('Email sent:', info.response);
     }
-});
+  });
 };
 
 
@@ -2424,7 +2910,7 @@ app.put('/approve/:providerID', async (req, res) => {
         coordinates: providerData.businessCoordinates.coordinates // Use the array directly
       }
     });
-    
+
 
     await newService.save();
 
@@ -2444,190 +2930,190 @@ app.put('/approve/:providerID', async (req, res) => {
 //////////////////////////////////////////////////////////////////
 
 const sendEmailReject = (email, name, message) => {
-if (!email) {
-  console.error('No recipients defined');
-  return;
-}
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'madeyudaadiwinata@gmail.com',
-    pass: 'hncq lgcx hkhz hjlq',
-  },
-  secure: true,
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-const mailOptions = {
-  from: 'madeyudaadiwinata@gmail.com',
-  to: email,
-  subject: 'Provider Rejected',
-  text: `Dear ${name},\n\nYour provider request has been rejected.\n\nReason: ${message}\nPlease provide correct and complete data and re-register.\n\nBest Regards,\nRUTE`,
-};
-
-transporter.sendMail(mailOptions, (error, info) => {
-  if (error) {
-    console.error('Error sending email:', error);
-  } else {
-    console.log('Email sent:', info.response);
-  }
-});
-};
-
-app.delete('/reject/:providerID', async (req, res) => {
-try {
-  const { providerID } = req.params;
-  const { message } = req.body;
-
-  const providerData = await Provider.findOne({ providerID });
-
-  if (!providerData) {
-    return res.status(404).json({ message: 'Provider not found' });
-  }
-
-  await Provider.deleteOne({ providerID });
-
-  sendEmailReject(providerData.email, providerData.name, message);
-
-  res.json({ message: 'Provider deleted successfully' });
-} catch (error) {
-  console.error('Error deleting provider:', error);
-  res.status(500).json({ message: 'Error deleting provider', error: error.message });
-}
-});
-
-const approveServices = (email, name) => {
-// Pastikan email penerima (recipients) telah didefinisikan
-if (!email) {
+  if (!email) {
     console.error('No recipients defined');
     return;
-}
+  }
 
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'madeyudaadiwinata@gmail.com',
-        pass: 'hncq lgcx hkhz hjlq',
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
     },
     secure: true,
     tls: {
       rejectUnauthorized: false,
     },
+  });
+
+  const mailOptions = {
+    from: 'madeyudaadiwinata@gmail.com',
+    to: email,
+    subject: 'Provider Rejected',
+    text: `Dear ${name},\n\nYour provider request has been rejected.\n\nReason: ${message}\nPlease provide correct and complete data and re-register.\n\nBest Regards,\nRUTE`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};
+
+app.delete('/reject/:providerID', async (req, res) => {
+  try {
+    const { providerID } = req.params;
+    const { message } = req.body;
+
+    const providerData = await Provider.findOne({ providerID });
+
+    if (!providerData) {
+      return res.status(404).json({ message: 'Provider not found' });
+    }
+
+    await Provider.deleteOne({ providerID });
+
+    sendEmailReject(providerData.email, providerData.name, message);
+
+    res.json({ message: 'Provider deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting provider:', error);
+    res.status(500).json({ message: 'Error deleting provider', error: error.message });
+  }
 });
 
-const mailOptions = {
+const approveServices = (email, name) => {
+  // Pastikan email penerima (recipients) telah didefinisikan
+  if (!email) {
+    console.error('No recipients defined');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
+    },
+    secure: true,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  const mailOptions = {
     from: 'madeyudaadiwinata@gmail.com',
     to: email,
     subject: 'Services Approval',
     text: `Dear ${name},\n\nYour services request has been approved.\nBest Regards,\nRUTE`,
-};
+  };
 
-transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-        console.error('Error sending email:', error);
+      console.error('Error sending email:', error);
     } else {
-        console.log('Email sent:', info.response);
+      console.log('Email sent:', info.response);
     }
-});
+  });
 };
 app.put('/service/approve/:id', async (req, res) => {
-try {
-  const serviceId = req.params.id;
+  try {
+    const serviceId = req.params.id;
 
-  // Temukan layanan berdasarkan _id
-  const service = await Service.findById(serviceId);
+    // Temukan layanan berdasarkan _id
+    const service = await Service.findById(serviceId);
 
-  if (!service) {
-    return res.status(404).json({ message: 'Service not found' });
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Perbarui status menjadi 'approved'
+    service.status = 'accepted';
+    const updatedService = await service.save();
+
+    // Temukan pengguna yang terkait dengan layanan
+    const user = await User.findById(service.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Jalankan fungsi approveServices dengan email dan name pengguna
+    approveServices(user.email, user.name);
+
+    res.json({ message: 'Service status updated to approved successfully', updatedService });
+  } catch (error) {
+    console.error('Error updating service status:', error);
+    res.status(500).json({ message: 'Error updating service status', error: error.message });
   }
-
-  // Perbarui status menjadi 'approved'
-  service.status = 'accepted';
-  const updatedService = await service.save();
-
-  // Temukan pengguna yang terkait dengan layanan
-  const user = await User.findById(service.userId);
-
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
-  // Jalankan fungsi approveServices dengan email dan name pengguna
-  approveServices(user.email, user.name);
-
-  res.json({ message: 'Service status updated to approved successfully', updatedService });
-} catch (error) {
-  console.error('Error updating service status:', error);
-  res.status(500).json({ message: 'Error updating service status', error: error.message });
-}
 });
 const rejectServices = (email, name, message) => {
-// Pastikan email penerima (recipients) telah didefinisikan
-if (!email) {
+  // Pastikan email penerima (recipients) telah didefinisikan
+  if (!email) {
     console.error('No recipients defined');
     return;
-}
+  }
 
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'madeyudaadiwinata@gmail.com',
-        pass: 'hncq lgcx hkhz hjlq',
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
     },
     secure: true,
     tls: {
       rejectUnauthorized: false,
     },
-});
+  });
 
-const mailOptions = {
+  const mailOptions = {
     from: 'madeyudaadiwinata@gmail.com',
     to: email,
     subject: 'Services Rejected',
     text: `Dear ${name},\n\nYour services request has been rejected.\n\nReason: ${message}\nBest Regards,\nRUTE`,
-};
+  };
 
-transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-        console.error('Error sending email:', error);
+      console.error('Error sending email:', error);
     } else {
-        console.log('Email sent:', info.response);
+      console.log('Email sent:', info.response);
     }
-});
+  });
 };
 app.delete('/service/reject/:id', async (req, res) => {
-try {
-  const { id } = req.params;
-  const { message } = req.body;
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
 
-  // Temukan layanan berdasarkan _id
-  const service = await Service.findById(id);
+    // Temukan layanan berdasarkan _id
+    const service = await Service.findById(id);
 
-  if (!service) {
-    return res.status(404).json({ message: 'Service not found' });
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Hapus layanan berdasarkan _id
+    await Service.deleteOne({ _id: id });
+
+    // Temukan pengguna yang terkait dengan layanan
+    const user = await User.findById(service.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Jalankan fungsi rejectServices dengan email dan name pengguna
+    rejectServices(user.email, user.name, message);
+
+    res.json({ message: 'Service deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting service:', error);
+    res.status(500).json({ message: 'Error deleting service', error: error.message });
   }
-
-  // Hapus layanan berdasarkan _id
-  await Service.deleteOne({ _id: id });
-
-  // Temukan pengguna yang terkait dengan layanan
-  const user = await User.findById(service.userId);
-
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
-  // Jalankan fungsi rejectServices dengan email dan name pengguna
-  rejectServices(user.email, user.name, message);
-
-  res.json({ message: 'Service deleted successfully' });
-} catch (error) {
-  console.error('Error deleting service:', error);
-  res.status(500).json({ message: 'Error deleting service', error: error.message });
-}
 });
 
 
@@ -2662,7 +3148,7 @@ const serviceSchema = new mongoose.Schema({
     type: { type: String, default: 'Point' },
     coordinates: { type: [Number], required: true }, // [lng, lat] format
   },
- 
+
   averageRating: { type: Number, default: 0 }, // Store average rating for the product
   totalReviews: { type: Number, default: 0 }   // Store the total number of reviews
 });
@@ -2705,7 +3191,7 @@ app.get('/api/services/:id', async (req, res) => {
 });
 
 // Route to get service by serviceId
-app.get('/getServiceById/:bookingId', async (req, res) => { 
+app.get('/getServiceById/:bookingId', async (req, res) => {
   try {
     const bookingId = req.params.bookingId;
 
@@ -2753,7 +3239,7 @@ app.get('/getServiceById/:bookingId', async (req, res) => {
 // GET services - Only return services with status 'accepted'
 app.get('/api/services', authMiddleware, async (req, res) => {
   try {
-    const services = await Service.find({ userId: req.user.userId, status:  {$in: ['accepted', 'published'] }  });
+    const services = await Service.find({ userId: req.user.userId, status: { $in: ['accepted', 'published'] } });
     res.json(services);
   } catch (err) {
     res.status(500).send(err);
@@ -2767,7 +3253,7 @@ app.post('/api/services', authMiddleware, upload.fields([
 ]), async (req, res) => {
   try {
     const { productName, productDescription, productPrice, productCategory, productSubcategory, location } = req.body;
-    
+
     const productImages = req.files['productImages'] ? req.files['productImages'].map(file => file.path) : [];
     const businessLicense = req.files['businessLicense'] ? req.files['businessLicense'][0].path : null;
 
@@ -2816,9 +3302,9 @@ app.put('/api/services/:id', upload.fields([
 
     // Handle image removal
     if (req.body.imagesToRemove) {
-      const imagesToRemove = req.body.imagesToRemove instanceof Array 
-                              ? req.body.imagesToRemove 
-                              : [req.body.imagesToRemove];
+      const imagesToRemove = req.body.imagesToRemove instanceof Array
+        ? req.body.imagesToRemove
+        : [req.body.imagesToRemove];
       existingImages = existingImages.filter(image => !imagesToRemove.includes(image));
     }
 
@@ -2892,7 +3378,7 @@ app.delete('/api/services/:id', authMiddleware, async (req, res) => {
 app.get('/api/search', authMiddleware, async (req, res) => {
   console.log('masuk server');
   const { term, category } = req.query;
-  const query = {status: 'accepted' };
+  const query = { status: { $in: ['accepted', 'published'] }};
 
   console.log('term: ', term);
   console.log('category', category);
@@ -2925,12 +3411,12 @@ app.get('/api/search', authMiddleware, async (req, res) => {
 
 // setting midtrans payment
 
- ///////////////////////////////////////////
- //midtrans
+///////////////////////////////////////////
+//midtrans
 
- const midtransClient = require("midtrans-client");
+const midtransClient = require("midtrans-client");
 
- // Initialize Midtrans Snap client
+// Initialize Midtrans Snap client
 const snap = new midtransClient.Snap({
   isProduction: false, // Set to true in production
   serverKey: "SB-Mid-server-EkQFDkUqZ0I0nG-avUrCzTi0",
@@ -3019,8 +3505,8 @@ app.post('/api/payments/update-status', async (req, res) => {
 
 // backup midtrans
 
- ///////////////////////////////////////////
- //midtrans
+///////////////////////////////////////////
+//midtrans
 
 //  const midtransClient = require("midtrans-client");
 
@@ -3084,7 +3570,7 @@ app.post('/api/payments/update-status', async (req, res) => {
 ////////////////////////////////////////////////////////
 
 
-  
+
 
 app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10), async (req, res) => {
   // console.log(req.body);
@@ -3145,21 +3631,21 @@ app.put('/api/services/update/tourGuide/:id', upload.array('productImages', 10),
 // Define the route for fetching transportation bookings by user ID
 app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
   try {
-      // Log the incoming request parameter
-      console.log(`Received request for transportation bookings with userId: ${req.params.userId}`);
+    // Log the incoming request parameter
+    console.log(`Received request for transportation bookings with userId: ${req.params.userId}`);
 
-      // Find bookings by userId and populate relevant fields if needed
-      const bookings = await VehicleBooking.find({ userId: req.params.userId })
-                                           .populate('userId serviceId'); // Populate references to User and Service
+    // Find bookings by userId and populate relevant fields if needed
+    const bookings = await VehicleBooking.find({ userId: req.params.userId })
+      .populate('userId serviceId'); // Populate references to User and Service
 
-      // Log the response data
-      console.log('Transportation bookings found:', bookings);
+    // Log the response data
+    console.log('Transportation bookings found:', bookings);
 
-      // Send the bookings as JSON
-      res.json(bookings);
+    // Send the bookings as JSON
+    res.json(bookings);
   } catch (error) {
-      console.error('Error fetching transportation bookings:', error);
-      res.status(500).json({ message: 'Error fetching transportation bookings', error });
+    console.error('Error fetching transportation bookings:', error);
+    res.status(500).json({ message: 'Error fetching transportation bookings', error });
   }
 });
 
@@ -3172,7 +3658,7 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 //   try {
 //     // Count existing vehicle bookings
 //     const existingCount = await VehicleBooking.countDocuments();
-    
+
 //     if (existingCount >= 10) {
 //       console.log('There are already 10 or more vehicle bookings. No new data injected.');
 //       return; // Exit if there are already 10 or more bookings
@@ -3265,7 +3751,7 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 //   try {
 //     // Count existing tour bookings
 //     const existingCount = await TourBooking.countDocuments();
-    
+
 //     if (existingCount >= 10) {
 //       console.log('There are already 10 or more tour bookings. No new data injected.');
 //       return; // Exit if there are already 10 or more bookings
@@ -3301,6 +3787,90 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 //   }
 // }
 
+
+// async function injectDummyReviews() {
+//   const dummyReviews = [
+//     // Service 665f51fb893ed90d8a93012d
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Outstanding service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Good, would use again.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Satisfactory, but could improve.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Highly recommended!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Very good experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceptional service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Average, could be better.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Enjoyable experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Perfect, no complaints.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('665f51fb893ed90d8a93012d'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'It was okay.' },
+
+//     // Service 671917ef7a8909e7ed0bdbbc
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Friendly staff, would recommend.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Absolutely loved it!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be improved in some areas.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceeded my expectations!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Good service, will book again.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Exceptional experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Okay, but could use improvements.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Nice experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Highly recommend this service.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671917ef7a8909e7ed0bdbbc'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Satisfactory overall.' },
+
+//     // Service 671c95c3108fdbc05b68056c
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Great experience, worth it!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Superb quality service!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Not bad, but could be better.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'The best I have experienced!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Very good overall.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Wonderful and smooth.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be better with some improvements.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Satisfactory experience.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'A great choice!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671c95c3108fdbc05b68056c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Just okay, not great.' },
+
+//     // Service 671ca1ca58cb132eb1dc6d8c
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Flawless experience!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Definitely good quality.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('671ca1ca58cb132eb1dc6d8c'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'Could be better, but was okay.' },
+//     // Add more reviews similarly as needed up to 10-20
+
+//     // Service 670b61778db9a43e3f9c82d3
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 4, comment: 'Worth the money.' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 5, comment: 'Excellent!' },
+//     { userId: new mongoose.Types.ObjectId(), serviceId: new mongoose.Types.ObjectId('670b61778db9a43e3f9c82d3'), bookingId: new mongoose.Types.ObjectId(), rating: 3, comment: 'It was alright.' },
+//     // Continue similarly with 10-20 total reviews for each service
+//   ];
+
+//   try {
+//     await Review.insertMany(dummyReviews);
+//     console.log('Dummy reviews inserted successfully!');
+//   } catch (error) {
+//     console.error('Error inserting dummy reviews:', error);
+//   }
+// }
+
+// injectDummyReviews();
+
+
+// async function deleteBookingsExcept() {
+//   try {
+//     const excludeIds = [
+//       '665f51fb893ed90d8a93012d', // First ID to exclude
+//       '670b6a018db9a43e3f9c82d4'  // Second ID to exclude
+//     ];
+
+//     // Delete all bookings except the ones with the specified _ids
+//     const result = await Service.deleteMany({
+//       _id: { $nin: excludeIds } // $nin: not in (exclude both IDs)
+//     });
+
+//     console.log(`Deleted ${result.deletedCount} booking(s)`);
+//   } catch (err) {
+//     console.error('Error deleting bookings:', err);
+//   }
+// }
+
+// // Call the function to perform the deletion
+// deleteBookingsExcept();
+
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  })
+  console.log(`Server is running on http://localhost:${PORT}`);
+})

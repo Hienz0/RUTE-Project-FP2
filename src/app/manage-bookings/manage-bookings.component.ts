@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ChangeDetectorRef } from '@angular/core';
+import { ServicesService } from '../services/services.service';
 
 
 declare const Swal: any;
@@ -34,11 +35,19 @@ export class ManageBookingsComponent implements OnInit {
   selectedBooking: any | null = null;
   selectedBookingType: string = ''; // Default to Pending
 
+  availableRooms: any[] = [];
+selectedRoomId: string = '';
+
+serviceName: string | null = null;
+
+
+
 
   constructor(
     private route: ActivatedRoute,
     private bookingService: BookingService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private servicesService: ServicesService
 
   ) {}
 
@@ -46,6 +55,7 @@ export class ManageBookingsComponent implements OnInit {
     this.serviceId = this.route.snapshot.paramMap.get('serviceId');
     if (this.serviceId) {
       this.loadAllBookings();
+      // this.servicesService.get
     }
   }
 
@@ -53,9 +63,43 @@ export class ManageBookingsComponent implements OnInit {
     console.log('Loading all bookings for serviceId:', this.serviceId);
   
     this.bookingService.getAccommodationBookingsByServiceId(this.serviceId).subscribe(
-      (response) => {
-        // Assuming 'response' contains the three booking categories
+      async (response) => {
         const { accommodationBookings, tourBookings, vehicleBookings } = response;
+  
+        console.log('Accommodation bookings:', accommodationBookings);
+        console.log('Tour bookings:', tourBookings);
+        console.log('Vehicle bookings:', vehicleBookings);
+
+
+              // Determine serviceName based on booking types
+      if (accommodationBookings.length > 0) {
+        this.serviceName = accommodationBookings[0].accommodationName;
+      } else if (tourBookings.length > 0) {
+        this.serviceName = tourBookings[0].tourName;
+      } else if (vehicleBookings.length > 0) {
+        this.serviceName = vehicleBookings[0].productName;
+      } else {
+        this.serviceName = 'Unknown Service';
+      }
+      console.log('Service Name:', this.serviceName);
+
+  
+        // Load room number and room type for accommodation bookings
+        for (const booking of accommodationBookings) {
+          if (booking.roomId) {
+            try {
+              // console.log('Room ID', booking.roomId)
+              const room = await this.bookingService.getRoomById(booking.roomId).toPromise();
+              // console.log('Room details:', room);
+              booking.roomNumber = room?.roomNumber || 'Unknown';
+              booking.roomType = room?.roomType || 'Unknown';
+            } catch (error) {
+              console.error('Error fetching room details:', error);
+              booking.roomNumber = 'Unknown';
+              booking.roomType = 'Unknown';
+            }
+          }
+        }
   
         // Combine all booking types into one array
         this.bookings = [
@@ -65,26 +109,17 @@ export class ManageBookingsComponent implements OnInit {
         ];
         console.log('All Bookings:', this.bookings);
   
-        console.log('Tour bookings:', tourBookings);
-        console.log('Vehicle bookings:', vehicleBookings);
-  
         // Filter bookings after combining them
         this.filterBookings(this.selectedStatus);
         console.log('Filtered Bookings:', this.filteredBookings);
-  
-        // Delay to ensure filteredBookings is fully populated before searching for a match
-        // setTimeout(() => {
-        //   const matchingIndex = this.filteredBookings.findIndex((booking) => booking._id === this.bookingId);
-        //   if (matchingIndex !== -1) {
-        //     this.openBookingModal(matchingIndex);
-        //   }
-        // });
       },
       (error) => {
         console.error('Error loading bookings:', error);
       }
     );
   }
+  
+  
   
   
 
@@ -106,6 +141,7 @@ export class ManageBookingsComponent implements OnInit {
   }
   
   
+  
 
   openBookingModal(index: number): void {
     console.log('Opening booking modal');
@@ -124,6 +160,27 @@ export class ManageBookingsComponent implements OnInit {
     const modal = new bootstrap.Modal(this.bookingModal.nativeElement);
     modal.show();
   }
+
+
+  openManageAccommodationModal(booking: any): void {
+    console.log('Opening manage accommodation modal');
+    this.selectedBooking = booking;
+
+
+    this.closeBookingModal();
+    // Open the modal using Bootstrap's API
+    const modal = new bootstrap.Modal(document.getElementById('manageAccommodationModal') as HTMLElement);
+    modal.show();
+}
+
+closeManageAccommodationModal(): void {
+  const modalElement = document.getElementById('manageAccommodationModal') as HTMLElement;
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+}
+
   
 
   closeBookingModal(): void {
@@ -212,6 +269,127 @@ export class ManageBookingsComponent implements OnInit {
     });
 }
 
+
+earlyCheckout(selectedBooking: any): void {
+  console.log('Initiating early checkout for', selectedBooking);
+
+  Swal.fire({
+    title: 'Confirm Early Checkout',
+    text: 'Are you sure you want to proceed with early checkout?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Checkout Early',
+  }).then((result: { isConfirmed: boolean }) => {
+    if (result.isConfirmed) {
+      // Call the BookingService to update the booking status
+      this.bookingService.earlyCheckout(selectedBooking._id).subscribe(
+        (response) => {
+          console.log('Early checkout successful:', response);
+          Swal.fire('Success', 'Booking status updated to Complete.', 'success');
+          // Optionally, refresh the bookings list or update the UI
+          this.loadAllBookings(); // Assuming you have a method to fetch updated bookings
+          this.closeManageAccommodationModal();
+          this.cdr.detectChanges();
+        },
+        (error) => {
+          console.error('Error during early checkout:', error);
+          Swal.fire('Error', 'Failed to update booking status. Please try again.', 'error');
+        }
+      );
+    }
+  });
+}
+
+
+changeRoom(selectedBooking: any) {
+  Swal.fire({
+    title: 'Change Room',
+    text: 'This feature allows you to change the room for the guest.',
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonText: 'Proceed',
+  // }).then((result) => {
+  //   if (result.isConfirmed) {
+  //     // Redirect or open a modal for room selection (implement as needed)
+  //     this.router.navigate([`/change-room/${selectedBooking.serviceId}`]);
+  //   }
+  });
+}
+
+
+openChangeRoomModal(): void {
+  console.log('Opening change room modal');
+  const serviceId: string = this.route.snapshot.paramMap.get('serviceId') ?? '';
+  const roomTypeId = this.selectedBooking.roomTypeId;
+  const checkInDate = this.selectedBooking.checkInDate;
+  const checkOutDate = this.selectedBooking.checkOutDate;
+
+  console.log('serviceId', serviceId, 'roomTypeId', roomTypeId, 'checkInDate', checkInDate, 'checkOutDate', checkOutDate);
+
+  this.bookingService.getAvailableRooms(serviceId, roomTypeId, checkInDate, checkOutDate).subscribe({
+    next: (rooms) => {
+      this.availableRooms = rooms;
+
+      // Check if there are no available rooms
+      if (this.availableRooms.length === 0) {
+        Swal.fire(
+          'No Available Rooms',
+          'Unfortunately, there are no other rooms available for the selected date range.',
+          'info'
+        );
+        return;
+      }
+
+      this.closeManageAccommodationModal();
+      const modal = new bootstrap.Modal(document.getElementById('changeRoomModal') as HTMLElement);
+      modal.show();
+      console.log('Available rooms:', this.availableRooms);
+    },
+    error: (err) => {
+      console.error('Error fetching available rooms:', err);
+      Swal.fire('Error', 'Failed to fetch available rooms', 'error');
+    },
+  });
+}
+
+
+
+confirmRoomChange(): void {
+  if (!this.selectedRoomId) {
+    Swal.fire('Select Room', 'Please select a room to proceed.', 'warning');
+    return;
+  }
+
+  console.log('Changing room to:', this.selectedRoomId);
+
+  // Prepare the data to send to the backend
+  const updateData = {
+    bookingId: this.selectedBooking._id,  // The selected booking to update
+    newRoomId: this.selectedRoomId        // The new roomId
+  };
+
+  // Make an API call to update the booking with the new roomId
+  this.bookingService.changeRoom(updateData).subscribe({
+    next: (response) => {
+      console.log('Room change successful:', response);
+      Swal.fire('Success', 'Room changed successfully', 'success');
+      this.closeChangeRoomModal();  // Close the modal after successful room change
+    },
+    error: (err) => {
+      console.error('Error changing room:', err);
+      Swal.fire('Error', 'Failed to change the room', 'error');
+    }
+  });
+}
+
+
+closeChangeRoomModal(): void {
+  const modalElement = document.getElementById('changeRoomModal') as HTMLElement;
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+}
 
 
 }

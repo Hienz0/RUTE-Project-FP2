@@ -77,6 +77,137 @@
   padding-right: 2.5rem;  /* Adjust to leave room for the icon */
 }
 
+.btn-book-now {
+  background: linear-gradient(135deg, #4CAF50, #2e7d32); /* Muted green gradient */
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 50px;
+  transition: all 0.3s ease-in-out;
+  padding: 10px 25px;
+}
+
+.btn-book-now i {
+  font-size: 1.3rem;
+}
+
+.btn-book-now:hover {
+  background: linear-gradient(135deg, #66BB6A, #388E3C); /* Slightly brighter on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-book-now:active {
+  background: linear-gradient(135deg, #388E3C, #1B5E20); /* Darker on click */
+  transform: scale(0.98);
+}
+
+.shadow-sm {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transportation-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.display-5 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+}
+
+
+
+.divider {
+  width: 60px;
+  height: 3px;
+  background-color: #388E3C;
+  border-radius: 2px;
+}
+
+.lead {
+  color: #6c757d;
+  font-size: 1.1rem;
+  max-width: 800px;
+}
+
+
+.text-secondary {
+  color: #495057;
+}
+
+/* Gradient Background for the Card */
+
+
+/* Gradient Text for Headers */
+.gradient-text {
+  background: linear-gradient(135deg, #66BB6A, #388E3C);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.icon-gradient {
+  font-size: 1.5rem; /* Ukuran ikon */
+  background: linear-gradient(45deg, #00c6ff, #0072ff); /* Biru Muda ke Biru Tua */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+
+/* Gradient Effect for Icons */
+.gradient-icon {
+  background: linear-gradient(135deg, #66BB6A, #388E3C);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 2.5rem; /* Adjust size as needed */
+}
+
+/* Money-like color for price text (Green with Gold hint) */
+.text-money {
+  color: #ffcc00; /* Gold-like color for money */
+  font-weight: bold;
+}
+
+/* General Card Styling */
+.card-body {
+  background-color: #ffffff; /* White background for readability */
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 1rem;
+}
+
+/* Icon Styling */
+.fas.fa-car {
+  color: transparent; /* Ensures the color will be gradiented */
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.text-info {
+  color: #17a2b8 !important;
+}
+
+
+
+
+
+
+
 
   
   

@@ -1,3 +1,5 @@
+<app-user-navbar></app-user-navbar>
+
 <div class="container mt-5">
   <!-- Loading state or error message -->
   <div *ngIf="!transportationService">
@@ -11,32 +13,30 @@
   <div *ngIf="transportationService" class="container my-5">
     <!-- Transportation Service Section -->
     <section
-      class="transportation-section container my-5 py-5 bg-light rounded shadow-sm"
-      aria-labelledby="transportation-title"
-    >
-      <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8 text-center">
-          <!-- Product Title with Fallback and Styling -->
-          <h1
-            id="transportation-title"
-            class="display-4 fw-bold text-primary mb-3"
-          >
-            {{
-              transportationService.productName ||
-                "Our Premium Transportation Service"
-            }}
-          </h1>
-
-          <!-- Product Description with Fallback -->
-          <p class="lead text-muted mx-auto description">
-            {{
-              transportationService.productDescription ||
-                "Enjoy a seamless travel experience with our reliable and comfortable transportation services tailored to meet your needs."
-            }}
-          </p>
-        </div>
+  class="transportation-section container my-5 py-5 rounded shadow"
+  aria-labelledby="transportation-title"
+>
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8 text-center">
+      <!-- Product Icon with Gradient Effect and Title -->
+      <div class="d-flex justify-content-center align-items-center mb-3">
+        
+        <h1 id="transportation-title" class="display-5 fw-bold text-dark mb-0">
+          {{ transportationService.productName || "Our Premium Transportation Service" }}
+        </h1>
       </div>
-    </section>
+
+      <!-- Decorative Divider -->
+      <hr class="my-4 mx-auto divider" />
+
+      <!-- Product Description with Fallback -->
+      <p class="lead text-secondary mx-auto description">
+        {{ transportationService.productDescription || "Enjoy a seamless travel experience with our reliable and comfortable transportation services tailored to meet your needs." }}
+      </p>
+    </div>
+  </div>
+</section>
+
 
     <!-- Carousel for Service Images -->
     <div *ngIf="transportationService.productImages?.length" class="row my-5">
@@ -106,38 +106,47 @@
     </div>
 
     <!-- Vehicle Types as Cards -->
-    <div class="container mt-4">
-      <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-info">
-          <i class="fas fa-car me-2"></i>Available Vehicle Types
-        </h1>
-        <p class="text-muted">Explore our range of vehicles for your journey</p>
-      </div>
-      <div
-        class="row justify-content-center row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"
-      >
-        <div
-          class="col"
-          *ngFor="let subcategory of transportationService.productSubcategory"
-        >
-          <div class="card h-100 shadow-sm border-light rounded">
-            <div class="card-body">
-              <h5 class="card-title text-dark">{{ subcategory.name }}</h5>
-              <p class="card-text text-muted">
-                <strong>Type:</strong> {{ subcategory.type }}
-              </p>
-              <p class="card-text text-muted">
-                <strong>Quantity Available:</strong> {{ subcategory.quantity }}
-              </p>
-              <p class="card-text text-success">
-                <strong>Price:</strong>
-                {{ subcategory.price | currency : "IDR" : "symbol" }}
-              </p>
-            </div>
-          </div>
-        </div>
+<div class="container mt-4">
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold gradient-text">
+      <i class="fas fa-car me-2 gradient-icon"></i>Available Vehicle Types
+    </h1>
+    <p class="text-muted gradient-text">Explore our range of vehicles for your journey</p>
+  </div>
+  <div class="row justify-content-center row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div
+      class="col"
+      *ngFor="let subcategory of transportationService.productSubcategory"
+    >
+    <div class="card h-100 shadow-sm border-light rounded gradient-card">
+      <div class="card-body">
+        <h5 class="card-title text-muted">
+          <i class="fas fa-tags me-2 icon-gradient"></i>
+          {{ subcategory.name | titlecase }}
+        </h5>
+        
+        <p class="card-text text-muted">
+          <i class="fas fa-list-ul me-2 text-success"></i>
+          <strong>Type:</strong> {{ subcategory.type }}
+        </p>
+        <p class="card-text text-muted">
+          <i class="fas fa-boxes me-2 text-info"></i>
+          <strong>Quantity Available:</strong> {{ subcategory.quantity }}
+        </p>
+        <p class="card-text text-money">
+          <i class="fas fa-money-bill-wave me-2 text-warning"></i>
+          <strong>Price:</strong>
+          {{ subcategory.price | currency : "IDR" : "symbol" }}
+        </p>
       </div>
     </div>
+    
+    </div>
+  </div>
+</div>
+
+
+
 
     <!-- Price and Location -->
     <div class="row text-center my-4">
@@ -175,16 +184,19 @@
     </div>
   </div>
 
-  <!-- Button to Open Modal -->
   <div class="d-flex justify-content-center my-5">
     <button
       type="button"
-      class="btn btn-primary btn-lg shadow-sm px-5 py-3 mb-4"
+      class="btn btn-book-now shadow px-5 py-3 mb-4 d-flex align-items-center"
       (click)="openModal()"
     >
-      Book This Transportation Service
+      <i class="bi bi-calendar2-check-fill me-2"></i>
+      <!-- Bootstrap icon for booking -->
+      Book Now
     </button>
   </div>
+
+  <app-review-list [serviceId]="transportID"></app-review-list>
 
   <div *ngIf="isModalOpen" class="modal-backdrop fade show"></div>
   <!-- Booking Modal -->
@@ -314,7 +326,9 @@
                   <input
                     type="number"
                     min="1"
-                    [max]="remainingQuantity[subcategory._id] || subcategory.quantity"
+                    [max]="
+                      remainingQuantity[subcategory._id] || subcategory.quantity
+                    "
                     [(ngModel)]="vehicleQuantities[subcategory.name]"
                     (input)="onQuantityInput(subcategory)"
                     class="form-control"
