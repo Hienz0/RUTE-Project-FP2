@@ -374,6 +374,8 @@ export class BookTransportationComponent implements OnInit {
       dropoffLocation: this.dropoffLocation,
       vehicleBooking: this.vehicleBooking, // Add vehicle details
       totalBookingPrice: this.totalBookingPrice, // Add total price
+      pickupStreetName: this.pickupStreetName,
+      dropoffStreetName: this.dropoffStreetName
     };
 
     console.log(bookingData);
@@ -715,6 +717,10 @@ export class BookTransportationComponent implements OnInit {
   }
 
   // Reverse Geocoding to get the address from lat/lng
+
+  pickupStreetName: string = '';
+  dropoffStreetName: string = '';
+
   reverseGeocode(
     lat: number,
     lng: number,
@@ -729,8 +735,10 @@ export class BookTransportationComponent implements OnInit {
 
         if (type === 'pickup') {
           this.pickupAddress = address; // Set pickup address
+          this.pickupStreetName = address; // Set pickup street name
         } else if (type === 'dropoff') {
           this.dropoffAddress = address; // Set dropoff address
+          this.dropoffStreetName = address; // Set dropoff street name
         } else if (type === 'location') {
           // Update the UI for the location address
           document.getElementById('location-address')!.textContent = address;

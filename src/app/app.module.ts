@@ -49,6 +49,8 @@ import { RateServicesComponent } from './rate-services/rate-services.component';
 import { UserNavbarComponent } from './user-navbar/user-navbar.component';
 import { ReviewListComponent } from './review-list/review-list.component';
 import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
+import { TruncateLocationPipe } from './truncate-location.pipe';
+import { TruncatePipe } from './truncate.pipe';
 
 @NgModule({
   declarations: [
@@ -86,7 +88,9 @@ import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.compo
     RateServicesComponent,
     UserNavbarComponent,
     ReviewListComponent,
-    ProviderNavbarComponent
+    ProviderNavbarComponent,
+    TruncateLocationPipe,
+    TruncatePipe
   ],
   imports: [
     BrowserModule,

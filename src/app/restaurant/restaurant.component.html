@@ -69,7 +69,7 @@
           <h5 class="card-title text-dark mb-2" style="font-weight: 600; font-size: 1.15rem;">
             <i class="fas fa-utensils me-2 text-secondary"></i>{{ restaurant.productName }}
           </h5>
-          <p class="card-text text-muted" style="font-size: 0.95rem; line-height: 1.4;">{{ restaurant.productDescription }}</p>
+          <p class="card-text text-muted" style="font-size: 0.95rem; line-height: 1.4;">{{ restaurant.productDescription | truncate: 150 }}</p>
 
           <!-- Rating Section -->
           <div class="d-flex align-items-center mt-3">

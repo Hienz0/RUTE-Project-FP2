@@ -19,6 +19,8 @@ const BASE_URL = 'http://localhost:3000';
   styleUrls: ['./restaurant-detail.component.css']
 })
 export class RestaurantDetailComponent implements OnInit, AfterViewInit {
+  serviceId: string | null = null;
+
   restaurant: any;
   restaurantId: string | null = null;
   currentUser: any;
@@ -40,6 +42,8 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    this.serviceId = this.route.snapshot.paramMap.get('id');
+
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
     });

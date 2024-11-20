@@ -1896,30 +1896,53 @@ app.get('/transportationService/:id', async (req, res) => {
 
 
 
-app.post('/manage/transportation', async (req, res) => {
+app.post('/manage/transportation', upload.array('productImages', 10), async (req, res) => {
   try {
-    const { userId, serviceId, productSubCategory } = req.body;
-    let { productName, productDescription, productImages, location } = req.body;
+    /// Parse JSON dari properti `data`
+    const parsedData = JSON.parse(req.body.data);
+    const { userId, serviceId, productSubCategory, deletedImages } = parsedData;
+    let { productName, productDescription, location } = parsedData;
 
-    console.log('Request Data:', req.body);
+
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
 
     // Verifikasi apakah user ada
     const user = await User.findById(userId);
     if (!user) {
+      console.log('User ID tidak ditemukan di database:', userId);
       return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
     }
+
 
     // Cari service berdasarkan ID
     const service = await Service.findById(serviceId);
     if (!service) {
+      console.log('Service tidak ditemukan');
       return res.status(404).json({ success: false, message: 'Service tidak ditemukan' });
     }
+
+        // Ambil gambar yang ada dari service jika tidak ada di request
+    let existingImages = service.productImages || [];
+
+    // Ambil gambar baru yang diunggah
+    const newImages = req.files.length > 0 ? req.files.map((file) => file.path) : [];
+
+    // Menggabungkan gambar yang sudah ada dengan gambar baru
+    let productImages = [...existingImages, ...newImages];
+
 
     // Gunakan data service sebagai default jika field opsional tidak diisi
     productName = productName || service.productName;
     productDescription = productDescription || service.productDescription;
     productImages = productImages || service.productImages;
     location = location || service.location;
+
+
+    // Filter gambar yang ada dengan menghapus gambar dari `deletedImages`
+    if (deletedImages && deletedImages.length > 0) {
+      productImages = productImages.filter((imgPath) => !deletedImages.includes(imgPath));
+    }
 
     // Cek apakah transportation dengan serviceId ini sudah ada
     let transportation = await Transportation.findOne({ serviceId: service._id });
@@ -1929,13 +1952,12 @@ app.post('/manage/transportation', async (req, res) => {
       userId: user._id,
       productName,
       productDescription,
-      productImages,
+      productImages, // Gambar yang sudah di-filter
       productCategory: service.productCategory,
       location,
       serviceId: service._id,
       productSubcategory: transportation ? transportation.productSubcategory : [],
     };
-
 
     console.log('Transportation Data:', productSubCategory);
 
@@ -1996,6 +2018,8 @@ app.post('/manage/transportation', async (req, res) => {
       service.status = 'published';
       await service.save();
     }
+
+    
   } catch (error) {
     console.error('Error mengelola transportation:', error);
     res.status(500).json({ success: false, message: 'Gagal mengelola transportation' });
@@ -2092,6 +2116,14 @@ const bookingVehicleSchema = new mongoose.Schema({
     trim: true,
   },
   vehiclePickupLocation: {
+    type: String,
+    trim: true,
+  },
+  pickupStreetName: {
+    type: String,
+    trim: true,
+  },
+  dropoffStreetName: { 
     type: String,
     trim: true,
   },
@@ -2277,6 +2309,7 @@ cron.schedule('0 0 * * *', updateAllBookings);  // Runs every day at midnight
 
 
 // Route untuk booking transportasi
+// Route untuk booking transportasi
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
 
@@ -2289,7 +2322,9 @@ app.post('/api/bookTransports', async (req, res) => {
     specialRequest,
     pickupLocation,
     dropoffLocation,
-    totalBookingPrice
+    totalBookingPrice,
+    pickupStreetName,
+    dropoffStreetName,
   } = req.body;
 
   console.log("Booking Data:", {
@@ -2301,7 +2336,9 @@ app.post('/api/bookTransports', async (req, res) => {
     pickupLocation,
     dropoffLocation,
     totalBookingPrice,
-    vehicleBooking
+    vehicleBooking,
+    pickupStreetName,
+    dropoffStreetName,
   });
 
   try {
@@ -2397,7 +2434,10 @@ app.post('/api/bookTransports', async (req, res) => {
       specialRequest,
       bookingStatus: 'Waiting for payment',
       totalBookingPrice,
-      paymentExpiration
+      paymentExpiration,
+      pickupStreetName,
+      dropoffStreetName,
+      
     });
 
     await newBooking.save();
@@ -2414,6 +2454,7 @@ app.post('/api/bookTransports', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 
 
@@ -3337,7 +3378,7 @@ app.delete('/api/services/:id', authMiddleware, async (req, res) => {
 app.get('/api/search', authMiddleware, async (req, res) => {
   console.log('masuk server');
   const { term, category } = req.query;
-  const query = { status: 'accepted' };
+  const query = { status: { $in: ['accepted', 'published'] }};
 
   console.log('term: ', term);
   console.log('category', category);
@@ -3807,6 +3848,28 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 // }
 
 // injectDummyReviews();
+
+
+// async function deleteBookingsExcept() {
+//   try {
+//     const excludeIds = [
+//       '665f51fb893ed90d8a93012d', // First ID to exclude
+//       '670b6a018db9a43e3f9c82d4'  // Second ID to exclude
+//     ];
+
+//     // Delete all bookings except the ones with the specified _ids
+//     const result = await Service.deleteMany({
+//       _id: { $nin: excludeIds } // $nin: not in (exclude both IDs)
+//     });
+
+//     console.log(`Deleted ${result.deletedCount} booking(s)`);
+//   } catch (err) {
+//     console.error('Error deleting bookings:', err);
+//   }
+// }
+
+// // Call the function to perform the deletion
+// deleteBookingsExcept();
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

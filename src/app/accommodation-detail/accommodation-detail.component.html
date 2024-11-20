@@ -5,11 +5,13 @@
   <div class="row">
     <div class="col-12 text-center">
       <h1 class="display-4 fw-bold">{{ accommodationDetail.productName }}</h1>
-      <p class="lead text-muted">{{ accommodationDetail.productDescription }}</p>
+      <p class="lead text-muted">{{ accommodationDetail.productDescription | truncateLocation: 1 }}</p>
+
       <div class="d-flex justify-content-center align-items-center">
         <span class="badge bg-success me-2">★ {{ accommodationDetail.rating }}</span>
         <span class="text-muted">({{ accommodationDetail.reviewsCount }} reviews)</span>
       </div>
+
     </div>
   </div>
 
@@ -54,6 +56,15 @@
       </div>
     </div>
   </div>
+  <p 
+  class="lead text-muted" 
+  style="font-size: 1.2rem; line-height: 1.6; text-align: justify; font-style: italic; color: #6c757d; padding: 1rem; border-left: 4px solid #007bff; background-color: #f8f9fa;"
+>
+  {{ accommodationDetail.productDescription }}
+  
+</p>
+
+
 
 
 

@@ -113,22 +113,33 @@
 </div>
 
 <!-- Services List -->
-<div class="container">
+<!-- Services List -->
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10 col-sm-12">
-            <div class="text-center mb-4">
-                <h4>Services List</h4>
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Our Services</h2>
+                <p class="text-muted">Explore the range of services we offer to meet your needs.</p>
             </div>
             <!-- Service Cards -->
-            <div class="row">
+            <div class="row gy-4">
                 <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let service of services; let i = index">
-                    <div class="card mb-3">
+                    <div class="card shadow-sm border-0 h-100">
                         <div id="carousel{{i}}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                <div *ngFor="let image of service.productImages; let isFirst = first" [class.active]="isFirst" class="carousel-item">
+                            <!-- Carousel Indicators -->
+                            <div class="carousel-indicators">
+                                <button type="button" [attr.data-bs-target]="'#carousel' + i" [attr.data-bs-slide-to]="j" 
+                                        [class.active]="j === 0" *ngFor="let img of service.productImages; let j = index" aria-current="j === 0 ? 'true' : null">
+                                </button>
+                            </div>
+                            <!-- Carousel Images -->
+                            <div class="carousel-inner rounded-top">
+                                <div *ngFor="let image of service.productImages; let isFirst = first" 
+                                     [class.active]="isFirst" class="carousel-item">
                                     <img [src]="getFullImagePath(image)" class="d-block w-100 service-image" alt="Service Image">
                                 </div>
                             </div>
+                            <!-- Carousel Controls -->
                             <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel' + i" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
@@ -139,30 +150,38 @@
                             </button>
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ service.productName }}</h5>
-                            <p class="card-text">{{ service.productDescription }}</p>
-                            <p class="card-text"><strong>Price:</strong> {{ service.productPrice | currency:'IDR':'symbol' }}</p>
-                            <p class="card-text"><strong>Category:</strong> {{ service.productCategory }}</p>
-                            <!-- Display subcategory only if it exists -->
+                            <h5 class="card-title fw-bold">{{ service.productName }}</h5>
+                            <p class="card-text text-muted mb-2">{{ service.productDescription | truncate:150  }}</p>
+                            <p class="card-text mb-1">
+                                <strong>Price:</strong> {{ service.productPrice | currency:'IDR':'symbol' }}
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Category:</strong> {{ service.productCategory }}
+                            </p>
+                            <!-- Subcategory -->
                             <ng-container *ngIf="service.productSubcategory">
-                                <p class="card-text"><strong>Type:</strong> {{ service.productSubcategory }}</p>
+                                <p class="card-text mb-3">
+                                    <strong>Type:</strong> {{ service.productSubcategory }}
+                                </p>
                             </ng-container>
-                            <button type="button" class="btn btn-success me-2" (click)="navigateToService(service)">
-                                Manage Service
-                              </button>
-                              <button *ngIf="false" type="button" class="btn btn-primary me-2" (click)="openEditModal(i)" data-bs-toggle="modal" [attr.data-bs-target]="'#editServiceModal'">Update</button>
-
-                            <button type="button" class="btn btn-danger" (click)="confirmDelete(i)">Delete</button>
-
+                            <div class="d-flex justify-content-start">
+                                <button type="button" class="btn btn-success me-2" (click)="navigateToService(service)">
+                                    Manage Service
+                                </button>
+                                <button *ngIf="false" type="button" class="btn btn-primary me-2" 
+                                        (click)="openEditModal(i)" data-bs-toggle="modal" 
+                                        [attr.data-bs-target]="'#editServiceModal'">Update
+                                </button>
+                                <button type="button" class="btn btn-danger" (click)="confirmDelete(i)">Delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-
         </div>
     </div>
 </div>
+
 
 <!-- Edit Service Modal -->
 <div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">

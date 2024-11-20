@@ -53,7 +53,7 @@
                     <strong>Type:</strong>
                     <span class="ms-auto text-dark">{{ booking.accommodationType }}</span>
                   </li>
-                  
+
                   <li class="mb-3 d-flex align-items-center" *ngIf="booking.numberOfGuests">
                     <i class="fas fa-users text-secondary me-3"></i>
                     <strong>Guests:</strong>
@@ -77,27 +77,29 @@
                     <span class="ms-auto text-dark">{{ booking.selectedVehicleType }}</span>
                   </li> -->
                   <!-- Vehicle Name -->
-<li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.name">
-  <i class="fas fa-truck text-primary me-3"></i> <!-- Vehicle icon -->
-  <strong>Vehicle Name:</strong>
-  <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.name }}</span>
-</li>
+                  <li class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.name">
+                    <i class="fas fa-truck text-primary me-3"></i> <!-- Vehicle icon -->
+                    <strong>Vehicle Name:</strong>
+                    <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.name }}</span>
+                  </li>
 
-<!-- Vehicle Type (Optional) -->
-<li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.selectedVehicleType">
-  <i class="fas fa-car text-secondary me-3"></i>
-  <strong>Vehicle Type:</strong>
-  <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.selectedVehicleType }}</span>
-</li>
+                  <!-- Vehicle Type (Optional) -->
+                  <li class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.vehicleBooking?.length > 0 && booking.vehicleBooking[0]?.selectedVehicleType">
+                    <i class="fas fa-car text-secondary me-3"></i>
+                    <strong>Vehicle Type:</strong>
+                    <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.selectedVehicleType }}</span>
+                  </li>
                   <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehiclePickupLocation">
                     <i class="fas fa-map-marker-alt text-info me-3"></i>
                     <strong>Pickup Location:</strong>
-                    <span class="ms-auto text-dark">{{ booking.vehiclePickupLocation }}</span>
+                    <span class="ms-auto text-dark">{{ booking.pickupStreetName | truncateLocation:3 }}</span>
                   </li>
                   <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleDropoffLocation">
                     <i class="fas fa-map-marker-alt text-warning me-3"></i>
                     <strong>Dropoff Location:</strong>
-                    <span class="ms-auto text-dark">{{ booking.vehicleDropoffLocation }}</span>
+                    <span class="ms-auto text-dark">{{ booking.dropoffStreetName | truncateLocation:3 }}</span>
                   </li>
 
                   <!-- Tour Specific Fields -->
@@ -138,19 +140,17 @@
                       </span>
                     </span>
                   </li>
-                  <li
-                  class="mb-3 d-flex align-items-center"
-                  *ngIf="booking.paymentExpiration && booking.bookingStatus === 'Waiting for payment'"
-                >
-                  <i class="fas fa-clock text-warning me-3"></i>
-                  <strong>Expires In:</strong>
-                  <span class="ms-auto text-dark">
-                    <ng-container *ngIf="remainingTimes[booking._id] > 0; else expired">
-                      {{ formatRemainingTime(remainingTimes[booking._id]) }}
-                    </ng-container>
-                    <ng-template #expired>Expired</ng-template>
-                  </span>
-                </li>
+                  <li class="mb-3 d-flex align-items-center"
+                    *ngIf="booking.paymentExpiration && booking.bookingStatus === 'Waiting for payment'">
+                    <i class="fas fa-clock text-warning me-3"></i>
+                    <strong>Expires In:</strong>
+                    <span class="ms-auto text-dark">
+                      <ng-container *ngIf="remainingTimes[booking._id] > 0; else expired">
+                        {{ formatRemainingTime(remainingTimes[booking._id]) }}
+                      </ng-container>
+                      <ng-template #expired>Expired</ng-template>
+                    </span>
+                  </li>
                 </ul>
               </div>
 
@@ -159,25 +159,17 @@
                 <button class="btn btn-outline-secondary btn-sm px-3 py-1" (click)="openBookingModal(i)">
                   Details
                 </button>
-                <button
-                *ngIf="
+                <button *ngIf="
                   booking.bookingStatus === 'Complete' && !booking.isReviewed
-                "
-                class="btn btn-outline-primary btn-sm px-3 py-1"
-                (click)="navigateToReview(booking._id)"
-              >
-                Review
-              </button>
+                " class="btn btn-outline-primary btn-sm px-3 py-1" (click)="navigateToReview(booking._id)">
+                  Review
+                </button>
 
-              <button
-                *ngIf="
+                <button *ngIf="
                   booking.bookingStatus === 'Complete' && booking.isReviewed
-                "
-                class="btn btn-outline-secondary btn-sm px-3 py-1"
-                disabled
-              >
-                Reviewed
-              </button>
+                " class="btn btn-outline-secondary btn-sm px-3 py-1" disabled>
+                  Reviewed
+                </button>
               </div>
             </div>
           </div>
@@ -256,21 +248,29 @@
                   <strong class="text-muted">Vehicle Type:</strong>
                   <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.selectedVehicleType }}</span>
                 </div>
-  <!-- Vehicle Name -->
-  <div class="list-group-item d-flex align-items-center border-0 py-3">
-    <i class="fas fa-truck me-3 text-muted"></i> <!-- Add an icon for vehicle name -->
-    <strong class="text-muted">Vehicle Name:</strong>
-    <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.name }}</span>
-  </div>
+                <!-- Vehicle Name -->
+                <div class="list-group-item d-flex align-items-center border-0 py-3">
+                  <i class="fas fa-truck me-3 text-muted"></i> <!-- Add an icon for vehicle name -->
+                  <strong class="text-muted">Vehicle Name:</strong>
+                  <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.name }}</span>
+                </div>
                 <div class="list-group-item d-flex align-items-center border-0 py-3">
                   <i class="fas fa-map-marker-alt me-3 text-muted"></i>
                   <strong class="text-muted">Pickup Location:</strong>
-                  <span class="ms-auto text-dark">{{ selectedBooking?.vehiclePickupLocation }}</span>
+                  <span class="ms-auto text-dark">{{ selectedBooking?.pickupStreetName | truncateLocation:3 }}</span>
                 </div>
+                <div class="list-group-item d-flex align-items-center border-0 py-3">
+                  <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+                  <strong class="text-muted">Drop Off Location:</strong>
+                  <span class="ms-auto text-dark">
+                    {{ selectedBooking?.dropoffStreetName | truncateLocation:3 }}
+                  </span>
+                </div>
+
                 <div class="list-group-item d-flex align-items-center border-0 py-3">
                   <i class="fas fa-clock me-3 text-muted"></i>
                   <strong class="text-muted">Rental Duration:</strong>
-                  <span class="ms-auto text-dark">{{ selectedBooking?.rentalDuration }} hours</span>
+                  <span class="ms-auto text-dark">{{ selectedBooking?.rentalDuration }} Days</span>
                 </div>
               </ng-container>
 
@@ -305,22 +305,24 @@
                   'bg-warning': selectedBooking?.bookingStatus === 'Pending',
                   'bg-secondary': selectedBooking?.bookingStatus === 'Complete'
                 }">
-                  {{ selectedBooking?.bookingStatus === 'Pending' ? 'Waiting for Verification' : selectedBooking?.bookingStatus }}
+                    {{ selectedBooking?.bookingStatus === 'Pending' ? 'Waiting for Verification' :
+                    selectedBooking?.bookingStatus }}
 
                   </span>
                 </span>
               </div>
               <!-- Payment Countdown Timer -->
-<div class="list-group-item d-flex align-items-center border-0 py-3" *ngIf="selectedBooking?.paymentExpiration && selectedBooking?.bookingStatus === 'Waiting for payment'">
-  <i class="fas fa-clock me-3 text-warning"></i>
-  <strong class="text-muted">Expires In:</strong>
-  <span class="ms-auto text-dark">
-    <ng-container *ngIf="remainingTimes[selectedBooking._id] > 0; else expired">
-      {{ formatRemainingTime(remainingTimes[selectedBooking._id]) }}
-    </ng-container>
-    <ng-template #expired>Expired</ng-template>
-  </span>
-</div>
+              <div class="list-group-item d-flex align-items-center border-0 py-3"
+                *ngIf="selectedBooking?.paymentExpiration && selectedBooking?.bookingStatus === 'Waiting for payment'">
+                <i class="fas fa-clock me-3 text-warning"></i>
+                <strong class="text-muted">Expires In:</strong>
+                <span class="ms-auto text-dark">
+                  <ng-container *ngIf="remainingTimes[selectedBooking._id] > 0; else expired">
+                    {{ formatRemainingTime(remainingTimes[selectedBooking._id]) }}
+                  </ng-container>
+                  <ng-template #expired>Expired</ng-template>
+                </span>
+              </div>
             </div>
           </div>
 

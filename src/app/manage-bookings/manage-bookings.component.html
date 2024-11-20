@@ -103,16 +103,16 @@
                                 <strong>Vehicle Type:</strong>
                                 <span class="ms-auto text-dark">{{ booking.vehicleBooking[0]?.selectedVehicleType }}</span>
                               </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehiclePickupLocation">
+                              <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehiclePickupLocation">
                                 <i class="fas fa-map-marker-alt text-info me-3"></i>
                                 <strong>Pickup Location:</strong>
-                                <span class="ms-auto text-dark">{{ booking.vehiclePickupLocation }}</span>
-                            </li>
-                            <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleDropoffLocation">
+                                <span class="ms-auto text-dark">{{ booking.pickupStreetName | truncateLocation:3 }}</span>
+                              </li>
+                              <li class="mb-3 d-flex align-items-center" *ngIf="booking.vehicleDropoffLocation">
                                 <i class="fas fa-map-marker-alt text-warning me-3"></i>
                                 <strong>Dropoff Location:</strong>
-                                <span class="ms-auto text-dark">{{ booking.vehicleDropoffLocation }}</span>
-                            </li>
+                                <span class="ms-auto text-dark">{{ booking.dropoffStreetName | truncateLocation:3 }}</span>
+                              </li>
 
                             <!-- Tour Specific Fields -->
                             <li class="mb-3 d-flex align-items-center" *ngIf="booking.tourName">
@@ -254,15 +254,22 @@
     <strong class="text-muted">Vehicle Name:</strong>
     <span class="ms-auto text-dark">{{ selectedBooking?.vehicleBooking[0]?.name }}</span>
   </div>
-                        <div class="list-group-item d-flex align-items-center border-0 py-3">
-                            <i class="fas fa-map-marker-alt me-3 text-muted"></i>
-                            <strong class="text-muted">Pickup Location:</strong>
-                            <span class="ms-auto text-dark">{{ selectedBooking?.vehiclePickupLocation }}</span>
-                        </div>
+  <div class="list-group-item d-flex align-items-center border-0 py-3">
+    <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+    <strong class="text-muted">Pickup Location:</strong>
+    <span class="ms-auto text-dark">{{ selectedBooking?.pickupStreetName | truncateLocation:3 }}</span>
+  </div>
+  <div class="list-group-item d-flex align-items-center border-0 py-3">
+    <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+    <strong class="text-muted">Drop Off Location:</strong>
+    <span class="ms-auto text-dark">
+      {{ selectedBooking?.dropoffStreetName | truncateLocation:3 }}
+    </span>
+  </div>
                         <div class="list-group-item d-flex align-items-center border-0 py-3">
                             <i class="fas fa-clock me-3 text-muted"></i>
                             <strong class="text-muted">Rental Duration:</strong>
-                            <span class="ms-auto text-dark">{{ selectedBooking?.rentalDuration }} hours</span>
+                            <span class="ms-auto text-dark">{{ selectedBooking?.rentalDuration }} Days</span>
                         </div>
                     </ng-container>
 
