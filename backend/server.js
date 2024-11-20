@@ -2095,6 +2095,15 @@ const bookingVehicleSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  pickupStreetName: {
+    type: String,
+    trim: true,
+  },
+  dropoffStreetName: { 
+    type: String,
+    trim: true,
+  },
+
   rentalDuration: {
     type: Number,
     required: true  // Duration in hours or days
@@ -2289,7 +2298,9 @@ app.post('/api/bookTransports', async (req, res) => {
     specialRequest,
     pickupLocation,
     dropoffLocation,
-    totalBookingPrice
+    totalBookingPrice,
+    pickupStreetName,
+    dropoffStreetName,
   } = req.body;
 
   console.log("Booking Data:", {
@@ -2301,7 +2312,9 @@ app.post('/api/bookTransports', async (req, res) => {
     pickupLocation,
     dropoffLocation,
     totalBookingPrice,
-    vehicleBooking
+    vehicleBooking,
+    pickupStreetName,
+    dropoffStreetName,
   });
 
   try {
@@ -2397,7 +2410,10 @@ app.post('/api/bookTransports', async (req, res) => {
       specialRequest,
       bookingStatus: 'Waiting for payment',
       totalBookingPrice,
-      paymentExpiration
+      paymentExpiration,
+      pickupStreetName,
+      dropoffStreetName,
+      
     });
 
     await newBooking.save();
