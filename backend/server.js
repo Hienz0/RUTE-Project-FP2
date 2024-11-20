@@ -551,7 +551,7 @@ app.post('/api/bookings/accommodation', async (req, res) => {
 
   try {
     const now = new Date();
-    const paymentExpiration = new Date(now.getTime() + 60000); // 15 minutes from now
+    const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
 
     const bookingData = {
       ...req.body,
@@ -1549,7 +1549,7 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
         // Calculate payment expiration (15 minutes from now)
         const now = new Date();
-        const paymentExpiration = new Date(now.getTime() +60000);
+        const paymentExpiration = new Date(now.getTime() +3600000);
 
     const bookingData = {
       ...req.body,
@@ -2416,7 +2416,7 @@ app.post('/api/bookTransports', async (req, res) => {
 
         // Calculate payment expiration (15 minutes from now)
         const now = new Date();
-        const paymentExpiration = new Date(now.getTime() + 60000);
+        const paymentExpiration = new Date(now.getTime() + 3600000);
     
 
     // If all checks pass, create the new booking
