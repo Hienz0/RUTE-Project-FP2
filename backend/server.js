@@ -14,6 +14,7 @@ const { type } = require('os');
 const fs = require('fs');
 const cron = require('node-cron');
 const axios = require('axios');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = 3000;
@@ -91,6 +92,8 @@ const userSchema = new mongoose.Schema({
   contact: String,
   avatar: String,
   userType: { type: String, default: 'user' },  // Add userType with default value 'user'
+  resetToken: String,
+  resetTokenExpiry: Date,
 });
 
 const User = mongoose.model('User', userSchema);
@@ -1446,9 +1449,97 @@ app.get('/api/weather', async (req, res) => {
   }
 });
 
+
+
+app.post('/request-password-reset', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
+    await user.save();
+
+    // Send reset email
+    const resetLink = `http://localhost:4200/reset-password/${resetToken}`; // Update with your frontend URL
+    sendResetPasswordEmail(email, user.name, resetLink);
+
+    res.status(200).json({ message: 'Reset password link sent to email' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Helper function to send email
+const sendResetPasswordEmail = (email, name, resetLink) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
+    },
+    secure: true,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  const mailOptions = {
+    from: 'madeyudaadiwinata@gmail.com',
+    to: email,
+    subject: 'Reset Password Request',
+    text: `Hi ${name},\n\nClick the link below to reset your password:\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nBest Regards,\nYour Team`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};
+
+app.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  console.log('New Password: ', token, newPassword);
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Hash the new password
+    const saltRounds = 10; // You can adjust the salt rounds as needed
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    user.password = hashedPassword; // Save the hashed password
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // white space
-
-
 
 
 

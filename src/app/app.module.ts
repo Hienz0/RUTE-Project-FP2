@@ -52,6 +52,8 @@ import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.compo
 import { TruncateLocationPipe } from './truncate-location.pipe';
 import { TruncatePipe } from './truncate.pipe';
 import { WeatherWidgetComponent } from './weather-widget/weather-widget.component';
+import { RequestResetPasswordComponent } from './request-reset-password/request-reset-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 @NgModule({
   declarations: [
@@ -92,7 +94,9 @@ import { WeatherWidgetComponent } from './weather-widget/weather-widget.componen
     ProviderNavbarComponent,
     TruncateLocationPipe,
     TruncatePipe,
-    WeatherWidgetComponent
+    WeatherWidgetComponent,
+    RequestResetPasswordComponent,
+    ResetPasswordComponent
   ],
   imports: [
     BrowserModule,
