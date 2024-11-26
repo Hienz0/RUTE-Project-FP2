@@ -1,58 +1,3 @@
-
-/* end of responsive navbar */
-
-
-.rating {
-  display: flex;
-  align-items: center;
-  font-size: 1.2em;
-}
-
-.star {
-  color: gold;
-  margin-right: 2px;
-}
-
-.text-muted {
-  font-size: 0.9em;
-  color: #6c757d;
-}
-
-.card:hover {
-  transform: scale(1.03);
-  box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 20px;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.card-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.card-text {
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.badge {
-  background-color: #007bff;
-  font-size: 0.85rem;
-  color: white;
-}
-
-
-
-
-
-
-
-
-
-
-
 @import url('https://fonts.googleapis.com/css?family=Overlock');
 body {
 	background: #643a7a;
@@ -77,55 +22,6 @@ body {
   overflow: hidden;
 }
 
-/* sun */
-
-/* .frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 400px;
-  height: 400px;
-  margin-top: -200px;
-  margin-left: -200px;
-  border-radius: 2px;
-  box-shadow: 0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.3); /* Reduced shadow opacity for a softer effect 
-  background-image: linear-gradient(to top, #87CEEB, #E0FFFF); /* Gradient from light blue to sky blue 
-  color: #4b384c;
-  font-family: 'overlock', Helvetica, sans-serif;
-  font-weight: 300;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
-} */
-.sun {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  top: 45px;
-  left: 55px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffdd00 40%, #ff9800);
-  box-shadow: 0 0 2rem rgba(255, 211, 0, 0.6);
-  animation: rise 2s ease-out;
-}
-
-.sun:hover {
-  transform: scale(1.1);
-  transition: 0.6s ease;
-}
-
-@keyframes rise {
-  0% {
-    opacity: 0;
-    transform: translateY(100px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
 .moon {
   position: absolute;
 	width: 6rem;
@@ -141,8 +37,6 @@ body {
 		transition: 3s;
 	}
 }
-
-
 
 .moon-crater1 {
 	position: absolute;
@@ -163,22 +57,6 @@ body {
 	left: 2.8rem;
 }
 
-/* Keyframe for cloud puffing animation */
-@keyframes puffClouds {
-  0% {
-    transform: scale(1); /* Initial size */
-    opacity: 0.8; /* Initial opacity */
-  }
-  50% {
-    transform: scale(1.05); /* Slightly grow the cloud */
-    opacity: 1; /* Full opacity */
-  }
-  100% {
-    transform: scale(1); /* Return to original size */
-    opacity: 0.8; /* Return to initial opacity */
-  }
-}
-
 .hill-bg-1, .hill-bg-2, .hill-fg-1, .hill-fg-2, .hill-fg-3 {
   position: absolute;
   z-index: 2;
@@ -188,10 +66,8 @@ body {
   left: -57px;
   background: #503760;
   border-radius: 50%;
-  box-shadow: -.5rem 0 .8rem rgba(0, 0, 0, .3);
-  animation: puffClouds 5s ease-in-out infinite; /* Apply puffing animation */
+	box-shadow: -.5rem 0 .8rem rgba(0, 0, 0, .3);
 }
-
 
 .hill-bg-2 {
   top: 177px;
@@ -212,17 +88,6 @@ body {
 .hill-fg-3 {
   top: 218px;
   left: 292px;
-}
-
-.clear-weather .hill-bg-1,
-.clear-weather .hill-bg-2 {
-  background: #e0e0e0; /* Slightly darker background for hill-bg */
-}
-
-.clear-weather .hill-fg-1,
-.clear-weather .hill-fg-2,
-.clear-weather .hill-fg-3 {
-  background: #ffffff; /* White background for clear weather */
 }
 
 .front {
@@ -1093,5 +958,3 @@ body {
 	background: #d1baca;
 	height: 100%;
 }
-
-

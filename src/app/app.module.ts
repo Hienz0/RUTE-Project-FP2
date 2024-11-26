@@ -51,6 +51,7 @@ import { ReviewListComponent } from './review-list/review-list.component';
 import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
 import { TruncateLocationPipe } from './truncate-location.pipe';
 import { TruncatePipe } from './truncate.pipe';
+import { WeatherWidgetComponent } from './weather-widget/weather-widget.component';
 
 @NgModule({
   declarations: [
@@ -90,7 +91,8 @@ import { TruncatePipe } from './truncate.pipe';
     ReviewListComponent,
     ProviderNavbarComponent,
     TruncateLocationPipe,
-    TruncatePipe
+    TruncatePipe,
+    WeatherWidgetComponent
   ],
   imports: [
     BrowserModule,

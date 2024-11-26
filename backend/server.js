@@ -13,6 +13,7 @@ const bcrypt = require('bcrypt');
 const { type } = require('os');
 const fs = require('fs');
 const cron = require('node-cron');
+const axios = require('axios');
 
 const app = express();
 const PORT = 3000;
@@ -1436,7 +1437,14 @@ app.get('/api/services/bookings/room/:roomId/hasActiveBookings', async (req, res
   }
 });
 
-
+app.get('/api/weather', async (req, res) => {
+  try {
+    const response = await axios.get('https://forecast7.com/en/n8d51115d26/ubud/?format=json');
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send('Error fetching weather data');
+  }
+});
 
 // white space
 

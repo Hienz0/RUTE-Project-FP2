@@ -15,6 +15,9 @@ export class AccommodationComponent implements OnInit {
   accommodationServices: any[] = [];
   currentUser: any;
   Math = Math;
+  isDayTime: boolean = true;
+  frameStyle: any;
+  weatherCondition: string = 'rainy';
 
 
   constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService) {}
@@ -24,8 +27,36 @@ export class AccommodationComponent implements OnInit {
       this.currentUser = user;
     });
     
+     // Check if it's day or night
+     this.setDayNight();
+      // Set the background style for the frame
+    this.setFrameBackground();
     this.loadAccommodationServices();
   }
+
+    // Method to check if it's day or night based on current time
+    setDayNight(): void {
+// Daytime is between 6 AM and 6 PM
+const currentHour = new Date().getHours();
+this.isDayTime = currentHour >= 6 && currentHour < 18; 
+    }
+
+    setFrameBackground(): void {
+      if (this.isDayTime) {
+        // Set the sky to blue during the day
+        this.frameStyle = {
+          backgroundImage: 'linear-gradient(to top, #3a8dff, #61a6f9, #a2c8f9, #e0f3ff)', 
+
+
+        };
+      } else {
+        // Set the background to night-like colors
+        this.frameStyle = {
+          backgroundImage: 'linear-gradient(to top, #40334f, #2f273c, #272232, #201c29)', // Night gradient
+        };
+      }
+    }
+  
 
   loadAccommodationServices(): void {
     this.servicesService.getAccommodationServices().pipe(
