@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, Renderer2, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
@@ -50,9 +50,28 @@ export class AccommodationComponent implements OnInit {
 
 
 
-  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService) {}
+  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService, private renderer: Renderer2) {}
 
   ngOnInit(): void {
+        // Add the first script
+        const chtlConfigScript = this.renderer.createElement('script');
+        chtlConfigScript.type = 'text/javascript';
+        chtlConfigScript.text = `
+          window.chtlConfig = {
+            chatbotId: "4482333918"
+          };
+        `;
+        this.renderer.appendChild(document.body, chtlConfigScript);
+    
+        // Add the second script
+        const chatlingScript = this.renderer.createElement('script');
+        chatlingScript.src = 'https://chatling.ai/js/embed.js';
+        chatlingScript.async = true;
+        chatlingScript.type = 'text/javascript';
+        chatlingScript.id = 'chatling-embed-script';
+        chatlingScript.dataset.id = '4482333918';
+        this.renderer.appendChild(document.body, chatlingScript);
+
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
     });
