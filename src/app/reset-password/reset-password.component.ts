@@ -16,6 +16,7 @@ export class ResetPasswordComponent {
   message: string | null = null;
   error: string | null = null;
   token: string | null = null;
+  confirmPassword: string = '';
 
   constructor(private authService: AuthService, private route: ActivatedRoute, private router: Router) {}
 
@@ -25,43 +26,62 @@ export class ResetPasswordComponent {
 
   onSubmit() {
     if (!this.token) {
-      this.error = 'Invalid token';
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Token',
+        text: 'The token provided is invalid or missing.',
+        confirmButtonColor: '#d33',
+      });
       return;
     }
-
+  
+    if (this.newPassword.length < 8) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Password Too Short',
+        text: 'Your password must be at least 8 characters long.',
+        confirmButtonColor: '#f39c12',
+      });
+      return;
+    }
+  
+    if (this.newPassword !== this.confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Passwords Do Not Match',
+        text: 'The new password and confirmation password must be the same.',
+        confirmButtonColor: '#d33',
+      });
+      return;
+    }
+  
     this.isLoading = true;
-    this.message = null;
-    this.error = null;
-
+  
     this.authService.resetPassword(this.token, this.newPassword).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.message = response.message;
-        
-        // Show SweetAlert2 success message for password reset
+  
         Swal.fire({
           icon: 'success',
           title: 'Password Reset Successful',
           text: 'Your password has been successfully reset. You can now log in with your new password.',
           confirmButtonColor: '#3085d6',
         }).then(() => {
-          // Optionally redirect to login or other page
           this.router.navigate(['/login']);
         });
       },
       error: (err) => {
         this.isLoading = false;
-        this.error = err.error?.message || 'Something went wrong';
-        
-        // Show SweetAlert2 error message for password reset failure
+  
         Swal.fire({
           icon: 'error',
           title: 'Password Reset Failed',
-          text: this.error,
+          text: err.error?.message || 'Something went wrong during the password reset process.',
           confirmButtonColor: '#d33',
         });
       },
-      
     });
   }
+  
+  
 }
