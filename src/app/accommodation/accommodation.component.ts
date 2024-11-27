@@ -86,7 +86,7 @@ export class AccommodationComponent implements OnInit {
       (data) => {
         this.weather = data; // Assign the weather data to a variable
         console.log('Weather data:', this.weather);
-        this.updateWeatherCondition(this.weather.current.icon);
+        // this.updateWeatherCondition(this.weather.current.icon);
       },
       (error) => {
         console.error('Error fetching weather data:', error);
