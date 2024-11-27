@@ -1,4 +1,5 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { WeatherService } from '../services/weather.service';
 
 @Component({
   selector: 'app-weather-widget',
@@ -19,7 +20,22 @@ import { Component, AfterViewInit } from '@angular/core';
 
 // style="display: inline-block; width: 420px;">
 
-export class WeatherWidgetComponent implements AfterViewInit {
+export class WeatherWidgetComponent implements OnInit,AfterViewInit {
+  weather: any;
+
+  constructor(private weatherService: WeatherService) {}
+
+  ngOnInit() {
+    this.weatherService.getWeather().subscribe(
+      (data) => {
+        this.weather = data; // Assign the weather data to a variable
+        console.log('Weather data:', this.weather);
+      },
+      (error) => {
+        console.error('Error fetching weather data:', error);
+      }
+    );
+  }
   ngAfterViewInit(): void {
     this.loadWeatherWidgetScript();
   }

@@ -104,9 +104,9 @@ body {
   top: 45px;
   left: 55px;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffdd00 40%, #ff9800);
-  box-shadow: 0 0 2rem rgba(255, 211, 0, 0.6);
-  animation: rise 2s ease-out;
+  background: radial-gradient(circle, #ffdd6d 50%, #ffbb33);
+  box-shadow: 0 0 4rem rgba(255, 186, 51, 0.3); /* Soft golden glow */
+  animation: rise 3s ease-in-out;
 }
 
 .sun:hover {
@@ -1093,5 +1093,48 @@ body {
 	background: #d1baca;
 	height: 100%;
 }
+
+/* Styling for the top-right container */
+.top-right {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  text-align: right;
+  padding: 12px 20px; /* Spacious padding for elegance */
+  font-family: 'Merriweather', serif; /* Elegant serif font */
+  font-weight: 400; /* Regular weight for subtlety */
+  font-size: 22px; /* Slightly larger font for readability */
+  border-radius: 8px; /* Soft, rounded edges */
+}
+
+/* Location name styling */
+.location {
+  font-size: 26px; /* Larger for emphasis */
+  font-weight: 500; /* Medium weight for a balanced look */
+  margin-bottom: 12px; /* Space between location and clock */
+  letter-spacing: 0.5px; /* Elegant spacing */
+}
+
+/* Clock styling */
+.clock {
+  font-size: 20px; /* Slightly larger for consistency */
+  font-weight: 300; /* Light weight for elegance */
+  letter-spacing: 0.5px; /* Clean, modern look */
+  text-transform: uppercase; /* Uppercase for style */
+}
+
+/* Day-time color styling */
+.day-time {
+  color: rgba(90, 90, 90, 0.9); /* Soft gray for day */
+}
+
+/* Night-time color styling */
+/* Night-time color styling */
+.night-time {
+  color: rgba(255, 255, 255, 0.8); /* Soft white with 70% opacity for a slightly visible effect */
+}
+
+
+
 
 

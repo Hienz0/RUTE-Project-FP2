@@ -4,6 +4,8 @@ import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
 import { forkJoin } from 'rxjs'; // Import forkJoin
+import { WeatherService } from '../services/weather.service';
+
 
 
 @Component({
@@ -18,9 +20,13 @@ export class AccommodationComponent implements OnInit {
   isDayTime: boolean = true;
   frameStyle: any;
   weatherCondition: string = 'rainy';
+  weather: any;
+  location: string = 'Ubud'; // Hardcoded location name
+  currentTime: string = ''; // Dynamic clock
 
 
-  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService) {}
+
+  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService) {}
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
@@ -32,7 +38,31 @@ export class AccommodationComponent implements OnInit {
       // Set the background style for the frame
     this.setFrameBackground();
     this.loadAccommodationServices();
+
+    this.weatherService.getWeather().subscribe(
+      (data) => {
+        this.weather = data; // Assign the weather data to a variable
+        console.log('Weather data:', this.weather);
+        this.updateWeatherCondition(this.weather.current.icon);
+      },
+      (error) => {
+        console.error('Error fetching weather data:', error);
+      }
+    );
+
+    this.updateClock(); // Initialize the clock
+    setInterval(() => {
+      this.updateClock(); // Update the clock every minute
+    }, 1000);
   }
+
+    // Function to update the current time
+    updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      this.currentTime = `${hours}:${minutes}`;
+    }
 
     // Method to check if it's day or night based on current time
     setDayNight(): void {
@@ -54,6 +84,39 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
         this.frameStyle = {
           backgroundImage: 'linear-gradient(to top, #40334f, #2f273c, #272232, #201c29)', // Night gradient
         };
+      }
+    }
+
+    getWeatherProverb(): string {
+      switch (this.weatherCondition) {
+        case 'rainy':
+          return '“Frogs croaking in the lagoon,\nMeans rain will come real soon.”';
+        case 'cloudy':
+          return '“Gray clouds across the skies,\nA storm is nigh, to no surprise.”';
+        case 'clear':
+          return '“Clear skies and the sun’s bright ray,\nPromise a lovely day today.”';
+        default:
+          return '“Nature holds its clues in view,\nFor what the weather will soon do.”';
+      }
+    }
+
+      // Method to convert wind direction from degrees to cardinal direction
+  getWindDirection(degrees: number): string {
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(degrees / 45) % 8;
+    return directions[index];
+  }
+
+    // Update weather condition based on the icon
+    updateWeatherCondition(icon: string) {
+      if (icon === 'rain') {
+        this.weatherCondition = 'rainy';
+      } else if (icon === 'cloudy') {
+        this.weatherCondition = 'cloudy';
+      } else if (icon === 'clear-day') {
+        this.weatherCondition = 'clear';
+      } else {
+        this.weatherCondition = 'clear';
       }
     }
   
