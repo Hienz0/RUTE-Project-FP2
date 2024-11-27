@@ -60,9 +60,11 @@ body {
 
 .frame {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 400px;
+  /* top: 50%;
+  left: 50%; */
+  width: 420px;
+  /* width: 400px; original */
+
   height: 400px;
   margin-top: -200px;
   margin-left: -200px;
@@ -228,7 +230,7 @@ body {
 .front {
   position: absolute;
   z-index: 10;
-  width: 400px;
+  width: 420px;
   height: 140px;
   left: 0;
   bottom: -53px;
@@ -1137,6 +1139,32 @@ body {
 .frame {
   touch-action: none; /* Prevent touch scrolling while dragging */
   user-select: none; /* Prevent text selection while dragging */
+}
+
+.close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.3); /* Slightly visible background */
+  border: none;
+  color: black;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  opacity: 0; /* Fully hidden initially */
+  cursor: pointer;
+  transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
+}
+
+/* Show the close button only when the frame is hovered */
+.frame:hover .close-btn {
+  opacity: 1; /* Fully visible when the frame is hovered */
+}
+
+.fade-out {
+  opacity: 0; /* Fades out */
+  transform: scale(0.9); /* Slight shrink effect */
 }
 
 

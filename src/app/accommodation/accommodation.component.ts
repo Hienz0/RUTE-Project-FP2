@@ -5,6 +5,7 @@ import { AuthService } from '../services/auth.service';
 import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
 import { forkJoin } from 'rxjs'; // Import forkJoin
 import { WeatherService } from '../services/weather.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 
 
@@ -12,6 +13,14 @@ import { WeatherService } from '../services/weather.service';
   selector: 'app-accommodation',
   templateUrl: './accommodation.component.html',
   styleUrls: ['./accommodation.component.css'],
+  animations: [
+    trigger('fadeAnimation', [
+      transition(':leave', [ // Triggered when the element is removed
+        style({ opacity: 1, transform: 'scale(1)' }),
+        animate('200ms ease-out', style({ opacity: 0, transform: 'scale(0.9)' }))
+      ])
+    ])
+  ]
 })
 export class AccommodationComponent implements OnInit {
   accommodationServices: any[] = [];
@@ -27,11 +36,12 @@ export class AccommodationComponent implements OnInit {
 
   frameStyle: any = {
     position: 'absolute',
-    top: '100px',
-    left: '100px',
+    bottom: '25px', // Distance from the bottom of the screen
+    right: '25px', // Distance from the right side of the screen
     cursor: 'grab',
     zIndex: 9999  // Ensures the element stays on top
   };
+  
   
   weatherCondition: string = 'rainy';
   weather: any;
@@ -193,15 +203,22 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
   onDragStart(event: MouseEvent) {
     this.isDragging = true;
   
-    // Fallback values in case left or top are undefined or invalid
-    const left = parseInt(this.frameStyle.left || '0', 10); 
-    const top = parseInt(this.frameStyle.top || '0', 10);
+    // Get the exact position of the element including any scrolling
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    const computedStyle = window.getComputedStyle(event.target as HTMLElement);
   
+    // Correctly calculate the `left` and `top` values
+    const left = rect.left - parseFloat(computedStyle.marginLeft);
+    const top = rect.top - parseFloat(computedStyle.marginTop);
+  
+    // Calculate the offsets to start dragging smoothly
     this.startX = event.clientX - left;
     this.startY = event.clientY - top;
   
+    // Change cursor to indicate dragging
     this.frameStyle.cursor = 'grabbing';
   }
+  
   
 
   onDragEnd() {
@@ -211,10 +228,17 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
 
   onDragMove(event: MouseEvent) {
     if (this.isDragging) {
+      // Calculate new `left` and `top` positions
       const newLeft = event.clientX - this.startX;
       const newTop = event.clientY - this.startY;
+  
+      // Apply the new position
       this.frameStyle.left = `${newLeft}px`;
       this.frameStyle.top = `${newTop}px`;
+  
+      // Remove `bottom` and `right` to prevent conflicting styles
+      delete this.frameStyle.bottom;
+      delete this.frameStyle.right;
     }
   }
 
@@ -223,4 +247,12 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
     this.isDragging = false;
     this.frameStyle.cursor = 'grab';
   }
+
+
+  isWidgetVisible = true; // Controls the visibility of the widget
+
+closeWidget() {
+  this.isWidgetVisible = false;
+}
+
 }
