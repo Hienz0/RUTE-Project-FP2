@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
@@ -18,7 +18,21 @@ export class AccommodationComponent implements OnInit {
   currentUser: any;
   Math = Math;
   isDayTime: boolean = true;
-  frameStyle: any;
+  // frameStyle: Partial<CSSStyleDeclaration> = {
+  //   position: 'absolute',
+  //   top: '100px',
+  //   left: '100px',
+  //   cursor: 'grab'
+  // };
+
+  frameStyle: any = {
+    position: 'absolute',
+    top: '100px',
+    left: '100px',
+    cursor: 'grab',
+    zIndex: 9999  // Ensures the element stays on top
+  };
+  
   weatherCondition: string = 'rainy';
   weather: any;
   location: string = 'Ubud'; // Hardcoded location name
@@ -75,17 +89,18 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
       if (this.isDayTime) {
         // Set the sky to blue during the day
         this.frameStyle = {
-          backgroundImage: 'linear-gradient(to top, #3a8dff, #61a6f9, #a2c8f9, #e0f3ff)', 
-
-
+          ...this.frameStyle, // Keep existing properties
+          backgroundImage: 'linear-gradient(to top, #3a8dff, #61a6f9, #a2c8f9, #e0f3ff)'
         };
       } else {
         // Set the background to night-like colors
         this.frameStyle = {
-          backgroundImage: 'linear-gradient(to top, #40334f, #2f273c, #272232, #201c29)', // Night gradient
+          ...this.frameStyle, // Keep existing properties
+          backgroundImage: 'linear-gradient(to top, #40334f, #2f273c, #272232, #201c29)'
         };
       }
     }
+    
 
     getWeatherProverb(): string {
       switch (this.weatherCondition) {
@@ -163,5 +178,49 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
   // Navigate to the details page when a service is clicked
   goToDetail(id: string): void {
     this.router.navigate(['/accommodation', id]);
+  }
+
+
+
+  // weather widget related
+
+
+
+  private isDragging = false;
+  private startX = 0;
+  private startY = 0;
+
+  onDragStart(event: MouseEvent) {
+    this.isDragging = true;
+  
+    // Fallback values in case left or top are undefined or invalid
+    const left = parseInt(this.frameStyle.left || '0', 10); 
+    const top = parseInt(this.frameStyle.top || '0', 10);
+  
+    this.startX = event.clientX - left;
+    this.startY = event.clientY - top;
+  
+    this.frameStyle.cursor = 'grabbing';
+  }
+  
+
+  onDragEnd() {
+    this.isDragging = false;
+    this.frameStyle.cursor = 'grab';
+  }
+
+  onDragMove(event: MouseEvent) {
+    if (this.isDragging) {
+      const newLeft = event.clientX - this.startX;
+      const newTop = event.clientY - this.startY;
+      this.frameStyle.left = `${newLeft}px`;
+      this.frameStyle.top = `${newTop}px`;
+    }
+  }
+
+  @HostListener('document:mouseup', ['$event'])
+  onDocumentMouseUp() {
+    this.isDragging = false;
+    this.frameStyle.cursor = 'grab';
   }
 }

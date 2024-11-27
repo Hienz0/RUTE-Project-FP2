@@ -1134,6 +1134,12 @@ body {
   color: rgba(255, 255, 255, 0.8); /* Soft white with 70% opacity for a slightly visible effect */
 }
 
+.frame {
+  touch-action: none; /* Prevent touch scrolling while dragging */
+  user-select: none; /* Prevent text selection while dragging */
+}
+
+
 
 
 
