@@ -13,6 +13,7 @@ const bcrypt = require('bcrypt');
 const { type } = require('os');
 const fs = require('fs');
 const cron = require('node-cron');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 const app = express();
 const PORT = 3000;
@@ -3456,6 +3457,154 @@ app.post('/api/create-transaction', async (req, res) => {
 
 // Define the route to handle payment updates
 // Express Route for Updating Payment Status
+// Fungsi untuk membuat PDF Receipt
+async function generateReceiptPDF(details) {
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([600, 800]);
+  const { width, height } = page.getSize();
+
+  // Load fonts
+  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // Load the "Lunas" watermark logo
+  const lunasLogoPath = '../src/assets/images/lunas.png'; // Adjust path
+  const lunasLogoBytes = fs.existsSync(lunasLogoPath) ? fs.readFileSync(lunasLogoPath) : null;
+  const lunasLogo = lunasLogoBytes ? await pdfDoc.embedPng(lunasLogoBytes) : null;
+
+  // Load the company logo
+  const companyLogoPath = '../src/assets/images/rute-logo.png'; // Adjust path
+  const companyLogoBytes = fs.existsSync(companyLogoPath) ? fs.readFileSync(companyLogoPath) : null;
+  const companyLogo = companyLogoBytes ? await pdfDoc.embedPng(companyLogoBytes) : null;
+
+  // Add watermark
+  if (lunasLogo) {
+    page.drawImage(lunasLogo, {
+      x: width / 4,
+      y: height / 2 - 50, // Center the logo on the page
+      width: 200,
+      height: 100,
+      opacity: 0.1, // Make the watermark faint
+    });
+  }
+
+  // Header Section
+  page.drawText('Booking Receipt', {
+    x: 50,
+    y: height - 60,
+    size: 26,
+    font: boldFont,
+    color: rgb(0, 0.53, 0.71),
+  });
+
+  // Add Company Logo
+  if (companyLogo) {
+    page.drawImage(companyLogo, {
+      x: width - 150,
+      y: height - 100,
+      width: 100,
+      height: 50,
+    });
+  }
+
+  // Draw a line under the header
+  page.drawLine({
+    start: { x: 50, y: height - 80 },
+    end: { x: width - 50, y: height - 80 },
+    color: rgb(0, 0.53, 0.71),
+    thickness: 2,
+  });
+
+  // Styling for content
+  let contentY = height - 120;
+  const lineSpacing = 20;
+
+  // Format content neatly with sections
+  const addSection = (title, content) => {
+    page.drawText(`${title}:`, {
+      x: 50,
+      y: contentY,
+      size: 12,
+      font: boldFont,
+      color: rgb(0, 0, 0),
+    });
+    contentY -= lineSpacing;
+
+    page.drawText(content, {
+      x: 70,
+      y: contentY,
+      size: 12,
+      font: timesRomanFont,
+      color: rgb(0, 0, 0),
+      lineHeight: lineSpacing,
+    });
+    contentY -= lineSpacing * Math.ceil(content.length / 50);
+  };
+
+  // Booking Information Section
+  addSection('Customer Name', details.userName);
+  addSection('Booking Type', details.bookingType);
+
+  if (details.bookingType === 'Accommodation') {
+    addSection('Accommodation Name', details.accommodationName || 'N/A');
+    addSection('Room Type', details.roomType || 'N/A');
+    addSection('Room Number', details.roomNumber || 'N/A');
+    addSection('Check-in Date', details.checkInDate || 'N/A');
+    addSection('Check-out Date', details.checkOutDate || 'N/A');
+    addSection('Number of Guests', details.numberOfGuests || 'N/A');
+  } else if (details.bookingType === 'Tour') {
+    addSection('Tour Name', details.tourName || 'N/A');
+    addSection('Tour Date', details.tourDate || 'N/A');
+    addSection('Tour Time', details.tourTime || 'N/A');
+    addSection('Number of Participants', details.numberOfParticipants || 'N/A');
+  } else if (details.bookingType === 'Vehicle') {
+    const vehicleDetails = details.vehicleBooking
+      .map((v) => `- ${v.name} (${v.selectedVehicleType}) x ${v.quantity}`)
+      .join('\n');
+    addSection('Vehicle(s) Booked', vehicleDetails || 'N/A');
+    addSection('Total Booking Price', `Rp.${details.totalBookingPrice}` || 'N/A');
+    addSection('Pickup Date', details.pickupDate || 'N/A');
+    addSection('Dropoff Date', details.dropoffDate || 'N/A');
+    addSection('Pickup Location', details.pickupLocation || 'N/A');
+    addSection('Dropoff Location', details.dropoffLocation || 'N/A');
+  }
+
+  addSection('Payment Status', details.paymentStatus || 'N/A');
+  addSection('Booking Status', details.bookingStatus || 'N/A');
+
+  contentY -= 20;
+
+  // Footer Section
+  page.drawLine({
+    start: { x: 50, y: 40 },
+    end: { x: width - 50, y: 40 },
+    color: rgb(0.7, 0.7, 0.7),
+    thickness: 1,
+  });
+
+  page.drawText('Thank you for choosing our service!', {
+    x: 50,
+    y: contentY - 20,
+    size: 10,
+    font: timesRomanFont,
+    color: rgb(0, 0, 0),
+  });
+
+  page.drawText('Powered by Your Company', {
+    x: 50,
+    y: 20,
+    size: 10,
+    font: timesRomanFont,
+    color: rgb(0.5, 0.5, 0.5),
+  });
+
+  // Save the PDF
+  const pdfBytes = await pdfDoc.save();
+  return pdfBytes;
+}
+
+
+// Endpoint untuk mengirimkan email dengan PDF receipt
 app.post('/api/payments/update-status', async (req, res) => {
   const { bookingId, bookingType } = req.body;
 
@@ -3475,141 +3624,71 @@ app.post('/api/payments/update-status', async (req, res) => {
   }
 
   try {
-    const updateData = {
-      paymentStatus: 'Paid',
-      bookingStatus: 'Pending',
-    };
+    const updateData = { paymentStatus: 'Paid', bookingStatus: 'Pending' };
+    const booking = await BookingModel.findById(bookingId).populate('userId');
 
-    let booking;
-    let roomType = null;
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
+    const user = booking.userId;
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Ambil data berdasarkan tipe booking
+    let details = { bookingType, userName: user.name, paymentStatus: 'Paid', bookingStatus: 'Pending' };
     if (bookingType === 'Accommodation') {
-      // Fetch the booking and populate user data
-      booking = await BookingModel.findById(bookingId).populate('userId');
-
-      if (!booking) {
-        return res.status(404).json({ error: 'Booking not found' });
-      }
-
-      // Fetch the roomType details from the Accommodation model
       const accommodation = await Accommodation.findOne({ 'roomTypes._id': booking.roomTypeId });
-      if (accommodation) {
-        roomType = accommodation.roomTypes.find(
-          (room) => room._id.toString() === booking.roomTypeId.toString()
-        );
-      }
+      const roomType = accommodation?.roomTypes.find((r) => r._id.toString() === booking.roomTypeId.toString());
+      const bookedRoom = roomType?.rooms.find((r) => r._id.toString() === booking.roomId.toString());
 
-      // Find the booked room number if available
-      let bookedRoomNumber = null;
-      if (roomType) {
-        const bookedRoom = roomType.rooms.find(
-          (room) => room._id.toString() === booking.roomId.toString()
-        );
-        bookedRoomNumber = bookedRoom ? bookedRoom.number : 'N/A';
-      }
-
-      // Prepare email for Accommodation
-      const user = booking.userId;
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-
-      emailSubject = 'Accommodation Booking Payment Receipt';
-      emailBody = `
-        Dear ${user.name},
-
-        Thank you for your payment for the accommodation booking. Below are the details:
-
-        Accommodation Name: ${booking.accommodationName}
-        Accommodation Type: ${booking.accommodationType}
-        Room Type: ${roomType ? roomType.name : 'N/A'}
-        Room Number: ${bookedRoomNumber}
-        Check-in Date: ${booking.checkInDate.toDateString()}
-        Check-out Date: ${booking.checkOutDate.toDateString()}
-        Number of Guests: ${booking.numberOfGuests}
-
-        Payment Status: Paid
-        Booking Status: Pending
-
-        Thank you for choosing our service!
-      `;
-    } else {
-      // Handle Tour and Vehicle Bookings
-      booking = await BookingModel.findById(bookingId).populate('userId');
-
-      if (!booking) {
-        return res.status(404).json({ error: 'Booking not found' });
-      }
-
-      const user = booking.userId;
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-
-      if (bookingType === 'Tour') {
-        emailSubject = 'Tour Booking Payment Receipt';
-        emailBody = `
-          Dear ${user.name},
-
-          Thank you for your payment for the tour booking. Below are the details:
-
-          Tour Name: ${booking.tourName}
-          Tour Date: ${booking.tourDate.toDateString()}
-          Tour Time: ${booking.tourTime}
-          Number of Participants: ${booking.numberOfParticipants}
-
-          Payment Status: Paid
-          Booking Status: Pending
-
-          Thank you for traveling with us!
-        `;
-      } else if (bookingType === 'Vehicle') {
-        emailSubject = 'Vehicle Booking Payment Receipt';
-        emailBody = `
-          Dear ${user.name},
-
-          Thank you for your payment for the vehicle booking. Below are the details:
-
-          Vehicle(s) Booked:
-          ${booking.vehicleBooking
-            .map(
-              (v) =>
-                `- ${v.name} (${v.selectedVehicleType}) x ${v.quantity} - Total: $${v.totalPrice}`
-            )
-            .join('\n')}
-
-          Total Booking Price: $${booking.totalBookingPrice}
-          Pickup Date: ${booking.pickupDate.toDateString()}
-          Dropoff Date: ${booking.dropoffDate.toDateString()}
-          Pickup Location: ${booking.pickupStreetName}
-          Dropoff Location: ${booking.dropoffStreetName}
-
-          Payment Status: Paid
-          Booking Status: Pending
-
-          Thank you for booking with us!
-        `;
-      }
+      details = {
+        ...details,
+        accommodationName: booking.accommodationName,
+        accommodationType: booking.accommodationType,
+        roomType: roomType?.name,
+        roomNumber: bookedRoom?.number,
+        checkInDate: booking.checkInDate?.toDateString(),
+        checkOutDate: booking.checkOutDate?.toDateString(),
+        numberOfGuests: booking.numberOfGuests,
+      };
+    } else if (bookingType === 'Tour') {
+      details = {
+        ...details,
+        tourName: booking.tourName,
+        tourDate: booking.tourDate?.toDateString(),
+        tourTime: booking.tourTime,
+        numberOfParticipants: booking.numberOfParticipants,
+      };
+    } else if (bookingType === 'Vehicle') {
+      details = {
+        ...details,
+        vehicleBooking: booking.vehicleBooking,
+        totalBookingPrice: booking.totalBookingPrice,
+        pickupDate: booking.pickupDate?.toDateString(),
+        dropoffDate: booking.dropoffDate?.toDateString(),
+        pickupLocation: booking.pickupStreetName,
+        dropoffLocation: booking.dropoffStreetName,
+      };
     }
+
+    // Generate PDF
+    const pdfBytes = await generateReceiptPDF(details);
 
     // Update booking status
     await BookingModel.findByIdAndUpdate(bookingId, updateData);
 
-    // Configure email transporter
+    // Kirim Email dengan Lampiran PDF
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
-      auth: {
-        user: 'madeyudaadiwinata@gmail.com',
-        pass: 'hncq lgcx hkhz hjlq',
-      },
+      auth: { user: 'madeyudaadiwinata@gmail.com', pass: 'hncq lgcx hkhz hjlq' },
     });
 
-    // Send the email
     await transporter.sendMail({
       from: 'madeyudaadiwinata@gmail.com',
-      to: booking.userId.email,
-      subject: emailSubject,
-      text: emailBody,
+      to: user.email,
+      subject: `${bookingType} Booking Payment Receipt`,
+      text: 'Please find your booking receipt attached.',
+      attachments: [
+        { filename: 'Booking_Receipt.pdf', content: pdfBytes, contentType: 'application/pdf' },
+      ],
     });
 
     res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
