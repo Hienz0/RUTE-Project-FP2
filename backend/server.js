@@ -112,7 +112,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
   accommodationType: {
     type: String,
     required: true,
-    enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays']
+    enum: ['Hotel', 'Apartment', 'Hostel', 'Guesthouse', 'Homestays', 'Villas']
   },
   numberOfGuests: {
     type: Number,
@@ -3455,10 +3455,10 @@ app.post('/api/create-transaction', async (req, res) => {
 });
 
 // Define the route to handle payment updates
+// Express Route for Updating Payment Status
 app.post('/api/payments/update-status', async (req, res) => {
   const { bookingId, bookingType } = req.body;
 
-  // Select the appropriate booking model based on the booking type
   let BookingModel;
   switch (bookingType) {
     case 'Accommodation':
@@ -3475,23 +3475,144 @@ app.post('/api/payments/update-status', async (req, res) => {
   }
 
   try {
-    // Common status update
     const updateData = {
       paymentStatus: 'Paid',
       bookingStatus: 'Pending',
     };
 
-    // Additional custom updates per booking type (if needed)
-    if (bookingType === 'Tour Guide') {
-      updateData.confirmationStatus = 'Awaiting Guide Confirmation';
-    } else if (bookingType === 'Transportation') {
-      updateData.vehicleStatus = 'Reserved';
+    let booking;
+    let roomType = null;
+
+    if (bookingType === 'Accommodation') {
+      // Fetch the booking and populate user data
+      booking = await BookingModel.findById(bookingId).populate('userId');
+
+      if (!booking) {
+        return res.status(404).json({ error: 'Booking not found' });
+      }
+
+      // Fetch the roomType details from the Accommodation model
+      const accommodation = await Accommodation.findOne({ 'roomTypes._id': booking.roomTypeId });
+      if (accommodation) {
+        roomType = accommodation.roomTypes.find(
+          (room) => room._id.toString() === booking.roomTypeId.toString()
+        );
+      }
+
+      // Find the booked room number if available
+      let bookedRoomNumber = null;
+      if (roomType) {
+        const bookedRoom = roomType.rooms.find(
+          (room) => room._id.toString() === booking.roomId.toString()
+        );
+        bookedRoomNumber = bookedRoom ? bookedRoom.number : 'N/A';
+      }
+
+      // Prepare email for Accommodation
+      const user = booking.userId;
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      emailSubject = 'Accommodation Booking Payment Receipt';
+      emailBody = `
+        Dear ${user.name},
+
+        Thank you for your payment for the accommodation booking. Below are the details:
+
+        Accommodation Name: ${booking.accommodationName}
+        Accommodation Type: ${booking.accommodationType}
+        Room Type: ${roomType ? roomType.name : 'N/A'}
+        Room Number: ${bookedRoomNumber}
+        Check-in Date: ${booking.checkInDate.toDateString()}
+        Check-out Date: ${booking.checkOutDate.toDateString()}
+        Number of Guests: ${booking.numberOfGuests}
+
+        Payment Status: Paid
+        Booking Status: Pending
+
+        Thank you for choosing our service!
+      `;
+    } else {
+      // Handle Tour and Vehicle Bookings
+      booking = await BookingModel.findById(bookingId).populate('userId');
+
+      if (!booking) {
+        return res.status(404).json({ error: 'Booking not found' });
+      }
+
+      const user = booking.userId;
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      if (bookingType === 'Tour') {
+        emailSubject = 'Tour Booking Payment Receipt';
+        emailBody = `
+          Dear ${user.name},
+
+          Thank you for your payment for the tour booking. Below are the details:
+
+          Tour Name: ${booking.tourName}
+          Tour Date: ${booking.tourDate.toDateString()}
+          Tour Time: ${booking.tourTime}
+          Number of Participants: ${booking.numberOfParticipants}
+
+          Payment Status: Paid
+          Booking Status: Pending
+
+          Thank you for traveling with us!
+        `;
+      } else if (bookingType === 'Vehicle') {
+        emailSubject = 'Vehicle Booking Payment Receipt';
+        emailBody = `
+          Dear ${user.name},
+
+          Thank you for your payment for the vehicle booking. Below are the details:
+
+          Vehicle(s) Booked:
+          ${booking.vehicleBooking
+            .map(
+              (v) =>
+                `- ${v.name} (${v.selectedVehicleType}) x ${v.quantity} - Total: $${v.totalPrice}`
+            )
+            .join('\n')}
+
+          Total Booking Price: $${booking.totalBookingPrice}
+          Pickup Date: ${booking.pickupDate.toDateString()}
+          Dropoff Date: ${booking.dropoffDate.toDateString()}
+          Pickup Location: ${booking.pickupStreetName}
+          Dropoff Location: ${booking.dropoffStreetName}
+
+          Payment Status: Paid
+          Booking Status: Pending
+
+          Thank you for booking with us!
+        `;
+      }
     }
 
-    // Update the booking in the database
+    // Update booking status
     await BookingModel.findByIdAndUpdate(bookingId, updateData);
+
+    // Configure email transporter
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'madeyudaadiwinata@gmail.com',
+        pass: 'hncq lgcx hkhz hjlq',
+      },
+    });
+
+    // Send the email
+    await transporter.sendMail({
+      from: 'madeyudaadiwinata@gmail.com',
+      to: booking.userId.email,
+      subject: emailSubject,
+      text: emailBody,
+    });
+
     res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
-    console.log(`${bookingType} booking updated successfully: ${bookingId}`);
   } catch (error) {
     console.error('Error updating payment and booking status:', error);
     res.status(500).json({ error: 'Failed to update payment and booking status' });
