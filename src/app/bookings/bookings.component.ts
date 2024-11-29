@@ -5,6 +5,8 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
 import jsPDF from 'jspdf'; // Pastikan library ini diinstal
+import html2canvas from 'html2canvas';
+
 
 declare const Swal: any;
 declare var bootstrap: any;
@@ -231,43 +233,30 @@ interval: any;
   this.isReceiptModalOpen = false; // Tutup modal
 }
 
+
 downloadReceiptAsPDF(): void {
-  if (!this.receiptData) {
-    alert('No receipt data available.');
+  const receiptModalElement = document.getElementById('receipt-modal');
+
+  if (!receiptModalElement) {
+    alert('Unable to find the receipt modal element.');
     return;
   }
 
-  const doc = new jsPDF();
+  html2canvas(receiptModalElement).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
 
-  doc.text('Receipt', 10, 10);
-  doc.text(`Booking ID: ${this.receiptData.bookingId}`, 10, 20);
-  doc.text(`Amount Paid: ${this.receiptData.amount}`, 10, 30);
-  doc.text(`Booking Type: ${this.receiptData.bookingType}`, 10, 40);
-  doc.text(`Payment Date: ${this.receiptData.paymentDate}`, 10, 50);
-  doc.text(`Transaction ID: ${this.receiptData.transactionId}`, 10, 60);
-  doc.text(`Status: ${this.receiptData.status}`, 10, 70);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  if (this.receiptData.details) {
-    doc.text('Booking Details:', 10, 80);
-
-    if (this.receiptData.details.type === 'Accommodation') {
-      doc.text(`Name: ${this.receiptData.details.name}`, 10, 90);
-      doc.text(`Address: ${this.receiptData.details.address}`, 10, 100);
-      doc.text(`Check-In: ${this.receiptData.details.checkIn}`, 10, 110);
-      doc.text(`Check-Out: ${this.receiptData.details.checkOut}`, 10, 120);
-    } else if (this.receiptData.details.type === 'Tour') {
-      doc.text(`Package Name: ${this.receiptData.details.packageName}`, 10, 90);
-      doc.text(`Start Date: ${this.receiptData.details.startDate}`, 10, 100);
-      doc.text(`End Date: ${this.receiptData.details.endDate}`, 10, 110);
-    } else if (this.receiptData.details.type === 'Vehicle') {
-      doc.text(`Vehicle Type: ${this.receiptData.details.vehicleType}`, 10, 90);
-      doc.text(`Pick-Up Date: ${this.receiptData.details.pickupDate}`, 10, 100);
-      doc.text(`Drop-Off Date: ${this.receiptData.details.dropOffDate}`, 10, 110);
-    }
-  }
-
-  doc.save(`Receipt-${this.receiptData.bookingId}.pdf`);
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Receipt-${new Date().toISOString()}.pdf`);
+  }).catch((error) => {
+    console.error('Error generating PDF:', error);
+  });
 }
+
+
 
 getBookingDetails(bookingId: string, bookingType: string): any {
   const booking = this.bookings.find((b) => b._id === bookingId);
