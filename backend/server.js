@@ -3638,26 +3638,39 @@ app.post('/api/payments/update-status', async (req, res) => {
       const accommodation = await Accommodation.findOne({ 'roomTypes._id': booking.roomTypeId });
       const roomType = accommodation?.roomTypes.find((r) => r._id.toString() === booking.roomTypeId.toString());
       const bookedRoom = roomType?.rooms.find((r) => r._id.toString() === booking.roomId.toString());
-
+    
+      const checkInDate = booking.checkInDate instanceof Date
+          ? booking.checkInDate.toDateString()
+          : new Date(booking.checkInDate).toDateString();
+      const checkOutDate = booking.checkOutDate instanceof Date
+          ? booking.checkOutDate.toDateString()
+          : new Date(booking.checkOutDate).toDateString();
+    
       details = {
         ...details,
-        accommodationName: booking.accommodationName,
-        accommodationType: booking.accommodationType,
-        roomType: roomType?.name,
-        roomNumber: bookedRoom?.number,
-        checkInDate: booking.checkInDate?.toDateString(),
-        checkOutDate: booking.checkOutDate?.toDateString(),
-        numberOfGuests: booking.numberOfGuests,
+        accommodationName: String(booking.accommodationName || ''),
+        accommodationType: String(booking.accommodationType || ''),
+        roomType: String(roomType?.name || ''),
+        roomNumber: String(bookedRoom?.number || ''),
+        checkInDate: checkInDate || '',
+        checkOutDate: checkOutDate || '',
+        numberOfGuests: String(booking.numberOfGuests || ''),
       };
-    } else if (bookingType === 'Tour') {
+    }
+    else if (bookingType === 'Tour') {
+      const tourDate = booking.tourDate instanceof Date
+          ? booking.tourDate.toDateString()
+          : new Date(booking.tourDate).toDateString();
+    
       details = {
         ...details,
-        tourName: booking.tourName,
-        tourDate: booking.tourDate?.toDateString(),
-        tourTime: booking.tourTime,
-        numberOfParticipants: booking.numberOfParticipants,
+        tourName: String(booking.tourName || ''),
+        tourDate: tourDate || '',
+        tourTime: String(booking.tourTime || ''),
+        numberOfParticipants: String(booking.numberOfParticipants || ''),
       };
-    } else if (bookingType === 'Vehicle') {
+    }
+     else if (bookingType === 'Vehicle') {
       details = {
         ...details,
         vehicleBooking: booking.vehicleBooking,

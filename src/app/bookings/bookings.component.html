@@ -159,6 +159,13 @@
                 <button class="btn btn-outline-secondary btn-sm px-3 py-1" (click)="openBookingModal(i)">
                   Details
                 </button>
+                <button
+  class="btn btn-primary btn-sm px-3 py-1"
+  (click)="openReceiptModal(i)">
+  Show Receipt
+</button>
+
+                
                 <button *ngIf="
                   booking.bookingStatus === 'Complete' && !booking.isReviewed
                 " class="btn btn-outline-primary btn-sm px-3 py-1 ms-2" (click)="navigateToReview(booking._id)">
@@ -348,3 +355,79 @@
 
 
   </div>
+
+
+
+  <div *ngIf="isReceiptModalOpen" class="modal show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Payment Receipt</h5>
+          <button type="button" class="btn-close" (click)="closeReceiptModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="receiptData?.details?.type === 'Accommodation'">
+            <p><strong>Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
+            <p><strong>Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
+            <p><strong>Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
+            <p><strong>Number of Guests:</strong> {{ receiptData?.details?.numberOfGuests }}</p>
+            <p><strong>Check-In Date:</strong> {{ receiptData?.details?.checkInDate | date }}</p>
+            <p><strong>Check-Out Date:</strong> {{ receiptData?.details?.checkOutDate | date }}</p>
+            <p><strong>Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+            <p><strong>Amount:</strong> {{ receiptData?.details?.amount | currency }}</p>
+          </div>
+  
+          <div *ngIf="receiptData?.details?.type === 'Tour'">
+            <p><strong>Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
+            <p><strong>Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+            <p><strong>Number of Participants:</strong> {{ receiptData?.details?.numberOfParticipants }}</p>
+            <p><strong>Tour Date:</strong> {{ receiptData?.details?.tourDate | date }}</p>
+            <p><strong>Tour Time:</strong> {{ receiptData?.details?.tourTime }}</p>
+            <p><strong>Tour Guide Type:</strong> {{ receiptData?.details?.tourguideType }}</p>
+            <p><strong>Pickup Location:</strong> {{ receiptData?.details?.pickupLocation }}</p>
+            <p><strong>Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+            <p><strong>Amount:</strong> {{ receiptData?.details?.amount | currency }}</p>
+          </div>
+  
+          <div *ngIf="receiptData?.details?.type === 'Vehicle'">
+            <p><strong>Product Name:</strong> {{ receiptData?.details?.productName }}</p>
+            <p><strong>Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+            <p><strong>Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
+            <p><strong>Pickup Date:</strong> {{ receiptData?.details?.pickupDate | date }}</p>
+            <p><strong>Dropoff Date:</strong> {{ receiptData?.details?.dropoffDate | date }}</p>
+            <p><strong>Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName }}</p>
+            <p><strong>Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName }}</p>
+  
+            <h6>Vehicle Details:</h6>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Vehicle Name</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>Price/Vehicle</th>
+                  <th>Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let vehicle of receiptData?.details?.vehicleDetails">
+                  <td>{{ vehicle.name }}</td>
+                  <td>{{ vehicle.selectedVehicleType }}</td>
+                  <td>{{ vehicle.quantity }}</td>
+                  <td>{{ vehicle.pricePerVehicle | currency:'IDR'  }}</td>
+                  <td>{{ vehicle.totalPrice | currency:'IDR'  }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Total Booking Price:</strong> {{ receiptData?.details?.totalBookingPrice | currency:'IDR'  }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeReceiptModal()">Close</button>
+          <button class="btn btn-primary" (click)="downloadReceiptAsPDF()">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  

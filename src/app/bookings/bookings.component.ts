@@ -4,7 +4,7 @@ import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
-
+import jsPDF from 'jspdf'; // Pastikan library ini diinstal
 
 declare const Swal: any;
 declare var bootstrap: any;
@@ -218,6 +218,157 @@ interval: any;
         }
     }
 }
+
+
+
+ // Properti untuk menyimpan data resi
+ receiptData: any = null;
+
+ // Properti untuk mengontrol visibilitas modal resi
+ isReceiptModalOpen: boolean = false;
+
+ closeReceiptModal(): void {
+  this.isReceiptModalOpen = false; // Tutup modal
+}
+
+downloadReceiptAsPDF(): void {
+  if (!this.receiptData) {
+    alert('No receipt data available.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  doc.text('Receipt', 10, 10);
+  doc.text(`Booking ID: ${this.receiptData.bookingId}`, 10, 20);
+  doc.text(`Amount Paid: ${this.receiptData.amount}`, 10, 30);
+  doc.text(`Booking Type: ${this.receiptData.bookingType}`, 10, 40);
+  doc.text(`Payment Date: ${this.receiptData.paymentDate}`, 10, 50);
+  doc.text(`Transaction ID: ${this.receiptData.transactionId}`, 10, 60);
+  doc.text(`Status: ${this.receiptData.status}`, 10, 70);
+
+  if (this.receiptData.details) {
+    doc.text('Booking Details:', 10, 80);
+
+    if (this.receiptData.details.type === 'Accommodation') {
+      doc.text(`Name: ${this.receiptData.details.name}`, 10, 90);
+      doc.text(`Address: ${this.receiptData.details.address}`, 10, 100);
+      doc.text(`Check-In: ${this.receiptData.details.checkIn}`, 10, 110);
+      doc.text(`Check-Out: ${this.receiptData.details.checkOut}`, 10, 120);
+    } else if (this.receiptData.details.type === 'Tour') {
+      doc.text(`Package Name: ${this.receiptData.details.packageName}`, 10, 90);
+      doc.text(`Start Date: ${this.receiptData.details.startDate}`, 10, 100);
+      doc.text(`End Date: ${this.receiptData.details.endDate}`, 10, 110);
+    } else if (this.receiptData.details.type === 'Vehicle') {
+      doc.text(`Vehicle Type: ${this.receiptData.details.vehicleType}`, 10, 90);
+      doc.text(`Pick-Up Date: ${this.receiptData.details.pickupDate}`, 10, 100);
+      doc.text(`Drop-Off Date: ${this.receiptData.details.dropOffDate}`, 10, 110);
+    }
+  }
+
+  doc.save(`Receipt-${this.receiptData.bookingId}.pdf`);
+}
+
+getBookingDetails(bookingId: string, bookingType: string): any {
+  const booking = this.bookings.find((b) => b._id === bookingId);
+  if (!booking) return null;
+
+  console.log(`Booking`, booking);
+
+  if (bookingType === 'Accommodation') {
+    return {
+      type: 'Accommodation',
+      accommodationName: booking.accommodationName,
+      accommodationType: booking.accommodationType,
+      guestName: booking.guestName,
+      numberOfGuests: booking.numberOfGuests,
+      checkInDate: booking.checkInDate,
+      checkOutDate: booking.checkOutDate,
+      specialRequest: booking.specialRequest,
+      amount: booking.amount,
+    };
+  } else if (bookingType === 'Tour') {
+    return {
+      type: 'Tour',
+      tourName: booking.tourName,
+      customerName: booking.customerName,
+      numberOfParticipants: booking.numberOfParticipants,
+      tourDate: booking.tourDate,
+      tourTime: booking.tourTime,
+      tourguideType: booking.tourguideType,
+      pickupLocation: booking.pickupLocation,
+      specialRequest: booking.specialRequest,
+      amount: booking.amount,
+    };
+  } else if (bookingType === 'Vehicle') {
+    return {
+      type: 'Vehicle',
+      productName: booking.productName,
+      customerName: booking.customerName,
+      rentalDuration: booking.rentalDuration,
+      pickupDate: booking.pickupDate,
+      dropoffDate: booking.dropoffDate,
+      pickupStreetName: booking.pickupStreetName,
+      dropoffStreetName: booking.dropoffStreetName,
+      vehicleDetails: booking.vehicleBooking.map((vehicle: any) => ({
+        name: vehicle.name,
+        selectedVehicleType: vehicle.selectedVehicleType,
+        quantity: vehicle.quantity,
+        pricePerVehicle: vehicle.pricePerVehicle,
+        totalPrice: vehicle.totalPrice,
+      })),
+      totalBookingPrice: booking.totalBookingPrice,
+
+      
+    };
+  }
+
+  return null;
+}
+
+openReceiptModal(index: number): void {
+  if (!this.bookings || this.bookings.length === 0) {
+    console.error('Bookings array is empty or not loaded.');
+    return;
+  }
+
+  const booking = this.bookings[index];
+  if (!booking) {
+    console.error('Booking not found for index:', index);
+    return;
+  }
+
+  const bookingId = booking._id;
+  let bookingType = '';
+
+  // Determine booking type
+  if (booking.accommodationType) {
+    bookingType = 'Accommodation';
+  } else if (booking.vehicleBooking) {
+    bookingType = 'Vehicle';
+  } else if (booking.tourName) {
+    bookingType = 'Tour';
+  } else {
+    console.error('Unable to determine booking type for booking:', booking);
+    return;
+  }
+
+  console.log('Booking Details:', bookingType);
+  console.log('Received Booking ID:', bookingId);
+
+  // Fetch booking details
+  const details = this.getBookingDetails(bookingId, bookingType);
+  if (details) {
+    this.receiptData = { details };
+    this.isReceiptModalOpen = true;
+  } else {
+    console.error('Booking details not found for ID:', bookingId);
+  }
+}
+
+
+
+  
   
 
 payForBooking(bookingId: string, amount: number, bookingType: string): void {
@@ -249,7 +400,15 @@ payForBooking(bookingId: string, amount: number, bookingType: string): void {
               console.log(`${bookingType} booking updated successfully.`);
               this.loadAllBookings();
               this.closeBookingModal();
+              this.receiptData = {
+                bookingId,
+                details: this.getBookingDetails(bookingId, bookingType),
+              };
+              this.isReceiptModalOpen = true; // Open receipt modal
               this.cdr.detectChanges();
+
+              
+
             },
             error => {
               console.error('Failed to update booking status:', error);
