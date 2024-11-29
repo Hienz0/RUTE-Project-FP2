@@ -31,6 +31,7 @@ import { ManageTransportationComponent } from './manage-transportation/manage-tr
 import { RateServicesComponent } from './rate-services/rate-services.component';
 import { RequestResetPasswordComponent } from './request-reset-password/request-reset-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { CustomerServiceComponent } from './customer-service/customer-service.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -68,6 +69,7 @@ const routes: Routes = [
   {path: 'payment-list', component: PaymentListComponent},
   { path: 'request-password-reset', component: RequestResetPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
+  { path: 'customer-service', component: CustomerServiceComponent },
 ];
 
 @NgModule({

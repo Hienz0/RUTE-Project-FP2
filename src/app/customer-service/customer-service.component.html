@@ -1,0 +1,52 @@
+<div *ngIf="userType === 'admin'; else userView">
+    <!-- Admin View -->
+    <div class="admin-interface">
+      <div class="user-list">
+        <h3>Users</h3>
+        <ul>
+          <li *ngFor="let user of users" (click)="selectUser(user._id)">
+            {{ user.name }}
+          </li>
+        </ul>
+      </div>
+      <div class="chat-container" *ngIf="selectedUserId">
+        <h3>Chat with User</h3>
+        <div class="messages">
+          <div
+            *ngFor="let msg of messages"
+            [class.sent]="msg.senderId === userId"
+            [class.received]="msg.senderId !== userId"
+          >
+            <p>{{ msg.message }}</p>
+            <small>{{ msg.timestamp | date: 'shortTime' }}</small>
+          </div>
+        </div>
+        <div class="message-input">
+          <input type="text" [(ngModel)]="newMessage" placeholder="Type your message..." />
+          <button (click)="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #userView>
+    <!-- User View -->
+    <div class="chat-container">
+      <h3>Chat with Admin</h3>
+      <div class="messages">
+        <div
+          *ngFor="let msg of messages"
+          [class.sent]="msg.senderId === userId"
+          [class.received]="msg.senderId !== userId"
+        >
+          <p>{{ msg.message }}</p>
+          <small>{{ msg.timestamp | date: 'shortTime' }}</small>
+        </div>
+      </div>
+      <div class="message-input">
+        <input type="text" [(ngModel)]="newMessage" placeholder="Type your message..." />
+        <button (click)="sendMessage()">Send</button>
+      </div>
+    </div>
+  </ng-template>
+  

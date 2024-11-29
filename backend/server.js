@@ -99,6 +99,17 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+// Chat Schema
+const chatSchema = new mongoose.Schema({
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  message: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  isRead: { type: Boolean, default: false } // Mark if the message is read
+});
+
+const Chat = mongoose.model('Chat', chatSchema);
+
 /////////////////////////////////////////////////////////
 // booking accomodation
 
@@ -1559,6 +1570,48 @@ app.put('/api/weather/:userId/toggle-weather-widget', async (req, res) => {
   } catch (error) {
     console.error('Error updating weather widget:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+// chat
+
+// Send a message
+app.post('/api/chat/send-message', async (req, res) => {
+  try {
+    const { senderId, receiverId, message } = req.body;
+    const chatMessage = new Chat({ senderId, receiverId, message });
+    await chatMessage.save();
+    res.status(200).json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to send message', error });
+  }
+});
+
+// Get chat messages between two users
+app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+    const messages = await Chat.find({
+      $or: [
+        { senderId: user1, receiverId: user2 },
+        { senderId: user2, receiverId: user1 }
+      ]
+    }).sort('timestamp');
+    res.status(200).json({ success: true, messages });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve messages', error });
+  }
+});
+
+// Get all users (exclude admin from the list)
+app.get('/api/chat/users', async (req, res) => {
+  try {
+    const users = await User.find({ _id: { $ne: '665f504a893ed90d8a930118' } });
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch users', error });
   }
 });
 

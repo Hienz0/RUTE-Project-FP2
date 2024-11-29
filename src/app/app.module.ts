@@ -56,6 +56,7 @@ import { RequestResetPasswordComponent } from './request-reset-password/request-
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { FloatingWeatherWidgetComponent } from './floating-weather-widget/floating-weather-widget.component';
 import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-service.component';
+import { CustomerServiceComponent } from './customer-service/customer-service.component';
 
 @NgModule({
   declarations: [
@@ -100,7 +101,8 @@ import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-se
     RequestResetPasswordComponent,
     ResetPasswordComponent,
     FloatingWeatherWidgetComponent,
-    AiCustomerServiceComponent
+    AiCustomerServiceComponent,
+    CustomerServiceComponent
   ],
   imports: [
     BrowserModule,
