@@ -949,3 +949,12 @@
     }
   }
   
+  .weather-widget-container {
+    overflow: hidden;
+    max-height: 0; /* Collapsed by default */
+    transition: max-height 0.5s ease-in-out;
+  }
+  .weather-widget-container.open {
+    max-height: 300px; /* Adjust based on your widget's height */
+  }
+  

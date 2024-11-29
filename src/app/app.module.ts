@@ -54,6 +54,8 @@ import { TruncatePipe } from './truncate.pipe';
 import { WeatherWidgetComponent } from './weather-widget/weather-widget.component';
 import { RequestResetPasswordComponent } from './request-reset-password/request-reset-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { FloatingWeatherWidgetComponent } from './floating-weather-widget/floating-weather-widget.component';
+import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-service.component';
 
 @NgModule({
   declarations: [
@@ -96,7 +98,9 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
     TruncatePipe,
     WeatherWidgetComponent,
     RequestResetPasswordComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    FloatingWeatherWidgetComponent,
+    AiCustomerServiceComponent
   ],
   imports: [
     BrowserModule,

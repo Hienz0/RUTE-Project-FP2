@@ -1,18 +1,12 @@
-import { Component, OnInit, Renderer2, HostListener } from '@angular/core';
-import { Router } from '@angular/router';
-import { ServicesService } from '../services/services.service';
-import { AuthService } from '../services/auth.service';
-import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
-import { forkJoin } from 'rxjs'; // Import forkJoin
+import { Component, OnInit, HostListener } from '@angular/core';
 import { WeatherService } from '../services/weather.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 
-
 @Component({
-  selector: 'app-accommodation',
-  templateUrl: './accommodation.component.html',
-  styleUrls: ['./accommodation.component.css'],
+  selector: 'app-floating-weather-widget',
+  templateUrl: './floating-weather-widget.component.html',
+  styleUrls: ['./floating-weather-widget.component.css'],
   animations: [
     trigger('fadeAnimation', [
       transition(':leave', [ // Triggered when the element is removed
@@ -22,10 +16,8 @@ import { trigger, transition, style, animate } from '@angular/animations';
     ])
   ]
 })
-export class AccommodationComponent implements OnInit {
-  accommodationServices: any[] = [];
-  currentUser: any;
-  Math = Math;
+export class FloatingWeatherWidgetComponent implements OnInit {
+
   isDayTime: boolean = true;
   // frameStyle: Partial<CSSStyleDeclaration> = {
   //   position: 'absolute',
@@ -49,59 +41,33 @@ export class AccommodationComponent implements OnInit {
   currentTime: string = ''; // Dynamic clock
 
 
+  constructor(private weatherService: WeatherService) {}
 
-  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService, private renderer: Renderer2) {}
 
   ngOnInit(): void {
-    // // chatbot
-    //     // Add the first script
-    //     const chtlConfigScript = this.renderer.createElement('script');
-    //     chtlConfigScript.type = 'text/javascript';
-    //     chtlConfigScript.text = `
-    //       window.chtlConfig = {
-    //         chatbotId: "4482333918"
-    //       };
-    //     `;
-    //     this.renderer.appendChild(document.body, chtlConfigScript);
-    
-    //     // Add the second script
-    //     const chatlingScript = this.renderer.createElement('script');
-    //     chatlingScript.src = 'https://chatling.ai/js/embed.js';
-    //     chatlingScript.async = true;
-    //     chatlingScript.type = 'text/javascript';
-    //     chatlingScript.id = 'chatling-embed-script';
-    //     chatlingScript.dataset.id = '4482333918';
-    //     this.renderer.appendChild(document.body, chatlingScript);
 
+ // Check if it's day or night
+ this.setDayNight();
+  // Set the background style for the frame
+this.setFrameBackground();
 
-    //     //chatbot closed
-
-    this.authService.currentUser.subscribe(user => {
-      this.currentUser = user;
-    });
-    
-     // Check if it's day or night
-     this.setDayNight();
-      // Set the background style for the frame
-    this.setFrameBackground();
-    this.loadAccommodationServices();
-
-    this.weatherService.getWeather().subscribe(
-      (data) => {
-        this.weather = data; // Assign the weather data to a variable
-        console.log('Weather data:', this.weather);
-        this.updateWeatherCondition(this.weather.current.icon);
-      },
-      (error) => {
-        console.error('Error fetching weather data:', error);
-      }
-    );
-
-    this.updateClock(); // Initialize the clock
-    setInterval(() => {
-      this.updateClock(); // Update the clock every minute
-    }, 1000);
+this.weatherService.getWeather().subscribe(
+  (data) => {
+    this.weather = data; // Assign the weather data to a variable
+    console.log('Weather data:', this.weather);
+    this.updateWeatherCondition(this.weather.current.icon);
+  },
+  (error) => {
+    console.error('Error fetching weather data:', error);
   }
+);
+
+this.updateClock(); // Initialize the clock
+setInterval(() => {
+  this.updateClock(); // Update the clock every minute
+}, 1000);
+}
+
 
     // Function to update the current time
     updateClock() {
@@ -167,54 +133,8 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
         this.weatherCondition = 'clear';
       }
     }
-  
 
-  loadAccommodationServices(): void {
-    this.servicesService.getAccommodationServices().pipe(
-      // Map over the services data and fetch the ratings for each service
-      switchMap((services: any[]) => {
-        return forkJoin(
-          services.map((service: any) => 
-            this.servicesService.getServiceRating(service._id).pipe(
-              map((ratingData: any) => ({
-                ...service,
-                averageRating: ratingData?.averageRating ?? 0,
-                reviewCount: ratingData?.reviewCount ?? 0
-              }))
-            )
-          )
-        );
-      })
-    ).subscribe(
-      (accommodationServices: any[]) => {
-        this.accommodationServices = accommodationServices;
-      },
-      (error) => {
-        console.error('Error fetching accommodation services', error);
-      }
-    );
-  }
-
-  getStarIcons(rating: number): string[] {
-    const filledStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
-    const emptyStars = 5 - filledStars - halfStar;
-    return [
-      ...Array(filledStars).fill('★'),
-      ...Array(halfStar).fill('☆'),
-      ...Array(emptyStars).fill('✩')
-    ];
-  }
-
-  
-
-  // Navigate to the details page when a service is clicked
-  goToDetail(id: string): void {
-    this.router.navigate(['/accommodation', id]);
-  }
-
-
-
+    
   // weather widget related
 
 
@@ -277,5 +197,6 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
 closeWidget() {
   this.isWidgetVisible = false;
 }
+  
 
 }

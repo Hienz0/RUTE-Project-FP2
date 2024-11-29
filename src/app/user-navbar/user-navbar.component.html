@@ -23,6 +23,12 @@
             <li class="nav-item">
                 <a class="nav-link" href="">Itinerary Planning</a>
             </li>
+            <li class="nav-item">
+              <!-- Weather Widget Toggle -->
+              <a class="nav-link" (click)="toggleWeatherWidget()">
+                  Weather Widget
+              </a>
+          </li>
             <li class="nav-item dropdown" id="navProfile">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
               aria-expanded="false">
@@ -83,3 +89,11 @@
         </select>
     </div>
   </nav>
+
+  <!-- Weather Widget Container -->
+<div 
+class="weather-widget-container" 
+[@slideToggle]="isWeatherWidgetVisible ? 'open' : 'closed'"
+>
+<app-weather-widget></app-weather-widget>
+</div>

@@ -7,11 +7,18 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
   templateUrl: './user-navbar.component.html',
   styleUrls: ['./user-navbar.component.css'],
   animations: [
+    // Existing Dropdown Animation
     trigger('dropdownAnimation', [
       state('closed', style({ opacity: 0, transform: 'translateY(-10px)', display: 'none' })),
       state('open', style({ opacity: 1, transform: 'translateY(0)', display: 'block' })),
       transition('closed => open', [animate('300ms ease-out')]),
       transition('open => closed', [animate('200ms ease-in')]),
+    ]),
+    // New Slide Toggle Animation
+    trigger('slideToggle', [
+      state('closed', style({ maxHeight: '0', overflow: 'hidden' })),
+      state('open', style({ maxHeight: '300px', overflow: 'visible' })), // Adjust maxHeight as needed
+      transition('closed <=> open', animate('0.5s ease-in-out')),
     ]),
   ],
 })
@@ -51,5 +58,11 @@ export class UserNavbarComponent implements OnInit {
     if (!targetElement.closest('.dropdown-menu') && !this.dropdownButton.nativeElement.contains(targetElement)) {
       this.closeDropdown();
     }
+  }
+
+  isWeatherWidgetVisible = false;
+
+  toggleWeatherWidget() {
+    this.isWeatherWidgetVisible = !this.isWeatherWidgetVisible;
   }
 }
