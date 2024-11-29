@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { WeatherService } from '../services/weather.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -9,12 +9,19 @@ import { trigger, transition, style, animate } from '@angular/animations';
   styleUrls: ['./floating-weather-widget.component.css'],
   animations: [
     trigger('fadeAnimation', [
-      transition(':leave', [ // Triggered when the element is removed
-        style({ opacity: 1, transform: 'scale(1)' }),
-        animate('200ms ease-out', style({ opacity: 0, transform: 'scale(0.9)' }))
+      // Entry animation
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.9)' }), // Initial state
+        animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' })) // Final state
+      ]),
+      // Leave animation
+      transition(':leave', [
+        style({ opacity: 1, transform: 'scale(1)' }), // Initial state
+        animate('200ms ease-out', style({ opacity: 0, transform: 'scale(0.9)' })) // Final state
       ])
     ])
   ]
+  
 })
 export class FloatingWeatherWidgetComponent implements OnInit {
 
@@ -39,6 +46,8 @@ export class FloatingWeatherWidgetComponent implements OnInit {
   weather: any;
   location: string = 'Ubud'; // Hardcoded location name
   currentTime: string = ''; // Dynamic clock
+  @Input() isWidgetVisible: boolean = true; // To control visibility from the parent
+  @Output() widgetClosed: EventEmitter<void> = new EventEmitter<void>(); // Notify parent when closed
 
 
   constructor(private weatherService: WeatherService) {}
@@ -60,12 +69,18 @@ this.weatherService.getWeather().subscribe(
   (error) => {
     console.error('Error fetching weather data:', error);
   }
+
+  
 );
 
 this.updateClock(); // Initialize the clock
 setInterval(() => {
   this.updateClock(); // Update the clock every minute
 }, 1000);
+
+if (!this.isWidgetVisible) {
+  this.closeWidget();
+}
 }
 
 
@@ -192,10 +207,11 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
   }
 
 
-  isWidgetVisible = true; // Controls the visibility of the widget
+ // Controls the visibility of the widget
 
 closeWidget() {
   this.isWidgetVisible = false;
+  this.widgetClosed.emit();
 }
   
 

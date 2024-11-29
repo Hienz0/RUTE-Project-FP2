@@ -13,4 +13,10 @@ export class WeatherService {
   getWeather(): Observable<any> {
     return this.http.get(this.apiUrl); // Make the API call
   }
+
+    // Update weatherWidgetToggle for a specific user
+    updateWeatherWidgetToggle(userId: string, weatherWidgetToggle: boolean): Observable<any> {
+      const url = `${this.apiUrl}/${userId}/toggle-weather-widget`;
+      return this.http.put(url, { weatherWidgetToggle });
+    }
 }

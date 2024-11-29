@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { WeatherService } from '../services/weather.service';
 
 @Component({
   selector: 'app-user-navbar',
@@ -25,14 +26,21 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 export class UserNavbarComponent implements OnInit {
 
   currentUser: any;
+  weatherWidgetToggle: boolean = false; // Default value for the weather widget visibility
+
   isDropdownOpen = false;
   @ViewChild('dropdownButton') dropdownButton!: ElementRef;
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private weatherService: WeatherService) { }
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
+            // Set weatherWidgetToggle based on the user data (if available)
+            if (this.currentUser && this.currentUser.weatherWidgetToggle !== undefined) {
+              this.weatherWidgetToggle = this.currentUser.weatherWidgetToggle;
+            }
+            console.log('Current User:', this.currentUser);
     });
   }
 
@@ -64,5 +72,55 @@ export class UserNavbarComponent implements OnInit {
 
   toggleWeatherWidget() {
     this.isWeatherWidgetVisible = !this.isWeatherWidgetVisible;
+  }
+
+  toggleFloatingWeatherWidget(): void {
+    console.log('Weather Widget Toggle:', this.weatherWidgetToggle);
+    // this.weatherWidgetToggle = !this.weatherWidgetToggle;
+    // Optionally update the user's preference here (e.g., API call to save the state)
+    // this.authService.updateWeatherWidgetPreference(this.weatherWidgetToggle);
+    if(this.currentUser){
+      this.weatherService.updateWeatherWidgetToggle(this.currentUser.userId, this.weatherWidgetToggle).subscribe(
+        (response) => {
+          console.log('Weather widget updated successfully:', response);
+                    // Update the current user in AuthService
+                    const updatedUser = {
+                      ...this.currentUser,
+                      weatherWidgetToggle: this.weatherWidgetToggle
+                    };
+                    this.authService.updateCurrentUser(updatedUser);
+        },
+        (error) => {
+          console.error('Error updating weather widget:', error);
+        }
+      );
+    }
+    else {
+      console.error('User not available');
+    }
+  }
+
+  onWidgetClosed(): void {
+    console.log('Widget closed from child component');
+    this.weatherWidgetToggle = false; // Reflect the closed state
+    if(this.currentUser){
+      this.weatherService.updateWeatherWidgetToggle(this.currentUser.userId, this.weatherWidgetToggle).subscribe(
+        (response) => {
+          console.log('Weather widget updated successfully:', response);
+                    // Update the current user in AuthService
+                    const updatedUser = {
+                      ...this.currentUser,
+                      weatherWidgetToggle: this.weatherWidgetToggle
+                    };
+                    this.authService.updateCurrentUser(updatedUser);
+        },
+        (error) => {
+          console.error('Error updating weather widget:', error);
+        }
+      );
+    }
+    else {
+      console.error('User not available');
+    }
   }
 }

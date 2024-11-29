@@ -94,6 +94,7 @@ const userSchema = new mongoose.Schema({
   userType: { type: String, default: 'user' },  // Add userType with default value 'user'
   resetToken: String,
   resetTokenExpiry: Date,
+  weatherWidgetToggle: { type: Boolean, default: true }
 });
 
 const User = mongoose.model('User', userSchema);
@@ -1538,6 +1539,28 @@ app.post('/reset-password', async (req, res) => {
   }
 });
 
+// Update weatherWidgetToggle based on user ID
+app.put('/api/weather/:userId/toggle-weather-widget', async (req, res) => {
+  const { userId } = req.params;
+  const { weatherWidgetToggle } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { weatherWidgetToggle },
+      { new: true } // Return the updated user document
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Weather widget updated', user });
+  } catch (error) {
+    console.error('Error updating weather widget:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // white space
 
@@ -1923,7 +1946,7 @@ app.post('/signin', async (req, res) => {
     const token = generateToken(user);
 
     // Include user details in the response
-    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address } };
+    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address,weatherWidgetToggle: user.weatherWidgetToggle } };
     console.log('Sending response:', response); // Debugging response from server
     res.status(200).json(response);
   } catch (error) {
