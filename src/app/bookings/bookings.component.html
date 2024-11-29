@@ -367,13 +367,13 @@
         <!-- Modal Body -->
         <div id="receipt-modal" class="modal-body">
           <!-- Modal Header with Logo and Title -->
-        <div  class="modal-header bg-white text-dark d-flex align-items-center px-4 py-3 mb-4">
-          <img src="../../assets/images/rute-logo-temp.png" alt="Company Logo" class="img-fluid me-3" style="height: 40px;" />
-          <h4 class="modal-title flex-grow-1 text-center fw-bold pt-2" style="font-size: 1.75rem;">
-            <i class="fas fa-receipt text-primary me-2"></i> Payment Receipt
-          </h4>
-          <button type="button" class="btn-close btn-close-dark" (click)="closeReceiptModal()" aria-label="Close"></button>
-        </div>
+          <div  class="modal-header bg-white text-dark d-flex align-items-center px-4 py-3 mb-4">
+            <img src="../../assets/images/rute-logo-temp.png" alt="Company Logo" class="img-fluid me-3" style="height: 40px;" />
+            <h4 class="modal-title flex-grow-1 text-center fw-bold pt-2" style="font-size: 1.75rem;">
+              <i class="fas fa-receipt text-primary me-2"></i> Payment Receipt
+            </h4>
+            <button type="button" class="btn-close btn-close-dark" (click)="closeReceiptModal()" aria-label="Close"></button>
+          </div>
           <!-- Accommodation Details -->
           <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="d-flex justify-content-between align-items-center mb-4">
             <div style="flex: 1;">
