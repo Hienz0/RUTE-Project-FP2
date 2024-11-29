@@ -159,11 +159,12 @@
                 <button class="btn btn-outline-secondary btn-sm px-3 py-1" (click)="openBookingModal(i)">
                   Details
                 </button>
+                 <!-- Show Receipt Button -->
                 <button
-  class="btn btn-primary btn-sm px-3 py-1"
-  (click)="openReceiptModal(i)">
-  Show Receipt
-</button>
+                  class="btn btn-outline-success btn-sm px-3 py-1 hover:bg-blue-600 hover:text-white ms-2"
+                  (click)="openReceiptModal(i)">
+                  Show Receipt
+                </button>
 
                 
                 <button *ngIf="
@@ -357,56 +358,127 @@
   </div>
 
 
-
-  <div *ngIf="isReceiptModalOpen" class="modal show" style="display: block;" tabindex="-1">
-    <div class="modal-dialog">
+  <div *ngIf="isReceiptModalOpen" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Payment Receipt</h5>
-          <button type="button" class="btn-close" (click)="closeReceiptModal()"></button>
+        <!-- Modal Header with Logo and Title -->
+        <div class="modal-header bg-white text-dark d-flex align-items-center px-4 py-3">
+          <img src="../../assets/images/rute-logo-temp.png" alt="Company Logo" class="img-fluid me-3" style="height: 40px;" />
+          <h4 class="modal-title flex-grow-1 text-center fw-bold pt-2" style="font-size: 1.75rem;">
+            <i class="fas fa-receipt text-primary me-2"></i> Payment Receipt
+          </h4>
+          <button type="button" class="btn-close btn-close-dark" (click)="closeReceiptModal()" aria-label="Close"></button>
         </div>
+  
+        <!-- Modal Body -->
         <div class="modal-body">
-          <div *ngIf="receiptData?.details?.type === 'Accommodation'">
-            <p><strong>Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
-            <p><strong>Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
-            <p><strong>Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
-            <p><strong>Number of Guests:</strong> {{ receiptData?.details?.numberOfGuests }}</p>
-            <p><strong>Check-In Date:</strong> {{ receiptData?.details?.checkInDate | date }}</p>
-            <p><strong>Check-Out Date:</strong> {{ receiptData?.details?.checkOutDate | date }}</p>
-            <p><strong>Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
-            <p><strong>Amount:</strong> {{ receiptData?.details?.amount | currency }}</p>
+          <!-- Accommodation Details -->
+          <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="d-flex justify-content-between align-items-center mb-4">
+            <div style="flex: 1;">
+              <h1 class="text-primary mb-3">
+                <i class="fas fa-bed me-2"></i> Accommodation Details
+              </h1>
+              <p><strong><i class="fas fa-hotel me-2"></i> Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
+              <p><strong><i class="fas fa-building me-2"></i> Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
+              <p><strong><i class="fas fa-user me-2"></i> Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
+              <p><strong><i class="fas fa-comment me-2"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+            </div>
+            <div>
+              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+            </div>
           </div>
   
-          <div *ngIf="receiptData?.details?.type === 'Tour'">
-            <p><strong>Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
-            <p><strong>Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-            <p><strong>Number of Participants:</strong> {{ receiptData?.details?.numberOfParticipants }}</p>
-            <p><strong>Tour Date:</strong> {{ receiptData?.details?.tourDate | date }}</p>
-            <p><strong>Tour Time:</strong> {{ receiptData?.details?.tourTime }}</p>
-            <p><strong>Tour Guide Type:</strong> {{ receiptData?.details?.tourguideType }}</p>
-            <p><strong>Pickup Location:</strong> {{ receiptData?.details?.pickupLocation }}</p>
-            <p><strong>Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
-            <p><strong>Amount:</strong> {{ receiptData?.details?.amount | currency }}</p>
-          </div>
-  
-          <div *ngIf="receiptData?.details?.type === 'Vehicle'">
-            <p><strong>Product Name:</strong> {{ receiptData?.details?.productName }}</p>
-            <p><strong>Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-            <p><strong>Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
-            <p><strong>Pickup Date:</strong> {{ receiptData?.details?.pickupDate | date }}</p>
-            <p><strong>Dropoff Date:</strong> {{ receiptData?.details?.dropoffDate | date }}</p>
-            <p><strong>Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName }}</p>
-            <p><strong>Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName }}</p>
-  
-            <h6>Vehicle Details:</h6>
-            <table class="table table-bordered">
-              <thead>
+          <!-- Accommodation Table -->
+          <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="table-responsive mt-3">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
                 <tr>
-                  <th>Vehicle Name</th>
-                  <th>Type</th>
-                  <th>Quantity</th>
-                  <th>Price/Vehicle</th>
-                  <th>Total Price</th>
+                  <th><i class="fas fa-users me-2"></i> Number of Guests</th>
+                  <th><i class="fas fa-calendar-check me-2"></i> Check-In Date</th>
+                  <th><i class="fas fa-calendar-times me-2"></i> Check-Out Date</th>
+                  <th><i class="fas fa-coins me-2"></i> Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ receiptData?.details?.numberOfGuests }}</td>
+                  <td>{{ receiptData?.details?.checkInDate | date }}</td>
+                  <td>{{ receiptData?.details?.checkOutDate | date }}</td>
+                  <td>{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-end"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
+          </div>
+  
+          <!-- Tour Details -->
+          <div *ngIf="receiptData?.details?.type === 'Tour'" class="d-flex justify-content-between align-items-center mb-4">
+            <div style="flex: 1;">
+              <h1 class="text-primary mb-3">
+                <i class="fas fa-map-marked-alt me-2"></i> Tour Details
+              </h1>
+              <p><strong><i class="fas fa-route me-2"></i> Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
+              <p><strong><i class="fas fa-user me-2"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+              <p><strong><i class="fas fa-comment me-2"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+              <p><strong><i class="fas fa-map-pin me-2"></i> Pickup Location:</strong> Ubud Palaces</p>
+            </div>
+            <div>
+              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+            </div>
+          </div>
+  
+          <!-- Tour Table -->
+          <div *ngIf="receiptData?.details?.type === 'Tour'" class="table-responsive mt-3">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th><i class="fas fa-users me-2"></i> Number of Participants</th>
+                  <th><i class="fas fa-calendar-day me-2"></i> Tour Date</th>
+                  <th><i class="fas fa-clock me-2"></i> Tour Time</th>
+                  <th><i class="fas fa-user-tag me-2"></i> Tour Guide Type</th>
+                  <th><i class="fas fa-coins me-2"></i> Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ receiptData?.details?.numberOfParticipants }}</td>
+                  <td>{{ receiptData?.details?.tourDate | date }}</td>
+                  <td>{{ receiptData?.details?.tourTime }}</td>
+                  <td>{{ receiptData?.details?.tourguideType }}</td>
+                  <td>{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-end"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
+          </div>
+  
+          <!-- Vehicle Details -->
+          <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="d-flex justify-content-between align-items-center mb-4">
+            <div style="flex: 1;">
+              <h1 class="text-primary mb-3">
+                <i class="fas fa-car-side me-2"></i> Vehicle Details
+              </h1>
+              <p><strong><i class="fas fa-car me-2"></i> Product Name:</strong> {{ receiptData?.details?.productName }}</p>
+              <p><strong><i class="fas fa-user me-2"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+              <p><strong><i class="fas fa-clock me-2"></i> Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
+              <p><strong><i class="fas fa-map-marker-alt me-2"></i> Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName }}</p>
+              <p><strong><i class="fas fa-map-pin me-2"></i> Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName }}</p>
+            </div>
+            <div>
+              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+            </div>
+          </div>
+  
+          <!-- Vehicle Table -->
+          <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="table-responsive mt-3">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th><i class="fas fa-car me-2"></i> Vehicle Name</th>
+                  <th><i class="fas fa-info-circle me-2"></i> Type</th>
+                  <th><i class="fas fa-list-ol me-2"></i> Quantity</th>
+                  <th><i class="fas fa-tag me-2"></i> Price/Vehicle</th>
+                  <th><i class="fas fa-coins me-2"></i> Total Price</th>
                 </tr>
               </thead>
               <tbody>
@@ -414,20 +486,40 @@
                   <td>{{ vehicle.name }}</td>
                   <td>{{ vehicle.selectedVehicleType }}</td>
                   <td>{{ vehicle.quantity }}</td>
-                  <td>{{ vehicle.pricePerVehicle | currency:'IDR'  }}</td>
-                  <td>{{ vehicle.totalPrice | currency:'IDR'  }}</td>
+                  <td>{{ vehicle.pricePerVehicle | currency:'IDR' }}</td>
+                  <td>{{ vehicle.totalPrice | currency:'IDR' }}</td>
                 </tr>
               </tbody>
             </table>
-            <p><strong>Total Booking Price:</strong> {{ receiptData?.details?.totalBookingPrice | currency:'IDR'  }}</p>
+            <p class="text-end"><strong>Total Booking Price:</strong> {{ receiptData?.details?.totalBookingPrice | currency:'IDR' }}</p>
           </div>
         </div>
+  
+        <!-- Modal Footer -->
         <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeReceiptModal()">Close</button>
-          <button class="btn btn-primary" (click)="downloadReceiptAsPDF()">Download PDF</button>
+          <button class="btn btn-secondary" (click)="closeReceiptModal()">
+            <i class="fas fa-times me-2"></i> Close
+          </button>
+          <button class="btn btn-primary" (click)="downloadReceiptAsPDF()">
+            <i class="fas fa-download me-2"></i> Download PDF
+          </button>
         </div>
       </div>
     </div>
   </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   

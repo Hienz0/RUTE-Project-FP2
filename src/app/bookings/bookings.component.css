@@ -1,0 +1,25 @@
+.d-flex {
+    display: flex;
+  }
+  
+  .justify-content-between {
+    justify-content: space-between;
+  }
+  
+  .align-items-start {
+    align-items: flex-start;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .text-primary {
+    color: #007bff;
+  }
+  
+  img.img-fluid {
+    max-width: 100%;
+    height: auto;
+  }
+  
