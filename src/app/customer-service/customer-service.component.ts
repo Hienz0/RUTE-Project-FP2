@@ -128,12 +128,13 @@ loadMessages(): void {
     });
   }
 
+  adminId = '665f504a893ed90d8a930118';
   // Admin: Select a user and load messages
 // Admin: Select a user and join their chat room
 selectUser(userId: string): void {
   this.selectedUserId = userId; // Set the selected user's ID
   this.loadMessages(); // Load chat history
-  this.chatService.joinChat({ userId, isAdmin: true }); // Admin joins the selected user's room
+  this.chatService.joinChat({ userId: this.adminId, isAdmin: true }); // Admin joins the selected user's room
 }
 
   

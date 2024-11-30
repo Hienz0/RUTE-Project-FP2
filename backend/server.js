@@ -1696,7 +1696,7 @@ io.on('connection', (socket) => {
 
   // Room joining logic
   socket.on('joinChat', ({ userId, isAdmin }) => {
-    const roomId = isAdmin ? `room-665f504a893ed90d8a930118` : `room-${userId}`;
+    const roomId = `room-${userId}`;
     socket.join(roomId);
     console.log(`User/Admin with Socket ID ${socket.id} joined room: ${roomId}`);
   });
