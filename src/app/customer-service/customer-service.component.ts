@@ -43,7 +43,7 @@ export class CustomerServiceComponent implements OnInit {
   messages: any[] = []; // Chat messages
   newMessage: string = ''; // New message content
   users: any[] = []; // Users list (for admin)
-  selectedUserName: string = 'RUTE Admin';
+  selectedUserName: string = 'RUTE User';
 
   constructor(private chatService: ChatService, private authService: AuthService) {}
 
@@ -135,6 +135,7 @@ selectUser(userId: string): void {
   this.selectedUserId = userId; // Set the selected user's ID
   this.loadMessages(); // Load chat history
   this.chatService.joinChat({ userId: this.adminId, isAdmin: true }); // Admin joins the selected user's room
+  this.selectedUserName = this.users.find((user) => user._id === userId)?.name || '';
 }
 
   

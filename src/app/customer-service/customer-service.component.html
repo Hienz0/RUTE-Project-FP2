@@ -1,3 +1,5 @@
+<app-user-navbar></app-user-navbar>
+
 <div class="container mt-5">
   <div *ngIf="userType === 'admin'; else userView" class="row g-4">
     <!-- Admin View -->
@@ -20,31 +22,35 @@
     </div>
 
     <div class="col-lg-8">
-      <div class="card border-0 shadow-sm" *ngIf="selectedUserId">
+      <div class="card border-0 shadow-sm" *ngIf="selectedUserId; else noUserSelected">
         <div class="card-header bg-dark text-light">
           <h5 class="mb-0 fw-semibold">Chat with {{ selectedUserName }}</h5>
         </div>
         <div class="card-body d-flex flex-column">
-          <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded">
+          <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded bg-doodle-pattern">
             <div
-              *ngFor="let msg of messages"
-              @messageAnimation
-              class="d-flex mb-3"
+            *ngFor="let msg of messages"
+            @messageAnimation
+            class="d-flex mb-3"
+            [ngClass]="{
+              'justify-content-end': msg.senderId === userId,
+              'justify-content-start': msg.senderId !== userId
+            }"
+          >
+            <div
+              class="p-3 rounded-3"
               [ngClass]="{
-                'justify-content-end': msg.senderId === userId,
-                'justify-content-start': msg.senderId !== userId
+                'bg-dark text-light': msg.senderId === userId,
+                'bg-light text-muted border': msg.senderId !== userId,
+                'rounded-bottom-right-0': msg.senderId === userId,
+                'rounded-bottom-left-0': msg.senderId !== userId
               }"
             >
-            <div class="p-3 rounded-3" 
-            [ngClass]="{
-              'bg-dark text-light': msg.senderId === userId,
-              'bg-light text-muted border': msg.senderId !== userId
-            }">
-         <div class="message-content mb-1 small">{{ msg.message }}</div>
-         <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
-       </div>
-       
+              <div class="message-content mb-1 small">{{ msg.message }}</div>
+              <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
             </div>
+          </div>
+          
           </div>
           
           <div class="input-group mt-3">
@@ -59,6 +65,12 @@
           </div>
         </div>
       </div>
+          <!-- Message when no user is selected -->
+    <ng-template #noUserSelected>
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <p class="text-muted">Please select a user to start chatting.</p>
+      </div>
+    </ng-template>
     </div>
   </div>
 
@@ -69,28 +81,30 @@
         <h5 class="mb-0 fw-semibold">Chat with Admin</h5>
       </div>
       <div class="card-body d-flex flex-column">
-        <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded">
+        <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded bg-doodle-pattern">
           <div
-            *ngFor="let msg of messages"
-            @messageAnimation
-            class="d-flex mb-3"
-            [ngClass]="{
-              'justify-content-end': msg.senderId === userId,
-              'justify-content-start': msg.senderId !== userId
-            }"
-          >
-          <div
-          class="p-3 rounded-3"
+          *ngFor="let msg of messages"
+          @messageAnimation
+          class="d-flex mb-3"
           [ngClass]="{
-            'bg-dark text-light': msg.senderId === userId,
-            'bg-light text-muted border': msg.senderId !== userId
+            'justify-content-end': msg.senderId === userId,
+            'justify-content-start': msg.senderId !== userId
           }"
         >
-          <p class="message-content mb-1 small">{{ msg.message }}</p>
-          <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+          <div
+            class="p-3 rounded-3"
+            [ngClass]="{
+              'bg-dark text-light': msg.senderId === userId,
+              'bg-light text-muted border': msg.senderId !== userId,
+              'rounded-bottom-right-0': msg.senderId === userId,
+              'rounded-bottom-left-0': msg.senderId !== userId
+            }"
+          >
+            <p class="message-content mb-1 small">{{ msg.message }}</p>
+            <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+          </div>
         </div>
         
-          </div>
         </div>
         
         <div class="input-group mt-3">

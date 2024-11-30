@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client';
   providedIn: 'root',
 })
 export class ChatService {
-  private baseUrl = 'http://192.168.186.130:3000/api/chat';
+  private baseUrl = 'http://localhost:3000/api/chat';
   private socket: Socket;
 
   constructor(private http: HttpClient) {
@@ -16,7 +16,7 @@ export class ChatService {
     sessionStorage.setItem('tabId', tabId);
   
     // Initialize WebSocket connection with the tab ID
-    this.socket = io('http://192.168.186.130:3001', { query: { tabId } });
+    this.socket = io('http://localhost:3001', { query: { tabId } });
   
     // Debug connection
     this.socket.on('connect', () => {
