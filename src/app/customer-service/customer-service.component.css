@@ -37,3 +37,8 @@
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background-color: #b0b0b0; /* Thumb color on hover */
 }
+
+.message-content {
+  word-break: break-word; /* Break long words when exceeding width */
+  white-space: pre-wrap; /* Preserve line breaks and wrap text */
+}

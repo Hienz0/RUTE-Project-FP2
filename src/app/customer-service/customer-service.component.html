@@ -25,33 +25,35 @@
           <h5 class="mb-0 fw-semibold">Chat with {{ selectedUserName }}</h5>
         </div>
         <div class="card-body d-flex flex-column">
-          <div class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded">
+          <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded">
             <div
               *ngFor="let msg of messages"
+              @messageAnimation
               class="d-flex mb-3"
               [ngClass]="{
                 'justify-content-end': msg.senderId === userId,
                 'justify-content-start': msg.senderId !== userId
               }"
             >
-              <div
-                class="p-3 rounded-3"
-                [ngClass]="{
-                  'bg-dark text-light': msg.senderId === userId,
-                  'bg-light text-muted border': msg.senderId !== userId
-                }"
-              >
-                <p class="mb-1 small">{{ msg.message }}</p>
-                <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
-              </div>
+            <div class="p-3 rounded-3" 
+            [ngClass]="{
+              'bg-dark text-light': msg.senderId === userId,
+              'bg-light text-muted border': msg.senderId !== userId
+            }">
+         <div class="message-content mb-1 small">{{ msg.message }}</div>
+         <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+       </div>
+       
             </div>
           </div>
+          
           <div class="input-group mt-3">
             <input
               type="text"
               class="form-control"
               [(ngModel)]="newMessage"
               placeholder="Type your message..."
+              (keyup.enter)="sendMessage()"
             />
             <button class="btn btn-dark" (click)="sendMessage()">Send</button>
           </div>
@@ -70,22 +72,24 @@
         <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded">
           <div
             *ngFor="let msg of messages"
+            @messageAnimation
             class="d-flex mb-3"
             [ngClass]="{
               'justify-content-end': msg.senderId === userId,
               'justify-content-start': msg.senderId !== userId
             }"
           >
-            <div
-              class="p-3 rounded-3"
-              [ngClass]="{
-                'bg-dark text-light': msg.senderId === userId,
-                'bg-light text-muted border': msg.senderId !== userId
-              }"
-            >
-              <p class="mb-1 small">{{ msg.message }}</p>
-              <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
-            </div>
+          <div
+          class="p-3 rounded-3"
+          [ngClass]="{
+            'bg-dark text-light': msg.senderId === userId,
+            'bg-light text-muted border': msg.senderId !== userId
+          }"
+        >
+          <p class="message-content mb-1 small">{{ msg.message }}</p>
+          <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+        </div>
+        
           </div>
         </div>
         
@@ -95,6 +99,7 @@
             class="form-control"
             [(ngModel)]="newMessage"
             placeholder="Type your message..."
+            (keyup.enter)="sendMessage()"
           />
           <button class="btn btn-dark" (click)="sendMessage()">Send</button>
         </div>

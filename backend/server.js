@@ -16,19 +16,70 @@ const cron = require('node-cron');
 const axios = require('axios');
 const crypto = require('crypto');
 
+
+
+
+
 const app = express();
 const PORT = 3000;
 
+
+
+
+
+
 app.use(cors({
-  origin: 'http://localhost:4200',
-  credentials: true // if you're using cookies or authentication headers
+  origin: [
+    'http://localhost:4200', 
+    'http://192.168.186.130:4200',    // Angular app running on PC2 (frontend)
+    'http://192.168.186.130:3000',    // API server on PC1
+    'http://192.168.186.130:3001'     // Another service on PC1 (if needed)
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,  // Allow cookies and authentication headers
 }));
+
+
+
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(bodyParser.json());
 // app.use(bodyParser.json({ limit: '1000mb' })); // Increase the limit as needed
 // app.use(bodyParser.urlencoded({ limit: '1000mb', extended: true })); // Increase the limit as needed
+
+
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+// Create the Socket.io instance and pass the existing server to it
+
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://192.168.186.130:4200", // Your Angular app's URL
+    methods: ["GET", "POST"]
+  }
+});
+
+
+
+// Start the HTTP server (which also starts Socket.io) on port 3001
+server.listen(3001, () => {
+  console.log('Socket.io server is running on http://192.168.186.130:3001');
+});
+
+
+
+
+
+
+
+
+
+
 
 
 // Connect to MongoDB
@@ -1606,14 +1657,82 @@ app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
 });
 
 // Get all users (exclude admin from the list)
+// Get users who have chatted with the admin
 app.get('/api/chat/users', async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: '665f504a893ed90d8a930118' } });
+    const adminId = '665f504a893ed90d8a930118'; // Admin ID
+
+    // Find all chats involving the admin
+    const chats = await Chat.find({
+      $or: [{ senderId: adminId }, { receiverId: adminId }]
+    });
+
+    // Extract unique user IDs who have chatted with the admin
+    const userIds = [
+      ...new Set(
+        chats.map(chat => 
+          chat.senderId.toString() === adminId ? chat.receiverId.toString() : chat.senderId.toString()
+        )
+      )
+    ];
+
+    // Fetch user details for the unique user IDs
+    const users = await User.find({ _id: { $in: userIds } }, 'name'); // Fetch only the `name` field
+
     res.status(200).json({ success: true, users });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch users', error });
   }
 });
+
+// Example socket connection event
+
+
+// Handle connections
+io.on('connection', (socket) => {
+  // Retrieve the unique tab ID or fallback to socket ID
+  const tabId = socket.handshake.query.tabId || socket.id;
+  console.log(`A user connected (server): ${socket.id}, Tab ID: ${tabId}`);
+
+  // Room joining logic
+  socket.on('joinChat', ({ userId, isAdmin }) => {
+    const roomId = isAdmin ? `room-665f504a893ed90d8a930118` : `room-${userId}`;
+    socket.join(roomId);
+    console.log(`User/Admin with Socket ID ${socket.id} joined room: ${roomId}`);
+  });
+  
+
+  // Handle sending a message
+  socket.on('sendMessage', (data) => {
+    console.log(data);
+    const { senderId, receiverId, message } = data;
+    const roomId = `room-${receiverId}`;
+    console.log(`Message received from ${senderId} to ${receiverId}: ${message}`);
+
+    // Emit the message to the correct room
+    io.to(roomId).emit('newMessage', {
+      senderId,
+      receiverId,
+      message,
+      timestamp: new Date(),
+    });
+    console.log(`Message emitted to room: ${roomId}`);
+
+    // Save the message in the database
+    const chatMessage = new Chat({ senderId, receiverId, message });
+    chatMessage
+      .save()
+      .then(() => console.log('Message saved to database successfully'))
+      .catch((err) => console.error('Error saving message to database:', err));
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log(`A user disconnected: ${socket.id}, Tab ID: ${tabId}`);
+  });
+});
+
+
 
 // white space
 
@@ -4046,6 +4165,13 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 // // Call the function to perform the deletion
 // deleteBookingsExcept();
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-})
+// app.listen(PORT, () => {
+//   console.log(`Server is running on http://localhost:${PORT}`);
+// })
+
+// Serve static files or API endpoints
+app.use(express.static('public')); // example for serving static files
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running at http://0.0.0.0:${PORT}`);
+});
