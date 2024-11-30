@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ChatService } from '../services/chat.service';
 import { AuthService } from '../services/auth.service';
 
@@ -8,6 +8,8 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./customer-service.component.css']
 })
 export class CustomerServiceComponent implements OnInit {
+  @ViewChild('chatMessagesContainer', { static: false }) chatMessagesContainer!: ElementRef;
+
 
   currentUser: any;
   userType: string = ''; // Logged-in user's role
@@ -16,6 +18,7 @@ export class CustomerServiceComponent implements OnInit {
   messages: any[] = []; // Chat messages
   newMessage: string = ''; // New message content
   users: any[] = []; // Users list (for admin)
+  selectedUserName: string = 'RUTE Admin';
 
   constructor(private chatService: ChatService, private authService: AuthService) {}
 
@@ -42,6 +45,7 @@ export class CustomerServiceComponent implements OnInit {
     this.chatService.getMessages(this.userId, this.selectedUserId).subscribe((response) => {
       if (response.success) {
         this.messages = response.messages;
+        this.scrollToBottom();
       }
     });
   }
@@ -58,6 +62,7 @@ export class CustomerServiceComponent implements OnInit {
             timestamp: new Date(),
           });
           this.newMessage = ''; // Clear the input
+          this.scrollToBottom();
         });
     }
   }
@@ -76,4 +81,13 @@ export class CustomerServiceComponent implements OnInit {
     this.selectedUserId = userId;
     this.loadMessages();
   }
+
+  private scrollToBottom(): void {
+    if (this.chatMessagesContainer) {
+      setTimeout(() => {
+        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+      }, 0); // Delay to ensure DOM updates are rendered
+    }
+  }
+  
 }

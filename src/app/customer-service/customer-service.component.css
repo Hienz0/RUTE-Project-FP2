@@ -1,58 +1,39 @@
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 400px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    overflow: hidden;
-  }
-  
-  .messages {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    background-color: #f9f9f9;
-  }
-  
-  .messages div {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    max-width: 70%;
-  }
-  
-  .messages .sent {
-    align-self: flex-end;
-    background-color: #dcf8c6;
-  }
-  
-  .messages .received {
-    align-self: flex-start;
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-  }
-  
-  .message-input {
-    display: flex;
-    padding: 10px;
-    background-color: #fff;
-    border-top: 1px solid #ccc;
-  }
-  
-  .message-input input {
-    flex: 1;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .message-input button {
-    margin-left: 10px;
-    padding: 5px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
+.chat-messages {
+  max-height: 400px;
+  min-height: 300px;
+  background-color: #f7f7f9;
+}
+
+.chat-messages .bg-light {
+  background-color: #f1f1f4 !important;
+}
+
+.chat-messages .bg-primary {
+  background-color: #007bff !important;
+}
+
+
+/* Custom Scrollbar Styles */
+.chat-messages {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #cfcfcf #f8f8f8; /* Thumb and track colors */
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f8f8f8; /* Background of the scrollbar track */
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background-color: #cfcfcf; /* Color of the scrollbar thumb */
+  border-radius: 10px;
+  border: 2px solid #f8f8f8; /* Space around the thumb */
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background-color: #b0b0b0; /* Thumb color on hover */
+}
