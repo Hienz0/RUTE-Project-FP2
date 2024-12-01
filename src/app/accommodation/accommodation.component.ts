@@ -53,6 +53,7 @@ export class AccommodationComponent implements OnInit {
   constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService, private renderer: Renderer2) {}
 
   ngOnInit(): void {
+    // this.loadGoogleTranslateScript();
     // // chatbot
     //     // Add the first script
     //     const chtlConfigScript = this.renderer.createElement('script');
@@ -101,6 +102,26 @@ export class AccommodationComponent implements OnInit {
     setInterval(() => {
       this.updateClock(); // Update the clock every minute
     }, 1000);
+  }
+
+  loadGoogleTranslateScript(): void {
+    const scriptId = 'google-translate';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.type = 'text/javascript';
+      script.src =
+        'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      document.body.appendChild(script);
+
+      // Attach the initialization function to the global scope
+      (window as any).googleTranslateElementInit = () => {
+        new (window as any).google.translate.TranslateElement(
+          { pageLanguage: 'en' },
+          'google_translate_element'
+        );
+      };
+    }
   }
 
     // Function to update the current time
