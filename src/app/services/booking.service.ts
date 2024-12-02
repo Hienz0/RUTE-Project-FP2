@@ -100,6 +100,9 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
       return this.http.get(`${this.apiUrl}/rooms/${roomId}`);
     }
     
+    sendReceiptToEmail(formData: FormData): Observable<any> {
+      return this.http.post<any>('http://localhost:3000/api/receipts', formData);
+    }
     
     
   

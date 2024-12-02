@@ -234,29 +234,36 @@ interval: any;
 }
 
 
-downloadReceiptAsPDF(): void {
-  const receiptModalElement = document.getElementById('receipt-modal');
+// downloadReceiptAsPDF(): void {
+//   const receiptModalElement = document.getElementById('receipt-modal');
 
-  if (!receiptModalElement) {
-    alert('Unable to find the receipt modal element.');
+//   if (!receiptModalElement) {
+//     alert('Unable to find the receipt modal element.');
+//     return;
+//   }
+
+//   html2canvas(receiptModalElement).then((canvas) => {
+//     const imgData = canvas.toDataURL('image/png');
+//     const pdf = new jsPDF('p', 'mm', 'a4');
+
+//     const pdfWidth = pdf.internal.pageSize.getWidth();
+//     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+//     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+//     pdf.save(`Receipt-${new Date().toISOString()}.pdf`);
+//   }).catch((error) => {
+//     console.error('Error generating PDF:', error);
+//   });
+// }
+
+downloadReceiptAsPDF(): void {
+  if (!this.receiptData) {
+    console.error('Receipt data is not available.');
     return;
   }
 
-  html2canvas(receiptModalElement).then((canvas) => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Receipt-${new Date().toISOString()}.pdf`);
-  }).catch((error) => {
-    console.error('Error generating PDF:', error);
-  });
+  this.generateReceipt(this.receiptData.bookingId, this.receiptData.details, false);
 }
-
-
 
 getBookingDetails(bookingId: string, bookingType: string): any {
   const booking = this.bookings.find((b) => b._id === bookingId);
@@ -356,6 +363,68 @@ openReceiptModal(index: number): void {
 }
 
 
+generateReceipt(bookingId: string, bookingType: string, details: any, sendToEmail: boolean = false): void {
+  this.cdr.detectChanges();
+  const receiptModalElement = document.getElementById('receipt-modal');
+
+  if (!receiptModalElement) {
+    alert('Unable to find the receipt modal element.');
+    return;
+  }
+
+  // Salin elemen modal untuk membuat PDF
+  const clonedElement = receiptModalElement.cloneNode(true) as HTMLElement;
+  clonedElement.id = 'receipt-modal-temp'; // Hindari konflik ID
+  clonedElement.style.position = 'absolute';
+  clonedElement.style.top = '-9999px'; // Sembunyikan elemen
+  clonedElement.style.left = '-9999px';
+  document.body.appendChild(clonedElement); // Tambahkan elemen ke DOM
+
+  // Terapkan gaya khusus untuk ukuran A4
+  clonedElement.style.width = "794px"; // Lebar A4
+  clonedElement.style.minHeight = "1123px"; // Tinggi minimum A4
+  clonedElement.style.fontSize = "12px"; // Ukuran font konsisten
+
+  setTimeout(() => {
+    html2canvas(clonedElement, {
+      scale: 2, // Resolusi tinggi
+      useCORS: true, // Untuk mendukung gambar eksternal
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      if (sendToEmail) {
+        const blob = pdf.output("blob");
+        const formData = new FormData();
+        formData.append("receipt", blob, `Receipt-${bookingId}.pdf`);
+        formData.append("bookingId", bookingId);
+        formData.append("bookingType", bookingType);
+        formData.append("details", JSON.stringify(details));
+
+        this.bookingService.sendReceiptToEmail(formData).subscribe(
+          () => {
+            console.log("Receipt sent to email successfully.");
+          },
+          (error) => {
+            console.error("Error sending receipt to email:", error);
+          }
+        );
+      } else {
+        pdf.save(`Receipt-${bookingId}.pdf`);
+      }
+
+      // Hapus elemen sementara setelah selesai
+      clonedElement.remove();
+    });
+  }, 500);
+}
+
+
+
 
   
   
@@ -394,6 +463,10 @@ payForBooking(bookingId: string, amount: number, bookingType: string): void {
                 details: this.getBookingDetails(bookingId, bookingType),
               };
               this.isReceiptModalOpen = true; // Open receipt modal
+              this.generateReceipt(bookingId, bookingType, this.receiptData.details, true);
+              
+              // Kirimkan PDF ke email
+              
               this.cdr.detectChanges();
 
               

@@ -22,4 +22,12 @@
     max-width: 100%;
     height: auto;
   }
+  #receipt-modal-temp {
+    width: 794px; /* Lebar A4 */
+    min-height: 1123px; /* Tinggi minimum A4 */
+    font-size: 12px; /* Ukuran font untuk dokumen */
+    padding: 10px; /* Berikan jarak padding jika diperlukan */
+    box-sizing: border-box; /* Untuk menghitung dimensi total dengan padding */
+    overflow: hidden; /* Cegah elemen meluap */
+  }
   

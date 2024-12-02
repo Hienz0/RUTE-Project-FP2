@@ -3603,6 +3603,71 @@ async function generateReceiptPDF(details) {
   return pdfBytes;
 }
 
+app.post('/api/receipts', upload.single('receipt'), async (req, res) => {
+  const { bookingId, bookingType } = req.body;
+  let BookingModel;
+
+  switch (bookingType) {
+    case 'Accommodation':
+      BookingModel = Booking;
+      break;
+    case 'Tour':
+      BookingModel = TourBooking;
+      break;
+    case 'Vehicle':
+      BookingModel = VehicleBooking;
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid booking type' });
+  }
+
+  try {
+    // Parse details dari body
+    const details = JSON.parse(req.body.details);
+    const receiptPath = req.file?.path;
+
+    if (!receiptPath) {
+      return res.status(400).json({ error: 'Receipt file is missing.' });
+    }
+
+    console.log('Details received:', details);
+
+    // Ambil data booking dengan informasi user
+    const booking = await BookingModel.findById(bookingId).populate('userId');
+
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found.' });
+    }
+
+    const user = booking.userId;
+
+    if (!user || !user.email) {
+      return res.status(400).json({ error: 'User email is missing or invalid.' });
+    }
+
+    // Konfigurasi transport email
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: { user: 'madeyudaadiwinata@gmail.com', pass: 'hncq lgcx hkhz hjlq' },
+    });
+
+    // Kirim email dengan lampiran
+    await transporter.sendMail({
+      from: 'madeyudaadiwinata@gmail.com',
+      to: user.email,
+      subject: `${details.bookingType} Booking Payment Receipt`,
+      text: 'Please find your booking receipt attached.',
+      attachments: [
+        { filename: 'Booking_Receipt.pdf', path: receiptPath, contentType: 'application/pdf' },
+      ],
+    });
+
+    res.status(200).json({ message: 'Receipt saved and emailed successfully.' });
+  } catch (error) {
+    console.error('Error saving and emailing receipt:', error);
+    res.status(500).json({ error: 'Failed to save and email receipt.' });
+  }
+});
 
 // Endpoint untuk mengirimkan email dengan PDF receipt
 app.post('/api/payments/update-status', async (req, res) => {
@@ -3634,75 +3699,12 @@ app.post('/api/payments/update-status', async (req, res) => {
 
     // Ambil data berdasarkan tipe booking
     let details = { bookingType, userName: user.name, paymentStatus: 'Paid', bookingStatus: 'Pending' };
-    if (bookingType === 'Accommodation') {
-      const accommodation = await Accommodation.findOne({ 'roomTypes._id': booking.roomTypeId });
-      const roomType = accommodation?.roomTypes.find((r) => r._id.toString() === booking.roomTypeId.toString());
-      const bookedRoom = roomType?.rooms.find((r) => r._id.toString() === booking.roomId.toString());
     
-      const checkInDate = booking.checkInDate instanceof Date
-          ? booking.checkInDate.toDateString()
-          : new Date(booking.checkInDate).toDateString();
-      const checkOutDate = booking.checkOutDate instanceof Date
-          ? booking.checkOutDate.toDateString()
-          : new Date(booking.checkOutDate).toDateString();
-    
-      details = {
-        ...details,
-        accommodationName: String(booking.accommodationName || ''),
-        accommodationType: String(booking.accommodationType || ''),
-        roomType: String(roomType?.name || ''),
-        roomNumber: String(bookedRoom?.number || ''),
-        checkInDate: checkInDate || '',
-        checkOutDate: checkOutDate || '',
-        numberOfGuests: String(booking.numberOfGuests || ''),
-      };
-    }
-    else if (bookingType === 'Tour') {
-      const tourDate = booking.tourDate instanceof Date
-          ? booking.tourDate.toDateString()
-          : new Date(booking.tourDate).toDateString();
-    
-      details = {
-        ...details,
-        tourName: String(booking.tourName || ''),
-        tourDate: tourDate || '',
-        tourTime: String(booking.tourTime || ''),
-        numberOfParticipants: String(booking.numberOfParticipants || ''),
-      };
-    }
-     else if (bookingType === 'Vehicle') {
-      details = {
-        ...details,
-        vehicleBooking: booking.vehicleBooking,
-        totalBookingPrice: booking.totalBookingPrice,
-        pickupDate: booking.pickupDate?.toDateString(),
-        dropoffDate: booking.dropoffDate?.toDateString(),
-        pickupLocation: booking.pickupStreetName,
-        dropoffLocation: booking.dropoffStreetName,
-      };
-    }
-
-    // Generate PDF
-    const pdfBytes = await generateReceiptPDF(details);
 
     // Update booking status
     await BookingModel.findByIdAndUpdate(bookingId, updateData);
 
-    // Kirim Email dengan Lampiran PDF
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: { user: 'madeyudaadiwinata@gmail.com', pass: 'hncq lgcx hkhz hjlq' },
-    });
-
-    await transporter.sendMail({
-      from: 'madeyudaadiwinata@gmail.com',
-      to: user.email,
-      subject: `${bookingType} Booking Payment Receipt`,
-      text: 'Please find your booking receipt attached.',
-      attachments: [
-        { filename: 'Booking_Receipt.pdf', content: pdfBytes, contentType: 'application/pdf' },
-      ],
-    });
+    
 
     res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
   } catch (error) {
