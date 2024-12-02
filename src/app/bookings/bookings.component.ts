@@ -363,65 +363,136 @@ openReceiptModal(index: number): void {
 }
 
 
-generateReceipt(bookingId: string, bookingType: string, details: any, sendToEmail: boolean = false): void {
-  this.cdr.detectChanges();
-  const receiptModalElement = document.getElementById('receipt-modal');
+generateReceipt(
+  bookingId: string,
+  bookingType: string,
+  details: any,
+  sendToEmail: boolean = false
+): void {
+  console.log("generateReceipt started");
+  console.time("Total time");
+
+  this.cdr.detectChanges(); // Memaksa Angular mendeteksi perubahan
+  console.time("Change detection");
+  console.log("Change detection triggered");
+  console.timeEnd("Change detection");
+
+  const receiptModalElement = document.getElementById("receipt-modal");
 
   if (!receiptModalElement) {
-    alert('Unable to find the receipt modal element.');
+    alert("Unable to find the receipt modal element.");
+    console.error("Receipt modal element not found in DOM");
+    console.timeEnd("Total time");
     return;
   }
 
-  // Salin elemen modal untuk membuat PDF
+  // Clone elemen modal
+  console.time("Clone element");
   const clonedElement = receiptModalElement.cloneNode(true) as HTMLElement;
-  clonedElement.id = 'receipt-modal-temp'; // Hindari konflik ID
-  clonedElement.style.position = 'absolute';
-  clonedElement.style.top = '-9999px'; // Sembunyikan elemen
-  clonedElement.style.left = '-9999px';
+  clonedElement.id = "receipt-modal-temp"; // Hindari konflik ID
+  clonedElement.style.position = "absolute";
+  clonedElement.style.top = "-9999px"; // Sembunyikan elemen
+  clonedElement.style.left = "-9999px";
   document.body.appendChild(clonedElement); // Tambahkan elemen ke DOM
+  console.timeEnd("Clone element");
 
   // Terapkan gaya khusus untuk ukuran A4
   clonedElement.style.width = "794px"; // Lebar A4
   clonedElement.style.minHeight = "1123px"; // Tinggi minimum A4
   clonedElement.style.fontSize = "12px"; // Ukuran font konsisten
+  console.log("Cloned element prepared and styled for PDF generation");
 
   setTimeout(() => {
+    console.time("html2canvas generation");
+    console.log("Starting html2canvas generation");
+
     html2canvas(clonedElement, {
-      scale: 2, // Resolusi tinggi
-      useCORS: true, // Untuk mendukung gambar eksternal
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      scale: 1.5, // Pertahankan resolusi tinggi
+      useCORS: true, // Hindari masalah dengan gambar eksternal
+      allowTaint: true, // Percepat jika tidak butuh validasi taint
+      logging: false, // Matikan logging untuk meningkatkan performa
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: clonedElement.scrollWidth,
+      windowHeight: clonedElement.scrollHeight,
+    })
+      .then((canvas) => {
+        console.timeEnd("html2canvas generation");
+        console.log("html2canvas finished rendering");
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
 
-      if (sendToEmail) {
-        const blob = pdf.output("blob");
-        const formData = new FormData();
-        formData.append("receipt", blob, `Receipt-${bookingId}.pdf`);
-        formData.append("bookingId", bookingId);
-        formData.append("bookingType", bookingType);
-        formData.append("details", JSON.stringify(details));
+        const imgHeight = (canvasHeight * pdfWidth) / canvasWidth;
+        let pageHeightLeft = imgHeight;
+        let position = 0;
 
-        this.bookingService.sendReceiptToEmail(formData).subscribe(
-          () => {
-            console.log("Receipt sent to email successfully.");
-          },
-          (error) => {
-            console.error("Error sending receipt to email:", error);
+        console.time("Add image to PDF");
+        while (pageHeightLeft > 0) {
+          const canvasData = canvas.toDataURL("image/png");
+          pdf.addImage(canvasData, "PNG", 0, position, pdfWidth, imgHeight);
+          pageHeightLeft -= pdfHeight;
+          position -= pdfHeight;
+
+          if (pageHeightLeft > 0) pdf.addPage();
+        }
+        console.timeEnd("Add image to PDF");
+        console.log("Image added to PDF");
+
+        if (sendToEmail) {
+          console.time("PDF to email process");
+          console.log("Preparing to send PDF via email");
+
+          const blob = pdf.output("blob");
+          console.log("PDF Blob size (bytes):", blob.size);
+
+          if (blob.size > 5 * 1024 * 1024) {
+            console.warn("PDF size is too large, consider optimizing the content.");
           }
-        );
-      } else {
-        pdf.save(`Receipt-${bookingId}.pdf`);
-      }
 
-      // Hapus elemen sementara setelah selesai
-      clonedElement.remove();
-    });
-  }, 500);
+          const formData = new FormData();
+          formData.append("receipt", blob, `Receipt-${bookingId}.pdf`);
+          formData.append("bookingId", bookingId);
+          formData.append("bookingType", bookingType);
+          formData.append("details", JSON.stringify(details));
+
+          console.log("Sending FormData to server", formData);
+
+          this.bookingService.sendReceiptToEmail(formData).subscribe(
+            () => {
+              console.timeEnd("PDF to email process");
+              console.log("Receipt sent to email successfully");
+            },
+            (error) => {
+              console.timeEnd("PDF to email process");
+              console.error("Error sending receipt to email:", error);
+            }
+          );
+        } else {
+          console.time("Save PDF locally");
+          console.log("Saving PDF locally");
+          pdf.save(`Receipt-${bookingId}.pdf`);
+          console.timeEnd("Save PDF locally");
+        }
+
+        console.log("PDF generation completed");
+
+        // Hapus elemen sementara setelah selesai
+        clonedElement.remove();
+        console.log("Temporary cloned element removed from DOM");
+      })
+      .catch((error) => {
+        console.error("Error generating canvas or PDF:", error);
+      });
+  }, 0);
+
+  console.timeEnd("Total time");
 }
+
+
 
 
 

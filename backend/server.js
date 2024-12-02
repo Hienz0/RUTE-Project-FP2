@@ -3458,216 +3458,162 @@ app.post('/api/create-transaction', async (req, res) => {
 // Define the route to handle payment updates
 // Express Route for Updating Payment Status
 // Fungsi untuk membuat PDF Receipt
-async function generateReceiptPDF(details) {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([600, 800]);
-  const { width, height } = page.getSize();
+const Queue = require("bull");
+const emailQueue = new Queue("emailQueue", "redis://127.0.0.1:6379");
 
-  // Load fonts
-  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+// Worker untuk memproses pengiriman email
+emailQueue.process(async (job) => {
+  const { receiptPath, user, bookingType } = job.data;
 
-  // Load the "Lunas" watermark logo
-  const lunasLogoPath = '../src/assets/images/lunas.png'; // Adjust path
-  const lunasLogoBytes = fs.existsSync(lunasLogoPath) ? fs.readFileSync(lunasLogoPath) : null;
-  const lunasLogo = lunasLogoBytes ? await pdfDoc.embedPng(lunasLogoBytes) : null;
-
-  // Load the company logo
-  const companyLogoPath = '../src/assets/images/rute-logo.png'; // Adjust path
-  const companyLogoBytes = fs.existsSync(companyLogoPath) ? fs.readFileSync(companyLogoPath) : null;
-  const companyLogo = companyLogoBytes ? await pdfDoc.embedPng(companyLogoBytes) : null;
-
-  // Add watermark
-  if (lunasLogo) {
-    page.drawImage(lunasLogo, {
-      x: width / 4,
-      y: height / 2 - 50, // Center the logo on the page
-      width: 200,
-      height: 100,
-      opacity: 0.1, // Make the watermark faint
-    });
+  if (!fs.existsSync(receiptPath)) {
+    console.error(`File not found: ${receiptPath}`);
+    throw new Error(`Receipt file not found: ${receiptPath}`);
   }
 
-  // Header Section
-  page.drawText('Booking Receipt', {
-    x: 50,
-    y: height - 60,
-    size: 26,
-    font: boldFont,
-    color: rgb(0, 0.53, 0.71),
-  });
-
-  // Add Company Logo
-  if (companyLogo) {
-    page.drawImage(companyLogo, {
-      x: width - 150,
-      y: height - 100,
-      width: 100,
-      height: 50,
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {  user: "madeyudaadiwinata@gmail.com", pass: "hncq lgcx hkhz hjlq" },
     });
+
+    await transporter.sendMail({
+      from: "madeyudaadiwinata@gmail.com",
+      to: user.email,
+      subject: `${bookingType} Booking Payment Receipt`,
+      text: "Please find your booking receipt attached.",
+      attachments: [
+        {
+          filename: "Booking_Receipt.pdf",
+          path: receiptPath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    console.log(`Email sent successfully to ${user.email}`);
+  } catch (error) {
+    console.error(`Failed to send email to ${user.email}:`, error);
+    throw error; // Retry jika gagal
   }
+});
 
-  // Draw a line under the header
-  page.drawLine({
-    start: { x: 50, y: height - 80 },
-    end: { x: width - 50, y: height - 80 },
-    color: rgb(0, 0.53, 0.71),
-    thickness: 2,
-  });
+// Event logging
+emailQueue.on("completed", (job) => console.log(`Job completed: ${job.id}`));
+emailQueue.on("failed", (job, error) => console.error(`Job failed: ${job.id}, Error: ${error.message}`));
+emailQueue.on("stalled", (job) => console.warn(`Job stalled: ${job.id}`));
 
-  // Styling for content
-  let contentY = height - 120;
-  const lineSpacing = 20;
-
-  // Format content neatly with sections
-  const addSection = (title, content) => {
-    page.drawText(`${title}:`, {
-      x: 50,
-      y: contentY,
-      size: 12,
-      font: boldFont,
-      color: rgb(0, 0, 0),
-    });
-    contentY -= lineSpacing;
-
-    page.drawText(content, {
-      x: 70,
-      y: contentY,
-      size: 12,
-      font: timesRomanFont,
-      color: rgb(0, 0, 0),
-      lineHeight: lineSpacing,
-    });
-    contentY -= lineSpacing * Math.ceil(content.length / 50);
-  };
-
-  // Booking Information Section
-  addSection('Customer Name', details.userName);
-  addSection('Booking Type', details.bookingType);
-
-  if (details.bookingType === 'Accommodation') {
-    addSection('Accommodation Name', details.accommodationName || 'N/A');
-    addSection('Room Type', details.roomType || 'N/A');
-    addSection('Room Number', details.roomNumber || 'N/A');
-    addSection('Check-in Date', details.checkInDate || 'N/A');
-    addSection('Check-out Date', details.checkOutDate || 'N/A');
-    addSection('Number of Guests', details.numberOfGuests || 'N/A');
-  } else if (details.bookingType === 'Tour') {
-    addSection('Tour Name', details.tourName || 'N/A');
-    addSection('Tour Date', details.tourDate || 'N/A');
-    addSection('Tour Time', details.tourTime || 'N/A');
-    addSection('Number of Participants', details.numberOfParticipants || 'N/A');
-  } else if (details.bookingType === 'Vehicle') {
-    const vehicleDetails = details.vehicleBooking
-      .map((v) => `- ${v.name} (${v.selectedVehicleType}) x ${v.quantity}`)
-      .join('\n');
-    addSection('Vehicle(s) Booked', vehicleDetails || 'N/A');
-    addSection('Total Booking Price', `Rp.${details.totalBookingPrice}` || 'N/A');
-    addSection('Pickup Date', details.pickupDate || 'N/A');
-    addSection('Dropoff Date', details.dropoffDate || 'N/A');
-    addSection('Pickup Location', details.pickupLocation || 'N/A');
-    addSection('Dropoff Location', details.dropoffLocation || 'N/A');
-  }
-
-  addSection('Payment Status', details.paymentStatus || 'N/A');
-  addSection('Booking Status', details.bookingStatus || 'N/A');
-
-  contentY -= 20;
-
-  // Footer Section
-  page.drawLine({
-    start: { x: 50, y: 40 },
-    end: { x: width - 50, y: 40 },
-    color: rgb(0.7, 0.7, 0.7),
-    thickness: 1,
-  });
-
-  page.drawText('Thank you for choosing our service!', {
-    x: 50,
-    y: contentY - 20,
-    size: 10,
-    font: timesRomanFont,
-    color: rgb(0, 0, 0),
-  });
-
-  page.drawText('Powered by Your Company', {
-    x: 50,
-    y: 20,
-    size: 10,
-    font: timesRomanFont,
-    color: rgb(0.5, 0.5, 0.5),
-  });
-
-  // Save the PDF
-  const pdfBytes = await pdfDoc.save();
-  return pdfBytes;
-}
-
-app.post('/api/receipts', upload.single('receipt'), async (req, res) => {
+app.post("/api/receipts", upload.single("receipt"), async (req, res) => {
   const { bookingId, bookingType } = req.body;
   let BookingModel;
 
   switch (bookingType) {
-    case 'Accommodation':
+    case "Accommodation":
       BookingModel = Booking;
       break;
-    case 'Tour':
+    case "Tour":
       BookingModel = TourBooking;
       break;
-    case 'Vehicle':
+    case "Vehicle":
       BookingModel = VehicleBooking;
       break;
     default:
-      return res.status(400).json({ error: 'Invalid booking type' });
+      return res.status(400).json({ error: "Invalid booking type" });
   }
 
   try {
-    // Parse details dari body
     const details = JSON.parse(req.body.details);
-    const receiptPath = req.file?.path;
+    const receiptPath = req.file.path;
 
-    if (!receiptPath) {
-      return res.status(400).json({ error: 'Receipt file is missing.' });
-    }
-
-    console.log('Details received:', details);
-
-    // Ambil data booking dengan informasi user
-    const booking = await BookingModel.findById(bookingId).populate('userId');
-
-    if (!booking) {
-      return res.status(404).json({ error: 'Booking not found.' });
-    }
+    const booking = await BookingModel.findById(bookingId).populate("userId");
+    if (!booking) return res.status(404).json({ error: "Booking not found." });
 
     const user = booking.userId;
+    if (!user || !user.email) return res.status(400).json({ error: "Invalid user email." });
 
-    if (!user || !user.email) {
-      return res.status(400).json({ error: 'User email is missing or invalid.' });
-    }
+    emailQueue.add(
+      { receiptPath, user, bookingType },
+      {
+        attempts: 5,
+        backoff: 5000,
+        removeOnComplete: true,
+      }
+    );
 
-    // Konfigurasi transport email
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: { user: 'madeyudaadiwinata@gmail.com', pass: 'hncq lgcx hkhz hjlq' },
-    });
-
-    // Kirim email dengan lampiran
-    await transporter.sendMail({
-      from: 'madeyudaadiwinata@gmail.com',
-      to: user.email,
-      subject: `${details.bookingType} Booking Payment Receipt`,
-      text: 'Please find your booking receipt attached.',
-      attachments: [
-        { filename: 'Booking_Receipt.pdf', path: receiptPath, contentType: 'application/pdf' },
-      ],
-    });
-
-    res.status(200).json({ message: 'Receipt saved and emailed successfully.' });
+    res.status(200).json({ message: "Email process handed over to background job." });
   } catch (error) {
-    console.error('Error saving and emailing receipt:', error);
-    res.status(500).json({ error: 'Failed to save and email receipt.' });
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Failed to process receipt." });
   }
 });
+
+
+
+
+// app.post('/api/receipts', upload.single('receipt'), async (req, res) => {
+//   const { bookingId, bookingType } = req.body;
+//   let BookingModel;
+
+//   switch (bookingType) {
+//     case 'Accommodation':
+//       BookingModel = Booking;
+//       break;
+//     case 'Tour':
+//       BookingModel = TourBooking;
+//       break;
+//     case 'Vehicle':
+//       BookingModel = VehicleBooking;
+//       break;
+//     default:
+//       return res.status(400).json({ error: 'Invalid booking type' });
+//   }
+
+//   try {
+//     // Parse details dari body
+//     const details = JSON.parse(req.body.details);
+//     const receiptPath = req.file?.path;
+
+//     if (!receiptPath) {
+//       return res.status(400).json({ error: 'Receipt file is missing.' });
+//     }
+
+//     console.log('Details received:', details);
+
+//     // Ambil data booking dengan informasi user
+//     const booking = await BookingModel.findById(bookingId).populate('userId');
+
+//     if (!booking) {
+//       return res.status(404).json({ error: 'Booking not found.' });
+//     }
+
+//     const user = booking.userId;
+
+//     if (!user || !user.email) {
+//       return res.status(400).json({ error: 'User email is missing or invalid.' });
+//     }
+
+//     // Konfigurasi transport email
+//     const transporter = nodemailer.createTransport({
+//       service: 'Gmail',
+//       auth: { user: 'madeyudaadiwinata@gmail.com', pass: 'hncq lgcx hkhz hjlq' },
+//     });
+
+//     // Kirim email dengan lampiran
+//     await transporter.sendMail({
+//       from: 'madeyudaadiwinata@gmail.com',
+//       to: user.email,
+//       subject: `${details.bookingType} Booking Payment Receipt`,
+//       text: 'Please find your booking receipt attached.',
+//       attachments: [
+//         { filename: 'Booking_Receipt.pdf', path: receiptPath, contentType: 'application/pdf' },
+//       ],
+//     });
+
+//     res.status(200).json({ message: 'Receipt saved and emailed successfully.' });
+//   } catch (error) {
+//     console.error('Error saving and emailing receipt:', error);
+//     res.status(500).json({ error: 'Failed to save and email receipt.' });
+//   }
+// });
 
 // Endpoint untuk mengirimkan email dengan PDF receipt
 app.post('/api/payments/update-status', async (req, res) => {
