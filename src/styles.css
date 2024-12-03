@@ -21,3 +21,143 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+
+/* Dark Mode */
+body.dark {
+  background-color: #121212;
+  color: #ffffff; /* Warna teks di dark mode */
+}
+
+body.dark .navbar a {
+  color: #ffffff; /* Warna tautan di navbar untuk dark mode */
+}
+
+body.dark .dropdown-item {
+  color: #ffffff; /* Warna item dropdown di dark mode */
+}
+
+
+
+/* Dark Mode */
+body.dark .card {
+  background-color: #1e1e1e; /* Warna latar kartu untuk dark mode */
+  color: #ffffff; /* Warna teks kartu untuk dark mode */
+  border: 1px solid #333; /* Batas kartu */
+ 
+}
+
+
+
+body.dark .card-header,
+body.dark .card-footer {
+  background-color: #2b2b2b; /* Latar untuk dark mode */
+  color: #ffffff;
+}
+
+
+/* Dark Mode - Menimpa Warna */
+body.dark .text-muted {
+  color: #b0b0b0 !important; /* Warna abu-abu terang untuk dark mode */
+}
+
+body.dark .text-dark {
+  color: #ffffff !important; /* Ganti menjadi putih */
+}
+
+body.dark .text-primary {
+  color: #ffffff !important; /* Warna biru lebih terang */
+}
+
+body.dark .text-secondary {
+  color: #adb5bd !important; /* Warna abu-abu untuk teks sekunder */
+}
+
+body.dark .text-success {
+  color: #63e6be !important; /* Warna hijau terang */
+}
+
+body.dark .text-info {
+  color: #ffffff !important; /* Warna biru muda */
+}
+
+body.dark .text-warning {
+  color: #ffd43b !important; /* Warna kuning terang */
+}
+
+body.dark .text-danger {
+  color: #ff6b6b !important; /* Warna merah terang */
+}
+
+body.dark .text-white {
+  color: #ffffff !important; /* Tetap putih */
+}
+
+/* Optional: Gaya Tambahan untuk Link */
+body.dark a {
+  color: #ffffff !important; /* Warna biru muda untuk tautan */
+}
+
+
+
+/* Dark Mode Styles */
+body.dark .modal-content {
+  background-color: #343a40; /* Latar belakang gelap */
+  color: #ffffff; /* Teks putih */
+  border: 1px solid #495057; /* Border lebih gelap */
+}
+
+body.dark .dropdown-menu {
+  background-color: #343a40; /* Latar belakang gelap */
+  color: #ffffff; /* Teks putih */
+  border: 1px solid #495057; /* Border lebih gelap */
+}
+
+body.dark .dropdown-item {
+  color: #ffffff; /* Teks putih untuk item dropdown */
+}
+
+body.dark .dropdown-item:hover,
+body.dark .dropdown-item:focus {
+  background-color: #495057; /* Warna hover lebih terang */
+  color: #ffffff; /* Tetap putih */
+}
+
+/* Optional: Tambahan untuk tombol dalam modal */
+body.dark .modal-header {
+  border-bottom: 1px solid #495057; /* Border header */
+}
+
+body.dark .modal-footer {
+  border-top: 1px solid #495057; /* Border footer */
+}
+
+body.dark .btn-close {
+  filter: invert(1); /* Tombol close jadi putih */
+}
+
+
+/* Dark Mode */
+body.dark .lead {
+  color: #ffffff; /* Teks putih untuk dark mode */
+}
+/* Dark Mode */
+body.dark .transportation-section {
+  background-color: #343a40; /* Latar belakang gelap */
+  color: #ffffff; /* Teks putih */
+}
+
+body.dark .divider {
+  border-color: #f3f3f3; /* Divider lebih gelap */
+}
+
+body.dark .description {
+  color: #d6d6d6; /* Teks sekunder terang */
+}
+
+body.dark .display-5 {
+  color: #ffffff; /* Judul berwarna putih di dark mode */
+}
+
+
