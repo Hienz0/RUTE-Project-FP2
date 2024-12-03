@@ -3461,21 +3461,42 @@ app.post('/api/create-transaction', async (req, res) => {
 const Queue = require("bull");
 const emailQueue = new Queue("emailQueue", "redis://127.0.0.1:6379");
 
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: "madeyudaadiwinata@gmail.com",
+    pass: "hncq lgcx hkhz hjlq",
+  },
+  pool: true,            // Mengaktifkan pooling
+  maxConnections: 5,     // Maksimum koneksi SMTP simultan
+  maxMessages: 100,      // Maksimum pesan per koneksi
+});
+
+// Warm-up SMTP connection
+(async () => {
+  try {
+    console.log("Establishing SMTP connection...");
+    await transporter.verify();
+    console.log("SMTP connection is ready to send emails.");
+  } catch (error) {
+    console.error("Failed to establish SMTP connection:", error);
+  }
+})();
+
 // Worker untuk memproses pengiriman email
 emailQueue.process(async (job) => {
   const { receiptPath, user, bookingType } = job.data;
 
+  // Cek apakah file lampiran tersedia
   if (!fs.existsSync(receiptPath)) {
     console.error(`File not found: ${receiptPath}`);
     throw new Error(`Receipt file not found: ${receiptPath}`);
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {  user: "madeyudaadiwinata@gmail.com", pass: "hncq lgcx hkhz hjlq" },
-    });
+    console.time(`Email to ${user.email}`); // Mulai pencatatan waktu
 
+    // Kirim email menggunakan transporter yang sudah dipanaskan
     await transporter.sendMail({
       from: "madeyudaadiwinata@gmail.com",
       to: user.email,
@@ -3490,6 +3511,7 @@ emailQueue.process(async (job) => {
       ],
     });
 
+    console.timeEnd(`Email to ${user.email}`); // Akhiri pencatatan waktu
     console.log(`Email sent successfully to ${user.email}`);
   } catch (error) {
     console.error(`Failed to send email to ${user.email}:`, error);
