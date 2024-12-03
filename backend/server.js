@@ -2543,7 +2543,7 @@ app.get('/remaining-quantity', async (req, res) => {
       // Ambil pemesanan terkait dengan serviceId yang bertumpuk dengan tanggal yang dipilih
       const bookings = await VehicleBooking.find({
         serviceId,
-        bookingStatus: 'Booked',
+        bookingStatus: { $in: ['Pending', 'Booked'] },
         $or: [
           { pickupDate: { $lt: dropoff }, dropoffDate: { $gt: pickup } }
         ],
