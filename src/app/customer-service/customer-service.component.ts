@@ -45,6 +45,11 @@ export class CustomerServiceComponent implements OnInit {
   users: any[] = []; // Users list (for admin)
   selectedUserName: string = 'RUTE User';
 
+    // Existing properties...
+    promptMessage: string | null = 'prompt'; // Holds the prompt message
+    isPromptActive: boolean = false; // Tracks if a Yes/No prompt is active
+  
+
   constructor(private chatService: ChatService, private authService: AuthService) {}
 
   ngOnInit(): void {
@@ -67,6 +72,12 @@ export class CustomerServiceComponent implements OnInit {
       console.log('Listening for new messages...');
       this.chatService.onNewMessage().subscribe((message) => {
         console.log('New message received:', message);
+      // Existing logic to add message...
+      if (message.message === 'prompt') {
+        this.promptMessage = message.message;
+        this.isPromptActive = true;
+      }
+        
         // Check if the message already exists in the chat
         if (
           (message.senderId === this.selectedUserId && message.receiverId === this.userId) ||
@@ -155,6 +166,21 @@ selectUser(userId: string): void {
         this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
       }, 0); // Delay to ensure DOM updates are rendered
     }
+  }
+
+  handlePromptResponse(response: boolean): void {
+    // Send the response to the server or process it
+    const responseMessage = response ? 'Yes' : 'No';
+    // this.chatService.sendMessage({
+    //   senderId: this.userId,
+    //   receiverId: this.selectedUserId,
+    //   message: responseMessage,
+    //   messageType: 'response'
+    // });
+
+    // Reset the prompt state
+    this.promptMessage = null;
+    this.isPromptActive = false;
   }
   
 }

@@ -26,23 +26,23 @@ const PORT = 3000;
 
 
 
-// app.use(cors({
-//   origin: 'http://192.168.156.130:4200',
-//   credentials: true // if you're using cookies or authentication headers
-// }));
-
-
 app.use(cors({
-  origin: [
-    'http://192.168.156.130:4200', 
-    'http://192.168.156.130:4200',    // Angular app running on PC2 (frontend)
-    'http://192.168.156.130:3000',    // API server on PC1
-    'http://192.168.156.130:3001'     // Another service on PC1 (if needed)
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,  // Allow cookies and authentication headers
+  origin: 'http://localhost:4200',
+  credentials: true // if you're using cookies or authentication headers
 }));
+
+
+// app.use(cors({
+//   origin: [
+//     'http://localhost:4200', 
+//     'http://localhost:4200',    // Angular app running on PC2 (frontend)
+//     'http://localhost:3000',    // API server on PC1
+//     'http://localhost:3001'     // Another service on PC1 (if needed)
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+//   credentials: true,  // Allow cookies and authentication headers
+// }));
 
 
 
@@ -63,7 +63,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://192.168.156.130:4200", // Your Angular app's URL
+    origin: "http://localhost:4200", // Your Angular app's URL
     methods: ["GET", "POST"]
   }
 });
@@ -72,7 +72,7 @@ const io = new Server(server, {
 
 // Start the HTTP server (which also starts Socket.io) on port 3001
 server.listen(3001, () => {
-  console.log('Socket.io server is running on http://192.168.156.130:3001');
+  console.log('Socket.io server is running on http://localhost:3001');
 });
 
 
@@ -1543,7 +1543,7 @@ app.post('/request-password-reset', async (req, res) => {
     await user.save();
 
     // Send reset email
-    const resetLink = `http://192.168.156.130:4200/reset-password/${resetToken}`; // Update with your frontend URL
+    const resetLink = `http://localhost:4200/reset-password/${resetToken}`; // Update with your frontend URL
     sendResetPasswordEmail(email, user.name, resetLink);
 
     res.status(200).json({ message: 'Reset password link sent to email' });
@@ -4255,7 +4255,7 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 // deleteBookingsExcept();
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://192.168.156.130:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 })
 
 // Serve static files or API endpoints

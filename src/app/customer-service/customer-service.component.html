@@ -104,6 +104,15 @@
             <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
           </div>
         </div>
+
+            <!-- Prompt -->
+    <div *ngIf="isPromptActive" class="prompt-container alert alert-info d-flex justify-content-between align-items-center mt-3">
+      <span>{{ promptMessage }}</span>
+      <div class="prompt-actions">
+        <button class="btn btn-success btn-sm me-2" (click)="handlePromptResponse(true)">Yes</button>
+        <button class="btn btn-danger btn-sm" (click)="handlePromptResponse(false)">No</button>
+      </div>
+    </div>
         
         </div>
         
