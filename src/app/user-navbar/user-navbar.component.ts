@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular
 import { AuthService } from '../services/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { WeatherService } from '../services/weather.service';
+import { Router } from '@angular/router';  // To redirect the user after logging out
 
 @Component({
   selector: 'app-user-navbar',
@@ -31,7 +32,7 @@ export class UserNavbarComponent implements OnInit {
   isDropdownOpen = false;
   @ViewChild('dropdownButton') dropdownButton!: ElementRef;
 
-  constructor(private authService: AuthService, private weatherService: WeatherService) { }
+  constructor(private authService: AuthService, private weatherService: WeatherService, private router: Router) { }
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
@@ -122,5 +123,12 @@ export class UserNavbarComponent implements OnInit {
     else {
       console.error('User not available');
     }
+  }
+
+  logout(): void {
+    this.authService.logout();  // Call the logout method in AuthService
+
+    // Optionally, navigate to login page after logging out
+    this.router.navigate(['/login']);
   }
 }

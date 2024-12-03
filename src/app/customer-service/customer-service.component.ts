@@ -66,18 +66,27 @@ export class CustomerServiceComponent implements OnInit {
       // Listen for new messages in real-time
       console.log('Listening for new messages...');
       this.chatService.onNewMessage().subscribe((message) => {
-        console.log('New message received:', message); // Debug log
+        console.log('New message received:', message);
+        // Check if the message already exists in the chat
         if (
           (message.senderId === this.selectedUserId && message.receiverId === this.userId) ||
           (message.senderId === this.userId && message.receiverId === this.selectedUserId)
         ) {
-          console.log('Adding message to chat:', message); // Debug log
-          this.messages.push(message); // Add new message to the chat
-          setTimeout(() => this.scrollToBottom(), 0); // Automatically scroll to the bottom
+          const existingMessage = this.messages.find(
+            (msg) => msg.timestamp === message.timestamp && msg.senderId === message.senderId
+          );
+          if (!existingMessage) {
+            console.log('Adding message to chat:', message);
+            this.messages.push(message);
+            setTimeout(() => this.scrollToBottom(), 0); // Automatically scroll to the bottom
+          } else {
+            console.log('Duplicate message ignored');
+          }
         } else {
-          console.log('Message not relevant to the current chat'); // Debug log
+          console.log('Message not relevant to the current chat');
         }
       });
+      
     });
   }
   
@@ -106,7 +115,7 @@ loadMessages(): void {
   sendMessage(): void {
     if (this.newMessage.trim()) {
       this.chatService
-        .sendMessage(this.userId, this.selectedUserId, this.newMessage)
+        .sendMessage(this.userId, this.selectedUserId, this.newMessage, this.userType)
         .subscribe(() => {
           this.messages.push({
             senderId: this.userId,

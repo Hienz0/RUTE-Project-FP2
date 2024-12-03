@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client';
   providedIn: 'root',
 })
 export class ChatService {
-  private baseUrl = 'http://localhost:3000/api/chat';
+  private baseUrl = 'http://192.168.156.130:3000/api/chat';
   private socket: Socket;
 
   constructor(private http: HttpClient) {
@@ -16,7 +16,7 @@ export class ChatService {
     sessionStorage.setItem('tabId', tabId);
   
     // Initialize WebSocket connection with the tab ID
-    this.socket = io('http://localhost:3001', { query: { tabId } });
+    this.socket = io('http://192.168.156.130:3001', { query: { tabId } });
   
     // Debug connection
     this.socket.on('connect', () => {
@@ -30,9 +30,9 @@ export class ChatService {
   
 
   // Send a message
-  sendMessage(senderId: string, receiverId: string, message: string): Observable<any> {
-    const chatData = { senderId, receiverId, message };
-    this.socket.emit('sendMessage', chatData); // Emit the message to the server via WebSocket
+  sendMessage(senderId: string, receiverId: string, message: string, userType: string): Observable<any> {
+    const chatData = { senderId, receiverId, message, userType };
+    // this.socket.emit('sendMessage', chatData); // Emit the message to the server via WebSocket
     return this.http.post(`${this.baseUrl}/send-message`, chatData); // Save the message in the database
   }
 
