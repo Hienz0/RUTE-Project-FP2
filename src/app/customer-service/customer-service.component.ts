@@ -113,6 +113,16 @@ loadMessages(): void {
     if (response.success) {
       this.messages = response.messages;
 
+
+            // Check the latest message for prompt conditions
+            if (this.messages.length > 0) {
+              const latestMessage = this.messages[this.messages.length - 1];
+              if (latestMessage.senderId === '665f504a893ed90d8a930118' && latestMessage.message === 'prompt') {
+                this.promptMessage = latestMessage.message;
+                this.isPromptActive = true;
+              }
+            }
+
       // Ensure scrolling happens after messages are rendered
       setTimeout(() => {
         this.scrollToBottom();
@@ -177,6 +187,11 @@ selectUser(userId: string): void {
     //   message: responseMessage,
     //   messageType: 'response'
     // });
+
+    this.newMessage = responseMessage;
+    this.sendMessage();
+
+    
 
     // Reset the prompt state
     this.promptMessage = null;
