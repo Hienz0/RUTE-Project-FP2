@@ -444,7 +444,7 @@ padding: 20px;
 .card-title {
 font-size: 20px;
 font-weight: bold;
-color: #333;
+
 }
 
 .card-text {
@@ -966,13 +966,13 @@ border: 2px dashed #007bff; /* Dashed border similar to file-upload */
 border-radius: 5px; /* Rounded corners */
 padding: 20px; /* Padding to match the upload example */
 text-align: center;
-background-color: #f8f9fa; /* Light background inside the dashed border */
+/*background-color: #f8f9fa; /* Light background inside the dashed border */
 transition: background-color 0.3s ease, border-color 0.3s ease;
 cursor: pointer;
 }
 
 .menu-list .card:hover {
-background-color: #e9ecef; /* Slightly darker background on hover */
+/*background-color: #e9ecef; /* Slightly darker background on hover */
 border-color: #0056b3; /* Darker dashed border color on hover */
 }
 
@@ -980,6 +980,8 @@ border-color: #0056b3; /* Darker dashed border color on hover */
 margin-bottom: 10px;
 color: #007bff; /* Consistent color for icon */
 }
+
+
 
 /* CSS for zoom effect */
 .zoomed {

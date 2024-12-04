@@ -160,4 +160,132 @@ body.dark .display-5 {
   color: #ffffff; /* Judul berwarna putih di dark mode */
 }
 
+/* Dark Mode */
+body.dark .card {
+  border: none; /* Hilangkan border saat dark mode */
+}
+
+body.dark .mat-form-field-label {
+  color: rgba(255, 255, 255, 0.7); /* Label material input saat dark mode */
+}
+
+/* Dark Mode Styling for mat-label */
+body.dark mat-label {
+  color: #ffffff !important; /* Ubah teks menjadi putih */
+}
+body.dark mat-datepicker-toggle button {
+  color: #ffffff !important; /* Warna ikon datepicker toggle */
+}
+body.dark input[matInput] {
+  
+  color: #ffffff !important; /* Warna teks input */
+  
+}
+/* Dark Mode styles */
+body.dark-mode p.lead {
+  color: #e0e0e0; /* Lighter text color in dark mode */
+  background-color: #343a40 !important; /* Dark background in dark mode, force overwrite */
+  border-left: 4px solid #00b0ff; /* Lighter blue border for contrast */
+}
+
+
+
+
+/* Search bar dark mode */
+body.dark .search-bar {
+  background-color: #333; /* Dark background for the search bar */
+  color: #fff; /* White text color */
+}
+
+body.dark .search-bar .form-control.search-input {
+  background-color: #444; /* Darker background for input */
+  color: #fff; /* White text color for input */
+  border: 1px solid #555; /* Subtle border for input */
+}
+
+body.dark .search-bar .input-group-text {
+  background-color: #555 !important; /* Background for icon container */
+  color: #fff; /* Icon color */
+}
+
+body.dark .search-bar .btn-outline-primary {
+  background-color: transparent;
+  border-color: #777; /* Border color for dropdown button */
+  color: #fff;
+}
+
+body.dark .search-bar .btn-outline-primary:hover {
+  background-color: #ffffff;
+  color: #fff;
+}
+
+body.dark .search-bar .dropdown-menu {
+  background-color: #444; /* Background for dropdown menu */
+  color: #fff;
+}
+
+body.dark .search-bar .dropdown-item {
+  color: #fff;
+}
+
+body.dark .search-bar .dropdown-item:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+body.dark .search-bar .btn-primary {
+  background-color: #007bff; /* Primary button background */
+  color: #fff;
+  border: none;
+}
+
+body.dark .search-bar .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+body.dark #search-input {
+  background-color: #fff; /* Tetap putih */
+  color: #000; /* Teks berwarna hitam */
+  border: 1px solid #ccc; /* Border abu-abu */
+}
+
+body.dark #search-input::placeholder {
+  color: #888; /* Placeholder abu-abu gelap */
+}
+body.dark-mode .card {
+  background-color: #2b2b2b !important; /* Dark Mode Background */
+  color: #ffffff; /* Dark Mode Text */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4); /* Softer Shadow for Dark Mode */
+}
+
+
+
+/* Dark Mode styles */
+body.dark-mode .menu-list .card {
+  background-color: #333333 !important; /* Dark background for card */
+  border-color: #007bff; /* Retain blue dashed border for dark mode */
+}
+
+body.dark-mode .menu-list .card:hover {
+  background-color: #444444 !important; /* Darker background on hover */
+  border-color: #0056b3; /* Darker border on hover */
+}
+
+body.dark-mode .menu-list .card-body .fa-file-alt {
+  color: #82b1ff; /* Lighter icon color for dark mode */
+}
+
+body.dark-mode .menu-list .card .text-muted {
+  color: #bbbbbb; /* Lighter muted text */
+}
+
+body.dark-mode .menu-list .card .click-text {
+  color: #90caf9; /* Light blue color for clickable text */
+}
+
+/* Dark Mode styles */
+body.dark-mode .menu-list .card .card-title {
+  color: #ffffff; /* White text color in dark mode */
+}
+
 
