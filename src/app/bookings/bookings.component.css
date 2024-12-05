@@ -30,4 +30,16 @@
     box-sizing: border-box; /* Untuk menghitung dimensi total dengan padding */
     overflow: hidden; /* Cegah elemen meluap */
   }
+  .custom-text-primary {
+    color: #007bff !important; /* Ganti dengan warna sesuai kebutuhan */
+  }
+
+  /* Aturan khusus untuk dark mode */
+body.dark-mode .nav {
+  background-color: #000000 !important; /* Hitam */
+}
+
+body.dark-mode .nav.flex-column {
+  background-color: #000000 !important; /* Hitam */
+}
   
