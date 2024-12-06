@@ -118,7 +118,7 @@ loadMessages(): void {
             // Check the latest message for prompt conditions
             if (this.messages.length > 0) {
               const latestMessage = this.messages[this.messages.length - 1];
-              if (latestMessage.senderId === '665f504a893ed90d8a930118' && latestMessage.message === 'prompt') {
+              if (latestMessage.senderId === '665f504a893ed90d8a930118' && latestMessage.message === 'Has your problem been resolved?') {
                 this.promptMessage = latestMessage.message;
                 this.isPromptActive = true;
               }

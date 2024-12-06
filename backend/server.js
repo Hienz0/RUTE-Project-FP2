@@ -1659,6 +1659,8 @@ app.post('/api/chat/send-message', async (req, res) => {
       timestamp: new Date(),
     });
 
+
+
     // Handle customer service ticket if sender is not an admin
     if (userType !== 'admin') {
       let ticket = await CustomerServiceTicket.findOne({ userId: senderId });
@@ -1771,6 +1773,17 @@ app.post('/api/chat/send-message', async (req, res) => {
         ticket.timestamp = new Date();
         await ticket.save();
       }
+    }
+    else {
+            // Find the ticket based on the receiverId
+            const ticket = await CustomerServiceTicket.findOne({ userId: receiverId, status: 'Pending' });
+
+            if (ticket) {
+              // Update the status to 'In Progress'
+              ticket.status = 'In Progress';
+              await ticket.save();
+              console.log(`Ticket for user ${receiverId} updated to 'In Progress'`);
+            }
     }
 
     // Send a successful response
