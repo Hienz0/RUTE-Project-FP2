@@ -1713,6 +1713,60 @@ app.post('/api/chat/send-message', async (req, res) => {
           });
         }, 100); // 100ms delay for admin message
       } else {
+
+        if (userType === 'resolved' || userType === 'unresolved') {
+          // Set admin's message based on userType
+
+          if (userType === 'resolved' || userType === 'unresolved') {
+            // Update status if resolved
+            if (userType === 'resolved') {
+              ticket.status = 'Resolved';
+            }
+          }
+          
+          const adminMessage =
+            userType === 'resolved'
+            ? 'We are glad your issue has been resolved. Feel free to reach out if you need further assistance!'
+            : 'We’re sorry to hear that your issue is still unresolved. Could you please provide more details about the current situation so we can assist you further?';      
+        
+          // Send admin's message
+          setTimeout(async () => {
+            const adminChatMessage = new Chat({
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,               // User ID
+              message: adminMessage,
+            });
+            await adminChatMessage.save();
+        
+            // Emit admin's message to the user's chat room
+            io.to(`room-${senderId}`).emit('newMessage', {
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,
+              message: adminMessage,
+              timestamp: new Date(),
+            });
+          }, 100); // 100ms delay for admin message
+        } else if (userType === 'prompt') {
+          // Handle the 'prompt' case
+          setTimeout(async () => {
+            const adminMessage = 'Please respond with Yes or No to proceed.';
+            const adminChatMessage = new Chat({
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,               // User ID
+              message: adminMessage,
+            });
+            await adminChatMessage.save();
+        
+            // Emit admin's message to the user's chat room
+            io.to(`room-${senderId}`).emit('newMessage', {
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,
+              message: adminMessage,
+              timestamp: new Date(),
+            });
+          }, 100); // 100ms delay for admin message
+        }
+        
         // For other statuses, just update the timestamp
         ticket.timestamp = new Date();
         await ticket.save();
@@ -1792,6 +1846,7 @@ app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
 
 // Get all users (exclude admin from the list)
 // Get users who have chatted with the admin
+// Get users who have chatted with the admin
 app.get('/api/chat/users', async (req, res) => {
   try {
     const adminId = '665f504a893ed90d8a930118'; // Admin ID
@@ -1804,20 +1859,43 @@ app.get('/api/chat/users', async (req, res) => {
     // Extract unique user IDs who have chatted with the admin
     const userIds = [
       ...new Set(
-        chats.map(chat => 
+        chats.map(chat =>
           chat.senderId.toString() === adminId ? chat.receiverId.toString() : chat.senderId.toString()
         )
       )
     ];
 
     // Fetch user details for the unique user IDs
-    const users = await User.find({ _id: { $in: userIds } }, 'name'); // Fetch only the `name` field
+    const users = await User.find(
+      { _id: { $in: userIds } },
+      'name' // Fetch only the `name` field
+    );
 
-    res.status(200).json({ success: true, users });
+    // Fetch ticket statuses for the corresponding users
+    const tickets = await CustomerServiceTicket.find(
+      { userId: { $in: userIds } },
+      'userId status' // Fetch `userId` and `status`
+    );
+
+    // Map user IDs to their most recent ticket status (if available)
+    const userStatusMap = tickets.reduce((map, ticket) => {
+      map[ticket.userId.toString()] = ticket.status; // Use userId as the key
+      return map;
+    }, {});
+
+    // Combine user details with their ticket status
+    const response = users.map(user => ({
+      _id: user._id,
+      name: user.name,
+      status: userStatusMap[user._id.toString()] || 'No Tickets' // Default to 'No Tickets' if none found
+    }));
+
+    res.status(200).json({ success: true, users: response });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch users', error });
   }
 });
+
 
 // Example socket connection event
 

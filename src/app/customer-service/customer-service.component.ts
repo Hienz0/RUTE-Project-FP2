@@ -44,9 +44,10 @@ export class CustomerServiceComponent implements OnInit {
   newMessage: string = ''; // New message content
   users: any[] = []; // Users list (for admin)
   selectedUserName: string = 'RUTE User';
+  selectedUserStatus: string = '';
 
     // Existing properties...
-    promptMessage: string | null = 'prompt'; // Holds the prompt message
+    promptMessage: string | null = 'Has your problem been resolved?'; // Holds the prompt message
     isPromptActive: boolean = false; // Tracks if a Yes/No prompt is active
   
 
@@ -73,7 +74,7 @@ export class CustomerServiceComponent implements OnInit {
       this.chatService.onNewMessage().subscribe((message) => {
         console.log('New message received:', message);
       // Existing logic to add message...
-      if (message.message === 'prompt') {
+      if (message.message === 'Has your problem been resolved?') {
         this.promptMessage = message.message;
         this.isPromptActive = true;
       }
@@ -154,6 +155,7 @@ loadMessages(): void {
     this.chatService.getUsers().subscribe((response) => {
       if (response.success) {
         this.users = response.users;
+        console.log('Users loaded:', this.users);
       }
     });
   }
@@ -166,6 +168,8 @@ selectUser(userId: string): void {
   this.loadMessages(); // Load chat history
   this.chatService.joinChat({ userId: this.adminId, isAdmin: true }); // Admin joins the selected user's room
   this.selectedUserName = this.users.find((user) => user._id === userId)?.name || '';
+  this.selectedUserStatus = this.users.find((user) => user._id === userId)?.status || '';
+  console.log('selected user status: ', this.selectedUserStatus);
 }
 
   
@@ -180,16 +184,19 @@ selectUser(userId: string): void {
 
   handlePromptResponse(response: boolean): void {
     // Send the response to the server or process it
-    const responseMessage = response ? 'Yes' : 'No';
-    // this.chatService.sendMessage({
-    //   senderId: this.userId,
-    //   receiverId: this.selectedUserId,
-    //   message: responseMessage,
-    //   messageType: 'response'
-    // });
+// Determine the response message based on the response
+const responseMessage = response ? 'Yes' : 'No';
 
+// Update the userType based on the responseMessage
+if (responseMessage === 'Yes') {
+  this.userType = 'resolved';
+} else {
+  this.userType = 'unresolved';
+}
     this.newMessage = responseMessage;
     this.sendMessage();
+
+    this.userType = this.currentUser.userType;
 
     
 
@@ -197,5 +204,11 @@ selectUser(userId: string): void {
     this.promptMessage = null;
     this.isPromptActive = false;
   }
+
+  sendResolutionPrompt() {
+    this.newMessage = 'Has your problem been resolved?';
+    this.sendMessage();
+  }
+  
   
 }
