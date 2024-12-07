@@ -288,6 +288,30 @@ body.dark-mode .menu-list .card .card-title {
   color: #ffffff; /* White text color in dark mode */
 }
 
+body.dark-mode label {
+  color: #ffffff !important; /* Set label text to white */
+}
+
+
+body.dark-mode .modal-body {
+  background-color: black !important;
+  color: white;
+}
+
+
+body.dark-mode .btn.btn-outline-secondary {
+  color: white !important;
+  border-color: white !important;
+}
+
+body.dark-mode .btn.btn-outline-secondary:hover {
+  background-color: white !important;
+  color: black !important;
+}
+
+
+
+
 
 
 

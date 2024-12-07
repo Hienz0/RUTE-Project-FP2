@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef,Input } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ThemeService } from '../services/theme.service';
@@ -21,7 +21,7 @@ export class UserNavbarComponent implements OnInit {
   currentUser: any;
   isDropdownOpen = false;
   @ViewChild('dropdownButton') dropdownButton!: ElementRef;
-  isDarkMode: boolean = false;
+  @Input() isDarkMode: boolean = false;
 
 
   constructor(private authService: AuthService, private themeService: ThemeService) { }

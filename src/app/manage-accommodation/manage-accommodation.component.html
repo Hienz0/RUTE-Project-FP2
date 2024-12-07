@@ -1,8 +1,10 @@
-<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
-  <h1 class="text-center mb-5" style="color: #343a40;">Accommodation Management</h1>
+<app-provider-navbar></app-provider-navbar>
+
+<div class="container my-5 p-5" style=" border-radius: 8px;">
+  <h1 class="text-center mb-5" >Accommodation Management</h1>
 
   <!-- Accommodation Details Display or Edit Form -->
-  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card p-4 my-4" style=" border: 1px solid #dee2e6; border-radius: 8px;">
     <div class="card-body">
       <div *ngIf="!isEditing">
         <h3><i class="fas fa-hotel icon"></i> {{ accommodation.name }}</h3>
@@ -137,18 +139,18 @@
   
 
   <!-- Room Types Section -->
-  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card p-4 my-4" style=" border: 1px solid #dee2e6; border-radius: 8px;">
     <div class="card-body">
       <h3><i class="fas fa-door-closed icon"></i> Room Types</h3>
       <!-- <div *ngIf="accommodationDetail && accommodationDetail.length > 0;"> -->
         <div *ngFor="let accommodation of accommodationDetail; let accommodationIndex = index">
           <div *ngFor="let roomType of accommodation.roomTypes; let i = index" class="border p-3 mt-3 rounded"
-            style="background-color: #e9ecef;">
+           >
 
             <!-- Room Type Header with Edit, Save, and Cancel Buttons -->
             <div class="d-flex justify-content-between align-items-center">
               <!-- <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5> -->
-              <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
+              <h5><i class="fas fa-door-open" sy></i> Room Type {{ i + 1 }}</h5>
 
               <!-- Lock Button -->
         <!-- Lock/Unlock Button -->
@@ -248,7 +250,7 @@
 
             <!-- Rooms Display within Room Type -->
             <div *ngFor="let room of roomType.rooms; let j = index" class="border-left pl-4 mt-2"
-              style="background-color: #f8f9fa;">
+              >
               <div class="d-flex justify-content-between align-items-center">
                 <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
                 <!-- Room Lock Button -->
@@ -286,7 +288,7 @@
         </button>
 
         <div *ngFor="let roomType of accommodation.roomTypes; let i = index" class="border p-3 mt-3 rounded"
-          style="background-color: #e9ecef;">
+          >
           <div class="d-flex justify-content-between align-items-center">
             <h5><i class="fas fa-door-open"></i> Room Type {{ i + 1 }}</h5>
             <button class="btn btn-danger btn-sm" (click)="removeRoomType(i)"><i class="fas fa-trash-alt"></i>
@@ -362,7 +364,7 @@
 
           <!-- Rooms Section within Room Type -->
           <div *ngFor="let room of roomType.rooms; let j = index" class="border-left pl-4 mt-2"
-            style="background-color: #f8f9fa;">
+            >
             <div class="d-flex justify-content-between align-items-center">
               <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
               <button class="btn btn-danger btn-sm" (click)="removeRoom(roomType, j)"><i class="fas fa-trash-alt"></i>

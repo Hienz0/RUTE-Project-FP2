@@ -11,7 +11,8 @@ import 'leaflet-search'; // Import Leaflet Search
 @Component({
   selector: 'app-manage-transportation',
   templateUrl: './manage-transportation.component.html',
-  styleUrls: ['./manage-transportation.component.css']
+  styleUrls: ['./manage-transportation.component.css'],
+  
 })
 export class ManageTransportationComponent implements OnInit, AfterViewInit {
   @ViewChild('pickupMapContainer', { static: false }) pickupMapContainer!: ElementRef;

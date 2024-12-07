@@ -1,8 +1,10 @@
-<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
-  <h1 class="text-center mb-5" style="color: #343a40;">Transportation Management</h1>
+<app-provider-navbar></app-provider-navbar>
+
+<div class="container my-5 p-5 bg1" style=" border-radius: 8px;">
+  <h1 class="text-center mb-5" >Transportation Management</h1>
 
   <!-- Transportation Details Display or Edit Form -->
-  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card p-4 my-4" style=" border: 1px solid #dee2e6; border-radius: 8px;">
     <div class="card-body">
       <div *ngIf="!isEditing">
         <h3><i class="fas fa-bus icon"></i> {{ productName }}</h3>
@@ -123,12 +125,12 @@ View Bookings
   </div>
 
   <!-- Vehicle Types Section -->
-<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+<div class="card p-4 my-4" style=" border: 1px solid #dee2e6; border-radius: 8px;">
   <div class="card-body">
     <h3><i class="fas fa-car icon"></i> Vehicle Types</h3>
     
     <!-- Existing Vehicle Types -->
-    <div *ngFor="let vehicleType of displayedProductSubCategories; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
+    <div *ngFor="let vehicleType of displayedProductSubCategories; let i = index" class="border p-3 mt-3 rounded" >
       <div class="d-flex justify-content-between align-items-center">
         <h5><i class="fas fa-car"></i> Existing Vehicle Type {{ i + 1 }}</h5>
         <button class="btn btn-danger btn-sm" (click)="removeVehicleType(i, true)"><i class="fas fa-trash-alt"></i> Delete</button>
@@ -161,7 +163,7 @@ View Bookings
       <i class="fas fa-plus-circle"></i> Add Vehicle Type
     </button>
 
-    <div *ngFor="let vehicleType of newProductSubCategory; let i = index" class="border p-3 mt-3 rounded" style="background-color: #e9ecef;">
+    <div *ngFor="let vehicleType of newProductSubCategory; let i = index" class="border p-3 mt-3 rounded">
       <div class="d-flex justify-content-between align-items-center">
         <h5><i class="fas fa-car"></i> New Vehicle Type {{ i + 1 }}</h5>
         <button class="btn btn-danger btn-sm" (click)="removeVehicleType(i, false)"><i class="fas fa-trash-alt"></i> Delete</button>
