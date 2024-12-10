@@ -25,7 +25,7 @@
   
   .form-label {
     font-weight: 500;
-    color: #333;
+    
   }
   
   .form-control {
@@ -42,12 +42,5 @@
     border-color: #ff856f;
   }
   
-  .btn-light {
-    background-color: #f1f1f1;
-    color: #333;
-  }
   
-  .btn-light:hover {
-    background-color: #e2e2e2;
-  }
   

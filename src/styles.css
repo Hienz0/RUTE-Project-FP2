@@ -29,6 +29,13 @@ body.dark {
   background-color: #272626;
   color: #ffffff; /* Warna teks di dark mode */
 }
+@media (max-width: 768px) {
+  body.dark {
+    background-color: #272626 !important; /* Background hitam untuk layar kecil */
+    color: #ffffff; /* Warna teks tetap putih */
+  }
+}
+
 
 body.dark .navbar a {
   color: #ffffff; /* Warna tautan di navbar untuk dark mode */
@@ -93,6 +100,11 @@ body.dark .text-danger {
 body.dark .text-white {
   color: #ffffff !important; /* Tetap putih */
 }
+/* Change text-info color in dark mode */
+body.dark .text-info {
+  color: #ffffff !important; /* Set text-info to black in dark mode */
+}
+
 
 /* Optional: Gaya Tambahan untuk Link */
 body.dark a {
@@ -182,7 +194,7 @@ body.dark input[matInput] {
   
 }
 /* Dark Mode styles */
-body.dark-mode p.lead {
+body.dark p.lead {
   color: #e0e0e0; /* Lighter text color in dark mode */
   background-color: #343a40 !important; /* Dark background in dark mode, force overwrite */
   border-left: 4px solid #00b0ff; /* Lighter blue border for contrast */
@@ -252,7 +264,7 @@ body.dark #search-input {
 body.dark #search-input::placeholder {
   color: #888; /* Placeholder abu-abu gelap */
 }
-body.dark-mode .card {
+body.dark .card {
   background-color: #2b2b2b !important; /* Dark Mode Background */
   color: #ffffff; /* Dark Mode Text */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4); /* Softer Shadow for Dark Mode */
@@ -261,21 +273,21 @@ body.dark-mode .card {
 
 
 /* Dark Mode styles */
-body.dark-mode .menu-list .card {
+body.dark .menu-list .card {
   background-color: #333333 !important; /* Dark background for card */
   border-color: #007bff; /* Retain blue dashed border for dark mode */
 }
 
-body.dark-mode .menu-list .card:hover {
+body.dark .menu-list .card:hover {
   background-color: #444444 !important; /* Darker background on hover */
   border-color: #0056b3; /* Darker border on hover */
 }
 
-body.dark-mode .menu-list .card-body .fa-file-alt {
+body.dark .menu-list .card-body .fa-file-alt {
   color: #82b1ff; /* Lighter icon color for dark mode */
 }
 
-body.dark-mode .menu-list .card .text-muted {
+body.dark .menu-list .card .text-muted {
   color: #bbbbbb; /* Lighter muted text */
 }
 
@@ -284,30 +296,50 @@ body.dark-mode .menu-list .card .click-text {
 }
 
 /* Dark Mode styles */
-body.dark-mode .menu-list .card .card-title {
+body.dark .menu-list .card .card-title {
   color: #ffffff; /* White text color in dark mode */
 }
 
-body.dark-mode label {
+body.dark label {
   color: #ffffff !important; /* Set label text to white */
 }
 
 
-body.dark-mode .modal-body {
-  background-color: black !important;
-  color: white;
-}
 
 
-body.dark-mode .btn.btn-outline-secondary {
+
+body.dark .btn.btn-outline-secondary {
   color: white !important;
   border-color: white !important;
 }
 
-body.dark-mode .btn.btn-outline-secondary:hover {
+body.dark .btn.btn-outline-secondary:hover {
   background-color: white !important;
   color: black !important;
 }
+
+/* Input Group in Dark Mode */
+body.dark .input-group {
+  background-color: #000 !important; /* Black background for the input group */
+  border: 1px solid #444; /* Optional border color for dark mode */
+}
+
+body.dark .input-group .form-control {
+  background-color: #222; /* Darker input field background */
+  color: #fff; /* White text color */
+  border: none; /* Remove borders for a cleaner look */
+}
+
+body.dark .input-group .form-control::placeholder {
+  color: #bbb; /* Light gray placeholder text for dark mode */
+}
+
+body.dark .input-group-text {
+  background-color: #333; /* Darker background for input group text */
+  color: #fff; /* White text color */
+  border: none; /* Remove border for text */
+}
+
 
 
 
