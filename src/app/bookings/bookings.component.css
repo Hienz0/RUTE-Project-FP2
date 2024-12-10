@@ -30,4 +30,8 @@
     box-sizing: border-box; /* Untuk menghitung dimensi total dengan padding */
     overflow: hidden; /* Cegah elemen meluap */
   }
+  .btn-close-custom {
+    color: #000 !important;     /* Warna tombol */
+    opacity: 1 !important;      /* Pastikan opasitas tidak terpengaruh */
+  }
   
