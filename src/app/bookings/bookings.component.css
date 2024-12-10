@@ -14,8 +14,8 @@
     margin-bottom: 1rem;
   }
   
-  .text-primary {
-    color: #007bff;
+  .custom-text-primary {
+    color: #007bff !important;
   }
   
   img.img-fluid {

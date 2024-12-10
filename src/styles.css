@@ -393,9 +393,7 @@ body.dark .btn-outline-info:hover {
   background-color: #ffffff; /* White background on hover */
   color: black; /* Blue text color on hover */
 }
-body.dark .container {
-  background-color: #333333 !important; /* Black background for dark mode */
-}
+
 body.dark .border {
   background-color: #444444 !important; /* Black background for dark mode */
   color: white; /* Change text color to white for readability */
@@ -413,3 +411,18 @@ body.dark .btn-outline-success {
   border-color: #d4edda;
   color: #d4edda; /* Lighter color for dark mode */
 }
+
+
+@media (max-width: 768px) {
+  /* Menambahkan background hitam pada dropdown-menu saat dark mode aktif */
+  body.dark .dropdown-menu {
+    background-color: #343a40; /* Latar belakang gelap */
+    color: #ffffff; /* Teks putih */
+    border: 1px solid #495057; /* Border lebih gelap */
+  }
+  
+  body.dark .dropdown-item {
+    color: #ffffff; /* Teks putih untuk item dropdown */
+  }
+}
+
