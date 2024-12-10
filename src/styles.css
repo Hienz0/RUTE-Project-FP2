@@ -393,4 +393,23 @@ body.dark .btn-outline-info:hover {
   background-color: #ffffff; /* White background on hover */
   color: black; /* Blue text color on hover */
 }
+body.dark .container {
+  background-color: #333333 !important; /* Black background for dark mode */
+}
+body.dark .border {
+  background-color: #444444 !important; /* Black background for dark mode */
+  color: white; /* Change text color to white for readability */
+}
+body.dark h1 {
+  color: white !important; /* White text color for dark mode */
+}
 
+body.dark .btn-outline-danger {
+  border-color: #f8d7da;
+  color: #f8d7da; /* Lighter color for dark mode */
+}
+
+body.dark .btn-outline-success {
+  border-color: #d4edda;
+  color: #d4edda; /* Lighter color for dark mode */
+}

@@ -1,3 +1,5 @@
+<app-provider-navbar></app-provider-navbar>
+
 <div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
   <h1 class="text-center mb-5" style="color: #343a40;">Accommodation Management</h1>
 
@@ -248,7 +250,7 @@
 
             <!-- Rooms Display within Room Type -->
             <div *ngFor="let room of roomType.rooms; let j = index" class="border-left pl-4 mt-2"
-              style="background-color: #f8f9fa;">
+          >
               <div class="d-flex justify-content-between align-items-center">
                 <label><i class="fas fa-door-open icon"></i> Room {{ j + 1 }}</label>
                 <!-- Room Lock Button -->

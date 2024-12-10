@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { ThemeService } from '../services/theme.service';
 
 
 @Component({
@@ -22,13 +23,20 @@ export class ProviderNavbarComponent implements OnInit {
   currentUser: any;
   isDropdownOpen = false;
   @ViewChild('dropdownButton') dropdownButton!: ElementRef;
+  isDarkMode: boolean = false;
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private themeService: ThemeService) { }
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
     });
+    this.isDarkMode = this.themeService.getTheme() === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.themeService.setTheme(this.isDarkMode ? 'dark' : 'light');
   }
 
   getFullImagePath(image: string): string {
