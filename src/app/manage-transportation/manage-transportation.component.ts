@@ -196,11 +196,6 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     }
   }
   
-  
-
-
-  
-
 
   saveTransportation(): void {
     // Preserve the existing serviceDetails if it already exists
@@ -212,11 +207,23 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       productImages: this.productImages,
       location: this.location,
     };
-    
+  
     console.log('Transportation data saved to variable:', this.transportationData);
-    alert('Transportation data saved locally.');
-    this.isEditing;
+  
+    // SweetAlert notification
+    Swal.fire({
+      icon: 'success',
+      title: 'Transportation Data Saved',
+      text: 'Transportation data has been saved locally.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#3085d6',
+      background: '#f8f9fa', // Light background color
+      padding: '20px', // Add padding for a cleaner look
+    });
+  
+    this.isEditing = false; // Stop editing mode after saving
   }
+  
   
 
 
@@ -295,6 +302,7 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       console.log('Selected files:', this.selectedFiles);
     }
   }
+  
   
   
 
