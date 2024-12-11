@@ -116,20 +116,36 @@
         </label>
 
         <!-- Image Grid -->
-        <div class="image-grid mt-3 d-flex flex-wrap gap-3">
-          <div *ngFor="let imagePath of productImages; let i = index" class="image-card position-relative">
-            <img 
-              [src]="getFullImagePath(imagePath)" 
-              alt="Product Image" 
-              class="image-preview rounded shadow" />
-            <button 
-              type="button" 
-              class="btn btn-danger btn-sm remove-button position-absolute top-0 end-0 m-1" 
-              (click)="removeImage(i)">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </div>
-        </div>
+<div class="image-grid mt-3 d-flex flex-wrap gap-3">
+  <!-- Gambar yang sudah ada -->
+  <div *ngFor="let imagePath of productImages; let i = index" class="image-card position-relative">
+    <img 
+      [src]="getFullImagePath(imagePath)" 
+      alt="Product Image" 
+      class="image-preview rounded shadow" />
+    <button 
+      type="button" 
+      class="btn btn-danger btn-sm remove-button position-absolute top-0 end-0 m-1" 
+      (click)="removeImage(i)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+
+  <!-- Gambar yang baru dipilih -->
+  <div *ngFor="let imageUrl of selectedImageUrls; let i = index" class="image-card position-relative">
+    <img 
+      [src]="imageUrl" 
+      alt="New Product Image" 
+      class="image-preview rounded shadow" />
+    <button 
+      type="button" 
+      class="btn btn-danger btn-sm remove-button position-absolute top-0 end-0 m-1" 
+      (click)="removeNewImage(i)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+</div>
+
       </div>
       
       <!-- Pickup Location -->

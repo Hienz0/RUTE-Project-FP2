@@ -295,13 +295,23 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     );
   }
   
-  onImagesSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target.files) {
-      this.selectedFiles = Array.from(target.files);
-      console.log('Selected files:', this.selectedFiles);
-    }
+  selectedImageUrls: string[] = [];  // Untuk menyimpan URL gambar yang baru dipilih
+
+onImagesSelected(event: Event): void {
+  const target = event.target as HTMLInputElement;
+  if (target.files) {
+    this.selectedFiles = Array.from(target.files);
+
+    // Buat URL blob untuk setiap file yang dipilih
+    this.selectedImageUrls = this.selectedFiles.map(file => URL.createObjectURL(file));
+    console.log('Selected files:', this.selectedFiles);
   }
+}
+
+removeNewImage(index: number): void {
+  this.selectedFiles.splice(index, 1);
+  this.selectedImageUrls.splice(index, 1);
+}
   
   
   
