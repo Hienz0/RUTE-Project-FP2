@@ -72,15 +72,29 @@
           <label for="transportationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
           <textarea class="form-control" id="transportationDescription" [(ngModel)]="productDescription" rows="3"></textarea>
         </div>
-        <div>
-          <label for="productImages">Product Images</label>
-          <input type="file" (change)="onImagesSelected($event)" multiple />
+        <div class="mb-3">
+          <label for="productImages" class="form-label">
+            <i class="fas fa-images icon"></i> Product Images
+          </label>
+          
+          <!-- Input File -->
+          <input type="file" id="productImages" (change)="onImagesSelected($event)" multiple hidden />
+          <label for="productImages" class="upload-label">
+            <i class="fas fa-cloud-upload-alt"></i> Click or Drag & Drop Images Here
+          </label>
         
-          <div *ngFor="let imagePath of productImages; let i = index">
-            <img [src]="getFullImagePath(imagePath)" alt="Product Image" width="100" />
-            <button type="button" (click)="removeImage(i)">Remove</button>
+          <!-- Grid Layout untuk Menampilkan Gambar -->
+          <div class="image-grid">
+            <div *ngFor="let imagePath of productImages; let i = index" class="image-card">
+              <img [src]="getFullImagePath(imagePath)" alt="Product Image" class="image-preview" />
+              <button type="button" class="btn btn-danger btn-sm remove-button" (click)="removeImage(i)">
+                <i class="fas fa-trash-alt"></i> Remove
+              </button>
+            </div>
           </div>
         </div>
+        
+        
         
         
         

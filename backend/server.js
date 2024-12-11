@@ -2010,12 +2010,25 @@ app.post('/manage/transportation', upload.array('productImages', 10), async (req
       productName !== service.productName ||
       productDescription !== service.productDescription ||
       JSON.stringify(productImages) !== JSON.stringify(service.productImages) ||
-      location !== service.location
+      location !== service.businessCoordinates
     ) {
       service.productName = productName;
       service.productDescription = productDescription;
       service.productImages = productImages;
-      service.location = location;
+      // Jika location diberikan sebagai string, ubah ke businessCoordinates
+      if (location) {
+        const [latitude, longitude] = location.split(',').map(coord => parseFloat(coord.trim()));
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          service.businessCoordinates = {
+            type: 'Point',
+            coordinates: [longitude, latitude], // Format [lng, lat]
+          };
+        } else {
+          console.log('Lokasi tidak valid:', location);
+          return res.status(400).json({ success: false, message: 'Format lokasi tidak valid' });
+        }
+      }
+
       service.status = 'published';
       await service.save();
     }

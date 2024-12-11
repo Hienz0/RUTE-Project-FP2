@@ -426,4 +426,14 @@ body.dark .btn-outline-success {
   }
 }
 
+/* Dark mode styles */
+body.dark .upload-label {
+  background-color: #333; /* Dark background */
+  color: #fff; /* Light text color */
+  border: 2px dashed #555; /* Dark border */
+}
 
+body.dark .upload-label:hover {
+  background-color: #444; /* Slightly lighter on hover */
+  border-color: #777;
+}
