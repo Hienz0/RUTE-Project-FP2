@@ -1555,6 +1555,7 @@ app.post('/request-password-reset', async (req, res) => {
 
 // Helper function to send email
 const sendResetPasswordEmail = (email, name, resetLink) => {
+  // Create a transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -1567,13 +1568,24 @@ const sendResetPasswordEmail = (email, name, resetLink) => {
     },
   });
 
+  // Load the HTML template
+  const templatePath = path.join(__dirname, 'reset-password-email.html');
+  let emailBody = fs.readFileSync(templatePath, 'utf-8');
+
+  // Replace placeholders in the template
+  emailBody = emailBody
+    .replace('{{name}}', name)
+    .replace('{{resetLink}}', resetLink);
+
+  // Email options
   const mailOptions = {
     from: 'madeyudaadiwinata@gmail.com',
     to: email,
     subject: 'Reset Password Request',
-    text: `Hi ${name},\n\nClick the link below to reset your password:\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nBest Regards,\nYour Team`,
+    html: emailBody, // Use the HTML as email body
   };
 
+  // Send the email
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);

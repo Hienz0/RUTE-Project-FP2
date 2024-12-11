@@ -19,6 +19,7 @@ export class RequestResetPasswordComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
+    console.log('Email:', this.email);
     this.isLoading = true;
     this.message = null;
     this.error = null;
