@@ -63,6 +63,7 @@ export class CustomerServiceComponent implements OnInit {
   
       if (this.userType === 'admin') {
         this.loadUsers(); // Admin: Load all users
+        this.pollForNewUsers();
       } else {
         this.selectedUserId = '665f504a893ed90d8a930118'; // Default chat with admin
         this.loadMessages();
@@ -159,6 +160,14 @@ loadMessages(): void {
       }
     });
   }
+
+  // Polling for new users
+pollForNewUsers(): void {
+  setInterval(() => {
+    console.log('Checking for new users...');
+    this.loadUsers(); // Call your loadUsers function periodically
+  }, 5000); // Poll every 5 seconds (adjust as needed)
+}
 
   adminId = '665f504a893ed90d8a930118';
   // Admin: Select a user and load messages
