@@ -384,10 +384,10 @@
               <h1 class="custom-text-primary mb-3" >
                 <i class="fas fa-bed me-2"></i> Accommodation Details
               </h1>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-hotel me-2" style="color: #000000 !important;"></i> Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-building me-2" style="color: #000000 !important;"></i> Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-comment me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-hotel me-2" style="color: #000000 !important;"></i> Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-building me-2" style="color: #000000 !important;"></i> Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-comment me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
             </div>
             <div>
               <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
@@ -407,10 +407,10 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>{{ receiptData?.details?.numberOfGuests }}</td>
-                  <td>{{ receiptData?.details?.checkInDate | date }}</td>
-                  <td>{{ receiptData?.details?.checkOutDate | date }}</td>
-                  <td>{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfGuests }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.checkInDate | date }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.checkOutDate | date }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -423,10 +423,10 @@
               <h1 class="custom-text-primary mb-3">
                 <i class="fas fa-map-marked-alt me-2"></i> Tour Details
               </h1>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-route me-2" style="color: #000000 !important;"></i> Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-comment me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> Ubud Palaces</p>
+              <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-route me-2" style="color: #000000 !important;"></i> Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> Ubud Palaces</p>
             </div>
             <div>
               <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
@@ -447,11 +447,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>{{ receiptData?.details?.numberOfParticipants }}</td>
-                  <td>{{ receiptData?.details?.tourDate | date }}</td>
-                  <td>{{ receiptData?.details?.tourTime }}</td>
-                  <td>{{ receiptData?.details?.tourguideType }}</td>
-                  <td>{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfParticipants }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourDate | date }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourTime }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourguideType }}</td>
+                  <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -464,11 +464,32 @@
               <h1 class="custom-text-primary mb-3">
                 <i class="fas fa-car-side me-2"></i> Vehicle Details
               </h1>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-car me-2" style="color: #000000 !important;"></i> Product Name:</strong> {{ receiptData?.details?.productName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-clock me-2" style="color: #000000 !important;"></i> Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-map-marker-alt me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName }}</p>
-              <p style="color: #000000 !important;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-car me-2" style="color: #000000 !important;"></i> Product Name:</strong> {{ receiptData?.details?.productName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;">
+                <strong>
+                  <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Pickup Date:
+                </strong>
+                {{ receiptData?.details?.pickupDate | date: 'MMMM dd, yyyy' }}
+              </p>
+              
+              <p style="color: #000000 !important; text-transform: capitalize;">
+                <strong>
+                  <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Dropoff Date:
+                </strong>
+                {{ receiptData?.details?.dropoffDate | date: 'MMMM dd, yyyy' }}
+              </p>
+              
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-clock me-2" style="color: #000000 !important;"></i> Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-marker-alt me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName | truncateLocation:3 }}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName | truncateLocation:3}}</p>
+              <p style="color: #000000 !important; text-transform: capitalize;">
+                <strong>
+                  <i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:
+                </strong>
+                {{ receiptData?.details?.specialRequest || 'None' }}
+              </p>
+              
             </div>
             <div>
               <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
@@ -489,11 +510,11 @@
               </thead>
               <tbody>
                 <tr *ngFor="let vehicle of receiptData?.details?.vehicleDetails">
-                  <td>{{ vehicle.name }}</td>
-                  <td>{{ vehicle.selectedVehicleType }}</td>
-                  <td>{{ vehicle.quantity }}</td>
-                  <td>{{ vehicle.pricePerVehicle | currency:'IDR' }}</td>
-                  <td>{{ vehicle.totalPrice | currency:'IDR' }}</td>
+                  <td style="text-transform: capitalize;">{{ vehicle.name }}</td>
+                  <td style="text-transform: capitalize;">{{ vehicle.selectedVehicleType }}</td>
+                  <td style="text-transform: capitalize;">{{ vehicle.quantity }}</td>
+                  <td style="text-transform: capitalize;">{{ vehicle.pricePerVehicle | currency:'IDR' }}</td>
+                  <td style="text-transform: capitalize;">{{ vehicle.totalPrice | currency:'IDR' }}</td>
                 </tr>
               </tbody>
             </table>

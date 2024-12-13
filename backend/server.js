@@ -3514,7 +3514,84 @@ emailQueue.process(async (job) => {
       from: "madeyudaadiwinata@gmail.com",
       to: user.email,
       subject: `${bookingType} Booking Payment Receipt`,
-      text: "Please find your booking receipt attached.",
+      html: `
+        <div style="
+          font-family: Arial, sans-serif; 
+          color: #333; 
+          background-color: #f4f4f4; 
+          padding: 30px; 
+          max-width: 600px; 
+          margin: 0 auto; 
+          border-radius: 10px; 
+          text-align: center;
+        ">
+    
+          <div style="
+            background-color: #ffffff; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          ">
+            <h2 style="
+              color: #4CAF50; 
+              margin-bottom: 20px; 
+              font-size: 28px;
+            ">
+              <i class="fas fa-receipt" style="margin-right: 10px;"></i>
+              ${bookingType} Booking Payment Receipt
+            </h2>
+    
+            <p style="
+              font-size: 18px; 
+              line-height: 1.6; 
+              margin-bottom: 20px;
+            ">
+              Dear <strong>${user.name}</strong>,
+            </p>
+    
+            <p style="
+              font-size: 16px; 
+              line-height: 1.6; 
+              margin-bottom: 20px; 
+              color: #555;
+            ">
+              Thank you for your booking. Your payment has been successfully received.
+            </p>
+    
+            <p style="
+              font-size: 16px; 
+              line-height: 1.6; 
+              margin-bottom: 30px; 
+              color: #555;
+            ">
+              Please find your booking receipt attached to this email as a PDF file named <strong>"Booking_Receipt.pdf"</strong>.
+            </p>
+    
+            <div style="
+              margin: 30px 0; 
+              text-align: center;
+            ">
+              <p style="
+                font-size: 14px; 
+                color: #777;
+              ">
+                If you need any assistance, feel free to reach out to our support team.
+              </p>
+            </div>
+    
+            <p style="
+              font-size: 16px; 
+              font-weight: bold; 
+              margin-bottom: 0;
+              color: #777;
+            ">
+              Best regards, <br>
+              RUTE
+            </p>
+          </div>
+          
+        </div>
+      `,
       attachments: [
         {
           filename: "Booking_Receipt.pdf",
@@ -3523,6 +3600,7 @@ emailQueue.process(async (job) => {
         },
       ],
     });
+    
 
     console.timeEnd(`Email to ${user.email}`); // Akhiri pencatatan waktu
     console.log(`Email sent successfully to ${user.email}`);

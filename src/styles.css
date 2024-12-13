@@ -437,3 +437,16 @@ body.dark .upload-label:hover {
   background-color: #444; /* Slightly lighter on hover */
   border-color: #777;
 }
+
+body.dark .btn-outline-primary {
+  color: #ffffff;               /* Warna teks menjadi putih */
+  border-color: #007bff;        /* Warna border menjadi biru terang */
+  background-color: transparent;
+}
+
+body.dark .btn-outline-primary:hover {
+  background-color: #007bff;    /* Warna background saat hover menjadi biru terang */
+  color: #000000;               /* Warna teks menjadi hitam saat hover */
+  border-color: #007bff;        /* Warna border tetap biru terang */
+}
+
