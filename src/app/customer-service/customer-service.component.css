@@ -1,8 +1,15 @@
 .chat-messages {
+  height: 60vh; /* Takes the full height of the viewport */
+  background-color: #f7f7f9;
+  overflow-y: auto; /* Adds scrolling if content overflows */
+}
+
+/* .chat-messages {
   max-height: 400px;
   min-height: 300px;
   background-color: #f7f7f9;
-}
+} */
+
 
 .chat-messages .bg-light {
   background-color: #f1f1f4 !important;

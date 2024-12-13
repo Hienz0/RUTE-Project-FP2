@@ -5,8 +5,12 @@
 @fadeAnimation
      [ngStyle]="frameStyle" 
      (mousedown)="onDragStart($event)" 
+     (touchstart)="onDragStart($event)" 
      (mousemove)="onDragMove($event)" 
-     (mouseup)="onDragEnd()">
+     (touchmove)="onDragMove($event)" 
+     (mouseup)="onDragEnd()" 
+     (touchend)="onDragEnd()"
+   >
 
        <!-- Close Button -->
   <button class="close-btn" (click)="closeWidget()">&times;</button>

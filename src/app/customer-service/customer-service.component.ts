@@ -50,6 +50,21 @@ export class CustomerServiceComponent implements OnInit {
     promptMessage: string | null = 'Has your problem been resolved?'; // Holds the prompt message
     isPromptActive: boolean = false; // Tracks if a Yes/No prompt is active
   
+    // Component properties
+    startingQuestions: string[] = [
+      'How do I register my service?',
+      'What support do you offer?',
+      'How can I reach more travelers?',
+      'Do you help with regulations?',
+      'What if I face technical issues?'
+    ];
+    
+
+selectStartingQuestion(question: string): void {
+  this.newMessage = question; // Prefill the input field with the selected question
+  this.sendMessage();
+}
+
 
   constructor(private chatService: ChatService, private authService: AuthService) {}
 
@@ -75,10 +90,20 @@ export class CustomerServiceComponent implements OnInit {
       this.chatService.onNewMessage().subscribe((message) => {
         console.log('New message received:', message);
       // Existing logic to add message...
-      if (message.message === 'Has your problem been resolved?') {
+      if (
+        message.message === 'Has your problem been resolved?' ||
+        message.message === 'Hello! Has your issue been resolved? Please respond Yes or No. If we don\'t hear back from you within 3 days, your ticket will be considered resolved automatically.'
+      ) 
+      {
         this.promptMessage = message.message;
         this.isPromptActive = true;
-      }
+      } else {
+        // Deactivate the prompt if a new relevant message is received
+
+          console.log('Deactivating prompt due to a new message');
+          this.isPromptActive = false;
+
+        }
         
         // Check if the message already exists in the chat
         if (
@@ -119,7 +144,14 @@ loadMessages(): void {
             // Check the latest message for prompt conditions
             if (this.messages.length > 0) {
               const latestMessage = this.messages[this.messages.length - 1];
-              if (latestMessage.senderId === '665f504a893ed90d8a930118' && latestMessage.message === 'Has your problem been resolved?') {
+              if (
+                latestMessage.senderId === '665f504a893ed90d8a930118' && 
+                (
+                  latestMessage.message === 'Has your problem been resolved?' || 
+                  latestMessage.message === 'Hello! Has your issue been resolved? Please respond Yes or No. If we don\'t hear back from you within 3 days, your ticket will be considered resolved automatically.'
+                )
+              )
+              {
                 this.promptMessage = latestMessage.message;
                 this.isPromptActive = true;
               }
@@ -166,6 +198,8 @@ pollForNewUsers(): void {
   setInterval(() => {
     console.log('Checking for new users...');
     this.loadUsers(); // Call your loadUsers function periodically
+    this.selectedUserName = this.users.find((user) => user._id === this.selectedUserId)?.name || '';
+    this.selectedUserStatus = this.users.find((user) => user._id === this.selectedUserId)?.status || '';
   }, 5000); // Poll every 5 seconds (adjust as needed)
 }
 
@@ -210,7 +244,7 @@ if (responseMessage === 'Yes') {
     
 
     // Reset the prompt state
-    this.promptMessage = null;
+
     this.isPromptActive = false;
   }
 

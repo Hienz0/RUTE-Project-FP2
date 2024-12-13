@@ -75,7 +75,12 @@
             />
             <button class="btn btn-dark" (click)="sendMessage()">Send</button>
           </div>
-          <button class="btn btn-warning btn-sm mt-2" (click)="sendResolutionPrompt()">Ask if resolved</button>
+          <button 
+  class="btn btn-warning btn-sm mt-2" 
+  (click)="sendResolutionPrompt()" 
+  [disabled]="selectedUserStatus !== 'In Progress'">
+  Ask if resolved
+</button>
 
 
         </div>
@@ -90,58 +95,86 @@
   </div>
 
   <ng-template #userView>
-    <!-- User View -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-dark text-light">
-        <h5 class="mb-0 fw-semibold">Chat with Admin</h5>
-      </div>
-      <div class="card-body d-flex flex-column">
-        <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded bg-doodle-pattern">
-          <div
-          *ngFor="let msg of messages"
-          @messageAnimation
-          class="d-flex mb-3"
-          [ngClass]="{
-            'justify-content-end': msg.senderId === userId,
-            'justify-content-start': msg.senderId !== userId
-          }"
-        >
-          <div
-            class="p-3 rounded-3"
-            [ngClass]="{
-              'bg-dark text-light': msg.senderId === userId,
-              'bg-light text-muted border': msg.senderId !== userId,
-              'rounded-bottom-right-0': msg.senderId === userId,
-              'rounded-bottom-left-0': msg.senderId !== userId
-            }"
-          >
-            <p class="message-content mb-1 small">{{ msg.message }}</p>
-            <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Left Panel -->
+        <div class="col-md-4 col-lg-3 border-end">
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-dark text-light">
+              <h5 class="mb-0 fw-semibold">General Questions</h5>
+            </div>
+            <div class="card-body px-3 py-2">
+              <ul class="list-group">
+                <li 
+                  *ngFor="let question of startingQuestions" 
+                  class="list-group-item list-group-item-action"
+                  (click)="selectStartingQuestion(question)"
+                >
+                  {{ question }}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-
-            <!-- Prompt -->
-    <div *ngIf="isPromptActive" class="prompt-container alert alert-info d-flex justify-content-between align-items-center mt-3">
-      <span>{{ promptMessage }}</span>
-      <div class="prompt-actions">
-        <button class="btn btn-success btn-sm me-2" (click)="handlePromptResponse(true)">Yes</button>
-        <button class="btn btn-danger btn-sm" (click)="handlePromptResponse(false)">No</button>
+    
+        <!-- User View (Chat Area) -->
+        <div class="col-md-8 col-lg-9">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-light">
+              <h5 class="mb-0 fw-semibold">Chat with Admin</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+              <div #chatMessagesContainer class="chat-messages flex-grow-1 overflow-auto px-3 py-2 border rounded bg-doodle-pattern">
+                <div
+                  *ngFor="let msg of messages"
+                  @messageAnimation
+                  class="d-flex mb-3"
+                  [ngClass]="{
+                    'justify-content-end': msg.senderId === userId,
+                    'justify-content-start': msg.senderId !== userId
+                  }"
+                >
+                  <div
+                    class="p-3 rounded-3"
+                    [ngClass]="{
+                      'bg-dark text-light': msg.senderId === userId,
+                      'bg-light text-muted border': msg.senderId !== userId,
+                      'rounded-bottom-right-0': msg.senderId === userId,
+                      'rounded-bottom-left-0': msg.senderId !== userId
+                    }"
+                  >
+                    <p class="message-content mb-1 small">{{ msg.message }}</p>
+                    <small class="text-muted">{{ msg.timestamp | date: 'shortTime' }}</small>
+                  </div>
+                </div>
+    
+                <!-- Prompt -->
+                <div *ngIf="isPromptActive" class="prompt-container alert alert-info d-flex justify-content-between align-items-center mt-3">
+                  <span>Has your issue been resolved?</span>
+                  <div class="prompt-actions">
+                    <button class="btn btn-success btn-sm me-2" (click)="handlePromptResponse(true)">Yes</button>
+                    <button class="btn btn-danger btn-sm" (click)="handlePromptResponse(false)">No</button>
+                  </div>
+                </div>
+              </div>
+    
+              <div class="input-group mt-3">
+                <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="newMessage"
+                placeholder="Type your message..."
+                (keyup.enter)="sendMessage()"
+                [disabled]="isPromptActive"
+              />
+              
+                <button class="btn btn-dark" (click)="sendMessage()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-        
-        </div>
-        
-        <div class="input-group mt-3">
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="newMessage"
-            placeholder="Type your message..."
-            (keyup.enter)="sendMessage()"
-          />
-          <button class="btn btn-dark" (click)="sendMessage()">Send</button>
-        </div>
-      </div>
-    </div>
+    
   </ng-template>
 </div>

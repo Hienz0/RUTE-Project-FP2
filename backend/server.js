@@ -37,7 +37,9 @@ app.use(cors({
 //     'http://localhost:4200', 
 //     'http://localhost:4200',    // Angular app running on PC2 (frontend)
 //     'http://localhost:3000',    // API server on PC1
-//     'http://localhost:3001'     // Another service on PC1 (if needed)
+//     'http://localhost:3001',     // Another service on PC1 (if needed)
+// 'https://3trzp1g5-4200.asse.devtunnels.ms', // Angular app via VS Code Dev Tunnel
+// 'https://3trzp1g5-3000.asse.devtunnels.ms'  // API server via VS Code Dev Tunnel
 //   ],
 //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 //   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -1849,6 +1851,100 @@ io.on('connection', (socket) => {
 });
 
 
+// Run every day at midnight
+cron.schedule('33 18 * * *', async () => {
+  console.log('Running scheduled task to check ticket statuses...');
+
+  try {
+    // Get tickets with pending status
+    const tickets = await CustomerServiceTicket.find({ status: 'In Progress' });
+
+    const adminId = '665f504a893ed90d8a930118'; // Admin ID
+
+    for (const ticket of tickets) {
+      console.log('ticket: ', ticket);
+      const reminderMessage = `Hello! Has your issue been resolved? Please respond Yes or No. If we don't hear back from you within 3 days, your ticket will be considered resolved automatically.`;
+const resolvedMessage = 'Your ticket has been marked as resolved due to inactivity. Please reach out if you need further assistance.';
+
+
+const lastMessage = await Chat.findOne({
+  $or: [
+    { senderId: ticket.userId, receiverId: adminId },
+    { senderId: adminId, receiverId: ticket.userId }
+  ],
+  message: { $nin: [reminderMessage, resolvedMessage] } // Exclude these messages
+}).sort({ timestamp: -1 });
+    
+      // Skip if no messages or if the last message is not from the admin
+      if (!lastMessage || lastMessage.senderId.toString() !== adminId) {
+        console.log(`Skipping user ${ticket.userId}: Last message not from admin.`);
+        continue;
+      }
+      const timeSinceLastMessage = Date.now() - new Date(lastMessage.timestamp).getTime();
+      const twoDays = 2 * 24 * 60 * 60 * 1000;
+      const threeDays = 3 * 24 * 60 * 60 * 1000;
+
+      // Log the computed time differences
+console.log(`Ticket ID: ${ticket._id}`);
+console.log(`Time since last message: ${timeSinceLastMessage}ms`);
+console.log(`Two days in milliseconds: ${twoDays}ms`);
+console.log(`Three days in milliseconds: ${threeDays}ms`);
+
+  // If 2 days have passed, send a reminder
+  if (timeSinceLastMessage > twoDays && timeSinceLastMessage <= threeDays) {
+    const reminderMessage = `Hello! Has your issue been resolved? Please respond Yes or No. If we don't hear back from you within 3 days, your ticket will be considered resolved automatically.`;
+    const reminderChat = new Chat({
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: reminderMessage,
+    });
+    await reminderChat.save();
+
+    // Emit reminder message to the user's chat room
+    const roomId = `room-${ticket.userId}`;
+    io.to(roomId).emit('newMessage', {
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: reminderMessage,
+      timestamp: new Date(),
+    });
+
+    console.log(`Sent reminder to user ${ticket.userId}`);
+  }
+
+
+  // If 3 days have passed, resolve the ticket
+  if (timeSinceLastMessage > threeDays) {
+    ticket.status = 'Resolved';
+    await ticket.save();
+
+    const roomId = `room-${ticket.userId}`;
+    const resolvedMessage = 'Your ticket has been marked as resolved due to inactivity. Please reach out if you need further assistance.';
+
+      // Create a new chat message for the resolved ticket
+  const resolvedChat = new Chat({
+    senderId: adminId,
+    receiverId: ticket.userId,
+    message: resolvedMessage,
+  });
+
+  // Save the resolved message to the database
+  await resolvedChat.save();
+
+    io.to(roomId).emit('newMessage', {
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: resolvedMessage,
+      timestamp: new Date(),
+    });
+
+    console.log(`Ticket for user ${ticket.userId} marked as "Resolved"`);
+  }
+    }
+  } catch (error) {
+    console.error('Error running scheduled task:', error);
+  }
+});
 
 
 

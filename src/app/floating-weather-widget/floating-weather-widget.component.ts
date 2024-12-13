@@ -158,8 +158,20 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
   private startX = 0;
   private startY = 0;
 
-  onDragStart(event: MouseEvent) {
+  onDragStart(event: MouseEvent | TouchEvent) {
     this.isDragging = true;
+  
+    let clientX, clientY;
+  
+    // Determine if the event is a mouse event or touch event
+    if (event instanceof MouseEvent) {
+      clientX = event.clientX;
+      clientY = event.clientY;
+    } else {
+      const touch = event.touches[0];
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    }
   
     // Get the exact position of the element including any scrolling
     const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -170,25 +182,30 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
     const top = rect.top - parseFloat(computedStyle.marginTop);
   
     // Calculate the offsets to start dragging smoothly
-    this.startX = event.clientX - left;
-    this.startY = event.clientY - top;
+    this.startX = clientX - left;
+    this.startY = clientY - top;
   
     // Change cursor to indicate dragging
     this.frameStyle.cursor = 'grabbing';
   }
   
-  
-
-  onDragEnd() {
-    this.isDragging = false;
-    this.frameStyle.cursor = 'grab';
-  }
-
-  onDragMove(event: MouseEvent) {
+  onDragMove(event: MouseEvent | TouchEvent) {
     if (this.isDragging) {
+      let clientX, clientY;
+  
+      // Determine if the event is a mouse event or touch event
+      if (event instanceof MouseEvent) {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      } else {
+        const touch = event.touches[0];
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      }
+  
       // Calculate new `left` and `top` positions
-      const newLeft = event.clientX - this.startX;
-      const newTop = event.clientY - this.startY;
+      const newLeft = clientX - this.startX;
+      const newTop = clientY - this.startY;
   
       // Apply the new position
       this.frameStyle.left = `${newLeft}px`;
@@ -199,6 +216,12 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
       delete this.frameStyle.right;
     }
   }
+  
+  onDragEnd() {
+    this.isDragging = false;
+    this.frameStyle.cursor = 'grab';
+  }
+  
 
   @HostListener('document:mouseup', ['$event'])
   onDocumentMouseUp() {
