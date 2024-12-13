@@ -262,7 +262,7 @@ downloadReceiptAsPDF(): void {
     return;
   }
 
-  this.generateReceipt(this.receiptData.bookingId, this.receiptData.details, false);
+  this.generateReceipt(this.receiptData.bookingId, this.receiptData.bookingType, this.receiptData.details, false);
 }
 
 getBookingDetails(bookingId: string, bookingType: string): any {
@@ -306,6 +306,7 @@ getBookingDetails(bookingId: string, bookingType: string): any {
       dropoffDate: booking.dropoffDate,
       pickupStreetName: booking.pickupStreetName,
       dropoffStreetName: booking.dropoffStreetName,
+      specialRequest: booking.specialRequest,
       vehicleDetails: booking.vehicleBooking.map((vehicle: any) => ({
         name: vehicle.name,
         selectedVehicleType: vehicle.selectedVehicleType,
@@ -323,12 +324,14 @@ getBookingDetails(bookingId: string, bookingType: string): any {
 }
 
 openReceiptModal(index: number): void {
-  if (!this.bookings || this.bookings.length === 0) {
+  if (!this.filteredBookings || this.filteredBookings.length === 0) {
     console.error('Bookings array is empty or not loaded.');
     return;
   }
 
-  const booking = this.bookings[index];
+  const booking = this.filteredBookings[index];
+
+  console.log('index',booking)
   if (!booking) {
     console.error('Booking not found for index:', index);
     return;
@@ -360,6 +363,8 @@ openReceiptModal(index: number): void {
   } else {
     console.error('Booking details not found for ID:', bookingId);
   }
+
+  this.cdr.detectChanges();
 }
 
 
@@ -454,7 +459,7 @@ generateReceipt(
           }
 
           const formData = new FormData();
-          formData.append("receipt", blob, `Receipt-${bookingId}.pdf`);
+          formData.append("receipt", blob, `Receipt-${bookingType}.pdf`);
           formData.append("bookingId", bookingId);
           formData.append("bookingType", bookingType);
           formData.append("details", JSON.stringify(details));
@@ -474,7 +479,7 @@ generateReceipt(
         } else {
           console.time("Save PDF locally");
           console.log("Saving PDF locally");
-          pdf.save(`Receipt-${bookingId}.pdf`);
+          pdf.save(`Receipt.pdf`);
           console.timeEnd("Save PDF locally");
         }
 
