@@ -51,6 +51,13 @@ import { ReviewListComponent } from './review-list/review-list.component';
 import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
 import { TruncateLocationPipe } from './truncate-location.pipe';
 import { TruncatePipe } from './truncate.pipe';
+import { WeatherWidgetComponent } from './weather-widget/weather-widget.component';
+import { RequestResetPasswordComponent } from './request-reset-password/request-reset-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { FloatingWeatherWidgetComponent } from './floating-weather-widget/floating-weather-widget.component';
+import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-service.component';
+import { CustomerServiceComponent } from './customer-service/customer-service.component';
+import { TranslatePageComponent } from './translate-page/translate-page.component';
 
 @NgModule({
   declarations: [
@@ -90,7 +97,14 @@ import { TruncatePipe } from './truncate.pipe';
     ReviewListComponent,
     ProviderNavbarComponent,
     TruncateLocationPipe,
-    TruncatePipe
+    TruncatePipe,
+    WeatherWidgetComponent,
+    RequestResetPasswordComponent,
+    ResetPasswordComponent,
+    FloatingWeatherWidgetComponent,
+    AiCustomerServiceComponent,
+    CustomerServiceComponent,
+    TranslatePageComponent
   ],
   imports: [
     BrowserModule,

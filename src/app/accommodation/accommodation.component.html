@@ -1,5 +1,113 @@
 <app-user-navbar></app-user-navbar>
 <app-search></app-search>
+<!-- <app-weather-widget></app-weather-widget> -->
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+<!-- <div id="chatbot-container"></div>
+<div class="frame" 
+*ngIf="isWidgetVisible"
+@fadeAnimation
+     [ngStyle]="frameStyle" 
+     (mousedown)="onDragStart($event)" 
+     (mousemove)="onDragMove($event)" 
+     (mouseup)="onDragEnd()">
+
+       <!-- Close Button 
+  <button class="close-btn" (click)="closeWidget()">&times;</button>
+
+  <div class="top-right" [ngClass]="{'day-time': isDayTime, 'night-time': !isDayTime}">
+    <div class="location" [ngClass]="{'day-time': isDayTime, 'night-time': !isDayTime}">{{ location }}</div>
+    <div class="clock" [ngClass]="{'day-time': isDayTime, 'night-time': !isDayTime}">{{ currentTime }}</div>
+  </div>
+  <div *ngIf="isDayTime" class="sun">
+    <div class="sun-rays"></div>
+  </div>
+  
+  <div *ngIf="!isDayTime" class="moon">
+    <div class="moon-crater1"></div>
+    <div class="moon-crater2"></div>
+  </div>
+  
+
+  <!-- <div class="sun"></div>
+
+  
+<div [ngClass]="{'clear-weather': weatherCondition === 'clear'}">
+  <div class="hill-bg-1"></div>
+  <div class="hill-bg-2"></div>
+  <div class="hill-fg-1"></div>
+  <div class="hill-fg-2"></div>
+  <div class="hill-fg-3"></div>
+</div>
+
+	
+  <div class="front">
+		<div>
+      <div class="temperature">
+        {{ weather?.current?.temp }}°
+      </div>
+      
+			<div class="icons">
+				<i class="fas fa-wind"></i><br/><i class="fas fa-tint"></i>
+			</div>
+			<div>
+        <div class="info">
+          {{ getWindDirection(weather?.current?.windDir) }} {{ weather?.current?.windSpeed }} km/h <br>
+          {{ weather?.current?.humidity }}%
+        </div>
+        
+				<table class="preview">
+					<tbody>
+            <tr *ngFor="let day of weather?.forecast.slice(0, 2)">
+              <td>{{ day.dayShort }}</td>
+              <td>{{ day.maxTemp }}° | {{ day.minTemp }}°</td>
+            </tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="proverb">{{ getWeatherProverb() }}</div>
+
+	</div>
+
+  <div *ngIf="weatherCondition === 'rainy'">
+    <div class="drop-big-1"></div>
+    <div class="drop-big-2"></div>
+    <div class="drop-big-3"></div>
+    <div class="drop-big-4"></div>
+    <div class="drop-big-5"></div>
+    <div class="drop-big-6"></div>
+    <div class="drop-big-7"></div>
+    <div class="drop-big-8"></div>
+    <div class="drop-big-9"></div>
+    <div class="drop-big-10"></div>
+    <div class="drop-medium-1"></div>
+    <div class="drop-medium-2"></div>
+    <div class="drop-medium-3"></div>
+    <div class="drop-medium-4"></div>
+    <div class="drop-medium-5"></div>
+    <div class="drop-medium-6"></div>
+    <div class="drop-medium-7"></div>
+    <div class="drop-medium-8"></div>
+    <div class="drop-medium-9"></div>
+    <div class="drop-medium-10"></div>
+    <div class="drop-small-1"></div>
+    <div class="drop-small-2"></div>
+    <div class="drop-small-3"></div>
+    <div class="drop-small-4"></div>
+    <div class="drop-small-5"></div>
+    <div class="drop-small-6"></div>
+    <div class="drop-small-7"></div>
+    <div class="drop-small-8"></div>
+    <div class="drop-small-9"></div>
+    <div class="drop-small-10"></div>
+  </div>
+
+</div> -->
+
+
+
 
 <div class="container my-5">
   <h2 class="text-center mb-4 text-secondary" style="font-weight: 700; font-size: 2rem;">Accommodation Services</h2>
@@ -90,3 +198,4 @@
   </div>
 </div>
 
+<div id="google_translate_element"></div>

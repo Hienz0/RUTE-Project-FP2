@@ -1,58 +1,3 @@
-
-/* end of responsive navbar */
-
-
-.rating {
-  display: flex;
-  align-items: center;
-  font-size: 1.2em;
-}
-
-.star {
-  color: gold;
-  margin-right: 2px;
-}
-
-.text-muted {
-  font-size: 0.9em;
-  color: #6c757d;
-}
-
-.card:hover {
-  transform: scale(1.03);
-  box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 20px;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.card-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.card-text {
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.badge {
-  background-color: #007bff;
-  font-size: 0.85rem;
-  color: white;
-}
-
-
-
-
-
-
-
-
-
-
-
 @import url('https://fonts.googleapis.com/css?family=Overlock');
 body {
 	background: #643a7a;
@@ -60,11 +5,9 @@ body {
 
 .frame {
   position: absolute;
-  /* top: 50%;
-  left: 50%; */
-  width: 420px;
-  /* width: 400px; original */
-
+  top: 50%;
+  left: 50%;
+  width: 400px;
   height: 400px;
   margin-top: -200px;
   margin-left: -200px;
@@ -78,55 +21,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
 }
-
-/* sun */
-
-/* .frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 400px;
-  height: 400px;
-  margin-top: -200px;
-  margin-left: -200px;
-  border-radius: 2px;
-  box-shadow: 0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.3); /* Reduced shadow opacity for a softer effect 
-  background-image: linear-gradient(to top, #87CEEB, #E0FFFF); /* Gradient from light blue to sky blue 
-  color: #4b384c;
-  font-family: 'overlock', Helvetica, sans-serif;
-  font-weight: 300;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
-} */
-.sun {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  top: 45px;
-  left: 55px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffdd6d 50%, #ffbb33);
-  box-shadow: 0 0 4rem rgba(255, 186, 51, 0.3); /* Soft golden glow */
-  animation: rise 3s ease-in-out;
-}
-
-.sun:hover {
-  transform: scale(1.1);
-  transition: 0.6s ease;
-}
-
-@keyframes rise {
-  0% {
-    opacity: 0;
-    transform: translateY(100px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 
 .moon {
   position: absolute;
@@ -143,8 +37,6 @@ body {
 		transition: 3s;
 	}
 }
-
-
 
 .moon-crater1 {
 	position: absolute;
@@ -165,22 +57,6 @@ body {
 	left: 2.8rem;
 }
 
-/* Keyframe for cloud puffing animation */
-@keyframes puffClouds {
-  0% {
-    transform: scale(1); /* Initial size */
-    opacity: 0.8; /* Initial opacity */
-  }
-  50% {
-    transform: scale(1.05); /* Slightly grow the cloud */
-    opacity: 1; /* Full opacity */
-  }
-  100% {
-    transform: scale(1); /* Return to original size */
-    opacity: 0.8; /* Return to initial opacity */
-  }
-}
-
 .hill-bg-1, .hill-bg-2, .hill-fg-1, .hill-fg-2, .hill-fg-3 {
   position: absolute;
   z-index: 2;
@@ -190,10 +66,8 @@ body {
   left: -57px;
   background: #503760;
   border-radius: 50%;
-  box-shadow: -.5rem 0 .8rem rgba(0, 0, 0, .3);
-  animation: puffClouds 5s ease-in-out infinite; /* Apply puffing animation */
+	box-shadow: -.5rem 0 .8rem rgba(0, 0, 0, .3);
 }
-
 
 .hill-bg-2 {
   top: 177px;
@@ -216,21 +90,10 @@ body {
   left: 292px;
 }
 
-.clear-weather .hill-bg-1,
-.clear-weather .hill-bg-2 {
-  background: #e0e0e0; /* Slightly darker background for hill-bg */
-}
-
-.clear-weather .hill-fg-1,
-.clear-weather .hill-fg-2,
-.clear-weather .hill-fg-3 {
-  background: #ffffff; /* White background for clear weather */
-}
-
 .front {
   position: absolute;
   z-index: 10;
-  width: 420px;
+  width: 400px;
   height: 140px;
   left: 0;
   bottom: -53px;
@@ -1095,87 +958,3 @@ body {
 	background: #d1baca;
 	height: 100%;
 }
-
-/* Styling for the top-right container */
-.top-right {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  text-align: right;
-  padding: 12px 20px; /* Spacious padding for elegance */
-  font-family: 'Merriweather', serif; /* Elegant serif font */
-  font-weight: 400; /* Regular weight for subtlety */
-  font-size: 22px; /* Slightly larger font for readability */
-  border-radius: 8px; /* Soft, rounded edges */
-}
-
-/* Location name styling */
-.location {
-  font-size: 26px; /* Larger for emphasis */
-  font-weight: 500; /* Medium weight for a balanced look */
-  margin-bottom: 12px; /* Space between location and clock */
-  letter-spacing: 0.5px; /* Elegant spacing */
-}
-
-/* Clock styling */
-.clock {
-  font-size: 20px; /* Slightly larger for consistency */
-  font-weight: 300; /* Light weight for elegance */
-  letter-spacing: 0.5px; /* Clean, modern look */
-  text-transform: uppercase; /* Uppercase for style */
-}
-
-/* Day-time color styling */
-.day-time {
-  color: rgba(90, 90, 90, 0.9); /* Soft gray for day */
-}
-
-/* Night-time color styling */
-/* Night-time color styling */
-.night-time {
-  color: rgba(255, 255, 255, 0.8); /* Soft white with 70% opacity for a slightly visible effect */
-}
-
-.frame {
-  touch-action: none; /* Prevent touch scrolling while dragging */
-  user-select: none; /* Prevent text selection while dragging */
-}
-
-.close-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: rgba(255, 255, 255, 0.3); /* Slightly visible background */
-  border: none;
-  color: black;
-  font-size: 16px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  opacity: 0; /* Fully hidden initially */
-  cursor: pointer;
-  transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
-}
-
-/* Show the close button only when the frame is hovered */
-.frame:hover .close-btn {
-  opacity: 1; /* Fully visible when the frame is hovered */
-}
-
-.fade-out {
-  opacity: 0; /* Fades out */
-  transform: scale(0.9); /* Slight shrink effect */
-}
-
-#chatling-inline-bot {
-  width: 100%;
-  height: 500px;
-  visibility: visible;  /* Ensure it's not hidden */
-}
-
-
-
-
-
-
-

@@ -1,0 +1,42 @@
+/* Custom style for Google Translate widget container */
+.custom-translate-container {
+    position: relative;
+    padding: 12px;
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 250px;
+    text-align: left;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Customize the dropdown appearance */
+  .custom-translate-container select {
+    font-size: 14px;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  /* Focus effect for the select box */
+  .custom-translate-container select:focus {
+    outline: none;
+    border-color: #4c8bf5;
+    background-color: #ffffff;
+  }
+  
+  /* Optional: Add a custom label for the dropdown */
+  .custom-translate-container::before {
+    content: 'Select Language';
+    display: block;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  /* Hide the default Google Translate banner */
+  .goog-te-banner-frame.skiptranslate {
+    display: none !important;
+  }
+  

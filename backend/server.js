@@ -14,20 +14,79 @@ const { type } = require('os');
 const fs = require('fs');
 const cron = require('node-cron');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const axios = require('axios');
+const crypto = require('crypto');
+
+
+
+
 
 const app = express();
 const PORT = 3000;
+
+
+
 
 app.use(cors({
   origin: 'http://localhost:4200',
   credentials: true // if you're using cookies or authentication headers
 }));
 
+
+// app.use(cors({
+//   origin: [
+//     'http://localhost:4200', 
+//     'http://localhost:4200',    // Angular app running on PC2 (frontend)
+//     'http://localhost:3000',    // API server on PC1
+//     'http://localhost:3001',     // Another service on PC1 (if needed)
+// 'https://3trzp1g5-4200.asse.devtunnels.ms', // Angular app via VS Code Dev Tunnel
+// 'https://3trzp1g5-3000.asse.devtunnels.ms'  // API server via VS Code Dev Tunnel
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+//   credentials: true,  // Allow cookies and authentication headers
+// }));
+
+
+
+
 // Middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(bodyParser.json());
 // app.use(bodyParser.json({ limit: '1000mb' })); // Increase the limit as needed
 // app.use(bodyParser.urlencoded({ limit: '1000mb', extended: true })); // Increase the limit as needed
+
+
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+// Create the Socket.io instance and pass the existing server to it
+
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:4200", // Your Angular app's URL
+    methods: ["GET", "POST"]
+  }
+});
+
+
+
+// Start the HTTP server (which also starts Socket.io) on port 3001
+server.listen(3001, () => {
+  console.log('Socket.io server is running on http://localhost:3001');
+});
+
+
+
+
+
+
+
+
+
+
 
 
 // Connect to MongoDB
@@ -91,9 +150,32 @@ const userSchema = new mongoose.Schema({
   contact: String,
   avatar: String,
   userType: { type: String, default: 'user' },  // Add userType with default value 'user'
+  resetToken: String,
+  resetTokenExpiry: Date,
+  weatherWidgetToggle: { type: Boolean, default: true }
 });
 
 const User = mongoose.model('User', userSchema);
+
+// Chat Schema
+const chatSchema = new mongoose.Schema({
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  message: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  isRead: { type: Boolean, default: false } // Mark if the message is read
+});
+
+const Chat = mongoose.model('Chat', chatSchema);
+
+const ticketSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  status: { type: String, default: 'Pending' }, // Default status is 'Pending'
+  timestamp: { type: Date, default: Date.now }, // Record when the ticket was created
+});
+
+const CustomerServiceTicket = mongoose.model('CustomerServiceTicket', ticketSchema);
+
 
 /////////////////////////////////////////////////////////
 // booking accomodation
@@ -1437,11 +1519,511 @@ app.get('/api/services/bookings/room/:roomId/hasActiveBookings', async (req, res
   }
 });
 
+app.get('/api/weather', async (req, res) => {
+  try {
+    const response = await axios.get('https://forecast7.com/en/n8d51115d26/ubud/?format=json');
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send('Error fetching weather data');
+  }
+});
+
+
+
+app.post('/request-password-reset', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
+    await user.save();
+
+    // Send reset email
+    const resetLink = `http://localhost:4200/reset-password/${resetToken}`; // Update with your frontend URL
+    sendResetPasswordEmail(email, user.name, resetLink);
+
+    res.status(200).json({ message: 'Reset password link sent to email' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Helper function to send email
+const sendResetPasswordEmail = (email, name, resetLink) => {
+  // Create a transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'madeyudaadiwinata@gmail.com',
+      pass: 'hncq lgcx hkhz hjlq',
+    },
+    secure: true,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  // Load the HTML template
+  const templatePath = path.join(__dirname, 'reset-password-email.html');
+  let emailBody = fs.readFileSync(templatePath, 'utf-8');
+
+  // Replace placeholders in the template
+  emailBody = emailBody
+    .replace('{{name}}', name)
+    .replace('{{resetLink}}', resetLink);
+
+  // Email options
+  const mailOptions = {
+    from: 'madeyudaadiwinata@gmail.com',
+    to: email,
+    subject: 'Reset Password Request',
+    html: emailBody, // Use the HTML as email body
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};
+
+app.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  console.log('New Password: ', token, newPassword);
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Hash the new password
+    const saltRounds = 10; // You can adjust the salt rounds as needed
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    user.password = hashedPassword; // Save the hashed password
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update weatherWidgetToggle based on user ID
+app.put('/api/weather/:userId/toggle-weather-widget', async (req, res) => {
+  const { userId } = req.params;
+  const { weatherWidgetToggle } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { weatherWidgetToggle },
+      { new: true } // Return the updated user document
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Weather widget updated', user });
+  } catch (error) {
+    console.error('Error updating weather widget:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+// chat
+
+// Post request to send a message
+app.post('/api/chat/send-message', async (req, res) => {
+  try {
+    const { senderId, receiverId, message, userType } = req.body;
+
+    // Save the user's chat message
+    const chatMessage = new Chat({ senderId, receiverId, message });
+    await chatMessage.save();
+
+    // Emit the user's message to the chat room
+    const roomId = `room-${receiverId}`;
+    io.to(roomId).emit('newMessage', {
+      senderId,
+      receiverId,
+      message,
+      timestamp: new Date(),
+    });
+
+
+
+    // Handle customer service ticket if sender is not an admin
+    if (userType !== 'admin') {
+      let ticket = await CustomerServiceTicket.findOne({ userId: senderId });
+
+      if (!ticket) {
+        // Create a new ticket if no existing ticket
+        ticket = new CustomerServiceTicket({ userId: senderId });
+        await ticket.save();
+
+        // Send admin's response after a small delay
+        setTimeout(async () => {
+          const adminMessage =
+            'Thank you for reaching out to us. Your request has been successfully received, and our customer support team will review it promptly. We will assist you as soon as possible. We appreciate your patience and understanding.';
+          const adminChatMessage = new Chat({
+            senderId: '665f504a893ed90d8a930118', // Admin ID
+            receiverId: senderId,               // User ID
+            message: adminMessage,
+          });
+          await adminChatMessage.save();
+
+          // Emit admin's message to the user's chat room
+          io.to(`room-${senderId}`).emit('newMessage', {
+            senderId: '665f504a893ed90d8a930118', // Admin ID
+            receiverId: senderId,
+            message: adminMessage,
+            timestamp: new Date(),
+          });
+        }, 100); // 100ms delay for admin message
+      } else if (ticket.status === 'Resolved') {
+        // Reopen ticket if resolved
+        ticket.status = 'Pending';
+        ticket.timestamp = new Date();
+        await ticket.save();
+
+        // Send admin's reopening message
+        setTimeout(async () => {
+          const adminMessage =
+            'We have reopened your ticket and updated its status. Our customer support team is reviewing your request and will assist you as soon as possible. Thank you for your patience and understanding.';
+          const adminChatMessage = new Chat({
+            senderId: '665f504a893ed90d8a930118', // Admin ID
+            receiverId: senderId,               // User ID
+            message: adminMessage,
+          });
+          await adminChatMessage.save();
+
+          // Emit admin's message to the user's chat room
+          io.to(`room-${senderId}`).emit('newMessage', {
+            senderId: '665f504a893ed90d8a930118', // Admin ID
+            receiverId: senderId,
+            message: adminMessage,
+            timestamp: new Date(),
+          });
+        }, 100); // 100ms delay for admin message
+      } else {
+
+        if (userType === 'resolved' || userType === 'unresolved') {
+          // Set admin's message based on userType
+
+          if (userType === 'resolved' || userType === 'unresolved') {
+            // Update status if resolved
+            if (userType === 'resolved') {
+              ticket.status = 'Resolved';
+            }
+          }
+          
+          const adminMessage =
+            userType === 'resolved'
+            ? 'We are glad your issue has been resolved. Feel free to reach out if you need further assistance!'
+            : 'We’re sorry to hear that your issue is still unresolved. Could you please provide more details about the current situation so we can assist you further?';      
+        
+          // Send admin's message
+          setTimeout(async () => {
+            const adminChatMessage = new Chat({
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,               // User ID
+              message: adminMessage,
+            });
+            await adminChatMessage.save();
+        
+            // Emit admin's message to the user's chat room
+            io.to(`room-${senderId}`).emit('newMessage', {
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,
+              message: adminMessage,
+              timestamp: new Date(),
+            });
+          }, 100); // 100ms delay for admin message
+        } else if (userType === 'prompt') {
+          // Handle the 'prompt' case
+          setTimeout(async () => {
+            const adminMessage = 'Please respond with Yes or No to proceed.';
+            const adminChatMessage = new Chat({
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,               // User ID
+              message: adminMessage,
+            });
+            await adminChatMessage.save();
+        
+            // Emit admin's message to the user's chat room
+            io.to(`room-${senderId}`).emit('newMessage', {
+              senderId: '665f504a893ed90d8a930118', // Admin ID
+              receiverId: senderId,
+              message: adminMessage,
+              timestamp: new Date(),
+            });
+          }, 100); // 100ms delay for admin message
+        }
+        
+        // For other statuses, just update the timestamp
+        ticket.timestamp = new Date();
+        await ticket.save();
+      }
+    }
+    else {
+            // Find the ticket based on the receiverId
+            const ticket = await CustomerServiceTicket.findOne({ userId: receiverId, status: 'Pending' });
+
+            if (ticket) {
+              // Update the status to 'In Progress'
+              ticket.status = 'In Progress';
+              await ticket.save();
+              console.log(`Ticket for user ${receiverId} updated to 'In Progress'`);
+            }
+    }
+
+    // Send a successful response
+    res.status(200).json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ success: false, message: 'Failed to send message', error });
+  }
+});
+
+// WebSocket connection handling
+io.on('connection', (socket) => {
+  // Retrieve the unique tab ID or fallback to socket ID
+  const tabId = socket.handshake.query.tabId || socket.id;
+  console.log(`A user connected (server): ${socket.id}, Tab ID: ${tabId}`);
+
+  // Room joining logic (user or admin)
+  socket.on('joinChat', ({ userId, isAdmin }) => {
+    const roomId = `room-${userId}`;
+    socket.join(roomId);
+    console.log(`User/Admin with Socket ID ${socket.id} joined room: ${roomId}`);
+  });
+
+  // Handle sending a message through WebSocket
+  socket.on('sendMessage', (data) => {
+    const { senderId, receiverId, message } = data;
+    const roomId = `room-${receiverId}`;
+    console.log(`Message received from ${senderId} to ${receiverId}: ${message}`);
+
+    // Emit the message to the correct room
+    io.to(roomId).emit('newMessage', {
+      senderId,
+      receiverId,
+      message,
+      timestamp: new Date(),
+    });
+    console.log(`Message emitted to room: ${roomId}`);
+
+    // Save the message to the database
+    const chatMessage = new Chat({ senderId, receiverId, message });
+    chatMessage
+      .save()
+      .then(() => console.log('Message saved to database successfully'))
+      .catch((err) => console.error('Error saving message to database:', err));
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log(`A user disconnected: ${socket.id}, Tab ID: ${tabId}`);
+  });
+});
+
+
+// Run every day at midnight
+cron.schedule('33 18 * * *', async () => {
+  console.log('Running scheduled task to check ticket statuses...');
+
+  try {
+    // Get tickets with pending status
+    const tickets = await CustomerServiceTicket.find({ status: 'In Progress' });
+
+    const adminId = '665f504a893ed90d8a930118'; // Admin ID
+
+    for (const ticket of tickets) {
+      console.log('ticket: ', ticket);
+      const reminderMessage = `Hello! Has your issue been resolved? Please respond Yes or No. If we don't hear back from you within 3 days, your ticket will be considered resolved automatically.`;
+const resolvedMessage = 'Your ticket has been marked as resolved due to inactivity. Please reach out if you need further assistance.';
+
+
+const lastMessage = await Chat.findOne({
+  $or: [
+    { senderId: ticket.userId, receiverId: adminId },
+    { senderId: adminId, receiverId: ticket.userId }
+  ],
+  message: { $nin: [reminderMessage, resolvedMessage] } // Exclude these messages
+}).sort({ timestamp: -1 });
+    
+      // Skip if no messages or if the last message is not from the admin
+      if (!lastMessage || lastMessage.senderId.toString() !== adminId) {
+        console.log(`Skipping user ${ticket.userId}: Last message not from admin.`);
+        continue;
+      }
+      const timeSinceLastMessage = Date.now() - new Date(lastMessage.timestamp).getTime();
+      const twoDays = 2 * 24 * 60 * 60 * 1000;
+      const threeDays = 3 * 24 * 60 * 60 * 1000;
+
+      // Log the computed time differences
+console.log(`Ticket ID: ${ticket._id}`);
+console.log(`Time since last message: ${timeSinceLastMessage}ms`);
+console.log(`Two days in milliseconds: ${twoDays}ms`);
+console.log(`Three days in milliseconds: ${threeDays}ms`);
+
+  // If 2 days have passed, send a reminder
+  if (timeSinceLastMessage > twoDays && timeSinceLastMessage <= threeDays) {
+    const reminderMessage = `Hello! Has your issue been resolved? Please respond Yes or No. If we don't hear back from you within 3 days, your ticket will be considered resolved automatically.`;
+    const reminderChat = new Chat({
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: reminderMessage,
+    });
+    await reminderChat.save();
+
+    // Emit reminder message to the user's chat room
+    const roomId = `room-${ticket.userId}`;
+    io.to(roomId).emit('newMessage', {
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: reminderMessage,
+      timestamp: new Date(),
+    });
+
+    console.log(`Sent reminder to user ${ticket.userId}`);
+  }
+
+
+  // If 3 days have passed, resolve the ticket
+  if (timeSinceLastMessage > threeDays) {
+    ticket.status = 'Resolved';
+    await ticket.save();
+
+    const roomId = `room-${ticket.userId}`;
+    const resolvedMessage = 'Your ticket has been marked as resolved due to inactivity. Please reach out if you need further assistance.';
+
+      // Create a new chat message for the resolved ticket
+  const resolvedChat = new Chat({
+    senderId: adminId,
+    receiverId: ticket.userId,
+    message: resolvedMessage,
+  });
+
+  // Save the resolved message to the database
+  await resolvedChat.save();
+
+    io.to(roomId).emit('newMessage', {
+      senderId: adminId,
+      receiverId: ticket.userId,
+      message: resolvedMessage,
+      timestamp: new Date(),
+    });
+
+    console.log(`Ticket for user ${ticket.userId} marked as "Resolved"`);
+  }
+    }
+  } catch (error) {
+    console.error('Error running scheduled task:', error);
+  }
+});
+
+
+
+
+// Get chat messages between two users
+app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+    const messages = await Chat.find({
+      $or: [
+        { senderId: user1, receiverId: user2 },
+        { senderId: user2, receiverId: user1 }
+      ]
+    }).sort('timestamp');
+    res.status(200).json({ success: true, messages });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve messages', error });
+  }
+});
+
+// Get all users (exclude admin from the list)
+// Get users who have chatted with the admin
+// Get users who have chatted with the admin
+app.get('/api/chat/users', async (req, res) => {
+  try {
+    const adminId = '665f504a893ed90d8a930118'; // Admin ID
+
+    // Find all chats involving the admin
+    const chats = await Chat.find({
+      $or: [{ senderId: adminId }, { receiverId: adminId }]
+    });
+
+    // Extract unique user IDs who have chatted with the admin
+    const userIds = [
+      ...new Set(
+        chats.map(chat =>
+          chat.senderId.toString() === adminId ? chat.receiverId.toString() : chat.senderId.toString()
+        )
+      )
+    ];
+
+    // Fetch user details for the unique user IDs
+    const users = await User.find(
+      { _id: { $in: userIds } },
+      'name' // Fetch only the `name` field
+    );
+
+    // Fetch ticket statuses for the corresponding users
+    const tickets = await CustomerServiceTicket.find(
+      { userId: { $in: userIds } },
+      'userId status' // Fetch `userId` and `status`
+    );
+
+    // Map user IDs to their most recent ticket status (if available)
+    const userStatusMap = tickets.reduce((map, ticket) => {
+      map[ticket.userId.toString()] = ticket.status; // Use userId as the key
+      return map;
+    }, {});
+
+    // Combine user details with their ticket status
+    const response = users.map(user => ({
+      _id: user._id,
+      name: user.name,
+      status: userStatusMap[user._id.toString()] || 'No Tickets' // Default to 'No Tickets' if none found
+    }));
+
+    res.status(200).json({ success: true, users: response });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch users', error });
+  }
+});
+
+
+// Example socket connection event
+
 
 
 // white space
-
-
 
 
 
@@ -1825,7 +2407,7 @@ app.post('/signin', async (req, res) => {
     const token = generateToken(user);
 
     // Include user details in the response
-    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address } };
+    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address,weatherWidgetToggle: user.weatherWidgetToggle } };
     console.log('Sending response:', response); // Debugging response from server
     res.status(200).json(response);
   } catch (error) {
@@ -4148,3 +4730,10 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 })
+
+// Serve static files or API endpoints
+// app.use(express.static('public')); // example for serving static files
+
+// app.listen(PORT, '0.0.0.0', () => {
+//   console.log(`Server running at http://0.0.0.0:${PORT}`);
+// });
