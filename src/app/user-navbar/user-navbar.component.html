@@ -39,21 +39,8 @@
             (click)="toggleDropdown()" [attr.aria-expanded]="isDropdownOpen">
         </a>
 
-  <!-- Profile and Settings -->
-  <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user-circle me-2"></i> Profile</a></li>
-  <li><a class="dropdown-item" href="#"><i class="fas fa-brush me-2"></i> Theme Settings</a></li>
-  <li><a class="dropdown-item" href="#"><i class="fas fa-lock me-2"></i> Update Password</a></li>
-  <li>
-    <div class="dropdown-item d-flex align-items-center">
-      <i class="fas fa-adjust me-2"></i> Switch Theme
-      <label class="form-switch custom-toggle d-flex align-items-center ms-auto" aria-label="Switch Theme">
-        <input type="checkbox" class="custom-toggle-input" (change)="toggleTheme()" [checked]="isDarkMode">
-        <span class="custom-toggle-slider">
-          <i [ngClass]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
-        </span>
-      </label>
-    </div>
-  </li>
+  
+  
         <!-- Animated Dropdown Menu -->
         <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded"
           [@dropdownAnimation]="isDropdownOpen ? 'open' : 'closed'" aria-labelledby="navbarDropdownMenuLink">
@@ -71,6 +58,18 @@
           <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user-circle me-2"></i> Profile</a></li>
           <li><a class="dropdown-item" href="#"><i class="fas fa-brush me-2"></i> Theme Settings</a></li>
           <li><a class="dropdown-item" href="#"><i class="fas fa-lock me-2"></i> Update Password</a></li>
+          <li>
+            <div class="dropdown-item d-flex align-items-center">
+              <i class="fas fa-adjust me-2"></i> Switch Theme
+              <label class="form-switch custom-toggle d-flex align-items-center ms-auto" aria-label="Switch Theme">
+                <input type="checkbox" class="custom-toggle-input" (change)="toggleTheme()" [checked]="isDarkMode">
+                <span class="custom-toggle-slider">
+                  <i [ngClass]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
+                </span>
+              </label>
+            </div>
+          </li>
+          
 
           <!-- Provider Options -->
           <li *ngIf="currentUser.userType === 'user'">
@@ -108,7 +107,7 @@
         </ul>
 
 
-      </li>
+      
     </ul>
   </div>
   <div class="form-inline">
