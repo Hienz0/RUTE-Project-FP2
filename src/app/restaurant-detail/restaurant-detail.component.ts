@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import Panzoom from '@panzoom/panzoom';
 
@@ -38,7 +39,8 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private servicesService: ServicesService,
     private authService: AuthService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -244,6 +246,14 @@ toggleZoom() {
   // Handle image click separately (don't trigger zoom toggle)
   onImageClick(event: MouseEvent) {
     event.stopPropagation(); // Prevent click from propagating to the modal backdrop
+  }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
   }
   
 }

@@ -186,6 +186,17 @@
     </div>
   </div>
 
+  <div class="d-flex justify-content-center my-4">
+    <button 
+      class="btn btn-light border rounded-pill px-5 py-2 text-muted shadow-sm" 
+      (click)="navigateToChat()" 
+      [disabled]="!serviceId" 
+      title="Navigate to chat"
+      [style.cursor]="!serviceId ? 'not-allowed' : 'pointer'">
+      Chat with Provider
+    </button>
+  </div>
+
 
   
 <!-- Rating and Review Section -->

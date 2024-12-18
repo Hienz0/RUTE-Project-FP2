@@ -57,6 +57,7 @@ export class ManageServicesComponent implements OnInit {
         this.services.forEach((service, index) => {
           this.fetchImagesForService(service, index);
         });
+        console.log('tserv', this.services);
       },
       (error) => {
         console.error('Failed to load services:', error);
@@ -379,5 +380,9 @@ export class ManageServicesComponent implements OnInit {
       else if (service.productCategory === 'Transportation') {
         this.router.navigate([`/manageTransportation/${service._id}`]);
       }
+    }
+
+    navigateToChat(selectedUserId: string): void {
+      this.router.navigate(['/chat'], { queryParams: { userId: selectedUserId } });
     }
 }

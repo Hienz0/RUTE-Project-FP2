@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ChatService } from '../services/chat.service';
 import { AuthService } from '../services/auth.service';
 import { filter } from 'rxjs/operators';
+import { ProviderService } from '../services/provider.service';
+import { ActivatedRoute } from '@angular/router';
 
 import {
   trigger,
@@ -46,6 +48,8 @@ export class ChatComponent {
   messages: any[] = []; // Chat messages
   newMessage: string = ''; // New message content
   users: any[] = []; // Users list (for admin)
+  matchingServices: any[] = []; // Users list (for admin)
+  items: any[] = []; // Users list (for admin)
   selectedUserName: string = 'RUTE User';
   selectedUserStatus: string = '';
 
@@ -69,7 +73,7 @@ selectStartingQuestion(question: string): void {
 }
 
 
-  constructor(private chatService: ChatService, private authService: AuthService) {}
+  constructor(private chatService: ChatService, private authService: AuthService, private providerService: ProviderService, private route: ActivatedRoute ) {}
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe((user) => {
@@ -78,6 +82,16 @@ selectStartingQuestion(question: string): void {
       this.userId = this.currentUser.userId;
   
       console.log(`Current user:`, this.currentUser); // Debug log
+  // Extract 'userId' from the query parameters
+  this.route.queryParams.subscribe((params) => {
+    const userIdFromQuery = params['userId']; // Retrieve userId from query params
+
+    if (userIdFromQuery) {
+      this.currentUser.userId = userIdFromQuery; // Update the userId in currentUser
+      console.log(`UserId updated from query params: ${userIdFromQuery}`);
+    }
+  });
+
 
 // Only proceed if the URL contains 'providerId'
 this.chatService.getQueryParams()
@@ -87,7 +101,20 @@ this.chatService.getQueryParams()
   .subscribe((params) => {
     const providerId = params['providerId'];
     console.log('Provider ID found:', providerId); // Debug log
+    this.selectUser(providerId);
     this.handleProviderId(providerId);
+
+        // Call getServicesByID from providerService
+        this.providerService.getServicesByID(providerId).subscribe(
+          (serviceData: any) => {
+            console.log('Service data loaded:', serviceData); // Debug log for service data
+            this.selectedUserName = serviceData.productName;
+
+          },
+          (error: any) => {
+            console.error('Error loading service data:', error);
+          }
+        );
   });
       
           
@@ -95,6 +122,8 @@ this.chatService.getQueryParams()
   
       // if (this.userType === 'admin') {
         this.loadUsers(); // Admin: Load all users
+        this.pollForNewUsers();
+
       //   this.pollForNewUsers();
       // } else {
       //   this.selectedUserId = '665f504a893ed90d8a930118'; // Default chat with admin
@@ -206,15 +235,31 @@ loadMessages(): void {
   loadUsers(): void {
     const currentUserId = this.currentUser.userId; // Assuming `currentUser` holds the logged-in user details
   
-    this.chatService.getChatUsers(currentUserId).subscribe((response) => {
-      if (response.success) {
-        this.users = response.users; // Users who interacted with the current user
-        console.log('Users loaded:', this.users);
-      } else {
-        console.error('Error loading users:', response.error);
-      }
+    this.chatService.getChatUsers(currentUserId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Combine users and services, including `lastActive` and display name
+          this.items = response.items
+            .map((item: any) => ({
+              ...item,
+              displayName: item.type === 'user' ? item.data.name : item.data.productName, // User or service name
+            }))
+            .sort((a: any, b: any) => (b.lastActive || 0) - (a.lastActive || 0)); // Sort items by `lastActive`
+          
+          console.log('Sorted items:', this.items);
+        } else {
+          console.error('Error loading items:', response.error);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching chat users:', err);
+      },
     });
   }
+  
+  
+  
+  
   
   
 
@@ -306,6 +351,21 @@ if (responseMessage === 'Yes') {
       this.chatService.joinChat({ userId: this.userId, isAdmin: false });
     }
   }
+
+  selectItem(item: any): void {
+    if (item.type === 'user') {
+      console.log('User selected:', item.data);
+      this.selectUser(item.data._id); // Call existing user selection logic
+      this.selectedUserName = item.data.name;
+    } else if (item.type === 'service') {
+      console.log('Service selected:', item.data);
+      this.selectUser(item.data._id); // Call existing user selection logic
+      this.selectedUserName = item.data.productName;
+
+      // Add service-specific logic here if needed
+    }
+  }
+  
   
 
 }

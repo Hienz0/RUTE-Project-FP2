@@ -2028,6 +2028,7 @@ app.get('/api/chat/users', async (req, res) => {
 // Get users who interacted with the current user
 // Get users who interacted with the current user
 // Get users who interacted with the current user
+// Get users who interacted with the current user
 app.get('/api/chat/users/chat', async (req, res) => {
   try {
     const { userId } = req.query; // Current user's ID passed as query parameter
@@ -2036,8 +2037,8 @@ app.get('/api/chat/users/chat', async (req, res) => {
       return res.status(400).json({ success: false, error: 'User ID is required.' });
     }
 
-    // Convert userId to ObjectId
     const userObjectId = new mongoose.Types.ObjectId(userId);
+    const excludedUserId = new mongoose.Types.ObjectId('665f504a893ed90d8a930118');
 
     // Find distinct sender and receiver IDs where the current user has interacted
     const chatParticipants = await Chat.aggregate([
@@ -2052,10 +2053,37 @@ app.get('/api/chat/users/chat', async (req, res) => {
           users: {
             $addToSet: {
               $cond: [
-                { $eq: ['$senderId', userObjectId] },
+                {
+                  $and: [
+                    { $eq: ['$senderId', userObjectId] },
+                    { $ne: ['$receiverId', excludedUserId] },
+                  ],
+                },
                 '$receiverId',
-                '$senderId',
+                {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ['$receiverId', userObjectId] },
+                        { $ne: ['$senderId', excludedUserId] },
+                      ],
+                    },
+                    '$senderId',
+                    null,
+                  ],
+                },
               ],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          users: {
+            $filter: {
+              input: '$users',
+              as: 'user',
+              cond: { $ne: ['$$user', null] },
             },
           },
         },
@@ -2063,20 +2091,65 @@ app.get('/api/chat/users/chat', async (req, res) => {
     ]);
 
     if (chatParticipants.length > 0) {
-      // Fetch details of interacting users
-      const users = await User.find({
-        _id: { $in: chatParticipants[0].users },
-      }).select('_id name email status'); // Fetch necessary fields (customize as needed)
+      const userIds = chatParticipants[0].users || [];
 
-      res.json({ success: true, users });
+      // Fetch interacting users
+      const users = await User.find({ _id: { $in: userIds } })
+        .select('_id name email status')
+        .lean();
+
+      // Fetch matching services
+      const matchingServices = await Service.find({ _id: { $in: userIds } })
+        .select('_id providerId productName')
+        .lean();
+
+      // Fetch last active timestamp for users and services
+      const getLastChatTimestamp = async (id) => {
+        const lastChat = await Chat.findOne({
+          $or: [
+            { senderId: id, receiverId: userObjectId },
+            { senderId: userObjectId, receiverId: id },
+          ],
+        })
+          .sort({ timestamp: -1 })
+          .select('timestamp');
+        return lastChat ? lastChat.timestamp : null;
+      };
+
+      // Add lastActive to users
+      for (const user of users) {
+        user.lastActive = await getLastChatTimestamp(user._id);
+      }
+
+      // Add lastActive to services
+      for (const service of matchingServices) {
+        service.lastActive = await getLastChatTimestamp(service._id);
+      }
+
+      // Combine users and services into one array
+      const combinedItems = [
+        ...users.map((user) => ({ type: 'user', data: user, lastActive: user.lastActive })),
+        ...matchingServices.map((service) => ({
+          type: 'service',
+          data: service,
+          lastActive: service.lastActive,
+        })),
+      ];
+
+      // Sort combined items by lastActive in descending order
+      combinedItems.sort((a, b) => (b.lastActive || 0) - (a.lastActive || 0));
+
+      res.json({ success: true, items: combinedItems });
     } else {
-      res.json({ success: true, users: [] }); // No interactions found
+      res.json({ success: true, items: [] }); // No interactions found
     }
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+
 
 
 
