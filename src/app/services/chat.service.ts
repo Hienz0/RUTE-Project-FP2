@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,7 @@ export class ChatService {
   private baseUrl = 'http://localhost:3000/api/chat';
   private socket: Socket;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private route: ActivatedRoute) {
     // Generate a unique ID for the tab
     const tabId = sessionStorage.getItem('tabId') || `${Date.now()}-${Math.random()}`;
     sessionStorage.setItem('tabId', tabId);
@@ -67,5 +68,14 @@ export class ChatService {
   // Disconnect socket connection
   disconnect(): void {
     this.socket.disconnect();
+  }
+
+  // Get chat list for a user
+  getChatUsers(currentUserId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/users/chat`, { params: { userId: currentUserId } });
+  }
+
+  getQueryParams(): Observable<any> {
+    return this.route.queryParams;
   }
 }

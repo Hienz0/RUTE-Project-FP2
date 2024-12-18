@@ -2025,6 +2025,58 @@ app.get('/api/chat/users', async (req, res) => {
 // white space
 
 
+// Get users who interacted with the current user
+// Get users who interacted with the current user
+// Get users who interacted with the current user
+app.get('/api/chat/users/chat', async (req, res) => {
+  try {
+    const { userId } = req.query; // Current user's ID passed as query parameter
+
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'User ID is required.' });
+    }
+
+    // Convert userId to ObjectId
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Find distinct sender and receiver IDs where the current user has interacted
+    const chatParticipants = await Chat.aggregate([
+      {
+        $match: {
+          $or: [{ senderId: userObjectId }, { receiverId: userObjectId }],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          users: {
+            $addToSet: {
+              $cond: [
+                { $eq: ['$senderId', userObjectId] },
+                '$receiverId',
+                '$senderId',
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    if (chatParticipants.length > 0) {
+      // Fetch details of interacting users
+      const users = await User.find({
+        _id: { $in: chatParticipants[0].users },
+      }).select('_id name email status'); // Fetch necessary fields (customize as needed)
+
+      res.json({ success: true, users });
+    } else {
+      res.json({ success: true, users: [] }); // No interactions found
+    }
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 
 

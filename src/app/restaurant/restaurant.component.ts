@@ -58,4 +58,9 @@ export class RestaurantComponent implements OnInit {
   goToDetail(restaurantId: string): void {
     this.router.navigate(['/restaurant-detail', restaurantId]);
   }
+
+    // Method to navigate to the chat page
+    navigateToChat(providerId: string): void {
+      this.router.navigate(['/chat'], { queryParams: { providerId } });
+    }
 }
