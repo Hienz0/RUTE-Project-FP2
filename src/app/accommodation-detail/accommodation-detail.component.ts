@@ -557,6 +557,14 @@ onCheckOutDateChange(date: Date): void {
   get checkInDateAsDate(): Date {
     return new Date(this.bookingDetails.checkInDate);
   }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
+  }
   
   
 }

@@ -17,6 +17,8 @@ import Swal from 'sweetalert2';
 export class BookTransportationComponent implements OnInit {
   transportationService: any;
   currentUser: any;
+  serviceId: string | null = null;
+
 
   // Booking form fields with default values
   pickupDate: string = '';
@@ -75,6 +77,9 @@ export class BookTransportationComponent implements OnInit {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
+
+    this.serviceId = this.route.snapshot.paramMap.get('id');
+
 
     // Get ID from route parameter
     this.transportID = this.route.snapshot.paramMap.get('id')!;
@@ -769,6 +774,14 @@ export class BookTransportationComponent implements OnInit {
         this.router.navigate([redirectTo]);
       }
     });
+  }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
   }
   
 }

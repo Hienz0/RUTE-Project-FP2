@@ -58,6 +58,7 @@ import { FloatingWeatherWidgetComponent } from './floating-weather-widget/floati
 import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-service.component';
 import { CustomerServiceComponent } from './customer-service/customer-service.component';
 import { TranslatePageComponent } from './translate-page/translate-page.component';
+import { ChatComponent } from './chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -104,7 +105,8 @@ import { TranslatePageComponent } from './translate-page/translate-page.componen
     FloatingWeatherWidgetComponent,
     AiCustomerServiceComponent,
     CustomerServiceComponent,
-    TranslatePageComponent
+    TranslatePageComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,

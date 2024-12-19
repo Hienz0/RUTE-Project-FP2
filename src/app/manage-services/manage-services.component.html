@@ -116,7 +116,7 @@
 <!-- Services List -->
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="col-lg-10 col-md-10 col-sm-12">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Our Services</h2>
                 <p class="text-muted">Explore the range of services we offer to meet your needs.</p>
@@ -164,16 +164,28 @@
                                     <strong>Type:</strong> {{ service.productSubcategory }}
                                 </p>
                             </ng-container>
-                            <div class="d-flex justify-content-start">
-                                <button type="button" class="btn btn-success me-2" (click)="navigateToService(service)">
-                                    Manage Service
+                            <div class="d-flex justify-content-start gap-2 mt-3">
+                                <!-- Manage Service Button -->
+                                <button type="button" class="btn btn-outline-success me-2 text-muted px-2 py-1" 
+                                        (click)="navigateToService(service)" style="border-radius: 4px; font-size: 0.7rem;">
+                                  <i class="fas fa-cogs me-1"></i> Manage Service
                                 </button>
-                                <button *ngIf="false" type="button" class="btn btn-primary me-2" 
-                                        (click)="openEditModal(i)" data-bs-toggle="modal" 
-                                        [attr.data-bs-target]="'#editServiceModal'">Update
+                              
+                                <!-- Delete Button -->
+                                <button type="button" class="btn btn-outline-danger text-muted px-2 py-1" 
+                                        (click)="confirmDelete(i)" style="border-radius: 4px; font-size: 0.7rem;">
+                                  <i class="fas fa-trash-alt me-1"></i> Delete
                                 </button>
-                                <button type="button" class="btn btn-danger" (click)="confirmDelete(i)">Delete</button>
-                            </div>
+                              
+                                <!-- Go to Chat Button -->
+                                <button class="btn btn-outline-primary text-muted fw-semibold px-2 py-1" 
+                                        (click)="navigateToChat(service._id)" style="border-radius: 4px; font-size: 0.7rem;">
+                                  <i class="fas fa-comment-dots me-1"></i> Chats
+                                </button>
+                              </div>
+                              
+                              
+
                         </div>
                     </div>
                 </div>

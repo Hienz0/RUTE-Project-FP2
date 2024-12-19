@@ -1,5 +1,6 @@
 <app-user-navbar></app-user-navbar>
 
+
 <div *ngIf="accommodationDetail" class="container my-5">
   <!-- Accommodation Title and Description -->
   <div class="row">
@@ -286,6 +287,17 @@
   <div class="col-12">
     <div #mapContainer id="map" style="height: 400px;"></div>
   </div>
+</div>
+
+<div class="d-flex justify-content-center my-4">
+  <button 
+    class="btn btn-light border rounded-pill px-5 py-2 text-muted shadow-sm" 
+    (click)="navigateToChat()" 
+    [disabled]="!serviceId" 
+    title="Navigate to chat"
+    [style.cursor]="!serviceId ? 'not-allowed' : 'pointer'">
+    Chat with Provider
+  </button>
 </div>
 
 <!-- Rating and Review Section -->
