@@ -4187,6 +4187,9 @@ const transporter = nodemailer.createTransport({
     user: "madeyudaadiwinata@gmail.com",
     pass: "hncq lgcx hkhz hjlq",
   },
+  tls: {
+    rejectUnauthorized: false, // Allow self-signed certificates
+  },
   pool: true,            // Mengaktifkan pooling
   maxConnections: 5,     // Maksimum koneksi SMTP simultan
   maxMessages: 100,      // Maksimum pesan per koneksi

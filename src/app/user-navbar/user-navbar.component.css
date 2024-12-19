@@ -1030,7 +1030,7 @@ margin-top: 80px;
     visibility: hidden;
   }
   
-  label {
+  .weather-widget-switch {
     cursor: pointer;
     text-indent: -9999px;
     width: 40px;  /* Further reduced width */
@@ -1041,7 +1041,7 @@ margin-top: 80px;
     position: relative;
   }
   
-  label:after {
+  .weather-widget-switch:after {
     content: '';
     position: absolute;
     top: 2px;  /* Adjusted to make it smaller */
@@ -1053,16 +1053,16 @@ margin-top: 80px;
     transition: 0.3s;
   }
   
-  input:checked + label {
+  input:checked + .weather-widget-switch {
     background: #bada55; /* Color when checked */
   }
   
-  input:checked + label:after {
+  input:checked + .weather-widget-switch:after {
     left: calc(100% - 2px);  /* Adjusted to make the knob move smaller distance */
     transform: translateX(-100%);
   }
   
-  label:active:after {
+  .weather-widget-switch:active:after {
     width: 18px;  /* Slightly increase the knob size on active */
   }
   

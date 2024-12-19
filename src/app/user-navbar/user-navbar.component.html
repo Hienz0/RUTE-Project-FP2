@@ -23,7 +23,7 @@
       <li class="nav-item">
         <a class="nav-link" href="">Itinerary Planning</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" style="cursor: pointer;">
         <!-- Weather Widget Toggle -->
         <a class="nav-link" (click)="toggleWeatherWidget()">
           Weather Forecast
@@ -73,7 +73,7 @@
 
           <!-- Provider Options -->
           <li *ngIf="currentUser.userType === 'user'">
-            <a class="dropdown-item" href="/provider-registration"><i class="fas fa-building me-2"></i> Become a
+            <a class="dropdown-item" href="/provider-registration"><i class="fas fa-building me-2"></i> Become Our
               Partner</a>
           </li>
           <li *ngIf="currentUser.userType !== 'user'">
@@ -95,7 +95,7 @@
       <div class="dropdown-item d-flex align-items-center">
         <i class="fas fa-cloud-sun me-2"></i> Weather Widget
         <input type="checkbox" id="switch" [(ngModel)]="weatherWidgetToggle" (change)="toggleFloatingWeatherWidget()" />
-        <label for="switch"></label>
+        <label class="weather-widget-switch d-flex align-items-center ms-auto" for="switch"></label>
       </div>
     </li>
     <li>

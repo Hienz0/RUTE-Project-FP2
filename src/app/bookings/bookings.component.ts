@@ -421,7 +421,7 @@ generateReceipt(
       windowWidth: clonedElement.scrollWidth,
       windowHeight: clonedElement.scrollHeight,
     })
-      .then((canvas) => {
+      .then((canvas: any) => {
         console.timeEnd("html2canvas generation");
         console.log("html2canvas finished rendering");
 
