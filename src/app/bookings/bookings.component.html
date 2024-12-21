@@ -340,7 +340,7 @@
 
           <!-- Modal Footer -->
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" (click)= "closeBookingModal()">
               <i class="fas fa-times-circle me-2"></i>Close
             </button>
             <button *ngIf="selectedBooking?.bookingStatus === 'Waiting for payment'" type="button"
