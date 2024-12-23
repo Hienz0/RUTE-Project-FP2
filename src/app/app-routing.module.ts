@@ -33,6 +33,7 @@ import { RequestResetPasswordComponent } from './request-reset-password/request-
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { CustomerServiceComponent } from './customer-service/customer-service.component';
 import { ChatComponent } from './chat/chat.component';
+import { PlanningItineraryComponent } from './planning-itinerary/planning-itinerary.component';
 
 const routes: Routes = [
   {path: 'reviewProvider', component: ReviewRegisterComponent},
@@ -72,6 +73,7 @@ const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   { path: 'customer-service', component: CustomerServiceComponent },
   {path: 'chat', component: ChatComponent},
+  {path: 'planning-itinerary', component: PlanningItineraryComponent},
 ];
 
 @NgModule({

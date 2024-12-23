@@ -1,0 +1,161 @@
+<div class="container my-5">
+    <h1 class="text-center mb-4">Plan Your Itinerary</h1>
+  
+    <!-- Vacation Date Form -->
+<!-- Vacation Date Form -->
+<form #itineraryForm="ngForm" (ngSubmit)="onSubmit()" class="mb-5">
+    <div class="row g-3">
+      <div class="col-lg-6 col-md-12">
+        <label for="vacationStartDate" class="form-label">Vacation Start Date</label>
+        <input
+          type="date"
+          id="vacationStartDate"
+          class="form-control"
+          [(ngModel)]="vacationStartDate"
+          name="vacationStartDate"
+          (ngModelChange)="saveVacationDate()"
+          required
+        />
+      </div>
+      <div class="col-lg-6 col-md-12">
+        <label for="vacationEndDate" class="form-label">Vacation End Date</label>
+        <input
+          type="date"
+          id="vacationEndDate"
+          class="form-control"
+          [(ngModel)]="vacationEndDate"
+          name="vacationEndDate"
+          (ngModelChange)="saveVacationDate()"
+          required
+        />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-4" [disabled]="!itineraryForm.valid">
+        Plan Itinerary
+      </button>
+  </form>
+  
+  
+    <!-- Services Table -->
+    <div *ngIf="showServiceSelection">
+      <h2 class="mb-3">Select Services</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Service Type</th>
+              <th>Service Name</th>
+              <th>Date(s) and Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let service of availableServices">
+              <td>{{ service.serviceType }}</td>
+              <td>{{ service.serviceName }}</td>
+              <td>
+                <!-- Date and Time input handling for each service type -->
+                <ng-container *ngIf="service.serviceType === 'Accommodation' || service.serviceType === 'Vehicle'">
+                  <!-- Date range and time for Accommodation and Vehicle -->
+                  <div class="d-flex flex-column">
+                    <div class="d-flex mb-2">
+                      <input
+                        type="date"
+                        class="form-control me-2"
+                        [(ngModel)]="service.startDate"
+                        name="startDate-{{ service.serviceType }}"
+                        [min]="vacationStartDate"
+                        [max]="vacationEndDate"
+                        (ngModelChange)="saveServiceChange(service)"
+                        placeholder="Start Date"
+                      />
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="service.startTime"
+                        name="startTime-{{ service.serviceType }}"
+                        (ngModelChange)="saveServiceChange(service)"
+                      />
+                    </div>
+                    <div class="d-flex">
+                      <input
+                        type="date"
+                        class="form-control me-2"
+                        [(ngModel)]="service.endDate"
+                        name="endDate-{{ service.serviceType }}"
+                        [min]="service.startDate"
+                        [max]="vacationEndDate"
+                        (ngModelChange)="saveServiceChange(service)"
+                        placeholder="End Date"
+                      />
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="service.endTime"
+                        name="endTime-{{ service.serviceType }}"
+                        (ngModelChange)="saveServiceChange(service)"
+                      />
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="service.serviceType === 'Tour' || service.serviceType === 'Restaurant'">
+                  <!-- Single date and time for Tour and Restaurant -->
+                  <div class="d-flex">
+                    <input
+                      type="date"
+                      class="form-control me-2"
+                      [(ngModel)]="service.singleDate"
+                      name="singleDate-{{ service.serviceType }}"
+                      [min]="vacationStartDate"
+                      [max]="vacationEndDate"
+                      (ngModelChange)="saveServiceChange(service)"
+                      placeholder="Select Date"
+                    />
+                    <input
+                      type="time"
+                      class="form-control"
+                      [(ngModel)]="service.singleTime"
+                      name="singleTime-{{ service.serviceType }}"
+                      (ngModelChange)="saveServiceChange(service)"
+                    />
+                  </div>
+                </ng-container>
+              </td>
+              
+              <td>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-success me-2" (click)="addService(service)">
+                    Add to Itinerary
+                  </button>
+                  <button class="btn btn-info" (click)="chooseService(service)">
+                    Choose
+                  </button>
+                </div>
+              </td>
+              
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Selected Services Summary -->
+    <div *ngIf="selectedServices.length > 0" class="mt-5">
+      <h2 class="mb-3">Selected Services</h2>
+      <ul class="list-group">
+        <li *ngFor="let service of selectedServices" class="list-group-item">
+          {{ service.serviceType }} - {{ service.serviceName }}
+          <span *ngIf="service.startDate && service.endDate">
+            ({{ service.startDate }} {{ service.startTime }} to {{ service.endDate }} {{ service.endTime }})
+          </span>
+          <span *ngIf="service.singleDate">
+            ({{ service.singleDate }} {{ service.singleTime }})
+          </span>
+          <button class="btn btn-danger btn-sm float-end" (click)="removeService(service)">
+            Remove
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+  

@@ -2021,6 +2021,132 @@ app.get('/api/chat/users', async (req, res) => {
 
 // Example socket connection event
 
+// planning itinerary
+
+// Define the Itinerary Schema
+const itinerarySchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  vacationStartDate: {
+    type: Date,
+    required: true,
+  },
+  vacationEndDate: {
+    type: Date,
+    required: true,
+  },
+  services: [
+    {
+      serviceType: {
+        type: String,
+        enum: ['Accommodation', 'Vehicle', 'Tour', 'Restaurant'],
+        required: true,
+      },
+      serviceName: {
+        type: String,
+        required: true,
+      },
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
+      startTime: {
+        type: String, // Use 'HH:mm' format
+      },
+      endTime: {
+        type: String, // Use 'HH:mm' format
+      },
+      singleDate: {
+        type: Date,
+      },
+      singleTime: {
+        type: String, // Use 'HH:mm' format
+      },
+    },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Create the Itinerary Model
+const Itinerary = mongoose.model('Itinerary', itinerarySchema);
+
+app.put('/api/itinerary/services', async (req, res) => {
+  try {
+    const userId = req.body.userId; // Extract userId from the request body
+    const serviceData = req.body.service; // The service data to update or add
+
+    // Find the user's itinerary by userId
+    const itinerary = await Itinerary.findOne({ userId: userId });
+
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found for user' });
+    }
+
+    // Check if the service exists in the itinerary's services array
+    const serviceIndex = itinerary.services.findIndex(service => service.serviceType === serviceData.serviceType);
+
+    if (serviceIndex !== -1) {
+      // Update the existing service
+      itinerary.services[serviceIndex] = { ...itinerary.services[serviceIndex], ...serviceData };
+    } else {
+      // If the service doesn't exist, add the new service to the array
+      itinerary.services.push(serviceData);
+    }
+
+    // Save the updated itinerary
+    const updatedItinerary = await itinerary.save();
+
+    res.status(200).json(updatedItinerary);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update or add service', error });
+  }
+});
+
+
+
+
+app.put('/api/itinerary/dates', async (req, res) => {
+  try {
+    const { userId, startDate, endDate } = req.body;
+
+    // Update the itinerary for the user based on the user ID
+    const updatedItinerary = await Itinerary.findOneAndUpdate(
+      { userId: userId }, // Find the itinerary by user ID
+      { vacationStartDate: startDate, vacationEndDate: endDate },
+      { new: true, upsert: true } // `upsert: true` will create a new document if none is found
+    );
+
+    if (!updatedItinerary) {
+      return res.status(404).json({ message: 'Itinerary not found or created' });
+    }
+
+    res.status(200).json(updatedItinerary);
+  } catch (error) {
+    console.error('Error while saving vacation dates:', error);
+    res.status(500).json({ message: 'Failed to save vacation dates', error: error.message });
+  }
+});
+
+// Assuming you have an endpoint to get the itinerary by userId
+app.get('/api/itinerary/:userId', async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findOne({ userId: req.params.userId }).populate('services');
+    if (!itinerary) {
+      return res.status(404).send('Itinerary not found');
+    }
+    res.json(itinerary);
+  } catch (err) {
+    res.status(500).send('Error retrieving itinerary');
+  }
+});
 
 
 // white space

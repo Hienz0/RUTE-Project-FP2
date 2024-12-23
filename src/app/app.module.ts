@@ -59,6 +59,7 @@ import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-se
 import { CustomerServiceComponent } from './customer-service/customer-service.component';
 import { TranslatePageComponent } from './translate-page/translate-page.component';
 import { ChatComponent } from './chat/chat.component';
+import { PlanningItineraryComponent } from './planning-itinerary/planning-itinerary.component';
 
 @NgModule({
   declarations: [
@@ -106,7 +107,8 @@ import { ChatComponent } from './chat/chat.component';
     AiCustomerServiceComponent,
     CustomerServiceComponent,
     TranslatePageComponent,
-    ChatComponent
+    ChatComponent,
+    PlanningItineraryComponent
   ],
   imports: [
     BrowserModule,

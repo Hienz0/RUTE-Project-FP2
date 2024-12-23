@@ -1,5 +1,5 @@
 import { Component, OnInit, Renderer2, HostListener } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
@@ -50,7 +50,7 @@ export class AccommodationComponent implements OnInit {
 
 
 
-  constructor(private servicesService: ServicesService, private router: Router, private authService: AuthService, private weatherService: WeatherService, private renderer: Renderer2) {}
+  constructor(private servicesService: ServicesService, private router: Router, private route: ActivatedRoute, private authService: AuthService, private weatherService: WeatherService, private renderer: Renderer2) {}
 
   ngOnInit(): void {
     // this.loadGoogleTranslateScript();
@@ -231,7 +231,8 @@ this.isDayTime = currentHour >= 6 && currentHour < 18;
 
   // Navigate to the details page when a service is clicked
   goToDetail(id: string): void {
-    this.router.navigate(['/accommodation', id]);
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/accommodation', id], { queryParams });
   }
 
 
