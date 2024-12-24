@@ -124,6 +124,70 @@
                     <span class="ms-auto text-dark">{{ booking.tourTime }}</span>
                   </li>
 
+
+<!-- Loop through the services inside the booking -->
+<!-- Loop through the services inside the booking -->
+<li class="mb-3 d-flex flex-column">
+  <!-- Services Label -->
+  <div class="d-flex align-items-center mb-3">
+    <strong>Services:</strong>
+  </div>
+
+  <!-- Loop through the services and display each with its corresponding icon -->
+  <div *ngFor="let service of booking.services" class="d-flex align-items-center mb-3">
+    <!-- Icon based on serviceType -->
+    <i *ngIf="service.serviceType === 'Accommodation'" class="fas fa-bed text-primary me-3"></i>
+    <i *ngIf="service.serviceType === 'Tour'" class="fas fa-map-marker-alt text-success me-3"></i>
+    <i *ngIf="service.serviceType === 'Vehicle'" class="fas fa-car text-info me-3"></i>
+    <i *ngIf="service.serviceType === 'Restaurant'" class="fas fa-utensils text-warning me-3"></i>
+
+    <!-- Service Name -->
+    <span class="text-dark">{{ service.serviceName }}</span>
+  </div>
+</li>
+
+
+
+  <!-- Service Type -->
+  <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-calendar-day text-primary me-3"></i>
+      <strong>Service Type:</strong>
+    </div>
+    <span class="text-dark">{{ service.serviceType }}</span>
+  </div> -->
+<!-- </li> -->
+
+  <!-- Display start date -->
+  <!-- <div *ngIf="service.startDate">
+    <i class="fas fa-calendar-alt text-success me-3"></i>
+    <strong>Start Date:</strong>
+    <span class="ms-auto text-dark">{{ service.startDate | date:'mediumDate' }}</span>
+  </div> -->
+
+  <!-- Display end date -->
+  <!-- <div *ngIf="service.endDate">
+    <i class="fas fa-calendar-times text-danger me-3"></i>
+    <strong>End Date:</strong>
+    <span class="ms-auto text-dark">{{ service.endDate | date:'mediumDate' }}</span>
+  </div> -->
+
+  <!-- Display start time -->
+  <!-- <div *ngIf="service.startTime">
+    <i class="fas fa-clock text-info me-3"></i>
+    <strong>Start Time:</strong>
+    <span class="ms-auto text-dark">{{ service.startTime }}</span>
+  </div> -->
+
+  <!-- Display end time -->
+  <!-- <div *ngIf="service.endTime">
+    <i class="fas fa-clock text-danger me-3"></i>
+    <strong>End Time:</strong>
+    <span class="ms-auto text-dark">{{ service.endTime }}</span>
+  </div> -->
+
+
+
                   <!-- Booking Status -->
                   <li class="mb-3 d-flex align-items-center">
                     <i class="fas fa-info-circle text-info me-3"></i>
@@ -305,6 +369,50 @@
                 </div>
               </ng-container>
 
+              <!-- Itinerary Services -->
+<ng-container *ngIf="selectedBookingType === 'Itinerary'">
+  <div class="list-group-item d-flex align-items-center border-0 py-3">
+    <i class="fas fa-map me-3 text-muted"></i>
+    <strong class="text-muted">Itinerary Booking Status:</strong>
+    <span class="ms-auto text-dark">{{ selectedBooking?.bookingStatus }}</span>
+  </div>
+  <div class="list-group-item d-flex align-items-center border-0 py-3">
+    <i class="fas fa-dollar-sign me-3 text-muted"></i>
+    <strong class="text-muted">Total Amount:</strong>
+    <span class="ms-auto text-dark">{{ selectedBooking?.totalAmount | currency }}</span>
+  </div>
+  <div class="list-group-item d-flex flex-column align-items-start border-0 py-3">
+    <i class="fas fa-list-alt me-3 text-muted"></i>
+    <strong class="text-muted">Services:</strong>
+    <ul class="list-unstyled mt-2 ms-4">
+      <li *ngFor="let service of selectedBooking?.services" class="mb-3">
+        <div class="border p-3 rounded">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-concierge-bell me-3 text-secondary"></i>
+            <strong class="me-2">{{ service.serviceType }}:</strong>
+            <span class="text-dark">{{ service.serviceName }}</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-calendar-alt me-3 text-secondary"></i>
+            <strong class="me-2">Start:</strong>
+            <span class="text-dark">
+              {{ service.startDate | date:'mediumDate' }} ({{ service.startTime }})
+            </span>
+          </div>
+          <div class="d-flex align-items-center mt-1">
+            <i class="fas fa-calendar-times me-3 text-secondary"></i>
+            <strong class="me-2">End:</strong>
+            <span class="text-dark">
+              {{ service.endDate | date:'mediumDate' }} ({{ service.endTime }})
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</ng-container>
+
+
               <!-- Booking Status -->
               <div class="list-group-item d-flex align-items-center border-0 py-3">
                 <i class="fas fa-info-circle me-3 text-muted"></i>
@@ -344,10 +452,15 @@
               <i class="fas fa-times-circle me-2"></i>Close
             </button>
             <button *ngIf="selectedBooking?.bookingStatus === 'Waiting for payment'" type="button"
-              class="btn btn-outline-success btn-sm"
-              (click)="payForBooking(selectedBooking._id, selectedBooking.amount, selectedBookingType)">
-              <i class="fas fa-check-circle me-2"></i>Pay Now
-            </button>
+            class="btn btn-outline-success btn-sm"
+            (click)="payForBooking(
+              selectedBooking._id, 
+              selectedBooking.amount ?? selectedBooking.totalAmount, 
+              selectedBookingType
+            )">
+            <i class="fas fa-check-circle me-2"></i>Pay Now
+          </button>
+          
             <button *ngIf="['Pending', 'Waiting for payment'].includes(selectedBooking?.bookingStatus)" type="button"
               class="btn btn-outline-danger btn-sm" (click)="cancelBooking(selectedBooking)">
               <i class="fas fa-times-circle me-2"></i>Cancel Booking

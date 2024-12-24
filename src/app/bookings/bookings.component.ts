@@ -86,13 +86,17 @@ interval: any;
     
     this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
       (response) => {
-        const { accommodationBookings, tourBookings, vehicleBookings } = response;
+        const { accommodationBookings, tourBookings, vehicleBookings, itineraryBookings } = response;
+
+
+        console.log('itinerary bookings: ', itineraryBookings);
     
         // Combine all booking types into one array
         this.bookings = [
           ...accommodationBookings,
           ...tourBookings,
-          ...vehicleBookings
+          ...vehicleBookings,
+          ...itineraryBookings // Include itinerary bookings
         ];
   
         // Sort combined bookings by 'updatedAt'
@@ -194,6 +198,8 @@ interval: any;
       this.selectedBookingType = 'Vehicle';
     } else if (this.selectedBooking.tourName) {
       this.selectedBookingType = 'Tour';
+    } else if (this.selectedBooking.services && Array.isArray(this.selectedBooking.services)) {
+      this.selectedBookingType = 'Itinerary';
     }
   
     // Open the modal using Bootstrap's API

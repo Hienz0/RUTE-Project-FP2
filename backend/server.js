@@ -344,23 +344,28 @@ app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
     console.log('Fetching all bookings for userId :', userId);
 
     // Retrieve all tour bookings for the user, without using populate
-    const allTourBookings = await TourBooking.find({ userId: userId });
+    const allTourBookings = await TourBooking.find({ userId });
 
     // Retrieve all accommodation bookings for the user, without using populate
-    const allAccommodationBookings = await Booking.find({ userId: userId });
+    const allAccommodationBookings = await Booking.find({ userId });
 
     // Retrieve all vehicle bookings for the user, without using populate
-    const allVehicleBookings = await VehicleBooking.find({ userId: userId });
+    const allVehicleBookings = await VehicleBooking.find({ userId });
+
+    // Retrieve all itinerary bookings for the user, without using populate
+    const allItineraryBookings = await ItineraryBooking.find({ userId });
 
     console.log("Tour bookings:", allTourBookings);
     console.log("Accommodation bookings:", allAccommodationBookings);
     console.log("Vehicle bookings:", allVehicleBookings);
+    console.log("Itinerary bookings:", allItineraryBookings);
 
     // Combine and send the response with all types of bookings
     return res.status(200).json({
       tourBookings: allTourBookings,
       accommodationBookings: allAccommodationBookings,
-      vehicleBookings: allVehicleBookings
+      vehicleBookings: allVehicleBookings,
+      itineraryBookings: allItineraryBookings,
     });
 
   } catch (error) {
@@ -368,6 +373,7 @@ app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
     return res.status(500).json({ message: "Error fetching bookings", error });
   }
 });
+
 
 
 
