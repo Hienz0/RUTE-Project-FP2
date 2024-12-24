@@ -41,9 +41,15 @@ export class ItineraryService {
       return this.http.get(`${this.apiUrl}/planning/${userId}`); // Combine base URL and route dynamically
     }
 
-    updateItinerary(bookingId: string, userId: string, serviceType: string) {
-      return this.http.put(`${this.apiUrl}/add-service`, { bookingId, userId, serviceType });
+    updateItinerary(bookingId: string, userId: string, serviceType: string, amount: number) {
+      return this.http.put(`${this.apiUrl}/add-service`, { bookingId, userId, serviceType, amount });
     }
+
+    confirmItinerary(userId: string): Observable<any> {
+      return this.http.post(`${this.apiUrl}/confirm`, { userId });
+    }
+    
+    
     
     
     

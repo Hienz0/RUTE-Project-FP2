@@ -276,5 +276,10 @@ toggleZoom() {
       console.error('Service ID is not available.');
     }
   }
+
+  navigateToReview(bookingId: string): void {
+    this.router.navigate(['rateServices/', bookingId]);
+    console.log(bookingId);
+  }
   
 }

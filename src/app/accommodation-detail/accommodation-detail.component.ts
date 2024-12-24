@@ -518,7 +518,7 @@ onCheckOutDateChange(date: Date): void {
           if (planningItineraryId) {
             // Update the itinerary with the bookingId
             const userId = this.currentUser.userId; // Ensure `userId` is available
-            this.itineraryService.updateItinerary(bookingId, userId, 'Accommodation').subscribe(
+            this.itineraryService.updateItinerary(bookingId, userId, 'Accommodation', this.bookingDetails.amount).subscribe(
               () => {
                 console.log('Itinerary updated successfully.');
                 // Navigate to the /planning-itinerary route

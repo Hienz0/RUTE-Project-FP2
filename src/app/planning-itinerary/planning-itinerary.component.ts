@@ -19,10 +19,10 @@ export class PlanningItineraryComponent implements OnInit {
   showServiceSelection = false;
 
   availableServices = [
-    { serviceType: 'Accommodation', serviceName: 'Queen Room', startDate: '', endDate: '', startTime: '', endTime: '' },
-    { serviceType: 'Tour', serviceName: 'Ubud Tour', singleDate: '', singleTime: '' },
-    { serviceType: 'Vehicle', serviceName: 'Car Rental', startDate: '', endDate: '', startTime: '', endTime: '' },
-    { serviceType: 'Restaurant', serviceName: 'Local Diner', singleDate: '', singleTime: '' }
+    { serviceType: 'Accommodation', serviceName: 'Not Available', startDate: '', endDate: '', startTime: '', endTime: '' },
+    { serviceType: 'Tour', serviceName: 'Not Available', singleDate: '', singleTime: '' },
+    { serviceType: 'Vehicle', serviceName: 'Not Available', startDate: '', endDate: '', startTime: '', endTime: '' },
+    { serviceType: 'Restaurant', serviceName: 'Not Available', singleDate: '', singleTime: '' }
   ];
 
   selectedServices: Array<any> = [];
@@ -42,6 +42,8 @@ export class PlanningItineraryComponent implements OnInit {
     });
     
   }
+
+  
 
   loadItinerary(userId: string): void {
     console.log('Loading itinerary for user:', userId);
@@ -68,6 +70,8 @@ export class PlanningItineraryComponent implements OnInit {
                 endDate: service.endDate ? new Date(service.endDate).toISOString().split('T')[0] : '',
                 startTime: service.startTime || '',
                 endTime: service.endTime || '',
+                bookingId: service.bookingId || 'Missing',
+                amount: service.amount || 0,
               };
             } else if (type === 'Tour' || type === 'Restaurant') {
               // Shape for services requiring singleDate
@@ -76,6 +80,8 @@ export class PlanningItineraryComponent implements OnInit {
                 serviceName: service.serviceName || 'Not Available',
                 singleDate: service.singleDate ? new Date(service.singleDate).toISOString().split('T')[0] : '',
                 singleTime: service.singleTime || '',
+                bookingId: service.bookingId || 'Missing',
+                amount: service.amount || 0,
               };
             }
             // Default case to handle unknown service types
@@ -86,6 +92,8 @@ export class PlanningItineraryComponent implements OnInit {
               endDate: '',
               startTime: '',
               endTime: '',
+              bookingId: 'Missing',
+              amount: 0,
             };
           });
   
@@ -102,12 +110,15 @@ export class PlanningItineraryComponent implements OnInit {
   }
   
 
+  totalAmount: number = 0;
+
     // Method to fetch itinerary
     loadPlanningItinerary(): void {
       this.itineraryService.getPlanningItinerary(this.currentUser.userId).subscribe({
         next: (response) => {
           if (response && response.services) {
             this.selectedServices = response.services;
+            this.calculateTotalAmount();
           } else {
             alert('No services found for this user.');
           }
@@ -149,7 +160,12 @@ export class PlanningItineraryComponent implements OnInit {
   
     // Add service to selected services with a unique bookingId
     const newService = { ...service };
+
+    console.log('newService: ', newService);
     this.selectedServices.push(newService);
+
+      // Calculate the new total amount after adding a service
+  this.calculateTotalAmount();
   
     // Save itinerary to backend
     if (!this.currentUser.userId) {
@@ -246,6 +262,8 @@ export class PlanningItineraryComponent implements OnInit {
   viewItinerary(service: any): void {
     // Extract bookingId and serviceType from the service object
     const bookingId = service.bookingId ?? 'defaultBookingId'; // Fallback in case bookingId is missing
+
+    console.log('service: ', service);
     const serviceType = service.serviceType ?? 'defaultServiceType'; // Fallback in case serviceType is missing
   
     // Fetch the booking details based on bookingId and serviceType
@@ -275,6 +293,37 @@ export class PlanningItineraryComponent implements OnInit {
       modal?.hide();
     }
   }
+
+  calculateTotalAmount(): void {
+    this.totalAmount = this.selectedServices.reduce((sum, service) => {
+      return sum + (service.amount || 0); // Add amount, default to 0 if missing
+    }, 0);
+  }
+
+
+  confirmItinerary(): void {
+    if (!this.currentUser.userId) {
+      alert('User ID is missing. Cannot confirm itinerary.');
+      return;
+    }
+  
+    this.itineraryService.confirmItinerary(this.currentUser.userId).subscribe({
+      next: (response) => {
+        if (response.itineraryBooking) {
+          alert('Itinerary confirmed successfully!');
+          this.selectedServices = []; // Clear the services after confirmation
+          this.totalAmount = 0; // Reset the total amount
+        } else {
+          alert('Failed to confirm itinerary.');
+        }
+      },
+      error: (err) => {
+        console.error('Error confirming itinerary:', err);
+        alert('Error confirming itinerary.');
+      },
+    });
+  }
+  
   
   
   

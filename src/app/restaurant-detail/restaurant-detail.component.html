@@ -213,7 +213,15 @@
     </button>
   </div>
 
-
+  <div class="d-flex justify-content-center my-4">
+    <button 
+      class="btn btn-primary border rounded-pill px-5 py-2 text-light shadow-sm" 
+      (click)="navigateToReview(serviceId!)">
+      Review This Restaurant
+    </button>
+  </div>
+  
+  
   
 <!-- Rating and Review Section -->
 <app-review-list [serviceId]="serviceId ?? ''"></app-review-list>

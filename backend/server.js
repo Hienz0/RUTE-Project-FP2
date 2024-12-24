@@ -2107,6 +2107,9 @@ const itinerarySchema = new mongoose.Schema({
       singleTime: {
         type: String, // Use 'HH:mm' format
       },
+      amount: {
+        type: Number, // Add amount field
+      },
     },
   ],
   createdAt: {
@@ -2131,6 +2134,7 @@ const PlanningItinerarySchema = new mongoose.Schema({
       endTime: { type: String },   // "HH:mm" format
       singleDate: { type: Date }, // For single-date services like Tours or Restaurants
       singleTime: { type: String }, // "HH:mm" format
+      amount: { type: Number }, // Add the amount field as required
     },
   ],
   createdAt: { type: Date, default: Date.now },
@@ -2138,6 +2142,42 @@ const PlanningItinerarySchema = new mongoose.Schema({
 
 
 const PlanningItinerary = mongoose.model('PlanningItinerary', PlanningItinerarySchema);
+
+const ItineraryBookingSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  services: [
+    {
+      bookingId: { type: String, required: true },
+      serviceType: { type: String, required: true },
+      serviceName: { type: String, required: true },
+      startDate: { type: Date },
+      endDate: { type: Date },
+      startTime: { type: String },
+      endTime: { type: String },
+      singleDate: { type: Date },
+      singleTime: { type: String },
+      amount: { type: Number },
+    },
+  ],
+  totalAmount: { type: Number, required: true },
+  bookingStatus: {
+    type: String,
+    default: 'Waiting for payment',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
+    enum: ['Booked', 'Complete', 'Waiting for payment', 'Cancelled', 'CheckedIn', 'CheckedOut']
+  },
+  paymentStatus: {
+    type: String,
+    default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+    enum: ['Pending', 'Paid', 'Failed']
+  },
+  paymentExpiration: { type: Date },
+
+  isReviewed: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const ItineraryBooking = mongoose.model('ItineraryBooking', ItineraryBookingSchema);
+
 
 // Save Selected Services
 app.post('/api/itinerary/save', async (req, res) => {
@@ -2261,9 +2301,9 @@ app.get('/api/itinerary/planning/:userId', async (req, res) => {
 });
 
 app.put('/api/itinerary/add-service', async (req, res) => {
-  const { bookingId, userId, serviceType } = req.body;
+  const { bookingId, userId, serviceType, amount } = req.body;
 
-  if (!userId || !bookingId || !serviceType) {
+  if (!userId || !bookingId || !serviceType || amount === undefined) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -2282,16 +2322,89 @@ app.put('/api/itinerary/add-service', async (req, res) => {
       return res.status(404).json({ message: `Service of type ${serviceType} not found` });
     }
 
-    // Update the bookingId of the found service
+    let booking;
+    let serviceName;
+
+    // Search for booking in the corresponding schema based on serviceType
+    switch (serviceType) {
+      case 'Accommodation':
+        booking = await Booking.findOne({ _id: bookingId });
+        serviceName = booking ? booking.accommodationName : 'Unknown Accommodation';
+        break;
+      case 'Restaurant':
+        booking = await RestaurantBooking.findOne({ _id: bookingId });
+        serviceName = booking ? booking.productName : 'Unknown Restaurant';
+        break;
+      case 'Tour':
+        booking = await TourBooking.findOne({ _id: bookingId });
+        serviceName = booking ? booking.tourName : 'Unknown Tour';
+        break;
+      case 'Vehicle':
+        booking = await VehicleBooking.findOne({ _id: bookingId });
+        serviceName = booking ? booking.productName : 'Unknown Vehicle';
+        break;
+      default:
+        return res.status(400).json({ message: `Invalid service type: ${serviceType}` });
+    }
+
+    if (!booking) {
+      return res.status(404).json({ message: `Booking with ID ${bookingId} not found for service type ${serviceType}` });
+    }
+
+    // Update the service's bookingId, serviceName, and amount
     service.bookingId = bookingId;
+    service.serviceName = serviceName;
+    service.amount = amount; // Add the amount here
 
     await itinerary.save();
+
     res.json({ message: 'Itinerary updated successfully', itinerary });
   } catch (error) {
     console.error('Error updating itinerary:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+app.post('/api/itinerary/confirm', async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required.' });
+  }
+
+  try {
+    // Find the user's planning itinerary
+    const planningItinerary = await PlanningItinerary.findOne({ userId });
+
+    if (!planningItinerary) {
+      return res.status(404).json({ message: 'Planning itinerary not found for this user.' });
+    }
+
+    // Calculate total amount
+    const totalAmount = planningItinerary.services.reduce((sum, service) => sum + (service.amount || 0), 0);
+
+    // Create a new itinerary booking
+    const itineraryBooking = new ItineraryBooking({
+      userId,
+      services: planningItinerary.services,
+      totalAmount,
+    });
+
+    // Save the new itinerary booking
+    await itineraryBooking.save();
+
+    // Optionally delete the planning itinerary after confirmation
+    await PlanningItinerary.deleteOne({ userId });
+
+    res.status(200).json({ message: 'Itinerary confirmed successfully.', itineraryBooking });
+  } catch (error) {
+    console.error('Error confirming itinerary:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+
+
 
 
 
