@@ -124,7 +124,7 @@ export class PlanningItineraryComponent implements OnInit {
     }
   
     // Add service to selected services with a unique bookingId
-    const newService = { ...service, bookingId: this.generateBookingId() };
+    const newService = { ...service };
     this.selectedServices.push(newService);
   
     // Save itinerary to backend

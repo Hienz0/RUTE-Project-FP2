@@ -103,6 +103,11 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
     sendReceiptToEmail(formData: FormData): Observable<any> {
       return this.http.post<any>('http://localhost:3000/api/receipts', formData);
     }
+
+      // Add a new booking to the itinerary
+  addBookingToItinerary(bookingDetails: { productName: string, serviceId: string, userId: string, bookingStatus: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/add-to-itinerary`, bookingDetails);
+  }
     
     
   

@@ -262,6 +262,42 @@ const Booking = mongoose.model('AccommodationBooking', bookingAccommodationSchem
 
 module.exports = Booking;
 
+const restaurantBookingSchema = new mongoose.Schema({
+  productName: {
+    type: String,
+    required: true,
+  },
+  serviceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service', // Reference to the Service model
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model
+    required: true,
+  },
+  bookingStatus: {
+    type: String,
+    enum: ['pending', 'confirmed', 'completed', 'cancelled'], // Possible statuses for the booking
+    default: 'pending',
+  },
+  bookingDate: {
+    type: Date,
+    default: Date.now, // The date when the booking was made
+  },
+  serviceType: {
+    type: String,
+    enum: ['Restaurant'], // This can be expanded later if you add more services
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now, // Timestamp for when the booking was created
+  },
+});
+
+const RestaurantBooking = mongoose.model('RestaurantBooking', restaurantBookingSchema);
 
 
 // In your backend routes (e.g., bookingRoutes.js)
@@ -2113,19 +2149,30 @@ app.post('/api/itinerary/save', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Missing userId or services' });
     }
 
-    // Create a new Planning Itinerary record
+    // Check if an itinerary already exists for the user
+    let itinerary = await PlanningItinerary.findOne({ userId });
+
+    if (itinerary) {
+      // Update the existing itinerary's services
+      itinerary.services = services;
+      await itinerary.save();
+      return res.status(200).json({ success: true, message: 'Itinerary updated successfully', itinerary });
+    }
+
+    // If no itinerary exists, create a new one
     const newItinerary = new PlanningItinerary({
       userId,
       services,
     });
 
     const savedItinerary = await newItinerary.save();
-    res.status(200).json({ success: true, itinerary: savedItinerary });
+    res.status(201).json({ success: true, message: 'New itinerary created successfully', itinerary: savedItinerary });
   } catch (error) {
-    console.error('Error saving planning itinerary:', error);
-    res.status(500).json({ success: false, message: 'Failed to save planning itinerary' });
+    console.error('Error saving or updating planning itinerary:', error);
+    res.status(500).json({ success: false, message: 'Failed to save or update planning itinerary' });
   }
 });
+
 
 app.put('/api/itinerary/services', async (req, res) => {
   try {
@@ -2213,9 +2260,74 @@ app.get('/api/itinerary/planning/:userId', async (req, res) => {
   }
 });
 
+app.put('/api/itinerary/add-service', async (req, res) => {
+  const { bookingId, userId, serviceType } = req.body;
+
+  if (!userId || !bookingId || !serviceType) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    // Find the itinerary by userId
+    const itinerary = await Itinerary.findOne({ userId });
+
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found for this user' });
+    }
+
+    // Find the service by serviceType
+    const service = itinerary.services.find((s) => s.serviceType === serviceType);
+
+    if (!service) {
+      return res.status(404).json({ message: `Service of type ${serviceType} not found` });
+    }
+
+    // Update the bookingId of the found service
+    service.bookingId = bookingId;
+
+    await itinerary.save();
+    res.json({ message: 'Itinerary updated successfully', itinerary });
+  } catch (error) {
+    console.error('Error updating itinerary:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+
 
 // white space
 
+
+app.post('/api/bookings/add-to-itinerary', async (req, res) => {
+  const { productName, serviceId, userId, bookingStatus } = req.body;
+
+  if (!productName || !serviceId || !userId || !bookingStatus) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    // Create a new restaurant booking
+    const newBooking = new RestaurantBooking({
+      productName,
+      serviceId,
+      userId,
+      bookingStatus,
+      serviceType: 'Restaurant',
+    });
+
+    // Save the new booking
+    const savedBooking = await newBooking.save();
+    res.status(200).json({
+      message: 'Restaurant booking added successfully',
+      booking: savedBooking,
+    });
+  } catch (error) {
+    console.error('Error adding restaurant booking:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // Get users who interacted with the current user
 // Get users who interacted with the current user

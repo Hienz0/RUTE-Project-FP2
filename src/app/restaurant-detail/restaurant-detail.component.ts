@@ -4,6 +4,7 @@ import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { BookingService } from '../services/booking.service';
 import * as L from 'leaflet';
 import Panzoom from '@panzoom/panzoom';
 
@@ -40,7 +41,8 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     private servicesService: ServicesService,
     private authService: AuthService,
     private sanitizer: DomSanitizer,
-    private router: Router
+    private router: Router,
+    private bookingService: BookingService,
   ) {}
 
   ngOnInit(): void {
@@ -182,6 +184,7 @@ loadRestaurantDetails(id: string): void {
   this.servicesService.getRestaurantById(id).subscribe(
     (data) => {
       this.restaurant = data;
+      console.log(this.restaurant);
       if (this.map && this.restaurant.businessCoordinates) {
         // Update map center with restaurant coordinates
         const { coordinates } = this.restaurant.businessCoordinates;
@@ -191,6 +194,24 @@ loadRestaurantDetails(id: string): void {
     },
     (error) => {
       console.error('Error fetching restaurant details', error);
+    }
+  );
+}
+
+addToItinerary(): void {
+  const bookingDetails = {
+    productName: this.restaurant.productName,
+    serviceId: this.restaurant._id,
+    userId: this.currentUser.userId,
+    bookingStatus: 'pending'
+  };
+
+  this.bookingService.addBookingToItinerary(bookingDetails).subscribe(
+    (response) => {
+      console.log('Booking added to itinerary successfully', response);
+    },
+    (error) => {
+      console.error('Error adding booking to itinerary', error);
     }
   );
 }

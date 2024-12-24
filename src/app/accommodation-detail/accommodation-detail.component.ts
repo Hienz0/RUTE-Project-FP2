@@ -5,6 +5,7 @@ import { BookingService } from '../services/booking.service'; // Import the book
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import { ItineraryService } from '../services/itinerary.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 import * as L from 'leaflet';
@@ -61,7 +62,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     private renderer: Renderer2,
     private router: Router,
     private overlayContainer: OverlayContainer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private itineraryService: ItineraryService,
   ) {}
 
   ngOnInit(): void {
@@ -510,8 +512,29 @@ onCheckOutDateChange(date: Date): void {
         
                 // Redirect to accommodation-booking-detail page with the booking ID
                 const bookingId = response.booking._id;
-                this.router.navigate([`/bookings/${bookingId}`]);
-              } else {
+                
+                          // Check if "planning-itinerary" exists in the URL
+          const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+          if (planningItineraryId) {
+            // Update the itinerary with the bookingId
+            const userId = this.currentUser.userId; // Ensure `userId` is available
+            this.itineraryService.updateItinerary(bookingId, userId, 'Accommodation').subscribe(
+              () => {
+                console.log('Itinerary updated successfully.');
+                // Navigate to the /planning-itinerary route
+                this.router.navigate([`/planning-itinerary`]);
+              },
+              (error) => {
+                console.error('Failed to update itinerary:', error);
+              }
+            );
+          } else {
+            // Default navigation to booking details page
+            this.router.navigate([`/bookings/${bookingId}`]);
+          }
+
+              } 
+              else {
                 // User chose "Check Again"
                 console.log('User chose to check the details again.');
                 // Additional logic for "Check Again" (if needed) can go here
