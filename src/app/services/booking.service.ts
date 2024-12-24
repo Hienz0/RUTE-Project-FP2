@@ -108,6 +108,11 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
   addBookingToItinerary(bookingDetails: { productName: string, serviceId: string, userId: string, bookingStatus: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/add-to-itinerary`, bookingDetails);
   }
+
+    // Fetch booking details by bookingId and serviceType
+    getBookingDetails(bookingId: string, serviceType: string): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/${serviceType}/${bookingId}`);
+    }
     
     
   

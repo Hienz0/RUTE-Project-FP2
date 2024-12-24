@@ -2329,6 +2329,44 @@ app.post('/api/bookings/add-to-itinerary', async (req, res) => {
   }
 });
 
+app.get('/api/bookings/:serviceType/:bookingId', async (req, res) => {
+  const { serviceType, bookingId } = req.params;
+
+  try {
+    let bookingDetails;
+
+    // Switch case to handle different service types
+    switch (serviceType) {
+      case 'Accommodation':
+        bookingDetails = await Booking.findById(bookingId); // Assuming 'Booking' model doesn't require population
+        break;
+      case 'Tour':
+        bookingDetails = await TourBooking.findById(bookingId); // Assuming 'TourBooking' model doesn't require population
+        break;
+      case 'Transportation':
+        bookingDetails = await VehicleBooking.findById(bookingId); // Assuming 'VehicleBooking' model doesn't require population
+        break;
+      case 'Restaurant':
+        bookingDetails = await RestaurantBooking.findById(bookingId); // Assuming 'RestaurantBooking' model doesn't require population
+        break;
+      default:
+        return res.status(400).send({ message: 'Invalid service type' });
+    }
+
+    // Check if booking details are found
+    if (!bookingDetails) {
+      return res.status(404).send({ message: 'Booking not found' });
+    }
+
+    // Return the found booking details
+    res.json(bookingDetails);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+
+
 // Get users who interacted with the current user
 // Get users who interacted with the current user
 // Get users who interacted with the current user

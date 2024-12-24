@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ItineraryService } from '../services/itinerary.service';
+import { BookingService } from '../services/booking.service';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-planning-itinerary',
@@ -23,8 +26,9 @@ export class PlanningItineraryComponent implements OnInit {
   ];
 
   selectedServices: Array<any> = [];
+  bookingDetails: any = null;
 
-  constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService) {}
+  constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService, private bookingService: BookingService) {}
 
 
   ngOnInit(): void {
@@ -62,6 +66,7 @@ export class PlanningItineraryComponent implements OnInit {
             if (service.singleDate) {
               service.singleDate = new Date(service.singleDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
             }
+            
             return service;
           });
   
@@ -215,6 +220,41 @@ export class PlanningItineraryComponent implements OnInit {
         console.error('Error saving vacation dates:', err);
       },
     });
+  }
+
+
+  // Open the modal to show booking details
+  viewItinerary(service: any): void {
+    // Extract bookingId and serviceType from the service object
+    const bookingId = service.bookingId ?? 'defaultBookingId'; // Fallback in case bookingId is missing
+    const serviceType = service.serviceType ?? 'defaultServiceType'; // Fallback in case serviceType is missing
+  
+    // Fetch the booking details based on bookingId and serviceType
+    this.bookingService.getBookingDetails(bookingId, serviceType).subscribe(
+      (data) => {
+        // this.bookingDetails = data; // Set the booking details to display
+        this.bookingDetails = { ...data, serviceType: serviceType }; // Set the booking details to display
+        console.log('booking details: ', this.bookingDetails);
+        const modalElement = document.getElementById('bookingModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        }
+      },
+      (error) => {
+        console.error('Error fetching booking details:', error);
+      }
+    );
+  }
+  
+
+  // Close the modal
+  closeModal(): void {
+    const modalElement = document.getElementById('bookingModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
   }
   
   
