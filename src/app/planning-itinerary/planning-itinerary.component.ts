@@ -50,38 +50,57 @@ export class PlanningItineraryComponent implements OnInit {
       next: (itinerary) => {
         if (itinerary) {
           console.log('Itinerary loaded successfully:', itinerary);
-          
-          // Convert vacation start and end dates to the correct format
-          this.vacationStartDate = new Date(itinerary.vacationStartDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
-          this.vacationEndDate = new Date(itinerary.vacationEndDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
   
-          // Process services and ensure the dates are in ISO format for the date picker
-          this.availableServices = itinerary.services.map((service: any) => {
-            if (service.startDate) {
-              service.startDate = new Date(service.startDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
+          this.vacationStartDate = new Date(itinerary.vacationStartDate).toISOString().split('T')[0];
+          this.vacationEndDate = new Date(itinerary.vacationEndDate).toISOString().split('T')[0];
+  
+          const serviceTypes = ['Accommodation', 'Vehicle', 'Tour', 'Restaurant'];
+  
+          this.availableServices = serviceTypes.map((type) => {
+            const service = itinerary.services.find((s: any) => s.serviceType === type) || {};
+  
+            if (type === 'Accommodation' || type === 'Vehicle') {
+              // Shape for services requiring startDate and endDate
+              return {
+                serviceType: type,
+                serviceName: service.serviceName || 'Not Available',
+                startDate: service.startDate ? new Date(service.startDate).toISOString().split('T')[0] : '',
+                endDate: service.endDate ? new Date(service.endDate).toISOString().split('T')[0] : '',
+                startTime: service.startTime || '',
+                endTime: service.endTime || '',
+              };
+            } else if (type === 'Tour' || type === 'Restaurant') {
+              // Shape for services requiring singleDate
+              return {
+                serviceType: type,
+                serviceName: service.serviceName || 'Not Available',
+                singleDate: service.singleDate ? new Date(service.singleDate).toISOString().split('T')[0] : '',
+                singleTime: service.singleTime || '',
+              };
             }
-            if (service.endDate) {
-              service.endDate = new Date(service.endDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
-            }
-            if (service.singleDate) {
-              service.singleDate = new Date(service.singleDate).toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
-            }
-            
-            return service;
+            // Default case to handle unknown service types
+            return {
+              serviceType: type,
+              serviceName: 'Not Available',
+              startDate: '',
+              endDate: '',
+              startTime: '',
+              endTime: '',
+            };
           });
   
-          // Set showServiceSelection to true only if there are services available
-          this.showServiceSelection = this.availableServices.length > 0;
-  
+          this.showServiceSelection = true;
         } else {
           console.log('No itinerary found for user:', userId);
+          this.showServiceSelection = false;
         }
       },
       error: (err) => {
         console.error('Error loading itinerary:', err);
-      }
+      },
     });
   }
+  
 
     // Method to fetch itinerary
     loadPlanningItinerary(): void {
