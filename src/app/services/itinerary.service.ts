@@ -26,4 +26,18 @@ export class ItineraryService {
   getItineraryByUserId(userId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${userId}`);
   }
+
+  savePlanningItinerary(userId: string, services: any[]): Observable<any> {
+    const payload = {
+      userId,
+      services,
+    };
+
+    return this.http.post(`${this.apiUrl}/save`, payload);
+  }
+
+    // Method to fetch itinerary based on userId
+    getPlanningItinerary(userId: string): Observable<any> {
+      return this.http.get(`${this.apiUrl}/planning/${userId}`); // Combine base URL and route dynamically
+    }
 }

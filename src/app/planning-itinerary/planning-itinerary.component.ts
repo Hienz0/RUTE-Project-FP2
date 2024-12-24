@@ -33,6 +33,7 @@ export class PlanningItineraryComponent implements OnInit {
       if (this.currentUser) {
         // Fetch itinerary based on userId if user is logged in
         this.loadItinerary(this.currentUser.userId);
+        this.loadPlanningItinerary();
       }
     });
     
@@ -76,6 +77,24 @@ export class PlanningItineraryComponent implements OnInit {
       }
     });
   }
+
+    // Method to fetch itinerary
+    loadPlanningItinerary(): void {
+      this.itineraryService.getPlanningItinerary(this.currentUser.userId).subscribe({
+        next: (response) => {
+          if (response && response.services) {
+            this.selectedServices = response.services;
+          } else {
+            alert('No services found for this user.');
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching itinerary:', err);
+          alert('Error fetching itinerary');
+        },
+      });
+    }
+  
   
   
   
@@ -95,7 +114,7 @@ export class PlanningItineraryComponent implements OnInit {
       alert('Please select both start/end dates and times for this service.');
       return;
     }
-
+  
     if (
       (service.serviceType === 'Tour' || service.serviceType === 'Restaurant') &&
       (!service.singleDate || !service.singleTime)
@@ -103,10 +122,30 @@ export class PlanningItineraryComponent implements OnInit {
       alert('Please select a date and time for this service.');
       return;
     }
-
-    // Add to selected services
-    this.selectedServices.push({ ...service });
-
+  
+    // Add service to selected services with a unique bookingId
+    const newService = { ...service, bookingId: this.generateBookingId() };
+    this.selectedServices.push(newService);
+  
+    // Save itinerary to backend
+    if (!this.currentUser.userId) {
+      alert('User ID is missing. Cannot save itinerary.');
+      return;
+    }
+  
+    this.itineraryService.savePlanningItinerary(this.currentUser.userId, this.selectedServices).subscribe({
+      next: (response) => {
+        if (response.success) {
+          alert('Service added and planning itinerary saved successfully!');
+        } else {
+          alert('Failed to save planning itinerary.');
+        }
+      },
+      error: (err) => {
+        console.error('Error saving planning itinerary:', err);
+      },
+    });
+  
     // Clear service fields after adding
     service.startDate = '';
     service.endDate = '';
@@ -115,6 +154,12 @@ export class PlanningItineraryComponent implements OnInit {
     service.singleDate = '';
     service.singleTime = '';
   }
+  
+  // Utility method to generate a unique booking ID
+  generateBookingId(): string {
+    return 'booking-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+  
 
   removeService(service: any) {
     this.selectedServices = this.selectedServices.filter(s => s !== service);

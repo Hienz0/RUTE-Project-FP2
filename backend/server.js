@@ -2040,6 +2040,10 @@ const itinerarySchema = new mongoose.Schema({
   },
   services: [
     {
+      bookingId: {
+        type: String,
+        // Ensure bookingId is required for each service
+      },
       serviceType: {
         type: String,
         enum: ['Accommodation', 'Vehicle', 'Tour', 'Restaurant'],
@@ -2077,6 +2081,51 @@ const itinerarySchema = new mongoose.Schema({
 
 // Create the Itinerary Model
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
+
+const PlanningItinerarySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  services: [
+    {
+      bookingId: { type: String, required: true }, // Booking ID directly in the service
+      serviceType: { type: String, required: true },
+      serviceName: { type: String, required: true },
+      startDate: { type: Date }, // Optional for single-date services
+      endDate: { type: Date },   // Optional for single-date services
+      startTime: { type: String }, // "HH:mm" format
+      endTime: { type: String },   // "HH:mm" format
+      singleDate: { type: Date }, // For single-date services like Tours or Restaurants
+      singleTime: { type: String }, // "HH:mm" format
+    },
+  ],
+  createdAt: { type: Date, default: Date.now },
+});
+
+
+const PlanningItinerary = mongoose.model('PlanningItinerary', PlanningItinerarySchema);
+
+// Save Selected Services
+app.post('/api/itinerary/save', async (req, res) => {
+  const { userId, services } = req.body;
+
+  try {
+    // Validate the required fields
+    if (!userId || !services || services.length === 0) {
+      return res.status(400).json({ success: false, message: 'Missing userId or services' });
+    }
+
+    // Create a new Planning Itinerary record
+    const newItinerary = new PlanningItinerary({
+      userId,
+      services,
+    });
+
+    const savedItinerary = await newItinerary.save();
+    res.status(200).json({ success: true, itinerary: savedItinerary });
+  } catch (error) {
+    console.error('Error saving planning itinerary:', error);
+    res.status(500).json({ success: false, message: 'Failed to save planning itinerary' });
+  }
+});
 
 app.put('/api/itinerary/services', async (req, res) => {
   try {
@@ -2145,6 +2194,22 @@ app.get('/api/itinerary/:userId', async (req, res) => {
     res.json(itinerary);
   } catch (err) {
     res.status(500).send('Error retrieving itinerary');
+  }
+});
+
+// Get Planning Itinerary by userId
+app.get('/api/itinerary/planning/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const itinerary = await PlanningItinerary.findOne({ userId });
+    if (itinerary) {
+      res.json(itinerary);
+    } else {
+      res.status(404).json({ message: 'No itinerary found for this user.' });
+    }
+  } catch (error) {
+    console.error('Error fetching itinerary:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
