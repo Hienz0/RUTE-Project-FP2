@@ -43,6 +43,8 @@ export class BookingsComponent implements OnInit, OnDestroy  {
   bookingId: string | null = null;
   remainingTimes: { [key: string]: number } = {}; // Track remaining times for each booking
 interval: any;
+bookingDetails: any = null;
+
 
 
 
@@ -614,6 +616,41 @@ navigateToReview(bookingId: string): void {
   console.log(bookingId);
 }
 
+viewItinerary(service: any): void {
+  // Extract bookingId and serviceType from the service object
+  const bookingId = service.bookingId ?? 'defaultBookingId'; // Fallback in case bookingId is missing
+
+  console.log('service: ', service);
+  const serviceType = service.serviceType ?? 'defaultServiceType'; // Fallback in case serviceType is missing
+
+  // Fetch the booking details based on bookingId and serviceType
+  this.bookingService.getBookingDetails(bookingId, serviceType).subscribe(
+    (data) => {
+      // this.bookingDetails = data; // Set the booking details to display
+      this.bookingDetails = { ...data, serviceType: serviceType }; // Set the booking details to display
+      console.log('booking details: ', this.bookingDetails);
+      const modalElement = document.getElementById('bookingModal');
+      if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      }
+    },
+    (error) => {
+      console.error('Error fetching booking details:', error);
+    }
+  );
+}
+
+closeModal(): void {
+  const modalElement = document.getElementById('bookingModal');
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal?.hide();
+  }
+}
+
+
+// 
 
 
 

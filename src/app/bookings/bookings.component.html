@@ -128,10 +128,10 @@
 <!-- Loop through the services inside the booking -->
 <!-- Loop through the services inside the booking -->
 <li class="mb-3 d-flex flex-column">
-  <!-- Services Label -->
-  <div class="d-flex align-items-center mb-3">
+  <div *ngIf="booking.services && booking.services.length > 0" class="d-flex align-items-center mb-3">
     <strong>Services:</strong>
   </div>
+
 
   <!-- Loop through the services and display each with its corresponding icon -->
   <div *ngFor="let service of booking.services" class="d-flex align-items-center mb-3">
@@ -143,6 +143,11 @@
 
     <!-- Service Name -->
     <span class="text-dark">{{ service.serviceName }}</span>
+
+        <!-- View Itinerary Button -->
+        <button class="btn btn-primary btn-sm" (click)="viewItinerary(service)">
+          View Itinerary
+        </button>
   </div>
 </li>
 
@@ -647,6 +652,76 @@
       </div>
     </div>
   </div>
+
+      <!-- Booking Details Modal -->
+<!-- Booking Details Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+      <!-- Modal Header -->
+      <div class="modal-header bg-dark text-white border-0">
+        <h5 class="modal-title d-flex align-items-center" id="bookingModalLabel">
+          <i class="fas fa-calendar-check me-3"></i>Booking Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Booking details content dynamically injected here -->
+        <div *ngIf="bookingDetails">
+          <div *ngIf="bookingDetails.serviceType === 'Accommodation'" class="list-group">
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-user me-3 text-muted"></i>
+              <strong class="text-muted">Guest Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.guestName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-bed me-3 text-muted"></i>
+              <strong class="text-muted">Accommodation Type:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.accommodationType }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-users me-3 text-muted"></i>
+              <strong class="text-muted">Number of Guests:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.numberOfGuests }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-calendar-check me-3 text-muted"></i>
+              <strong class="text-muted">Check-In Date:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.checkInDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-calendar-times me-3 text-muted"></i>
+              <strong class="text-muted">Check-Out Date:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.checkOutDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-comment-dots me-3 text-muted"></i>
+              <strong class="text-muted">Special Request:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.specialRequest }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-info-circle me-3 text-muted"></i>
+              <strong class="text-muted">Status:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.bookingStatus }}</span>
+            </div>
+          </div>
+
+          <!-- Additional Service Types Here (e.g., Tour, Transportation) -->
+          <!-- Apply the same list-group-item structure as above -->
+
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   
   
   

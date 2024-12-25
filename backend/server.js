@@ -4899,46 +4899,84 @@ app.post("/api/receipts", upload.single("receipt"), async (req, res) => {
 // });
 
 // Endpoint untuk mengirimkan email dengan PDF receipt
+// Endpoint untuk mengirimkan email dengan PDF receipt
 app.post('/api/payments/update-status', async (req, res) => {
   const { bookingId, bookingType } = req.body;
 
-  let BookingModel;
-  switch (bookingType) {
-    case 'Accommodation':
-      BookingModel = Booking;
-      break;
-    case 'Tour':
-      BookingModel = TourBooking;
-      break;
-    case 'Vehicle':
-      BookingModel = VehicleBooking;
-      break;
-    default:
-      return res.status(400).json({ error: 'Invalid booking type' });
-  }
-
   try {
-    const updateData = { paymentStatus: 'Paid', bookingStatus: 'Pending' };
-    const booking = await BookingModel.findById(bookingId).populate('userId');
+    if (bookingType === 'Itinerary') {
+      const itinerary = await ItineraryBooking.findById(bookingId);
 
-    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+      if (!itinerary) return res.status(404).json({ error: 'Itinerary booking not found' });
 
-    const user = booking.userId;
-    if (!user) return res.status(404).json({ error: 'User not found' });
+      const serviceUpdates = itinerary.services.map(async (service) => {
+        let Model;
 
-    // Ambil data berdasarkan tipe booking
-    let details = { bookingType, userName: user.name, paymentStatus: 'Paid', bookingStatus: 'Pending' };
-    
+        // Determine the model based on serviceType
+        switch (service.serviceType) {
+          case 'Accommodation':
+            Model = Booking;
+            break;
+          case 'Tour':
+            Model = TourBooking;
+            break;
+          case 'Vehicle':
+            Model = VehicleBooking;
+            break;
+          case 'Restaurant':
+            Model = RestaurantBooking;
+            break;
+          default:
+            throw new Error(`Invalid service type: ${service.serviceType}`);
+        }
 
-    // Update booking status
-    await BookingModel.findByIdAndUpdate(bookingId, updateData);
+        // Update the booking status for the service
+        return Model.findByIdAndUpdate(
+          service.bookingId,
+          { bookingStatus: 'Pending' },
+          { new: true } // Return the updated document
+        );
+      });
 
-    
+      // Wait for all updates to complete
+      await Promise.all(serviceUpdates);
 
-    res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
+      // Update the itinerary booking status
+      await ItineraryBooking.findByIdAndUpdate(
+        bookingId,
+        { paymentStatus: 'Paid', bookingStatus: 'Pending' }
+      );
+
+      return res.status(200).json({ message: 'Itinerary booking and services updated successfully.' });
+    } else {
+      // Handle other booking types as before
+      let BookingModel;
+      switch (bookingType) {
+        case 'Accommodation':
+          BookingModel = Booking;
+          break;
+        case 'Tour':
+          BookingModel = TourBooking;
+          break;
+        case 'Vehicle':
+          BookingModel = VehicleBooking;
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid booking type' });
+      }
+
+      const updateData = { paymentStatus: 'Paid', bookingStatus: 'Pending' };
+      const booking = await BookingModel.findById(bookingId).populate('userId');
+
+      if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+      await BookingModel.findByIdAndUpdate(bookingId, updateData);
+
+      return res.status(200).json({ message: `${bookingType} payment and booking status updated successfully.` });
+    }
   } catch (error) {
     console.error('Error updating payment and booking status:', error);
-    res.status(500).json({ error: 'Failed to update payment and booking status' });
+    return res.status(500).json({ error: 'Failed to update payment and booking status' });
   }
 });
 
