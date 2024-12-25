@@ -255,6 +255,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
   paymentExpiration: { type: Date },
 
   isReviewed: { type: Boolean, default: false },
+  isItinerary: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Create the Booking model
@@ -343,17 +344,29 @@ app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
   try {
     console.log('Fetching all bookings for userId :', userId);
 
-    // Retrieve all tour bookings for the user, without using populate
-    const allTourBookings = await TourBooking.find({ userId });
+    // Retrieve all tour bookings for the user, excluding bookings where isItinerary is true or does not exist
+    const allTourBookings = await TourBooking.find({ 
+      userId, 
+      $or: [{ isItinerary: false }, { isItinerary: { $exists: false } }]
+    });
 
-    // Retrieve all accommodation bookings for the user, without using populate
-    const allAccommodationBookings = await Booking.find({ userId });
+    // Retrieve all accommodation bookings for the user, excluding bookings where isItinerary is true or does not exist
+    const allAccommodationBookings = await Booking.find({ 
+      userId, 
+      $or: [{ isItinerary: false }, { isItinerary: { $exists: false } }]
+    });
 
-    // Retrieve all vehicle bookings for the user, without using populate
-    const allVehicleBookings = await VehicleBooking.find({ userId });
+    // Retrieve all vehicle bookings for the user, excluding bookings where isItinerary is true or does not exist
+    const allVehicleBookings = await VehicleBooking.find({ 
+      userId, 
+      $or: [{ isItinerary: false }, { isItinerary: { $exists: false } }]
+    });
 
-    // Retrieve all itinerary bookings for the user, without using populate
-    const allItineraryBookings = await ItineraryBooking.find({ userId });
+    // Retrieve all itinerary bookings for the user, excluding bookings where isItinerary is true or does not exist
+    const allItineraryBookings = await ItineraryBooking.find({ 
+      userId, 
+      $or: [{ isItinerary: false }, { isItinerary: { $exists: false } }]
+    });
 
     console.log("Tour bookings:", allTourBookings);
     console.log("Accommodation bookings:", allAccommodationBookings);
@@ -373,6 +386,7 @@ app.get('/api/bookings/accommodation/user/:userId', async (req, res) => {
     return res.status(500).json({ message: "Error fetching bookings", error });
   }
 });
+
 
 
 
@@ -4944,7 +4958,7 @@ app.post('/api/payments/update-status', async (req, res) => {
       // Update the itinerary booking status
       await ItineraryBooking.findByIdAndUpdate(
         bookingId,
-        { paymentStatus: 'Paid', bookingStatus: 'Pending' }
+        { paymentStatus: 'Paid', bookingStatus: 'Booked' }
       );
 
       return res.status(200).json({ message: 'Itinerary booking and services updated successfully.' });
