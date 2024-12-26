@@ -217,7 +217,7 @@ const bookingAccommodationSchema = new mongoose.Schema({
   bookingStatus: {
     type: String,
     default: 'Booked',  // Other possible statuses: 'Cancelled', 'CheckedIn', 'CheckedOut'
-    enum: ['Booked', 'Complete', 'Waiting for payment', 'Cancelled', 'CheckedIn', 'CheckedOut']
+    enum: ['Booked', 'Complete', 'Waiting for payment', 'Cancelled', 'CheckedIn', 'CheckedOut', 'Waiting for Itinerary Confirmation']
   },
 
   serviceId: { // Add serviceId field
@@ -2910,7 +2910,7 @@ const bookingTourSchema = new mongoose.Schema({
   bookingStatus: {
     type: String,
     default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-    enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment']
+    enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment', 'Waiting for Itinerary Confirmation']
   },
   serviceId: { // Add serviceId field
     type: mongoose.Schema.Types.ObjectId,
@@ -3593,7 +3593,7 @@ const bookingVehicleSchema = new mongoose.Schema({
   bookingStatus: {
     type: String,
     default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
-    enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment']
+    enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment', 'Waiting for Itinerary Confirmation']
   },
   isReviewed: { type: Boolean, default: false },
   isItinerary: { type: Boolean, default: false },

@@ -1,5 +1,5 @@
 .container {
-    max-width: 800px;
+    max-width: 80%;
   }
   
   h1, h2 {
@@ -43,4 +43,239 @@
       color: inherit;
     }
   }
+  
+  .itinerary-form {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff; /* Clean white background */
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Professional shadow effect */
+  }
+  
+  .form-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #555555; /* Neutral text color */
+  }
+  
+  .form-control {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .form-control:focus {
+    border-color: #007bff; /* Bootstrap primary color */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Soft focus effect */
+  }
+  
+  .button-group .btn {
+    font-size: 1rem;
+    padding: 0.75rem 2rem;
+    border-radius: 50px; /* Rounded buttons */
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary {
+    background-color: #007bff; /* Professional blue */
+    border-color: #007bff;
+    color: #ffffff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    border-color: #0056b3;
+    transform: scale(1.05); /* Slight zoom effect */
+  }
+  
+  .btn-outline-dark {
+    color: #343a40; /* Dark gray */
+    border-color: #343a40;
+    background-color: transparent;
+  }
+  
+  .btn-outline-dark:hover {
+    background-color: #f8f9fa; /* Light gray background */
+    color: #212529; /* Darker text */
+    border-color: #212529;
+  }
+  
+  .gap-3 {
+    gap: 1rem; /* Spacing between buttons */
+  }
+  
+  @media (max-width: 768px) {
+    .form-control {
+      font-size: 0.9rem;
+    }
+  
+    .btn {
+      font-size: 0.9rem;
+      padding: 0.5rem 1.5rem;
+    }
+  }
+
+  /* General Styles */
+body {
+  font-family: 'Lato', sans-serif;
+  color: #333;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.table {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 0;
+}
+
+.table th, .table td {
+  text-align: center;
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.table thead {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.btn {
+  font-size: 1rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:focus {
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Colors */
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-lg {
+  font-size: 1.1rem;
+  padding: 0.75rem 2rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input and Date/Time Styling */
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .table th, .table td {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+  .btn {
+    font-size: 1rem;
+  }
+}
+
+.timeline {
+  position: relative;
+  padding: 2rem 0;
+}
+.timeline-list {
+  list-style: none;
+  padding: 0;
+  position: relative;
+}
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin-right: 1rem;
+}
+.timeline-content {
+  flex-grow: 1;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
   

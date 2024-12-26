@@ -518,7 +518,7 @@ export class PlanningItineraryComponent implements OnInit {
   
   
   private randomChar(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return chars[Math.floor(Math.random() * chars.length)];
   }
 
