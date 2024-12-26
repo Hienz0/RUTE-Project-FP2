@@ -2193,8 +2193,8 @@ const ItineraryBookingSchema = new mongoose.Schema({
   paymentExpiration: { type: Date },
 
   isReviewed: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true }
+);
 
 const ItineraryBooking = mongoose.model('ItineraryBooking', ItineraryBookingSchema);
 
@@ -2322,6 +2322,8 @@ app.get('/api/itinerary/planning/:userId', async (req, res) => {
 
 app.put('/api/itinerary/add-service', async (req, res) => {
   const { bookingId, userId, serviceType, amount } = req.body;
+
+  console.log('Req body: ', req.body);
 
   if (!userId || !bookingId || !serviceType || amount === undefined) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -2476,7 +2478,7 @@ app.get('/api/bookings/:serviceType/:bookingId', async (req, res) => {
       case 'Tour':
         bookingDetails = await TourBooking.findById(bookingId); // Assuming 'TourBooking' model doesn't require population
         break;
-      case 'Transportation':
+      case 'Vehicle':
         bookingDetails = await VehicleBooking.findById(bookingId); // Assuming 'VehicleBooking' model doesn't require population
         break;
       case 'Restaurant':

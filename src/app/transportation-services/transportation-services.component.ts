@@ -50,9 +50,11 @@ export class TransportationServicesComponent implements OnInit {
   }
 
   navigateToDetails(serviceId: string): void {
-    this.router.navigate(['/transportationDetail', serviceId]);
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/transportationDetail', serviceId], { queryParams });
   
   }
+
 
  // transportation-services.component.ts
  getUniqueSubcategories(service: any): string {

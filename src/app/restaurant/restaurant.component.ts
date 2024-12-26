@@ -1,7 +1,7 @@
 // restaurant.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ServicesService } from '../services/services.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
 import { forkJoin } from 'rxjs'; // Import forkJoin
@@ -19,7 +19,7 @@ export class RestaurantComponent implements OnInit {
 
 
 
-  constructor(private ServicesService: ServicesService, private authService: AuthService, private router: Router) {}
+  constructor(private ServicesService: ServicesService, private authService: AuthService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.authService.currentUser.subscribe(user => {
@@ -55,8 +55,11 @@ export class RestaurantComponent implements OnInit {
   }
   
 
-  goToDetail(restaurantId: string): void {
-    this.router.navigate(['/restaurant-detail', restaurantId]);
+
+  
+  goToDetail(id: string): void {
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/restaurant-detail', id], { queryParams });
   }
 
     // Method to navigate to the chat page

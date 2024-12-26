@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { BookingService } from '../services/booking.service';
 import * as L from 'leaflet';
 import Panzoom from '@panzoom/panzoom';
+import { ItineraryService } from '../services/itinerary.service';
 
 // Declare Swal globally
 declare var Swal: any;
@@ -43,6 +44,7 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     private sanitizer: DomSanitizer,
     private router: Router,
     private bookingService: BookingService,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
@@ -209,6 +211,29 @@ addToItinerary(): void {
   this.bookingService.addBookingToItinerary(bookingDetails).subscribe(
     (response) => {
       console.log('Booking added to itinerary successfully', response);
+
+      const bookingId = response.booking._id;
+
+      console.log('Booking ID: ', bookingId);
+
+      const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+      if (planningItineraryId) {
+        // Update the itinerary with the bookingId
+        const userId = this.currentUser.userId; // Ensure `userId` is available
+        this.itineraryService.updateItinerary(bookingId, userId, 'Restaurant', 0).subscribe(
+          () => {
+            console.log('Itinerary updated successfully.');
+            // Navigate to the /planning-itinerary route
+            this.router.navigate([`/planning-itinerary`]);
+          },
+          (error) => {
+            console.error('Failed to update itinerary:', error);
+          }
+        );
+      } else {
+        // Default navigation to booking details page
+        console.log('error');
+      }
     },
     (error) => {
       console.error('Error adding booking to itinerary', error);

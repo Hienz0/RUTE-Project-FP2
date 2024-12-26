@@ -397,22 +397,38 @@
             <strong class="me-2">{{ service.serviceType }}:</strong>
             <span class="text-dark">{{ service.serviceName }}</span>
           </div>
-          <div class="d-flex align-items-center">
-            <i class="fas fa-calendar-alt me-3 text-secondary"></i>
-            <strong class="me-2">Start:</strong>
-            <span class="text-dark">
-              {{ service.startDate | date:'mediumDate' }} ({{ service.startTime }})
-            </span>
-          </div>
-          <div class="d-flex align-items-center mt-1">
-            <i class="fas fa-calendar-times me-3 text-secondary"></i>
-            <strong class="me-2">End:</strong>
-            <span class="text-dark">
-              {{ service.endDate | date:'mediumDate' }} ({{ service.endTime }})
-            </span>
-          </div>
+      
+          <!-- Conditional display for "Accommodation" and "Vehicle" -->
+          <ng-container *ngIf="service.serviceType === 'Accommodation' || service.serviceType === 'Vehicle'; else singleDateTemplate">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-calendar-alt me-3 text-secondary"></i>
+              <strong class="me-2">Start:</strong>
+              <span class="text-dark">
+                {{ service.startDate | date:'mediumDate' }} ({{ service.startTime }})
+              </span>
+            </div>
+            <div class="d-flex align-items-center mt-1">
+              <i class="fas fa-calendar-times me-3 text-secondary"></i>
+              <strong class="me-2">End:</strong>
+              <span class="text-dark">
+                {{ service.endDate | date:'mediumDate' }} ({{ service.endTime }})
+              </span>
+            </div>
+          </ng-container>
+      
+          <!-- Template for "Tour" and "Restaurant" -->
+          <ng-template #singleDateTemplate>
+            <div class="d-flex align-items-center">
+              <i class="fas fa-calendar-day me-3 text-secondary"></i>
+              <strong class="me-2">Date:</strong>
+              <span class="text-dark">
+                {{ service.singleDate | date:'mediumDate' }} ({{ service.singleTime }})
+              </span>
+            </div>
+          </ng-template>
         </div>
       </li>
+      
     </ul>
   </div>
 </ng-container>
@@ -668,8 +684,8 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-        <!-- Booking details content dynamically injected here -->
         <div *ngIf="bookingDetails">
+          <!-- Accommodation -->
           <div *ngIf="bookingDetails.serviceType === 'Accommodation'" class="list-group">
             <div class="list-group-item d-flex align-items-center border-0 py-3">
               <i class="fas fa-user me-3 text-muted"></i>
@@ -708,9 +724,82 @@
             </div>
           </div>
 
-          <!-- Additional Service Types Here (e.g., Tour, Transportation) -->
-          <!-- Apply the same list-group-item structure as above -->
+          <!-- Tour -->
+          <div *ngIf="bookingDetails.serviceType === 'Tour'" class="list-group">
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-map-marked-alt me-3 text-muted"></i>
+              <strong class="text-muted">Tour Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.tourName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-user me-3 text-muted"></i>
+              <strong class="text-muted">Customer Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.customerName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-user-tie me-3 text-muted"></i>
+              <strong class="text-muted">Tour Guide:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.tourguideType }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-calendar-day me-3 text-muted"></i>
+              <strong class="text-muted">Tour Date:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.tourDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-map-pin me-3 text-muted"></i>
+              <strong class="text-muted">Pickup Location:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.pickupLocation }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-users me-3 text-muted"></i>
+              <strong class="text-muted">Participants:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.numberOfParticipants }}</span>
+            </div>
+          </div>
 
+          <!-- Vehicle -->
+          <div *ngIf="bookingDetails.serviceType === 'Vehicle'" class="list-group">
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-car me-3 text-muted"></i>
+              <strong class="text-muted">Vehicle Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.productName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-user me-3 text-muted"></i>
+              <strong class="text-muted">Customer Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.customerName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+              <strong class="text-muted">Pickup Location:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.vehiclePickupLocation }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-map-marker-alt me-3 text-muted"></i>
+              <strong class="text-muted">Dropoff Location:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.vehicleDropoffLocation }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-clock me-3 text-muted"></i>
+              <strong class="text-muted">Rental Duration:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.rentalDuration }} hours</span>
+            </div>
+          </div>
+
+          <!-- Restaurant -->
+          <div *ngIf="bookingDetails.serviceType === 'Restaurant'" class="list-group">
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-utensils me-3 text-muted"></i>
+              <strong class="text-muted">Restaurant Name:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.productName }}</span>
+            </div>
+            <div class="list-group-item d-flex align-items-center border-0 py-3">
+              <i class="fas fa-calendar-day me-3 text-muted"></i>
+              <strong class="text-muted">Booking Date:</strong>
+              <span class="ms-auto text-dark">{{ bookingDetails.bookingDate | date:'mediumDate' }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -721,6 +810,7 @@
     </div>
   </div>
 </div>
+
 
   
   

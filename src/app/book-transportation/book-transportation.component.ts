@@ -8,6 +8,7 @@ import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
 import flatpickr from 'flatpickr';
 import Swal from 'sweetalert2';
+import { ItineraryService } from '../services/itinerary.service';
 
 @Component({
   selector: 'app-book-transportation',
@@ -70,7 +71,8 @@ export class BookTransportationComponent implements OnInit {
     private route: ActivatedRoute,
     private service: TransportationService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
@@ -399,9 +401,25 @@ export class BookTransportationComponent implements OnInit {
             console.log('Transportation booked successfully:', response);
             const bookingId = response.bookingDetails._id;
             console.log(bookingId);
-    
-            // Redirect directly to booking details page
-            this.router.navigate([`/bookings/${bookingId}`]);
+
+            const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+            if (planningItineraryId) {
+              // Update the itinerary with the bookingId
+              const userId = this.currentUser.userId; // Ensure `userId` is available
+              this.itineraryService.updateItinerary(bookingId, userId, 'Vehicle', bookingData.totalBookingPrice).subscribe(
+                () => {
+                  console.log('Itinerary updated successfully.');
+                  // Navigate to the /planning-itinerary route
+                  this.router.navigate([`/planning-itinerary`]);
+                },
+                (error) => {
+                  console.error('Failed to update itinerary:', error);
+                }
+              );
+            } else {
+              // Default navigation to booking details page
+              this.router.navigate([`/bookings/${bookingId}`]);
+            }
           },
           (error) => {
             // Show error message

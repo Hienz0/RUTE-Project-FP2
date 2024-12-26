@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { switchMap, map } from 'rxjs/operators'; // Import necessary operators
@@ -21,7 +21,8 @@ export class BookingTourGuideComponent {
   constructor(
     private servicesService: ServicesService,
     private authService: AuthService,
-    private router: Router // Inject Router here
+    private router: Router, // Inject Router here
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -59,8 +60,11 @@ export class BookingTourGuideComponent {
   }
 
   // Navigate to the details page when a service is clicked
+
+  
   goToDetail(id: string): void {
-    this.router.navigate(['/tour-guide', id]);
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/tour-guide', id], { queryParams });
   }
 }
 

@@ -4,6 +4,7 @@ import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { ItineraryService } from '../services/itinerary.service';
 
 
 declare var Swal: any;
@@ -46,7 +47,8 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
     private bookingService: BookingService,
     private authService: AuthService,
     private renderer: Renderer2,
-    private router: Router
+    private router: Router,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
@@ -240,7 +242,25 @@ openModal(): void {
         console.log('Booking successful', response);
         this.closeModal();
         const bookingId = response._id;
-        this.router.navigate([`/bookings/${bookingId}`]);
+        const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+        if (planningItineraryId) {
+          // Update the itinerary with the bookingId
+          const userId = this.currentUser.userId; // Ensure `userId` is available
+          this.itineraryService.updateItinerary(bookingId, userId, 'Tour', this.bookingDetails.amount).subscribe(
+            () => {
+              console.log('Itinerary updated successfully.');
+              // Navigate to the /planning-itinerary route
+              this.router.navigate([`/planning-itinerary`]);
+            },
+            (error) => {
+              console.error('Failed to update itinerary:', error);
+            }
+          );
+        } else {
+          // Default navigation to booking details page
+          this.router.navigate([`/bookings/${bookingId}`]);
+        }
+
       },
       (error) => {
         console.error('Error submitting booking', error);
