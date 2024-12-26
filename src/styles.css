@@ -450,3 +450,12 @@ body.dark .btn-outline-primary:hover {
   border-color: #007bff;        /* Warna border tetap biru terang */
 }
 
+body.dark .list-group-item {
+  background-color: #212529;  /* Latar belakang hitam */
+  color: white;             /* Teks putih */
+}
+
+body.dark .list-group-item:hover {
+  background-color: #333;   /* Warna latar belakang saat hover */
+  color: white;
+}
