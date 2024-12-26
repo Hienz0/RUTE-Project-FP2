@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { ItineraryService } from '../services/itinerary.service';
 import { BookingService } from '../services/booking.service';
 import { NgForm } from '@angular/forms';
+import { startOfDay, endOfDay, eachDayOfInterval } from 'date-fns';
 
 
 declare var bootstrap: any;
@@ -29,6 +30,9 @@ export class PlanningItineraryComponent implements OnInit {
     { serviceType: 'Restaurant', serviceName: 'Not Available', singleDate: '', singleTime: '' }
   ];
 
+  calendarDates: { date: Date; highlight: boolean; services: any[], isPlaceholder: boolean }[] = [];
+
+
   selectedServices: Array<any> = [];
   bookingDetails: any = null;
 
@@ -39,8 +43,20 @@ export class PlanningItineraryComponent implements OnInit {
   resolvedIndices: Set<number> = new Set(); // Track resolved character positions
 
 
+  selectedMonth: number = new Date().getMonth();
+  selectedYear: number = new Date().getFullYear();
+  months: string[] = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  years: number[] = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - 10 + i);
 
-  constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService, private bookingService: BookingService) {}
+
+
+
+  constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService, private bookingService: BookingService) {
+    this.updateCalendar();
+  }
 
 
   ngOnInit(): void {
@@ -54,6 +70,31 @@ export class PlanningItineraryComponent implements OnInit {
         this.loadPlanningItinerary();
       }
     });
+
+    // const start = startOfDay(new Date(this.vacationStartDate));
+    // const end = endOfDay(new Date(this.vacationEndDate));
+    
+
+    //       // Generate all dates within the vacation range
+    //       this.calendarDates = eachDayOfInterval({ start, end }).map(date => ({
+    //         date,
+    //         highlight: false,
+    //         services: this.selectedServices.filter(service =>
+    //           service.singleDate
+    //             ? new Date(service.singleDate).getTime() === date.getTime()
+    //             : new Date(service.startDate).getTime() <= date.getTime() &&
+    //               new Date(service.endDate).getTime() >= date.getTime()
+    //         )
+    //       }));
+    
+    //       // Highlight dates with services
+    //       this.calendarDates.forEach(day => {
+    //         if (day.services.length > 0) {
+    //           day.highlight = true;
+    //         }
+    //       });
+
+    this.updateCalendar();
     
   }
 
@@ -112,6 +153,7 @@ export class PlanningItineraryComponent implements OnInit {
           });
   
           this.showServiceSelection = true;
+          this.updateCalendar();
         } else {
           console.log('No itinerary found for user:', userId);
           this.showServiceSelection = false;
@@ -134,6 +176,7 @@ export class PlanningItineraryComponent implements OnInit {
         next: (response) => {
           if (response && response.services) {
             this.selectedServices = response.services;
+            console.log('selected services', this.selectedServices);
             this.calculateTotalAmount();
           } else {
             console.log('No services found for this user.');
@@ -212,6 +255,7 @@ export class PlanningItineraryComponent implements OnInit {
     service.singleTime = '';
 
     this.resetService(service);
+    this.updateCalendar();
   }
   
   // Utility method to generate a unique booking ID
@@ -230,6 +274,7 @@ export class PlanningItineraryComponent implements OnInit {
       response => {
         console.log('Service removed from itinerary', response);
         Swal.fire('Success', 'Service has been removed from your itinerary.', 'success');
+        this.updateCalendar();
       },
       error => {
         console.error('Error removing service from itinerary', error);
@@ -556,4 +601,215 @@ export class PlanningItineraryComponent implements OnInit {
       textElement.classList.add('final-reveal');
     }
   }
+
+  getServiceColor(index: number): string {
+    const colors = ['#FFA726', '#AB47BC', '#29B6F6', '#66BB6A', '#FF7043']; // Add more colors as needed
+    return colors[index % colors.length];
+  }
+  
+  updateCalendar() {
+    this.calendarDates = [];
+  
+    // Get first day of selected month and necessary date information
+    const firstDay = new Date(this.selectedYear, this.selectedMonth, 1);
+    const startDayOfWeek = firstDay.getDay();
+    const daysInMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(this.selectedYear, this.selectedMonth, 0).getDate();
+  
+    // Add placeholders for the previous month
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      this.calendarDates.push({
+        date: new Date(this.selectedYear, this.selectedMonth - 1, daysInPrevMonth - i),
+        highlight: false,
+        services: [],
+        isPlaceholder: true,
+      } as any);
+    }
+  
+    // Add current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(this.selectedYear, this.selectedMonth, i);
+  
+      // Get services for the day, including past ones
+      const servicesForDay = this.getServicesForDay(currentDate);
+  
+      this.calendarDates.push({
+        date: currentDate,
+        highlight: this.isServiceDate(currentDate), // Highlight dates that have services
+        services: servicesForDay,
+        isPlaceholder: false,
+      } as any);
+    }
+  
+    // Add placeholders for the next month
+    const remainingDays = 42 - this.calendarDates.length;
+    for (let i = 1; i <= remainingDays; i++) {
+      this.calendarDates.push({
+        date: new Date(this.selectedYear, this.selectedMonth + 1, i),
+        highlight: false,
+        services: [],
+        isPlaceholder: true,
+      } as any);
+    }
+  }
+
+  // isServiceDate(date: Date): boolean {
+  //   return this.selectedServices.some(service => {
+  //     const serviceDate = new Date(
+  //       service.startDate || service.singleDate || service.endDate
+  //     );
+  //     return (
+  //       serviceDate.getFullYear() === date.getFullYear() &&
+  //       serviceDate.getMonth() === date.getMonth() &&
+  //       serviceDate.getDate() === date.getDate()
+  //     );
+  //   });
+  // }
+  
+  
+  
+  isHighlighted(date: Date): boolean {
+    return this.selectedServices.some(service => {
+      const serviceStartDate = service.startDate ? new Date(service.startDate) : null;
+      const serviceEndDate = service.endDate ? new Date(service.endDate) : null;
+      const serviceSingleDate = service.singleDate ? new Date(service.singleDate) : null;
+  
+      // Compare only the date part (ignore time)
+      const dateOnly = this.stripTime(date);
+      const startDateOnly = serviceStartDate ? this.stripTime(serviceStartDate) : null;
+      const endDateOnly = serviceEndDate ? this.stripTime(serviceEndDate) : null;
+      const singleDateOnly = serviceSingleDate ? this.stripTime(serviceSingleDate) : null;
+  
+      // Match if the date falls within the start-end range or equals singleDate
+      if (startDateOnly && endDateOnly) {
+        return dateOnly >= startDateOnly && dateOnly <= endDateOnly;
+      }
+  
+      if (singleDateOnly) {
+        return singleDateOnly.getTime() === dateOnly.getTime();
+      }
+  
+      return false;
+    });
+  }
+  
+  // Helper method to strip the time part from a Date
+  stripTime(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+  
+  
+  
+  getServicesForDay(date: Date): any[] {
+    const dateOnly = this.stripTime(date);  // Strip the time part
+  
+    return this.selectedServices
+      .filter(service => {
+        const startDate = service.startDate ? new Date(service.startDate) : null;
+        const endDate = service.endDate ? new Date(service.endDate) : null;
+        const singleDate = service.singleDate ? new Date(service.singleDate) : null;
+  
+        const startDateOnly = startDate ? this.stripTime(startDate) : null;
+        const endDateOnly = endDate ? this.stripTime(endDate) : null;
+        const singleDateOnly = singleDate ? this.stripTime(singleDate) : null;
+  
+        // If the service has a startDate and endDate, check for exact match
+        if (startDateOnly && endDateOnly) {
+          return dateOnly.getTime() === startDateOnly.getTime() || dateOnly.getTime() === endDateOnly.getTime();
+        }
+  
+        // If the service has a single date, match it
+        if (singleDateOnly) {
+          return singleDateOnly.getTime() === dateOnly.getTime();
+        }
+  
+        return false;
+      })
+      .map(service => {
+        // Map custom labels based on serviceType
+        if (service.serviceType === 'Accommodation') {
+          // Check if it's the first or last day
+          const isFirstDay = new Date(service.startDate).toDateString() === dateOnly.toDateString();
+          const isLastDay = new Date(service.endDate).toDateString() === dateOnly.toDateString();
+  
+          return {
+            ...service,
+            displayStartDate: isFirstDay ? `Check In: ${service.startTime}` : null,
+            displayEndDate: isLastDay ? `Check Out: ${service.endTime}` : null,
+          };
+        } else if (service.serviceType === 'Restaurant' || service.serviceType === 'Tour') {
+          return {
+            ...service,
+            displaySingleDate: `Reservation Time: ${service.singleTime}`, // Use singleTime for Restaurant/Tour
+          };
+        } else if (service.serviceType === 'Transportation') {
+          return {
+            ...service,
+            displayStartDate: `Pick Up: ${service.startTime}`,
+            displayEndDate: `Drop Off: ${service.endTime}`,
+          };
+        }
+        return service;  // Default case
+      });
+  }
+  
+  
+  
+  
+  
+  isDateInRange(date: Date): boolean {
+    const vacationStart = new Date(this.vacationStartDate);
+    const vacationEnd = new Date(this.vacationEndDate);
+    
+    // Strip time part to ensure comparison is based on date only
+    const dateOnly = this.stripLocalTime(date);
+    const vacationStartOnly = this.stripLocalTime(vacationStart);
+    const vacationEndOnly = this.stripLocalTime(vacationEnd);
+  
+    return dateOnly >= vacationStartOnly && dateOnly <= vacationEndOnly;
+  }
+  
+  // Helper function to strip time and only compare dates
+  stripLocalTime(date: Date): Date {
+    const strippedDate = new Date(date);
+    strippedDate.setHours(0, 0, 0, 0);  // Set to midnight to ignore time
+    return strippedDate;
+  }
+  
+
+  
+  
+  isServiceDate(date: Date): boolean {
+    return this.getServicesForDay(date).length > 0;
+  }
+
+  goToPreviousMonth() {
+    if (this.selectedMonth === 0) {
+      this.selectedMonth = 11;
+      this.selectedYear--;
+    } else {
+      this.selectedMonth--;
+    }
+    this.updateCalendar();
+  }
+
+  goToNextMonth() {
+    if (this.selectedMonth === 11) {
+      this.selectedMonth = 0;
+      this.selectedYear++;
+    } else {
+      this.selectedMonth++;
+    }
+    this.updateCalendar();
+  }
+
+  onMonthChange() {
+    this.updateCalendar();
+  }
+
+  onYearChange() {
+    this.updateCalendar();
+  }
+
+
 }

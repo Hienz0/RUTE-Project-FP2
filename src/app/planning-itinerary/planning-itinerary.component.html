@@ -224,12 +224,11 @@
 
   <!-- Clear Itinerary Button -->
   <div class="text-center mt-3">
-    <button
-      class="btn btn-danger btn-sm"
-    >
+    <button class="btn btn-outline-danger btn-sm hover-fill">
       <i class="fas fa-trash-alt"></i> Clear Itinerary
     </button>
   </div>
+  
 </div>
 
 
@@ -289,7 +288,124 @@
       </div>
     </div>
     
+    <div class="calendar-container">
+      <!-- Header -->
+      <div class="calendar-header">
+        <h3>My Vacation Itinerary ({{ vacationStartDate }} to {{ vacationEndDate }})</h3>
+        <div class="calendar-controls">
+          <button (click)="goToPreviousMonth()">Previous</button>
+          <select [(ngModel)]="selectedMonth" (change)="onMonthChange()">
+            <option *ngFor="let month of months; let i = index" [value]="i">{{ month }}</option>
+          </select>
+          <select [(ngModel)]="selectedYear" (change)="onYearChange()">
+            <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+          </select>
+          <button (click)="goToNextMonth()">Next</button>
+        </div>
+      </div>
     
+      <!-- Calendar Grid -->
+      <div class="calendar-grid">
+        <div
+          *ngFor="let day of calendarDates"
+          class="calendar-day"
+          [ngClass]="{
+            'highlight-day': isDateInRange(day.date),  
+            'placeholder-day': day.isPlaceholder
+          }"
+        >
+          <div class="date-number">{{ day.date | date: 'd' }}</div>
+          <div class="services">
+            <div
+              *ngFor="let service of day.services; let i = index"
+              class="service-badge"
+              [style.background-color]="getServiceColor(i)"
+              matTooltip=" 
+                {{ service.serviceName }}
+                {{ service.displayStartDate ? '(' + service.displayStartDate + ')' : '' }}
+                {{ service.displayEndDate ? '(' + service.displayEndDate + ')' : '' }}
+                {{ service.displaySingleDate ? '(' + service.displaySingleDate + ')' : '' }}"
+            >
+              {{ service.serviceName }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- <div class="mat-calendar-container">
+      <h3 class="text-center text-primary mb-4">
+        My Vacation Itinerary ({{ vacationStartDate }} to {{ vacationEndDate }})
+      </h3>
+    
+      <!-- Vacation Range 
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Vacation Start Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              [(ngModel)]="vacationStartDate"
+              (ngModelChange)="saveVacationDate()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Vacation End Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              [(ngModel)]="vacationEndDate"
+              (ngModelChange)="saveVacationDate()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    
+      <!-- Calendar Grid --
+      <mat-grid-list cols="7" rowHeight="1:1" gutterSize="10px">
+        <mat-grid-tile
+          *ngFor="let day of calendarDates"
+          [colspan]="1"
+          [rowspan]="1"
+          [ngClass]="{ 'highlight-day': day.highlight }"
+        >
+          <div class="date-number">{{ day.date | date: 'MMM d, yyyy' }}</div>
+          <div class="services">
+            <mat-chip-listbox>
+              <mat-chip
+                *ngFor="let service of day.services"
+                color="primary"
+                selected
+              >
+                {{ service.serviceName }}
+              </mat-chip>
+            </mat-chip-listbox>
+          </div>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div> -->
     
 
 

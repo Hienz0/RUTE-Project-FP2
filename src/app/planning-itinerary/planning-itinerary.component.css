@@ -53,6 +53,18 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Professional shadow effect */
   }
+
+  .highlight-day {
+    background-color: rgba(255, 235, 59, 0.2);  /* Light yellow with transparency */
+    color: #333;  /* Darker text for contrast */
+    border-radius: 50%;  /* Optional: makes the highlight circular */
+    transition: background-color 0.3s ease;  /* Smooth transition for hover effects */
+  }
+  
+  .highlight-day:hover {
+    background-color: rgba(255, 235, 59, 0.3);  /* Slightly darker yellow when hovered */
+  }
+  
   
   .form-label {
     font-size: 1.1rem;
@@ -275,6 +287,96 @@ h2 {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.calendar-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+  margin-bottom: 20px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 columns for days of the week */
+  gap: 10px;
+}
+
+.calendar-day {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+}
+
+.calendar-day:hover {
+  background-color: #eaf4fc;
+}
+
+.highlight-day {
+  background-color: #d1e7dd; /* Light green for highlights */
+  border-color: #0f5132;
+}
+
+.date-number {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.services {
+  font-size: 14px;
+  color: #495057;
+  margin-top: 5px;
+}
+
+.service-item {
+  margin: 0;
+  padding: 2px 0;
+}
+
+
+.mat-calendar-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+mat-grid-tile {
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+mat-grid-tile:hover {
+  background-color: #eaf4fc;
+}
+
+.highlight-day {
+  background-color: #d1e7dd !important; /* Light green for highlights */
+  border-color: #0f5132 !important;
+}
+
+.date-number {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.services mat-chip {
+  font-size: 12px;
+  margin: 2px;
+}
 
 
 

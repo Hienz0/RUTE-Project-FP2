@@ -32,6 +32,9 @@ import { SafeUrlPipe } from './safe-url.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
@@ -43,7 +46,6 @@ import { PaymentListComponent } from './payment-list/payment-list.component';
 import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
 import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
-
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
 import { UserNavbarComponent } from './user-navbar/user-navbar.component';
@@ -123,6 +125,9 @@ import { PlanningItineraryComponent } from './planning-itinerary/planning-itiner
     MatFormFieldModule,
     MatSnackBarModule, // Add comma here
     MatTooltipModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatGridListModule,
     RouterModule.forRoot([
       { path: 'manage-services', component: ManageServicesComponent },
       { path: 'register', component: RegisterComponent },
