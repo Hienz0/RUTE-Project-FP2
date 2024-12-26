@@ -4,7 +4,7 @@ import { WeatherService } from '../services/weather.service';
 @Component({
   selector: 'app-weather-widget',
   template: `
-<div style="text-align: center; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+<div style="text-align: center; padding: 20px; margin-bottom: 20px;  border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
   <a 
     class="weatherwidget-io" 
     href="https://forecast7.com/en/n8d51115d26/ubud/" 

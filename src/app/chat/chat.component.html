@@ -57,7 +57,7 @@
               class="p-3 rounded-3"
               [ngClass]="{
                 'bg-dark text-light': msg.senderId === userId,
-                'bg-light text-muted border': msg.senderId !== userId,
+                'custom-light text-muted border': msg.senderId !== userId,
                 'rounded-bottom-right-0': msg.senderId === userId,
                 'rounded-bottom-left-0': msg.senderId !== userId
               }"
@@ -136,7 +136,7 @@
                     class="p-3 rounded-3"
                     [ngClass]="{
                       'bg-dark text-light': msg.senderId === userId,
-                      'bg-light text-muted border': msg.senderId !== userId,
+                      'custom-light text-muted border': msg.senderId !== userId,
                       'rounded-bottom-right-0': msg.senderId === userId,
                       'rounded-bottom-left-0': msg.senderId !== userId
                     }"

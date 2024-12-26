@@ -10,7 +10,11 @@
   background-color: #f7f7f9;
 } */
 
-
+.custom-light {
+  background-color: #f8f9fa !important; /* Latar belakang terang */
+  color: #6c757d !important; /* Teks abu-abu */
+  border: 1px solid #dee2e6 !important; /* Garis tepi abu-abu */
+}
 .chat-messages .bg-light {
   background-color: #f1f1f4 !important;
 }

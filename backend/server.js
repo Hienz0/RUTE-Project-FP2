@@ -4855,6 +4855,40 @@ app.get('/api/bookings/transportation/user/:userId', async (req, res) => {
 // // Call the function to perform the deletion
 // deleteBookingsExcept();
 
+
+
+app.put('/update-id', async (req, res) => {
+  const oldId = '66541ddfc0a4f88df17403ab'; // ID lama
+  const newId = '665f504a893ed90d8a930118'; // ID baru
+
+  try {
+    // Temukan pengguna berdasarkan ID lama
+    const user = await User.findById(oldId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Salin data ke ID baru
+    const newUser = new User({
+      _id: newId,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    });
+
+    await newUser.save(); // Simpan data dengan ID baru
+    await User.findByIdAndDelete(oldId); // Hapus ID lama
+
+    res.status(200).json({ message: 'ID updated successfully', data: newUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating ID' });
+  }
+});
+
+
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 })
