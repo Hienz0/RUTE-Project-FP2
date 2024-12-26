@@ -3,8 +3,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ItineraryService } from '../services/itinerary.service';
 import { BookingService } from '../services/booking.service';
+import { NgForm } from '@angular/forms';
+
 
 declare var bootstrap: any;
+
+declare var Swal: any
 
 @Component({
   selector: 'app-planning-itinerary',
@@ -28,10 +32,20 @@ export class PlanningItineraryComponent implements OnInit {
   selectedServices: Array<any> = [];
   bookingDetails: any = null;
 
+
+  targetText: string = 'Plan Your Itinerary';
+  animatedText: string = '';
+  animationSpeed: number = 75; // Speed of the animation in milliseconds
+  resolvedIndices: Set<number> = new Set(); // Track resolved character positions
+
+
+
   constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService, private bookingService: BookingService) {}
 
 
   ngOnInit(): void {
+    this.animatedText = ' '.repeat(this.targetText.length); // Placeholder with spaces
+    this.animateText();
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
       if (this.currentUser) {
@@ -108,6 +122,8 @@ export class PlanningItineraryComponent implements OnInit {
       },
     });
   }
+
+  
   
 
   totalAmount: number = 0;
@@ -120,7 +136,7 @@ export class PlanningItineraryComponent implements OnInit {
             this.selectedServices = response.services;
             this.calculateTotalAmount();
           } else {
-            alert('No services found for this user.');
+            console.log('No services found for this user.');
           }
         },
         error: (err) => {
@@ -187,12 +203,15 @@ export class PlanningItineraryComponent implements OnInit {
     });
   
     // Clear service fields after adding
+    service.serviceName = 'Not Available'
     service.startDate = '';
     service.endDate = '';
     service.startTime = '';
     service.endTime = '';
     service.singleDate = '';
     service.singleTime = '';
+
+    this.resetService(service);
   }
   
   // Utility method to generate a unique booking ID
@@ -201,8 +220,22 @@ export class PlanningItineraryComponent implements OnInit {
   }
   
 
-  removeService(service: any) {
-    this.selectedServices = this.selectedServices.filter(s => s !== service);
+  // Remove service both locally and from the backend
+  removeService(service: any): void {
+    // Remove the service locally
+    this.selectedServices = this.selectedServices.filter(s => s.bookingId !== service.bookingId);
+
+    // Call backend to remove service by bookingId
+    this.itineraryService.removeServiceFromItinerary(this.currentUser.userId, service.bookingId).subscribe(
+      response => {
+        console.log('Service removed from itinerary', response);
+        Swal.fire('Success', 'Service has been removed from your itinerary.', 'success');
+      },
+      error => {
+        console.error('Error removing service from itinerary', error);
+        Swal.fire('Error', 'There was an issue removing the service.', 'error');
+      }
+    );
   }
 
   chooseService(service: any) {
@@ -323,9 +356,204 @@ export class PlanningItineraryComponent implements OnInit {
       },
     });
   }
+
+  clearFields(itineraryForm: NgForm): void {
+    const userId = this.currentUser.userId;
+    if (!userId) {
+      console.error('User ID is missing.');
+      return;
+    }
+  
+    // Clear frontend fields first
+    this.vacationStartDate = '';
+    this.vacationEndDate = '';
+    this.availableServices.forEach(service => {
+      service.startDate = '';
+      service.startTime = '';
+      service.endDate = '';
+      service.endTime = '';
+      service.singleDate = '';
+      service.singleTime = '';
+    });
+  
+    this.selectedServices = [];
+    this.totalAmount = 0;
+    this.showServiceSelection = false;
+  
+    // Reset the form state
+    itineraryForm.resetForm();
+  
+    // Confirm with the user before clearing
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will clear all your itineraries and planning data.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, clear it!',
+      cancelButtonText: 'No, keep it',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // Call to backend to clear itinerary
+        this.itineraryService.clearItinerary(userId).subscribe(
+          () => {
+            // Show success message after clearing the data
+            Swal.fire('Cleared!', 'Your itineraries have been cleared.', 'success');
+          },
+          (error) => {
+            console.error('Error clearing itineraries:', error);
+            Swal.fire('Error!', 'Failed to clear itineraries.', 'error');
+          }
+        );
+      }
+    });
+  }
+
+  clearItinerary(): void {
+
+    // Optionally, clear the service-specific date and time data
+    this.availableServices.forEach(service => {
+      service.startDate = '';
+      service.startTime = '';
+      service.endDate = '';
+      service.endTime = '';
+      service.singleDate = '';
+      service.singleTime = '';
+    });
+  
+      // Notify the backend to clear itineraries for the user
+  this.itineraryService.deleteItinerariesByUserId(this.currentUser.userId).subscribe({
+    next: (response) => {
+      // Show a success confirmation
+      Swal.fire('Cleared!', 'Your itinerary has been cleared from the database.', 'success');
+      
+    },
+    error: (error) => {
+      // Show an error message if the deletion fails
+      Swal.fire('Error', 'Failed to clear itinerary from the database.', 'error');
+      console.error(error);
+    },
+  });
+  }
+
+  resetService(service: any): void {
+    // Clear the local service data first
+    if (service.serviceType === 'Accommodation' || service.serviceType === 'Vehicle') {
+      service.serviceName = 'Not Available';
+      service.startDate = '';
+      service.endDate = '';
+      service.startTime = '';
+      service.endTime = '';
+    } else if (service.serviceType === 'Tour' || service.serviceType === 'Restaurant') {
+      service.serviceName = 'Not Available';
+      service.singleDate = '';
+      service.singleTime = '';
+    }
+  
+    // Now make the backend call to delete the service
+    this.itineraryService.deleteService(this.currentUser.userId, service.serviceType).subscribe(
+      (response) => {
+        console.log(`${service.serviceType} deleted successfully from the database`);
+      },
+      (error) => {
+        console.error('Error deleting service from database:', error);
+      }
+    );
+  }
   
   
   
+  clearAllServices(): void {
+    // Clear selected services locally
+    this.selectedServices = [];
+    this.totalAmount = 0;
+
+    // Call the backend to delete the itinerary from the database
+    this.itineraryService.clearPlanningItinerary(this.currentUser.userId).subscribe(
+      response => {
+        Swal.fire('Cleared!', 'All selected services and the itinerary have been cleared.', 'success');
+      },
+      error => {
+        Swal.fire('Error!', 'There was an issue clearing the itinerary.', 'error');
+      }
+    );
+  }
+  
+  isChooseDisabled(service: any): boolean {
+    if (service.serviceType === 'Accommodation' || service.serviceType === 'Vehicle') {
+      return (
+        !service.startDate ||
+        !service.startTime ||
+        !service.endDate ||
+        !service.endTime
+      );
+    } else if (service.serviceType === 'Tour' || service.serviceType === 'Restaurant') {
+      return !service.singleDate || !service.singleTime;
+    }
+    return true; // Default case for unknown service types
+  }
+  
+  isBookingIdValid(service: any): boolean {
+    // Check if the service has a 'bookingId' property and that it's not "Missing"
+    return 'bookingId' in service && service.bookingId !== 'Missing';
+  }
+
+  isAddToItineraryEnabled(service: any): boolean {
+    if ('bookingId' in service && service.bookingId && service.bookingId !== 'Missing') {
+      if (service.serviceType === 'Accommodation' || service.serviceType === 'Vehicle') {
+        // Check for Accommodation or Vehicle: startDate, endDate, startTime, and endTime
+        return (
+          !!service.startDate &&
+          !!service.startTime &&
+          !!service.endDate &&
+          !!service.endTime
+        );
+      } else if (service.serviceType === 'Tour' || service.serviceType === 'Restaurant') {
+        // Check for Tour or Restaurant: singleDate and singleTime
+        return !!service.singleDate && !!service.singleTime;
+      }
+    }
+    return false; // Disable button if conditions are not met
+  }
   
   
+  
+  private randomChar(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    return chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  private animateText(): void {
+    const interval = setInterval(() => {
+      if (this.resolvedIndices.size === this.targetText.length) {
+        clearInterval(interval); // Stop the animation once all letters are resolved
+        this.addFinalRevealEffect();
+        return;
+      }
+
+      // Pick a random unresolved index
+      let randomIndex: number;
+      do {
+        randomIndex = Math.floor(Math.random() * this.targetText.length);
+      } while (this.resolvedIndices.has(randomIndex));
+
+      // Add the index to resolved indices
+      this.resolvedIndices.add(randomIndex);
+
+      // Build the animated text
+      this.animatedText = this.targetText
+        .split('')
+        .map((char, index) =>
+          this.resolvedIndices.has(index) ? char : this.randomChar()
+        )
+        .join('');
+    }, this.animationSpeed);
+  }
+
+  private addFinalRevealEffect(): void {
+    // Add a class to trigger CSS transitions for a final effect
+    const textElement = document.querySelector('.animated-text');
+    if (textElement) {
+      textElement.classList.add('final-reveal');
+    }
+  }
 }

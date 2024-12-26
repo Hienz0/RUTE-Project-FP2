@@ -11,13 +11,21 @@ export class BookingService {
   constructor(private http: HttpClient) {}
 
   // Send a booking request to the backend
-  bookAccommodation(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${'accommodation'}`, bookingData);
+  bookAccommodation(bookingData: any, isItinerary: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/accommodation`, {
+      ...bookingData,
+      isItinerary,
+    });
   }
+  
 
-  bookTourGuide(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${'tour-guide'}`, bookingData);
+  bookTourGuide(bookingData: any, isItinerary: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/bookings/tour-guide`, {
+      ...bookingData,
+      isItinerary,
+    });
   }
+  
 
     // Check if the room is available for the specified date range
     checkRoomAvailability(serviceId: string, roomNumber: number, checkInDate: string, checkOutDate: string): Observable<boolean> {

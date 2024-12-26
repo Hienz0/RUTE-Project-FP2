@@ -1731,7 +1731,7 @@ submitBooking(): void {
       };
 
       // Submit the booking data
-      this.bookingService.bookAccommodation(bookingData).subscribe(
+      this.bookingService.bookAccommodation(bookingData, false).subscribe(
         (response) => {
           console.log('Booking Response:', response); // Log the response here
           Swal.fire({

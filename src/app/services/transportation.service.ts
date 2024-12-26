@@ -25,12 +25,15 @@ export class TransportationService {
     return this.http.get(`${this.url}/transportationsDetails/${transportID}`);
   }
 
-  bookTransport(bookingData: any): Observable<any> {
-    console.log('Booking Data:', bookingData);
-    return this.http.post(this.apiUrl, bookingData, {
+  bookTransport(bookingData: any, isItinerary: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/bookTransports`, {
+      ...bookingData,
+      isItinerary,
+    }, {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+  
 
   saveTransportation(data: any): Observable<any> {
     return this.http.post(`${this.url}/manage/transportation`, data);

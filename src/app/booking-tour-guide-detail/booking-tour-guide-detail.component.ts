@@ -41,6 +41,8 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
 
   currentDate: string = '';
 
+  isItinerary: boolean = false; // Default is false
+
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService,
@@ -55,6 +57,14 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
       console.log(this.currentUser);
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['planning-itinerary']) {
+        this.isItinerary = true;
+      } else {
+        this.isItinerary = false;
+      }
     });
 
     const today = new Date();
@@ -237,7 +247,7 @@ openModal(): void {
 
     console.log(bookingData)
   
-    this.bookingService.bookTourGuide(bookingData).subscribe(
+    this.bookingService.bookTourGuide(bookingData, this.isItinerary).subscribe(
       (response) => {
         console.log('Booking successful', response);
         this.closeModal();

@@ -1,6 +1,7 @@
 <app-user-navbar></app-user-navbar>
 <div class="container my-5">
-    <h1 class="text-center mb-4">Plan Your Itinerary</h1>
+  <h1 class="text-center mb-4">{{ animatedText }}</h1>
+
   
     <!-- Vacation Date Form -->
 <!-- Vacation Date Form -->
@@ -33,6 +34,9 @@
     </div>
     <button type="submit" class="btn btn-primary mt-4" [disabled]="!itineraryForm.valid">
         Plan Itinerary
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="clearFields(itineraryForm)">
+        Clear All
       </button>
   </form>
   
@@ -125,14 +129,31 @@
               
               <td>
                 <div class="d-flex justify-content-between">
-                  <button class="btn btn-success me-2" (click)="addService(service)">
-                    Add to Itinerary
-                  </button>
-                  <button class="btn btn-info" (click)="chooseService(service)">
-                    Choose
-                  </button>
-                  <button class="btn btn-primary" (click)="viewItinerary(service)">
-                    View Itinerary
+                  <button
+                  class="btn btn-success me-2"
+                  (click)="addService(service)"
+                  [disabled]="!isAddToItineraryEnabled(service)"
+                >
+                  Add to Itinerary
+                </button>
+                
+                  <button
+                  class="btn btn-info"
+                  (click)="chooseService(service)"
+                  [disabled]="isChooseDisabled(service)"
+                >
+                  Choose
+                </button>
+                <button
+                class="btn btn-primary"
+                (click)="viewItinerary(service)"
+                [disabled]="!isBookingIdValid(service)"
+              >
+                View Itinerary
+              </button>
+              
+                  <button class="btn btn-warning" (click)="resetService(service)">
+                    Reset
                   </button>
                   
                 </div>
@@ -142,6 +163,13 @@
           </tbody>
         </table>
       </div>
+
+        <!-- Button to Clear Itinerary -->
+  <div class="text-center mt-3">
+    <button class="btn btn-danger" (click)="clearItinerary()">
+      Clear Itinerary
+    </button>
+  </div>
     </div>
   
     <!-- Selected Services Summary -->
@@ -169,6 +197,13 @@
     <h4>Total Amount: {{ totalAmount | currency }}</h4>
   </div>
     </div>
+
+      <!-- Button to Clear All Selected Services -->
+  <div class="text-center mt-3">
+    <button class="btn btn-warning" (click)="clearAllServices()">
+      Clear All Services
+    </button>
+  </div>
 
     <div class="text-end mt-4">
       <button class="btn btn-success" (click)="confirmItinerary()">

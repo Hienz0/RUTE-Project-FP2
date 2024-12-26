@@ -67,6 +67,8 @@ export class BookTransportationComponent implements OnInit {
   isModalOpen = false;
   ubudCircle: any;
 
+  isItinerary: boolean = false; // Default is false
+
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
@@ -82,6 +84,13 @@ export class BookTransportationComponent implements OnInit {
 
     this.serviceId = this.route.snapshot.paramMap.get('id');
 
+    this.route.queryParams.subscribe(params => {
+      if (params['planning-itinerary']) {
+        this.isItinerary = true;
+      } else {
+        this.isItinerary = false;
+      }
+    });
 
     // Get ID from route parameter
     this.transportID = this.route.snapshot.paramMap.get('id')!;
@@ -396,7 +405,7 @@ export class BookTransportationComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // If user confirms, proceed with booking
-        this.service.bookTransport(bookingData).subscribe(
+        this.service.bookTransport(bookingData, this.isItinerary).subscribe(
           (response) => {
             console.log('Transportation booked successfully:', response);
             const bookingId = response.bookingDetails._id;

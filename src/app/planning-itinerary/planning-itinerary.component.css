@@ -10,3 +10,37 @@
     margin-left: 10px;
   }
   
+  h1 {
+    font-family: 'Arial', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  
+  .animated-text {
+    display: inline-block;
+    white-space: pre; /* Preserve spaces */
+    transition: color 0.5s ease-in-out, transform 0.5s ease-in-out;
+    color: #444; /* Initial text color */
+  }
+  
+  .final-reveal {
+    color: #000; /* Final text color */
+    transform: scale(1.05); /* Slight zoom effect */
+    animation: shimmer 1s linear forwards;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+      background-size: 200%;
+      background-clip: text;
+      color: transparent;
+    }
+    100% {
+      background-position: 100%;
+      color: inherit;
+    }
+  }
+  

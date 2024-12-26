@@ -48,7 +48,31 @@ export class ItineraryService {
     confirmItinerary(userId: string): Observable<any> {
       return this.http.post(`${this.apiUrl}/confirm`, { userId });
     }
+
+    clearItinerary(userId: string): Observable<any> {
+      return this.http.delete(`${this.apiUrl}/clear/${userId}`);
+    }
+
+      // Method to delete itineraries by userId
+  deleteItinerariesByUserId(userId: string): Observable<any> {
+    const url = `${this.apiUrl}/delete-services/${userId}`;
+    return this.http.delete(url);
+  }
+
+    // Delete service from itinerary based on userId and serviceType
+    deleteService(userId: string, serviceType: string): Observable<any> {
+      return this.http.delete(`${this.apiUrl}/delete-service/${userId}/${serviceType}`);
+    }
     
+      // Call the API to clear the itinerary for a user
+  clearPlanningItinerary(userId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/planning/clear/${userId}`);
+  }
+
+    // Remove service from the itinerary using userId and bookingId
+    removeServiceFromItinerary(userId: string, bookingId: string): Observable<any> {
+      return this.http.delete(`${this.apiUrl}/remove/${userId}/${bookingId}`);
+    }
     
     
     

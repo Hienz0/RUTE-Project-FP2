@@ -675,6 +675,14 @@ cron.schedule('*/1 * * * *', async () => { // Runs every minute
     );
     // console.log(`Updated ${tourGuideResult.nModified} expired tour guide bookings.`);
 
+        // Update itinerary bookings
+        const itineraryResult = await ItineraryBooking.updateMany(
+          { bookingStatus: 'Waiting for payment', paymentExpiration: { $lte: now } },
+          { $set: { bookingStatus: 'Expired' } }
+        );
+        // console.log(`Updated ${itineraryResult.nModified} expired itinerary bookings.`);
+        
+
   } catch (error) {
     console.error('Error updating expired bookings:', error);
   }
@@ -685,19 +693,70 @@ cron.schedule('*/1 * * * *', async () => { // Runs every minute
 
 // 
 // Route to handle booking accommodation
+// app.post('/api/bookings/accommodation', async (req, res) => {
+//   console.log('Request body:', req.body);
+
+//   try {
+//     const now = new Date();
+//     const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
+
+//     const bookingData = {
+//       ...req.body,
+//       serviceId: req.body.serviceId,
+//       userId: req.body.userId,
+//       bookingStatus: 'Waiting for payment',
+//       paymentExpiration,
+//     };
+
+//     // Step 1: Create the booking
+//     const booking = new Booking(bookingData);
+//     await booking.save();
+
+//     // Step 2: Update the room status to 'booked' in the accommodation collection
+//     const { accommodationId, roomTypeId, roomId } = req.body;
+
+//     // Find the accommodation by its ID and update the room status
+//     const accommodation = await Accommodation.findOneAndUpdate(
+//       {
+//         _id: accommodationId,
+//         'roomTypes._id': roomTypeId,
+//         'roomTypes.rooms._id': roomId,
+//       },
+//       {
+//         arrayFilters: [
+//           { 'type._id': roomTypeId },
+//           { 'room._id': roomId }
+//         ],
+//         new: true,
+//       }
+//     );
+
+//     // If accommodation not found, handle the error
+//     if (!accommodation) {
+//       return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
+//     }
+
+//     // Step 3: Return the created booking and updated accommodation
+//     res.status(201).json({ booking, accommodation });
+//   } catch (error) {
+//     console.error('Error details:', error);
+//     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
+//   }
+// });
+
 app.post('/api/bookings/accommodation', async (req, res) => {
   console.log('Request body:', req.body);
 
   try {
     const now = new Date();
-    const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
+    const isItinerary = req.body.isItinerary || false;
 
     const bookingData = {
       ...req.body,
       serviceId: req.body.serviceId,
       userId: req.body.userId,
-      bookingStatus: 'Waiting for payment',
-      paymentExpiration,
+      bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 3600000) }), // Add paymentExpiration only if not itinerary
     };
 
     // Step 1: Create the booking
@@ -707,7 +766,6 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     // Step 2: Update the room status to 'booked' in the accommodation collection
     const { accommodationId, roomTypeId, roomId } = req.body;
 
-    // Find the accommodation by its ID and update the room status
     const accommodation = await Accommodation.findOneAndUpdate(
       {
         _id: accommodationId,
@@ -715,15 +773,19 @@ app.post('/api/bookings/accommodation', async (req, res) => {
         'roomTypes.rooms._id': roomId,
       },
       {
+        $set: {
+          'roomTypes.$[type].rooms.$[room].status': 'booked',
+        },
+      },
+      {
         arrayFilters: [
           { 'type._id': roomTypeId },
-          { 'room._id': roomId }
+          { 'room._id': roomId },
         ],
         new: true,
       }
     );
 
-    // If accommodation not found, handle the error
     if (!accommodation) {
       return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
     }
@@ -735,6 +797,8 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     res.status(400).json({ error: 'Error creating booking or updating room status', details: error });
   }
 });
+
+
 // app.post('/api/bookings/accommodation', async (req, res) => {
 //   console.log('Request body:', req.body);
 
@@ -2203,6 +2267,9 @@ const ItineraryBooking = mongoose.model('ItineraryBooking', ItineraryBookingSche
 app.post('/api/itinerary/save', async (req, res) => {
   const { userId, services } = req.body;
 
+  console.log('Saved Itinerary" ', req.body);
+
+
   try {
     // Validate the required fields
     if (!userId || !services || services.length === 0) {
@@ -2235,6 +2302,9 @@ app.post('/api/itinerary/save', async (req, res) => {
 
 
 app.put('/api/itinerary/services', async (req, res) => {
+
+  console.log('Itinerary Services" ', req.body);
+
   try {
     const userId = req.body.userId; // Extract userId from the request body
     const serviceData = req.body.service; // The service data to update or add
@@ -2272,7 +2342,7 @@ app.put('/api/itinerary/services', async (req, res) => {
 app.put('/api/itinerary/dates', async (req, res) => {
   try {
     const { userId, startDate, endDate } = req.body;
-
+    console.log('Itinerary Dates" ', req.body);
     // Update the itinerary for the user based on the user ID
     const updatedItinerary = await Itinerary.findOneAndUpdate(
       { userId: userId }, // Find the itinerary by user ID
@@ -2312,13 +2382,14 @@ app.get('/api/itinerary/planning/:userId', async (req, res) => {
     if (itinerary) {
       res.json(itinerary);
     } else {
-      res.status(404).json({ message: 'No itinerary found for this user.' });
+      res.json({ message: 'No itinerary found for this user.', itinerary: null });
     }
   } catch (error) {
     console.error('Error fetching itinerary:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 app.put('/api/itinerary/add-service', async (req, res) => {
   const { bookingId, userId, serviceType, amount } = req.body;
@@ -2387,6 +2458,45 @@ app.put('/api/itinerary/add-service', async (req, res) => {
   }
 });
 
+// app.post('/api/itinerary/confirm', async (req, res) => {
+//   const { userId } = req.body;
+
+//   if (!userId) {
+//     return res.status(400).json({ message: 'User ID is required.' });
+//   }
+
+//   try {
+//     // Find the user's planning itinerary
+//     const planningItinerary = await PlanningItinerary.findOne({ userId });
+
+//     if (!planningItinerary) {
+//       return res.status(404).json({ message: 'Planning itinerary not found for this user.' });
+//     }
+
+//     // Calculate total amount
+//     const totalAmount = planningItinerary.services.reduce((sum, service) => sum + (service.amount || 0), 0);
+
+//     // Create a new itinerary booking
+//     const itineraryBooking = new ItineraryBooking({
+//       userId,
+//       services: planningItinerary.services,
+//       totalAmount,
+//     });
+
+//     // Save the new itinerary booking
+//     await itineraryBooking.save();
+
+//     // Optionally delete the planning itinerary after confirmation
+//     await PlanningItinerary.deleteOne({ userId });
+
+//     res.status(200).json({ message: 'Itinerary confirmed successfully.', itineraryBooking });
+//   } catch (error) {
+//     console.error('Error confirming itinerary:', error);
+//     res.status(500).json({ message: 'Internal server error.' });
+//   }
+// });
+
+
 app.post('/api/itinerary/confirm', async (req, res) => {
   const { userId } = req.body;
 
@@ -2405,11 +2515,16 @@ app.post('/api/itinerary/confirm', async (req, res) => {
     // Calculate total amount
     const totalAmount = planningItinerary.services.reduce((sum, service) => sum + (service.amount || 0), 0);
 
-    // Create a new itinerary booking
+    // Calculate payment expiration (15 minutes from now)
+    const now = new Date();
+    const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
+
+    // Create a new itinerary booking with payment expiration
     const itineraryBooking = new ItineraryBooking({
       userId,
       services: planningItinerary.services,
       totalAmount,
+      paymentExpiration,  // Set payment expiration here
     });
 
     // Save the new itinerary booking
@@ -2427,8 +2542,111 @@ app.post('/api/itinerary/confirm', async (req, res) => {
 
 
 
+// Clear Itinerary and PlanningItinerary by userId
+app.delete('/api/itinerary/clear/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Delete all documents in Itinerary where userId matches
+    const itineraryResult = await Itinerary.deleteMany({ userId });
+
+    // Delete all documents in PlanningItinerary where userId matches
+    const planningResult = await PlanningItinerary.deleteMany({ userId });
+
+    // Log the results (optional)
+    console.log('Itinerary deleted:', itineraryResult);
+    console.log('PlanningItinerary deleted:', planningResult);
+
+    res.status(200).json({ message: 'All itineraries cleared successfully.' });
+  } catch (error) {
+    console.error('Error clearing itineraries:', error);
+    res.status(500).json({ message: 'Server error while clearing itineraries.' });
+  }
+});
+
+// Route to delete itineraries by userId
+// Route to delete the services collection inside itinerary for a specific user
+app.delete('/api/itinerary/delete-services/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Update the services array to an empty array
+    const result = await Itinerary.updateMany(
+      { userId: userId },
+      { $set: { services: [] } }
+    );
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ message: 'Services cleared successfully' });
+    } else {
+      return res.status(404).json({ message: 'No itineraries found for this user' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'An error occurred while clearing services' });
+  }
+});
+
+// Route to delete a specific service for a user
+app.delete('/api/itinerary/delete-service/:userId/:serviceType', async (req, res) => {
+  try {
+    const { userId, serviceType } = req.params;
+
+    // Find the itinerary for the user and remove the service with the given serviceType
+    const result = await Itinerary.updateOne(
+      { userId: userId },
+      { $pull: { services: { serviceType: serviceType } } }  // $pull removes the service from the array
+    );
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ message: `Service ${serviceType} deleted successfully from itinerary.` });
+    } else {
+      return res.status(404).json({ message: `No service found for this user with type ${serviceType}` });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'An error occurred while deleting the service' });
+  }
+});
+
+// Endpoint to delete the entire itinerary for a user
+app.delete('/api/itinerary/planning/clear/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await PlanningItinerary.deleteOne({ userId: userId });
+
+    if (result.deletedCount > 0) {
+      return res.status(200).json({ message: 'Itinerary cleared successfully' });
+    } else {
+      return res.status(404).json({ message: 'No itinerary found for this user' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while clearing the itinerary' });
+  }
+});
 
 
+// Endpoint to remove a service by userId and bookingId
+app.delete('/api/itinerary/remove/:userId/:bookingId', async (req, res) => {
+  try {
+    const { userId, bookingId } = req.params;
+
+    // Find the itinerary by userId and remove the service with the specified bookingId
+    const updatedItinerary = await PlanningItinerary.findOneAndUpdate(
+      { userId: userId },
+      { $pull: { services: { bookingId: bookingId } } },
+      { new: true } // Return the updated itinerary
+    );
+
+    if (updatedItinerary) {
+      return res.status(200).json(updatedItinerary);
+    } else {
+      return res.status(404).json({ message: 'Itinerary not found or service not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while removing the service' });
+  }
+});
 
 
 
@@ -2718,6 +2936,7 @@ const bookingTourSchema = new mongoose.Schema({
   },
 
   isReviewed: { type: Boolean, default: false },
+  isItinerary: { type: Boolean, default: false },
   paymentExpiration: { type: Date },
 
 }, { timestamps: true });
@@ -2729,26 +2948,57 @@ module.exports = TourBooking;
 
 // Route to handle booking tour guide
 
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//         // Calculate payment expiration (15 minutes from now)
+//         const now = new Date();
+//         const paymentExpiration = new Date(now.getTime() +3600000);
+
+//     const bookingData = {
+//       ...req.body,
+//       serviceId: req.body.serviceId, // Make sure these are passed from the client side
+//       userId: req.body.userId,      // or set here if you have access to current user
+//       bookingStatus: 'Waiting for payment', // Set booking status here
+//       paymentExpiration
+//       // tourTime: req.body.tourTime
+//     };
+//     const booking = new TourBooking(bookingData);
+//     await booking.save();
+//     res.status(201).json(booking);
+//   } catch (error) {
+//     console.error('Error details:', error); // Log error details for debugging
+//     res.status(400).json({ error: 'Error creating booking', details: error });
+//   }
+// });
+
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
-        // Calculate payment expiration (15 minutes from now)
-        const now = new Date();
-        const paymentExpiration = new Date(now.getTime() +3600000);
+    const { serviceId, userId, isItinerary, ...otherData } = req.body;
 
+    // Log booking data for debugging
+    console.log("Booking Data:", req.body);
+
+    // Define booking status and payment expiration conditionally
     const bookingData = {
-      ...req.body,
-      serviceId: req.body.serviceId, // Make sure these are passed from the client side
-      userId: req.body.userId,      // or set here if you have access to current user
-      bookingStatus: 'Waiting for payment', // Set booking status here
-      paymentExpiration
-      // tourTime: req.body.tourTime
+      ...otherData,
+      serviceId,
+      userId,
+      bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+      ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }), // Add payment expiration if not itinerary
     };
+
+    // Create a new tour booking
     const booking = new TourBooking(bookingData);
     await booking.save();
-    res.status(201).json(booking);
+
+    res.status(201).json({
+      success: true,
+      message: 'Tour Guide booked successfully!',
+      bookingDetails: booking,
+    });
   } catch (error) {
-    console.error('Error details:', error); // Log error details for debugging
-    res.status(400).json({ error: 'Error creating booking', details: error });
+    console.error('Error creating booking:', error); // Log error details for debugging
+    res.status(400).json({ success: false, message: 'Error creating booking', details: error });
   }
 });
 
@@ -3346,6 +3596,7 @@ const bookingVehicleSchema = new mongoose.Schema({
     enum: ['Booked', 'Cancelled', 'Complete', 'Waiting for payment']
   },
   isReviewed: { type: Boolean, default: false },
+  isItinerary: { type: Boolean, default: false },
   paymentStatus: {
     type: String,
     default: 'Pending',  // Possible statuses: 'Pending', 'Paid', 'Failed'
@@ -3507,6 +3758,151 @@ cron.schedule('0 0 * * *', updateAllBookings);  // Runs every day at midnight
 
 // Route untuk booking transportasi
 // Route untuk booking transportasi
+// app.post('/api/bookTransports', async (req, res) => {
+//   console.log("Request received at /bookTransports");
+
+//   const {
+//     serviceId,
+//     userId,
+//     pickupDate,
+//     dropoffDate,
+//     vehicleBooking,
+//     specialRequest,
+//     pickupLocation,
+//     dropoffLocation,
+//     totalBookingPrice,
+//     pickupStreetName,
+//     dropoffStreetName,
+//   } = req.body;
+
+//   console.log("Booking Data:", {
+//     serviceId,
+//     userId,
+//     pickupDate,
+//     dropoffDate,
+//     specialRequest,
+//     pickupLocation,
+//     dropoffLocation,
+//     totalBookingPrice,
+//     vehicleBooking,
+//     pickupStreetName,
+//     dropoffStreetName,
+//   });
+
+//   try {
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       console.log("User not found");
+//       return res.status(404).json({ success: false, message: 'User not found' });
+//     }
+
+//     const service = await Transportation.findOne({ serviceId: serviceId });
+
+//     if (!service) {
+//       console.log("Service not found");
+//       return res.status(404).json({ success: false, message: 'Service not found' });
+//     }
+
+//     if (!pickupDate || !dropoffDate) {
+//       return res.status(400).json({ success: false, message: 'Pickup and Dropoff dates are required' });
+//     }
+
+//     const start = new Date(pickupDate);
+//     const end = new Date(dropoffDate);
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0); // Set time to 00:00 for date-only validation
+
+//     if (start < today) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Booking for past dates is not allowed'
+//       });
+//     }
+
+//     const rentalDuration = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+//     if (rentalDuration <= 0) {
+//       return res.status(400).json({ success: false, message: 'Dropoff date must be after pickup date' });
+//     }
+
+//     // Loop through each vehicle in the booking to check quantity
+//     for (const vehicle of vehicleBooking) {
+//       const { name, quantity: requestedQuantity } = vehicle;
+
+//       // Get the maximum quantity for this vehicle type in Transportation schema
+//       const serviceVehicle = service.productSubcategory.find(v => v.name === name);
+//       if (!serviceVehicle) {
+//         return res.status(400).json({ success: false, message: `Vehicle ${name} not found in service.` });
+//       }
+
+//       // Check existing bookings for the same vehicle type
+//       const existingBookings = await VehicleBooking.aggregate([
+//         { $match: { serviceId: serviceId } },
+//         { $unwind: "$vehicleBooking" },
+//         {
+//           $match: {
+//             "vehicleBooking.name": name,
+//             $or: [
+//               { pickupDate: { $lte: end, $gte: start } },
+//               { dropoffDate: { $lte: end, $gte: start } },
+//               { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
+//             ]
+//           }
+//         },
+//         { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" } } }
+//       ]);
+
+//       const totalBooked = existingBookings[0]?.totalBooked || 0;
+
+//       // Check if the requested quantity exceeds the available quantity
+//       if (totalBooked + requestedQuantity > serviceVehicle.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Insufficient quantity for ${name}. Only ${serviceVehicle.quantity - totalBooked} available.`
+//         });
+//       }
+//     }
+
+//         // Calculate payment expiration (15 minutes from now)
+//         const now = new Date();
+//         const paymentExpiration = new Date(now.getTime() + 3600000);
+    
+
+//     // If all checks pass, create the new booking
+//     const newBooking = new VehicleBooking({
+//       customerName: user.name,
+//       productName: service.productName,
+//       userId,
+//       serviceId,
+//       vehicleBooking,
+//       vehiclePickupLocation: pickupLocation,
+//       vehicleDropoffLocation: dropoffLocation,
+//       rentalDuration,
+//       pickupDate: start,
+//       dropoffDate: end,
+//       specialRequest,
+//       bookingStatus: 'Waiting for payment',
+//       totalBookingPrice,
+//       paymentExpiration,
+//       pickupStreetName,
+//       dropoffStreetName,
+      
+//     });
+
+//     await newBooking.save();
+
+
+
+//     res.status(201).json({
+//       success: true,
+//       message: 'Transportation booked successfully!',
+//       bookingDetails: newBooking
+//     });
+//   } catch (error) {
+//     console.error('Error creating booking:', error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// });
+
 app.post('/api/bookTransports', async (req, res) => {
   console.log("Request received at /bookTransports");
 
@@ -3522,6 +3918,7 @@ app.post('/api/bookTransports', async (req, res) => {
     totalBookingPrice,
     pickupStreetName,
     dropoffStreetName,
+    isItinerary, // Extracting isItinerary flag from the request body
   } = req.body;
 
   console.log("Booking Data:", {
@@ -3536,6 +3933,7 @@ app.post('/api/bookTransports', async (req, res) => {
     vehicleBooking,
     pickupStreetName,
     dropoffStreetName,
+    isItinerary,
   });
 
   try {
@@ -3564,7 +3962,7 @@ app.post('/api/bookTransports', async (req, res) => {
     if (start < today) {
       return res.status(400).json({
         success: false,
-        message: 'Booking for past dates is not allowed'
+        message: 'Booking for past dates is not allowed',
       });
     }
 
@@ -3577,13 +3975,11 @@ app.post('/api/bookTransports', async (req, res) => {
     for (const vehicle of vehicleBooking) {
       const { name, quantity: requestedQuantity } = vehicle;
 
-      // Get the maximum quantity for this vehicle type in Transportation schema
       const serviceVehicle = service.productSubcategory.find(v => v.name === name);
       if (!serviceVehicle) {
         return res.status(400).json({ success: false, message: `Vehicle ${name} not found in service.` });
       }
 
-      // Check existing bookings for the same vehicle type
       const existingBookings = await VehicleBooking.aggregate([
         { $match: { serviceId: serviceId } },
         { $unwind: "$vehicleBooking" },
@@ -3593,31 +3989,26 @@ app.post('/api/bookTransports', async (req, res) => {
             $or: [
               { pickupDate: { $lte: end, $gte: start } },
               { dropoffDate: { $lte: end, $gte: start } },
-              { pickupDate: { $lte: start }, dropoffDate: { $gte: end } }
-            ]
-          }
+              { pickupDate: { $lte: start }, dropoffDate: { $gte: end } },
+            ],
+          },
         },
-        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" } } }
+        { $group: { _id: null, totalBooked: { $sum: "$vehicleBooking.quantity" } } },
       ]);
 
       const totalBooked = existingBookings[0]?.totalBooked || 0;
 
-      // Check if the requested quantity exceeds the available quantity
       if (totalBooked + requestedQuantity > serviceVehicle.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient quantity for ${name}. Only ${serviceVehicle.quantity - totalBooked} available.`
+          message: `Insufficient quantity for ${name}. Only ${serviceVehicle.quantity - totalBooked} available.`,
         });
       }
     }
 
-        // Calculate payment expiration (15 minutes from now)
-        const now = new Date();
-        const paymentExpiration = new Date(now.getTime() + 3600000);
-    
-
-    // If all checks pass, create the new booking
-    const newBooking = new VehicleBooking({
+    // Conditional fields based on isItinerary
+    const now = new Date();
+    const bookingData = {
       customerName: user.name,
       productName: service.productName,
       userId,
@@ -3629,28 +4020,27 @@ app.post('/api/bookTransports', async (req, res) => {
       pickupDate: start,
       dropoffDate: end,
       specialRequest,
-      bookingStatus: 'Waiting for payment',
+      bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 3600000) }),
       totalBookingPrice,
-      paymentExpiration,
       pickupStreetName,
       dropoffStreetName,
-      
-    });
+    };
 
+    const newBooking = new VehicleBooking(bookingData);
     await newBooking.save();
-
-
 
     res.status(201).json({
       success: true,
       message: 'Transportation booked successfully!',
-      bookingDetails: newBooking
+      bookingDetails: newBooking,
     });
   } catch (error) {
     console.error('Error creating booking:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 
 

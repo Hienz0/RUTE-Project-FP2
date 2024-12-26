@@ -49,6 +49,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   bookingModal: any;
   bookedDates: string[] = [];
   minCheckOutDate: Date | null = null;
+
+  isItinerary: boolean = false; // Default is false
   
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
@@ -90,6 +92,15 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       this.loadAccommodationData(this.serviceId);
       this.loadBookedDates();
     }
+
+        // Check for the presence of the 'planning-itinerary' query parameter
+        this.route.queryParams.subscribe(params => {
+          if (params['planning-itinerary']) {
+            this.isItinerary = true;
+          } else {
+            this.isItinerary = false;
+          }
+        });
 
 
         // // Dynamically add Tailwind CDN script
@@ -492,7 +503,7 @@ onCheckOutDateChange(date: Date): void {
         };
   
         // Submit the booking data
-        this.bookingService.bookAccommodation(bookingData).subscribe(
+        this.bookingService.bookAccommodation(bookingData, this.isItinerary).subscribe(
           (response) => {
             console.log('Booking Response:', response);
         
