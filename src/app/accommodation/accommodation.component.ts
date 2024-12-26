@@ -47,6 +47,7 @@ export class AccommodationComponent implements OnInit {
   weather: any;
   location: string = 'Ubud'; // Hardcoded location name
   currentTime: string = ''; // Dynamic clock
+  showBackToPlanningButton = false;
 
 
 
@@ -79,6 +80,10 @@ export class AccommodationComponent implements OnInit {
 
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
+    });
+
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
     });
     
      // Check if it's day or night

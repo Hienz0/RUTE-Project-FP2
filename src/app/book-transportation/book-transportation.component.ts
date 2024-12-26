@@ -68,6 +68,7 @@ export class BookTransportationComponent implements OnInit {
   ubudCircle: any;
 
   isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -123,6 +124,9 @@ export class BookTransportationComponent implements OnInit {
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
   }
 
   fetchBookedDates(transportID: string): void {

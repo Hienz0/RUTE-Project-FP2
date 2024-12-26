@@ -387,10 +387,14 @@ export class PlanningItineraryComponent implements OnInit {
   
     this.itineraryService.confirmItinerary(this.currentUser.userId).subscribe({
       next: (response) => {
+        console.log('Itinerary confirmed:', response);
         if (response.itineraryBooking) {
           alert('Itinerary confirmed successfully!');
           this.selectedServices = []; // Clear the services after confirmation
           this.totalAmount = 0; // Reset the total amount
+          const bookingId = response.itineraryBooking._id;
+          this.router.navigate([`/bookings/${bookingId}`]);
+
         } else {
           alert('Failed to confirm itinerary.');
         }

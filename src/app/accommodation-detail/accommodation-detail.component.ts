@@ -51,6 +51,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   minCheckOutDate: Date | null = null;
 
   isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
   
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
@@ -102,6 +103,10 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
           }
         });
 
+
+        this.route.queryParams.subscribe(params => {
+          this.showBackToPlanningButton = !!params['planning-itinerary'];
+        });
 
         // // Dynamically add Tailwind CDN script
         // const script = this.renderer.createElement('script');

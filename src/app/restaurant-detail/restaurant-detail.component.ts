@@ -16,6 +16,7 @@ declare var bootstrap: any;
 const BASE_URL = 'http://localhost:3000';
 
 
+
 @Component({
   selector: 'app-restaurant-detail',
   templateUrl: './restaurant-detail.component.html',
@@ -35,6 +36,8 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
   selectedItem: any = null;
   @ViewChild('imagePreview') imagePreview!: ElementRef;
   panzoomInstance: any;
+  showBackToPlanningButton = false;
+  showAddToItineraryButton = false;
 
 
   constructor(
@@ -57,6 +60,14 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     if (this.restaurantId) {
       this.loadRestaurantDetails(this.restaurantId);
     }
+
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
+
+    this.route.queryParams.subscribe(params => {
+      this.showAddToItineraryButton = !!params['planning-itinerary'];
+    });
   }
 
 ngAfterViewInit(): void {
@@ -306,5 +317,7 @@ toggleZoom() {
     this.router.navigate(['rateServices/', bookingId]);
     console.log(bookingId);
   }
+
+
   
 }

@@ -42,6 +42,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
   currentDate: string = '';
 
   isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -67,6 +68,10 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
       }
     });
 
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
+    
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0];
 

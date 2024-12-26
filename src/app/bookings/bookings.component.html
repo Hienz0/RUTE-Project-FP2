@@ -127,29 +127,31 @@
 
 <!-- Loop through the services inside the booking -->
 <!-- Loop through the services inside the booking -->
-<li class="mb-3 d-flex flex-column">
-  <div *ngIf="booking.services && booking.services.length > 0" class="d-flex align-items-center mb-3">
+<li class="mb-3">
+  <div *ngIf="booking.services && booking.services.length > 0" class="mb-2">
     <strong>Services:</strong>
   </div>
 
-
   <!-- Loop through the services and display each with its corresponding icon -->
-  <div *ngFor="let service of booking.services" class="d-flex align-items-center mb-3">
-    <!-- Icon based on serviceType -->
-    <i *ngIf="service.serviceType === 'Accommodation'" class="fas fa-bed text-primary me-3"></i>
-    <i *ngIf="service.serviceType === 'Tour'" class="fas fa-map-marker-alt text-success me-3"></i>
-    <i *ngIf="service.serviceType === 'Vehicle'" class="fas fa-car text-info me-3"></i>
-    <i *ngIf="service.serviceType === 'Restaurant'" class="fas fa-utensils text-warning me-3"></i>
+  <div *ngFor="let service of booking.services" class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center">
+      <!-- Icon based on serviceType -->
+      <i *ngIf="service.serviceType === 'Accommodation'" class="fas fa-bed text-primary me-2"></i>
+      <i *ngIf="service.serviceType === 'Tour'" class="fas fa-map-marker-alt text-success me-2"></i>
+      <i *ngIf="service.serviceType === 'Vehicle'" class="fas fa-car text-info me-2"></i>
+      <i *ngIf="service.serviceType === 'Restaurant'" class="fas fa-utensils text-warning me-2"></i>
 
-    <!-- Service Name -->
-    <span class="text-dark">{{ service.serviceName }}</span>
+      <!-- Service Name -->
+      <span class="text-dark">{{ service.serviceName }}</span>
+    </div>
 
-        <!-- View Itinerary Button -->
-        <button class="btn btn-primary btn-sm" (click)="viewItinerary(service)">
-          View Itinerary
-        </button>
+    <!-- View Itinerary Button Styled as a Link -->
+    <button class="btn btn-link text-primary p-0" (click)="viewItinerary(service)">
+      View Itinerary
+    </button>
   </div>
 </li>
+
 
 
 

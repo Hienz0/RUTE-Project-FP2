@@ -17,6 +17,8 @@ export class RestaurantComponent implements OnInit {
   currentUser: any;
   Math = Math;
 
+  showBackToPlanningButton = false;
+
 
 
   constructor(private ServicesService: ServicesService, private authService: AuthService, private router: Router, private route: ActivatedRoute) {}
@@ -26,6 +28,10 @@ export class RestaurantComponent implements OnInit {
       this.currentUser = user;
     });
     this.loadRestaurants();
+
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
   }
 
   loadRestaurants(): void {

@@ -385,3 +385,12 @@
     <li class="list-group-item">Booking 2 - Date: 2024-10-20</li>
   </ul>
 </div>
+
+<!-- Fixed "Back to Itineraries Planning" Button -->
+<a 
+  *ngIf="showBackToPlanningButton" 
+  href="/planning-itinerary" 
+  class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x mb-3"
+>
+  Back to Itineraries Planning
+</a>

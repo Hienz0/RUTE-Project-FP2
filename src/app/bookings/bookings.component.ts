@@ -145,21 +145,26 @@ bookingDetails: any = null;
   
   startCountdown(): void {
     this.interval = setInterval(() => {
-      if (this.selectedBooking) { // Check if a booking is selected
-        if (this.selectedBooking.paymentExpiration) {
-          const remainingTime = this.getRemainingTime(this.selectedBooking.paymentExpiration);
-          this.remainingTimes[this.selectedBooking._id] = remainingTime;
+      if (this.bookings && this.bookings.length > 0) {
+        this.bookings.forEach((booking) => {
+          if (booking.paymentExpiration) {
+            const remainingTime = this.getRemainingTime(booking.paymentExpiration);
+            this.remainingTimes[booking._id] = remainingTime;
   
-          // If the selected booking has expired, update its status locally
-          if (remainingTime === 0 && this.selectedBooking.bookingStatus === 'Waiting for payment') {
-            this.selectedBooking.bookingStatus = 'Expired'; // Update status locally
-            console.log(`Booking ${this.selectedBooking._id} has expired.`);
-            this.cdr.detectChanges();
+            // If the booking has expired, update its status locally
+            if (remainingTime === 0 && booking.bookingStatus === 'Waiting for payment') {
+              booking.bookingStatus = 'Expired'; // Update status locally
+              console.log(`Booking ${booking._id} has expired.`);
+            }
           }
-        }
+        });
+  
+        // Detect changes after updating bookings
+        this.cdr.detectChanges();
       }
     }, 1000);
   }
+  
   
   
   clearCountdown(): void {

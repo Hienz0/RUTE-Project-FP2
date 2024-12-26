@@ -16,6 +16,7 @@ export class BookingTourGuideComponent {
   tourGuideServices: any[] = [];
   currentUser: any;
   Math = Math;
+  showBackToPlanningButton = false;
 
 
   constructor(
@@ -31,6 +32,9 @@ export class BookingTourGuideComponent {
     });
 
     this.loadTourGuideServices();
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
   }
 
   loadTourGuideServices(): void {
