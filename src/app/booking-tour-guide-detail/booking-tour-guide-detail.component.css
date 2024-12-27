@@ -221,7 +221,29 @@
   }
   
   
+  .custom-btn {
+    background-color: #f8f9fa; /* Warna dasar untuk mode terang */
+    color: #6c757d; /* Teks abu-abu */
+    border: 1px solid #ced4da; /* Border abu-abu muda */
+    border-radius: 50px; /* Membuat tombol melingkar */
+    padding: 0.5rem 2.5rem; /* Padding untuk ukuran tombol */
+    font-size: 1rem; /* Ukuran teks */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bayangan */
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Efek transisi */
+  }
   
+  .custom-btn:hover {
+    background-color: #e9ecef; /* Warna hover */
+    color: #495057; /* Warna teks lebih gelap */
+    border-color: #adb5bd; /* Border lebih gelap */
+  }
+  
+  .custom-btn:disabled {
+    background-color: #e9ecef; /* Warna untuk tombol nonaktif */
+    color: #adb5bd; /* Teks abu-abu */
+    border-color: #dee2e6; /* Border nonaktif */
+    cursor: not-allowed;
+  }
   
   
   

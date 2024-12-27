@@ -3877,6 +3877,57 @@ const serviceSchema = new mongoose.Schema({
 
 const Service = mongoose.model('Service', serviceSchema);
 
+
+//reandom services for dashboard
+app.get('/randomServices', async (req, res) => {
+  try {
+    const randomServices = await Service.aggregate([
+      {
+        $facet: {
+          Accommodation: [
+            { $match: { productCategory: 'Accommodation' } },
+            { $sample: { size: 1 } } // Ambil 1 layanan acak dari kategori ini
+          ],
+          Transportation: [
+            { $match: { productCategory: 'Transportation' } },
+            { $sample: { size: 1 } }
+          ],
+          TourGuide: [
+            { $match: { productCategory: 'Tour Guide' } },
+            { $sample: { size: 1 } }
+          ],
+          Restaurant: [
+            { $match: { productCategory: 'Restaurant' } },
+            { $sample: { size: 1 } }
+          ]
+        }
+      },
+      {
+        $project: {
+          combined: {
+            $concatArrays: ['$Accommodation', '$Transportation', '$TourGuide', '$Restaurant']
+          }
+        }
+      },
+      { $unwind: '$combined' },
+      { $replaceRoot: { newRoot: '$combined' } } // Kembalikan struktur dokumen asli
+    ]);
+
+    // Periksa apakah data ditemukan
+    if (randomServices.length === 0) {
+      return res.status(404).json({ message: 'No services found' });
+    }
+
+    res.status(200).json(randomServices); // Mengirim hasil layanan acak
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+
 // 
 // Route to get services with productCategory "Accommodation"
 app.get('/api/services/accommodation', async (req, res) => {

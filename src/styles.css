@@ -454,7 +454,7 @@ body.dark .btn-outline-primary:hover {
 }
 
 body.dark .list-group-item {
-  background-color: #212529;  /* Latar belakang hitam */
+  background-color: #343a40;  /* Latar belakang hitam */
   color: white;             /* Teks putih */
 }
 
@@ -500,4 +500,23 @@ body.dark .custom-translate-container select:focus {
 body.dark .custom-translate-container::before {
   content: 'Select Language';
   color: #ffffff; /* Teks putih untuk dark mode */
+}
+
+body.dark .custom-btn {
+  background-color: #343a40; /* Warna tombol dalam mode gelap */
+  color: #f8f9fa; /* Teks terang */
+  border-color: #495057; /* Border gelap */
+}
+
+body.dark .custom-btn:hover {
+  background-color: #495057; /* Warna hover gelap */
+  color: #ffffff; /* Teks tetap terang */
+  border-color: #6c757d; /* Border lebih jelas saat hover */
+}
+
+body.dark .custom-btn:disabled {
+  background-color: #6c757d; /* Tombol nonaktif dalam mode gelap */
+  color: #adb5bd; /* Teks nonaktif */
+  border-color: #6c757d; /* Border konsisten */
+  cursor: not-allowed;
 }

@@ -36,6 +36,46 @@
     height: 100%; /* Make all images fill the item height */
   }
   
+  .custom-container .d-flex {
+    gap: 20px; /* Jarak antar kartu */
+  }
+  
+  .custom-container .custom-card {
+    flex: 0 0 300px; /* Ukuran tetap setiap kartu */
+    max-width: 300px; /* Membatasi ukuran maksimum kartu */
+  }
+  
+  @media (max-width: 1200px) {
+    .custom-container .custom-card {
+      flex: 0 0 250px; /* Menyesuaikan ukuran untuk layar lebih kecil */
+      max-width: 250px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .custom-container .d-flex {
+      flex-direction: column; /* Kartu akan ditampilkan vertikal di layar kecil */
+    }
+  }
+  
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Jarak antar elemen */
+  }
+  
+  .rating span:first-child {
+    font-size: 1.5rem; /* Ukuran ikon bintang */
+    color: #ffc107; /* Warna emas */
+  }
+  
+  .rating span.text-muted {
+    font-size: 0.9rem; /* Ukuran teks ulasan */
+    color: #6c757d; /* Warna abu-abu profesional */
+    font-weight: 500; /* Sedikit lebih tebal */
+  }
+  
+  
   
   
   /* Custom header CSS */
