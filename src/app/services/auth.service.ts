@@ -134,4 +134,8 @@ export class AuthService {
       });
     }
 
+    getRandomServices(): Observable<any> {
+      return this.http.get(`${this.authUrl}/randomServices`);
+    }
+
 }

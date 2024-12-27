@@ -63,7 +63,7 @@
     </button>
     <!-- Plan your itinerary button -->
     <div class="carousel-caption position-absolute bottom-0 start-50 translate-middle-x">
-      <a href="/planning-itinerary" class="btn btn-primary btn-lg">Plan Your Itinerary Now!</a>
+      <a href="#" class="btn btn-primary btn-lg">Plan Your Itinerary Now!</a>
     </div>
   </div>
   
@@ -82,118 +82,85 @@
   
   
   
-    <div class="custom-container">
-      <div class="row">
-        <!-- Card 1 -->
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="../../assets/images/sample image/the-sacred-monkey-forest-home-to-700-monkeys-ubud-bali-indonesia-southeast-asia-asia-RHPLF14481.jpg" class="card-img-top" alt="Tourism Product Image">
+    <div class="custom-container py-5">
+      <div class="d-flex justify-content-center gap-3">
+        <!-- Loop through services dynamically -->
+        <div *ngFor="let service of services; let i = index" class="custom-card">
+          <div class="card shadow-sm rounded-4 border-0">
+            <!-- Image -->
+            <img [src]="getFullImagePath(service.productImages[0])" class="card-img-top rounded-top-4" alt="{{ service.productName }}">
             <div class="card-body">
-              <h5 class="card-title">Monkey Forest Tour</h5>
-              <!-- Price -->
-              <p class="card-text">Price: $50</p>
-              <!-- Star Rating -->
-              <div class="rating">
-                ★★★★☆ <!-- Adjust the number of stars as needed -->
+              <!-- Title -->
+              <h5 class="card-title fw-bold text-primary">
+                {{ formatProductName(service.productName) }}
+              </h5>
+              <!-- Category -->
+              <p class="card-text text-secondary mb-2">Category: {{ service.productCategory }}</p>
+              <!-- Star Rating and Total Reviews -->
+              <div class="rating mb-3">
+                <span [innerHTML]="getStars(service.averageRating)"></span>
+                <span class="text-muted">({{ service.totalReviews }})</span>
               </div>
+              
+              
               <!-- Button -->
-              <a href="#" class="btn btn-primary">Explore</a>
-            </div>
-          </div>
-        </div>
-    
-        <!-- Card 2 -->
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="../../assets/images/sample image/wp6300995.jpg" class="card-img-top" alt="Tourism Product Image">
-            <div class="card-body">
-              <h5 class="card-title">Ubud Local Villa</h5>
-              <!-- Price -->
-              <p class="card-text">Price: $100</p>
-              <!-- Star Rating -->
-              <div class="rating">
-                ★★★☆☆ <!-- Adjust the number of stars as needed -->
-              </div>
-              <!-- Button -->
-              <a href="#" class="btn btn-primary">Explore</a>
-            </div>
-          </div>
-        </div>
-    
-        <!-- Card 3 -->
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="../../assets/images/sample image/2e9ab24fd46b2137cc32e73c23ebe6bd.jpg" class="card-img-top" alt="Tourism Product Image">
-            <div class="card-body">
-              <h5 class="card-title">Local Ubud Cuisine</h5>
-              <!-- Price -->
-              <p class="card-text">Price: $30</p>
-              <!-- Star Rating -->
-              <div class="rating">
-                ★★★★☆ <!-- Adjust the number of stars as needed -->
-              </div>
-              <!-- Button -->
-              <a href="#" class="btn btn-primary">Explore</a>
+              <a
+                (click)="navigateToCategory(service)"
+                class="btn btn-outline-primary w-100"
+              >
+                Explore
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
     
-  <!-- Travel Tips Section -->
-  <section id="travel-tips">
-    <div class="container">
-      <h2 class="section-title text-center">Travel Tips</h2>
-      <div class="row">
-        <div class="col-md-6">
-          <div class="tip-card">
-            <h3><i class="fas fa-suitcase"></i> Tips for Packing</h3>
-            <ul>
-              <li>Make a packing list to ensure you don't forget anything.</li>
-              <li>Pack versatile clothing items that can be mixed and matched.</li>
-              <li>Roll your clothes to save space in your luggage.</li>
-              <li>Don't forget essential items like passport, tickets, and medications.</li>
-            </ul>
+    
+    
+    
+    
+    <!-- Travel Tips Section -->
+    <section id="travel-tips" class="bg-light py-5">
+      <div class="container">
+        <h2 class="section-title text-center text-primary mb-4">Travel Tips</h2>
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="tip-card p-4 shadow-sm rounded-4 bg-white">
+              <h3 class="text-secondary mb-3"><i class="fas fa-suitcase me-2 text-primary"></i> Tips for Packing</h3>
+              <ul class="list-unstyled">
+                <li class="mb-2">✔ Make a packing list to ensure you don't forget anything.</li>
+                <li class="mb-2">✔ Pack versatile clothing items that can be mixed and matched.</li>
+                <li class="mb-2">✔ Roll your clothes to save space in your luggage.</li>
+                <li>✔ Don't forget essential items like passport, tickets, and medications.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4">
+            <div class="tip-card p-4 shadow-sm rounded-4 bg-white">
+              <h3 class="text-secondary mb-3"><i class="fas fa-map-marked-alt me-2 text-primary"></i> Destination Guides</h3>
+              <p class="mb-3">Explore our destination guides to learn more about the places you'll visit:</p>
+              <ul class="list-unstyled">
+                <li><a href="#" class="text-decoration-none text-primary">- Guide to Ubud, Bali</a></li>
+                <li><a href="#" class="text-decoration-none text-primary">- Ubud's Hidden Gems</a></li>
+                <li><a href="#" class="text-decoration-none text-primary">- Cultural Experiences in Ubud</a></li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="tip-card">
-            <h3><i class="fas fa-map-marked-alt"></i> Destination Guides</h3>
-            <p>Explore our destination guides to learn more about the places you'll visit:</p>
-            <ul>
-              <li><a href="#">Guide to Ubud, Bali</a></li>
-              <li><a href="#">Ubud's Hidden Gems</a></li>
-              <li><a href="#">Cultural Experiences in Ubud</a></li>
-            </ul>
+      </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p class="mb-0">&copy; 2024 RUTE Company. All rights reserved.</p>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-  
-  <!-- Social Media Links Section -->
-  <section id="social-media" class="mt-5">
-    <div class="container">
-      <h2 class="section-title text-center">Connect with Us</h2>
-      <div class="social-links text-center">
-        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
-      </div>
-    </div>
-  </section>
-  
-  <!--Footer-->
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <p>&copy; 2024 RUTE Company. All rights reserved.</p>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
   <!-- 
 
