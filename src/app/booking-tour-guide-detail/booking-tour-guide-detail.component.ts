@@ -256,7 +256,7 @@ openModal(): void {
       (response) => {
         console.log('Booking successful', response);
         this.closeModal();
-        const bookingId = response._id;
+        const bookingId = response.bookingDetails._id;
         const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
         if (planningItineraryId) {
           // Update the itinerary with the bookingId

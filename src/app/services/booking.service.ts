@@ -20,7 +20,7 @@ export class BookingService {
   
 
   bookTourGuide(bookingData: any, isItinerary: boolean): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/bookings/tour-guide`, {
+    return this.http.post<any>(`${this.apiUrl}/tour-guide`, {
       ...bookingData,
       isItinerary,
     });

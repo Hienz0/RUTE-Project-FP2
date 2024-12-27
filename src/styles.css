@@ -227,8 +227,11 @@ body.dark .search-bar .btn-outline-primary {
   color: #fff;
 }
 
+
+
 body.dark .search-bar .btn-outline-primary:hover {
-  background-color: #ffffff;
+  background-color: #272727;
+  border-color: #777;
   color: #fff;
 }
 
@@ -243,7 +246,7 @@ body.dark .search-bar .dropdown-item {
 
 body.dark .search-bar .dropdown-item:hover {
   background-color: #555;
-  color: #fff;
+  color: #222222;
 }
 
 body.dark .search-bar .btn-primary {
@@ -450,3 +453,70 @@ body.dark .btn-outline-primary:hover {
   border-color: #007bff;        /* Warna border tetap biru terang */
 }
 
+body.dark .list-group-item {
+  background-color: #343a40;  /* Latar belakang hitam */
+  color: white;             /* Teks putih */
+}
+
+body.dark .list-group-item:hover {
+  background-color: #333;   /* Warna latar belakang saat hover */
+  color: white;
+}
+
+body.dark .weather-container {
+  background-color: #3b3939 !important; /* Latar belakang gelap */
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Bayangan lebih gelap */
+}
+
+body.dark .weather-container a {
+  color: #e0e0e0; /* Warna teks untuk mode gelap */
+}
+
+body.dark .custom-light {
+  background-color: #333334 !important; /* Latar belakang gelap */
+  color: #e0e0e0 !important; /* Teks terang */
+  border: 1px solid #495057 !important; /* Garis tepi gelap */
+}
+
+/* Dark Mode */
+body.dark .custom-translate-container {
+  background-color: #33393f; /* Dark background */
+  color: #ffffff; /* White text */
+}
+
+body.dark .custom-translate-container select {
+  background-color: #33393f; /* Dark dropdown */
+  color: #ffffff; /* White text */
+  border: 1px solid #555; /* Darker border */
+}
+
+body.dark .custom-translate-container select:focus {
+  outline: none;
+  border-color: #4c8bf5;
+  background-color: #292727; /* Slightly lighter focus */
+}
+
+body.dark .custom-translate-container::before {
+  content: 'Select Language';
+  color: #ffffff; /* Teks putih untuk dark mode */
+}
+
+body.dark .custom-btn {
+  background-color: #343a40; /* Warna tombol dalam mode gelap */
+  color: #f8f9fa; /* Teks terang */
+  border-color: #495057; /* Border gelap */
+}
+
+body.dark .custom-btn:hover {
+  background-color: #495057; /* Warna hover gelap */
+  color: #ffffff; /* Teks tetap terang */
+  border-color: #6c757d; /* Border lebih jelas saat hover */
+}
+
+body.dark .custom-btn:disabled {
+  background-color: #6c757d; /* Tombol nonaktif dalam mode gelap */
+  color: #adb5bd; /* Teks nonaktif */
+  border-color: #6c757d; /* Border konsisten */
+  cursor: not-allowed;
+}

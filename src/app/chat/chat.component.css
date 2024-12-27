@@ -85,6 +85,11 @@
     background-color: rgba(50, 205, 50, 0.7); /* Subtle green */
   }
   
+  .custom-light {
+    background-color: #f8f9fa !important; /* Latar belakang terang */
+    color: #6c757d !important; /* Teks abu-abu */
+    border: 1px solid #dee2e6 !important; /* Garis tepi abu-abu */
+  }
   
   
   

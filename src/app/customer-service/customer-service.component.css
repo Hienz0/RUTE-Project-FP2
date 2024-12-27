@@ -87,3 +87,8 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
 
 
+.custom-light {
+  background-color: #f8f9fa !important; /* Latar belakang terang */
+  color: #6c757d !important; /* Teks abu-abu */
+  border: 1px solid #dee2e6 !important; /* Garis tepi abu-abu */
+}
