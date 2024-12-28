@@ -231,8 +231,9 @@
                   Details
                 </button>
                  <!-- Show Receipt Button -->
-                 <button 
-                  *ngIf="booking.bookingStatus !== 'Expired' 
+                 <button
+                  *ngIf="!booking.services 
+                          && booking.bookingStatus !== 'Expired' 
                           && booking.bookingStatus !== 'Waiting for payment' 
                           && booking.bookingStatus !== 'Canceled by Traveller'"
                   class="btn btn-outline-success btn-sm px-3 py-1 hover:bg-blue-600 hover:text-white ms-2"
@@ -241,14 +242,15 @@
                 </button>
 
 
+
                 
-                <button *ngIf="
+                <button *ngIf="!booking.services &&
                   booking.bookingStatus === 'Complete' && !booking.isReviewed
                 " class="btn btn-outline-primary btn-sm px-3 py-1 ms-2" (click)="navigateToReview(booking._id)">
                   Review
                 </button>
 
-                <button *ngIf="
+                <button *ngIf="!booking.services &&
                   booking.bookingStatus === 'Complete' && booking.isReviewed
                 " class="btn btn-outline-secondary btn-sm px-3 py-1 ms-2" disabled>
                   Reviewed
@@ -634,16 +636,38 @@
         </div>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- Modal Footer -->
+    <div class="modal-footer bg-gray-100 border-t border-gray-300 py-4 flex justify-end items-center space-x-4">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary btn-sm text-white hover:bg-gray-700 rounded-lg px-4 py-2 transition"
+        data-bs-dismiss="modal">
+        Close
+      </button>
+      
+      <button 
+        class="btn btn-outline-success btn-sm px-3 py-1 hover:bg-blue-600 hover:text-white ms-2  rounded-lg px-4 py-2 transition"
+        (click)="showReceipt(bookingDetails)">
+        <span>Show Receipt</span>
+      </button>
+      
+      <div *ngIf="bookingDetails">
         <button 
-          class="btn btn-info me-2" style="color: #ffffff;"
-          (click)="showReceipt(bookingDetails)">
-          <i class="fas fa-receipt me-2"></i> Show Receipt
+          *ngIf="bookingDetails.bookingStatus === 'Complete' && !bookingDetails.isReviewed"
+          class="btn btn-outline-primary border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-lg px-4 py-2 transition"
+          (click)="navigateToReview(bookingDetails._id)">
+          Review
+        </button>
+        
+        <button 
+          *ngIf="bookingDetails.bookingStatus === 'Complete' && bookingDetails.isReviewed"
+          class="btn btn-outline-secondary border-gray-400 text-gray-400 cursor-not-allowed rounded-lg px-4 py-2 transition"
+          disabled>
+          Reviewed
         </button>
       </div>
-      
+    </div>
+
 
     </div>
   </div>
