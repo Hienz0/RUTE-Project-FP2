@@ -380,6 +380,23 @@ openReceiptModal(index: number): void {
   this.cdr.detectChanges();
 }
 
+showReceipt(bookingDetails: any) {
+  // Assign booking details to receipt data, ensuring the service type is included.
+  this.receiptData = {
+    details: {
+      type: bookingDetails.serviceType, // Explicitly include service type
+      ...bookingDetails // Spread the remaining properties of bookingDetails
+    }
+  };
+
+  // Debug log to verify booking details
+  console.log('Booking Details:', bookingDetails);
+
+  // Open the receipt modal
+  this.isReceiptModalOpen = true;
+}
+
+
 
 generateReceipt(
   bookingId: string,
