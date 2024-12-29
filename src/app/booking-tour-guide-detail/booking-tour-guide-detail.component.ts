@@ -43,6 +43,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
 
   isItinerary: boolean = false; // Default is false
   showBackToPlanningButton = false;
+  isFullyBooked: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -173,6 +174,44 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
     );
   }
 
+  checkTourAvailability(): void {
+    const { tourDate, tourName } = this.bookingDetails;
+  
+    if (!tourDate || !this.serviceId) {
+      this.isFullyBooked = false; // Reset if no date is selected
+      return;
+      console.log("No tourDate or serviceId provided.");
+    }
+
+    console.log("Checking availability for tour:", this.serviceId, "on", tourDate);
+  
+    // Call the backend to check tour availability
+    this.bookingService.checkTourAvailability(this.serviceId, tourDate).subscribe(
+      (response) => {
+        if (response.success) {
+          this.isFullyBooked = false; // Tour is available
+        } else {
+          this.isFullyBooked = true; // Tour is fully booked
+          Swal.fire({
+            icon: 'info',
+            title: 'Fully Booked',
+            text: 'This tour is fully booked for the selected date. Please choose another date.',
+            confirmButtonColor: '#3085d6',
+          });
+        }
+      },
+      (error) => {
+        console.error('Error checking tour availability', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Unable to check availability. Please try again later.',
+          confirmButtonColor: '#d33',
+        });
+      }
+    );
+  }
+
 
 openModal(): void {
   const modalElement = document.getElementById('bookingModal');
@@ -208,14 +247,18 @@ openModal(): void {
   
     // Log booking details
     console.log('Booking Details:', this.bookingDetails);
+    //test date
+    console.log('Tour Date:', this.bookingDetails.tourDate);
+
   
     // Validate fields
-    if (!this.bookingDetails.customerName || 
-        !this.bookingDetails.tourguideType || 
-        !this.bookingDetails.numberOfParticipants || 
-        !this.bookingDetails.tourTime||
-        !this.bookingDetails.tourDate) {
-  
+    if (
+      !this.bookingDetails.customerName ||
+      !this.bookingDetails.tourguideType ||
+      !this.bookingDetails.numberOfParticipants ||
+      !this.bookingDetails.tourTime ||
+      !this.bookingDetails.tourDate
+    ) {
       Swal.fire({
         icon: 'error',
         title: 'Missing Fields',
@@ -226,8 +269,16 @@ openModal(): void {
     }
   
     // Validate tour date
-    const normalizedCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    const normalizedTourDate = new Date(tourDate.getFullYear(), tourDate.getMonth(), tourDate.getDate());
+    const normalizedCurrentDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate()
+    );
+    const normalizedTourDate = new Date(
+      tourDate.getFullYear(),
+      tourDate.getMonth(),
+      tourDate.getDate()
+    );
   
     if (normalizedTourDate < normalizedCurrentDate) {
       Swal.fire({
@@ -238,55 +289,90 @@ openModal(): void {
       });
       return;
     }
-
-      // Calculate total amount based on participants
-  this.bookingDetails.amount = this.bookingDetails.amount * this.bookingDetails.numberOfParticipants;
-
   
-    // Process booking if validation passes
-    const bookingData = {
-      ...this.bookingDetails,
-      serviceId: this.serviceId,          // Include serviceId
-      userId: this.currentUser?.userId        // Include userId from the current user
-    };
-
-    console.log(bookingData)
+    // Check capacity limit before proceeding
+    this.bookingService
+      .checkTourAvailability(this.serviceId!, this.bookingDetails.tourDate)
+      .subscribe(
+        (response) => {
+          if (!response.success) {
+            // Show alert if the tour is fully booked
+            Swal.fire({
+              icon: 'error',
+              title: 'Fully Booked',
+              text: response.message,
+              confirmButtonColor: '#d33',
+            });
+            return;
+          }
   
-    this.bookingService.bookTourGuide(bookingData, this.isItinerary).subscribe(
-      (response) => {
-        console.log('Booking successful', response);
-        this.closeModal();
-        const bookingId = response.bookingDetails._id;
-        const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
-        if (planningItineraryId) {
-          // Update the itinerary with the bookingId
-          const userId = this.currentUser.userId; // Ensure `userId` is available
-          this.itineraryService.updateItinerary(bookingId, userId, 'Tour', this.bookingDetails.amount).subscribe(
-            () => {
-              console.log('Itinerary updated successfully.');
-              // Navigate to the /planning-itinerary route
-              this.router.navigate([`/planning-itinerary`]);
+          // Calculate total amount based on participants
+          this.bookingDetails.amount =
+            this.bookingDetails.amount * this.bookingDetails.numberOfParticipants;
+  
+          // Process booking if capacity is available
+          const bookingData = {
+            ...this.bookingDetails,
+            serviceId: this.serviceId, // Include serviceId
+            userId: this.currentUser?.userId, // Include userId from the current user
+          };
+  
+          console.log(bookingData);
+  
+          this.bookingService.bookTourGuide(bookingData, this.isItinerary).subscribe(
+            (response) => {
+              console.log('Booking successful', response);
+              this.closeModal();
+              const bookingId = response.bookingDetails._id;
+              const planningItineraryId = this.route.snapshot.queryParamMap.get(
+                'planning-itinerary'
+              );
+              if (planningItineraryId) {
+                // Update the itinerary with the bookingId
+                const userId = this.currentUser.userId; // Ensure `userId` is available
+                this.itineraryService
+                  .updateItinerary(
+                    bookingId,
+                    userId,
+                    'Tour',
+                    this.bookingDetails.amount
+                  )
+                  .subscribe(
+                    () => {
+                      console.log('Itinerary updated successfully.');
+                      // Navigate to the /planning-itinerary route
+                      this.router.navigate([`/planning-itinerary`]);
+                    },
+                    (error) => {
+                      console.error('Failed to update itinerary:', error);
+                    }
+                  );
+              } else {
+                // Default navigation to booking details page
+                this.router.navigate([`/bookings/${bookingId}`]);
+              }
             },
             (error) => {
-              console.error('Failed to update itinerary:', error);
+              console.error('Error submitting booking', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Booking Failed',
+                text: 'There was an error processing your booking. Please try again.',
+                confirmButtonColor: '#d33',
+              });
             }
           );
-        } else {
-          // Default navigation to booking details page
-          this.router.navigate([`/bookings/${bookingId}`]);
+        },
+        (error) => {
+          console.error('Error checking availability', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to check tour availability. Please try again.',
+            confirmButtonColor: '#d33',
+          });
         }
-
-      },
-      (error) => {
-        console.error('Error submitting booking', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Booking Failed',
-          text: 'There was an error processing your booking. Please try again.',
-          confirmButtonColor: '#d33',
-        });
-      }
-    );
+      );
   }  
 
   navigateToChat(): void {

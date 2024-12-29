@@ -161,6 +161,7 @@
               class="form-control"
               min="{{ currentDate | date:'yyyy-MM-dd' }}"
               required
+              (change)="checkTourAvailability()"
             />
           </div>
 

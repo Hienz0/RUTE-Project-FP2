@@ -25,8 +25,21 @@ export class BookingService {
       isItinerary,
     });
   }
+
+  // checkTourAvailability(serviceId: string, tourDate: string): Observable<any> {
+  //   const params = { serviceId, tourDate };
+  //   return this.http.post<any>('http://localhost:3000/api/bookings/check-tour-availability', params); // Updated URL
+  // }  
+
+  checkTourAvailability(serviceId: string, tourDate: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/bookings/check-tour-availability`, {
+      serviceId,
+      tourDate
+    });
+  }
   
 
+  
     // Check if the room is available for the specified date range
     checkRoomAvailability(serviceId: string, roomNumber: number, checkInDate: string, checkOutDate: string): Observable<boolean> {
       return this.http.get<boolean>(`${this.apiUrl}/${'check-availability'}`, {

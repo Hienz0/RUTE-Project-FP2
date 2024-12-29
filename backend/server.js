@@ -2900,6 +2900,148 @@ app.get('/api/chat/users/chat', async (req, res) => {
 
 
 
+// // booking tour
+
+// // Define the tour booking schema
+// const bookingTourSchema = new mongoose.Schema({
+//   customerName: {
+//     type: String,
+//     required: true,
+//     trim: true
+//   },
+//   tourName: {
+//     type: String,
+//     required: true,
+//     trim: true
+//   },
+
+//   tourguideType: {
+//     type: String,
+//     required: true,
+//     enum: ['With Guide', 'Tour Only']
+//   },
+
+//   tourDate: {
+//     type: Date,
+//     required: true,
+
+//     validate: {
+//       validator: function (value) {
+//         const now = new Date();
+//         return value >= now.setHours(0, 0, 0, 0);
+//       },
+//       message: 'Tour date must be in the future'
+//     }
+
+//   },
+
+//   pickupLocation: {
+//     type: String,
+//     required: true,
+
+//   },
+
+//   numberOfParticipants: {
+//     type: Number,
+//     required: true,
+//     min: 1
+//   },
+//   specialRequest: {
+//     type: String,
+//     trim: true
+//   },
+//   amount: {
+//     type: Number,
+//     required: true,
+//     min: 0
+//   },
+//   bookingStatus: {
+//     type: String,
+//     default: 'Booked',  // Other possible statuses: 'Cancelled', 'Completed'
+//     enum: ['Booked', 'Cancelled', 'Completed', 'Waiting for payment', 'Waiting for Itinerary Confirmation']
+//   },
+//   serviceId: { // Add serviceId field
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'Service',
+//     required: true
+//   },
+//   userId: { // Add userId field
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'User',
+//     required: true
+//   },
+
+//   tourTime: { // Add the tourTime field
+//     type: String,
+//     required: true,
+//     enum: ['9:00-11:00', '13:00-15:00', '17:00-19:00'] // Restrict to available time options
+//   },
+
+//   paymentStatus: {
+//     type: String,
+//     default: 'Pending', // Other possible statuses: 'Paid', 'Failed'
+//     enum: ['Pending', 'Paid', 'Failed']
+//   },
+
+//   isReviewed: { type: Boolean, default: false },
+//   isItinerary: { type: Boolean, default: false },
+//   paymentExpiration: { type: Date },
+
+// }, { timestamps: true });
+
+// // Create the Booking model
+// const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
+
+// module.exports = TourBooking;
+
+
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//   try {
+//     const { serviceId, userId, isItinerary, ...otherData } = req.body;
+
+//     // Log booking data for debugging
+//     console.log("Booking Data:", req.body);
+
+//     // Define booking status and payment expiration conditionally
+//     const bookingData = {
+//       ...otherData,
+//       serviceId,
+//       userId,
+//       bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+//       ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }), // Add payment expiration if not itinerary
+//     };
+
+//     // Create a new tour booking
+//     const booking = new TourBooking(bookingData);
+//     await booking.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: 'Tour Guide booked successfully!',
+//       bookingDetails: booking,
+//     });
+//   } catch (error) {
+//     console.error('Error creating booking:', error); // Log error details for debugging
+//     res.status(400).json({ success: false, message: 'Error creating booking', details: error });
+//   }
+// });
+
+
+// // GET route to fetch bookings by userId
+// app.get('/api/services/bookings/user/:userId', async (req, res) => {
+//   try {
+//     const userId = req.params.userId;
+//     const bookings = await TourBooking.find({ userId: userId });
+//     res.status(200).json(bookings);
+//   } catch (error) {
+//     console.error('Error fetching user bookings:', error);
+//     res.status(500).json({ error: 'Error fetching bookings' });
+//   }
+// });
+
+
+/////// NEW TOUR BOOKING SCHEMA //////////
+
 // booking tour
 
 // Define the tour booking schema
@@ -2994,31 +3136,6 @@ const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
 
 module.exports = TourBooking;
 
-// Route to handle booking tour guide
-
-// app.post('/api/bookings/tour-guide', async (req, res) => {
-//   try {
-//         // Calculate payment expiration (15 minutes from now)
-//         const now = new Date();
-//         const paymentExpiration = new Date(now.getTime() +3600000);
-
-//     const bookingData = {
-//       ...req.body,
-//       serviceId: req.body.serviceId, // Make sure these are passed from the client side
-//       userId: req.body.userId,      // or set here if you have access to current user
-//       bookingStatus: 'Waiting for payment', // Set booking status here
-//       paymentExpiration
-//       // tourTime: req.body.tourTime
-//     };
-//     const booking = new TourBooking(bookingData);
-//     await booking.save();
-//     res.status(201).json(booking);
-//   } catch (error) {
-//     console.error('Error details:', error); // Log error details for debugging
-//     res.status(400).json({ error: 'Error creating booking', details: error });
-//   }
-// });
-
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
     const { serviceId, userId, isItinerary, ...otherData } = req.body;
@@ -3050,6 +3167,149 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   }
 });
 
+// POST route to enforce booking limit
+// app.post('/api/bookings/tour-guide', async (req, res) => {
+//     try {
+//         const { serviceId, tourDate, ...otherData } = req.body;
+
+//         // Normalize the date to ensure comparisons are consistent
+//         const startOfDay = new Date(tourDate);
+//         startOfDay.setUTCHours(0, 0, 0, 0);
+//         const endOfDay = new Date(tourDate);
+//         endOfDay.setUTCHours(23, 59, 59, 999);
+
+//         // Count bookings for the same tour on the same day
+//         const bookingCount = await TourBooking.countDocuments({
+//             serviceId: serviceId,
+//             tourDate: { $gte: startOfDay, $lte: endOfDay },
+//         });
+
+//         if (bookingCount >= 3) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'This tour is fully booked for the selected date.',
+//             });
+//         }
+
+//         // Proceed with booking if limit not exceeded
+//         const bookingData = {
+//             ...otherData,
+//             serviceId,
+//             tourDate,
+//             bookingStatus: 'Waiting for payment',
+//             paymentExpiration: new Date(new Date().getTime() + 3600000), // Example: 1 hour for payment
+//         };
+
+//         const booking = new TourBooking(bookingData);
+//         await booking.save();
+
+//         res.status(201).json({
+//             success: true,
+//             message: 'Tour booked successfully!',
+//             bookingDetails: booking,
+//         });
+//     } catch (error) {
+//         console.error('Error creating booking:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Error processing booking',
+//             details: error.message,
+//         });
+//     }
+// });
+
+// POST route to handle booking and availability check
+app.post('/api/bookings/tour-guide', async (req, res) => {
+  try {
+      const { serviceId, tourDate, userId, isItinerary, ...otherData } = req.body;
+
+      // Normalize the date to ensure comparisons are consistent
+      const startOfDay = new Date(tourDate);
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const endOfDay = new Date(tourDate);
+      endOfDay.setUTCHours(23, 59, 59, 999);
+
+      // Count bookings for the same tour on the same day
+      const bookingCount = await TourBooking.countDocuments({
+          serviceId: serviceId,
+          tourDate: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+      if (bookingCount >= 3) {
+          return res.status(400).json({
+              success: false,
+              message: 'This tour is fully booked for the selected date.',
+          });
+      }
+
+      // Define booking status and payment expiration conditionally
+      const bookingData = {
+          ...otherData,
+          serviceId,
+          userId,
+          tourDate,
+          bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+          ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }), // Add payment expiration if not itinerary
+      };
+
+      // Create a new tour booking
+      const booking = new TourBooking(bookingData);
+      await booking.save();
+
+      res.status(201).json({
+          success: true,
+          message: 'Tour booked successfully!',
+          bookingDetails: booking,
+      });
+  } catch (error) {
+      console.error('Error creating booking:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Error processing booking',
+          details: error.message,
+      });
+  }
+});
+
+// POST route to check tour availability
+app.post('/api/bookings/check-tour-availability', async (req, res) => {
+  try {
+    const { serviceId, tourDate } = req.body;
+
+    // Normalize the date to ensure comparisons are consistent
+    const startOfDay = new Date(tourDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(tourDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    // Count bookings for the same tour on the same day
+    const bookingCount = await TourBooking.countDocuments({
+      serviceId: serviceId,
+      tourDate: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    // Respond with availability status
+    if (bookingCount >= 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'This tour is fully booked for the selected date.',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Tour is available.',
+    });
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking availability',
+      details: error.message,
+    });
+  }
+});
+
 
 // GET route to fetch bookings by userId
 app.get('/api/services/bookings/user/:userId', async (req, res) => {
@@ -3064,18 +3324,6 @@ app.get('/api/services/bookings/user/:userId', async (req, res) => {
 });
 
 
-
-
-// app.post('/api/bookings/tour-guide', async (req, res) => {
-//   try {
-//     const booking = new TourBooking(req.body);
-//     await booking.save();
-//     res.status(201).json(booking);
-//   } catch (error) {
-//     console.error('Error details:', error); // Log error details for debugging
-//     res.status(400).json({ error: 'Error creating tour guide booking', details: error });
-//   }
-// });
 
 
 
