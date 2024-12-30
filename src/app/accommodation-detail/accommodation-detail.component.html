@@ -227,7 +227,7 @@
                 <mat-label>Check-in Date</mat-label>
                 <input matInput class="z-index-front" [matDatepicker]="picker" [(ngModel)]="bookingDetails.checkInDate"
                   (ngModelChange)="onCheckInDateChange($event)" [matDatepickerFilter]="disableBookedDates"
-                  [disabled]="!bookingDetails.roomTypeId" matTooltip="Please select a room type first"
+                  [disabled]="!bookingDetails.roomTypeId || isItinerary" matTooltip="Please select a room type first"
                   [matTooltipDisabled]="!!bookingDetails.roomTypeId" required readonly />
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
@@ -243,7 +243,7 @@
                 <mat-label>Check-out Date</mat-label>
                 <input matInput class="z-index-front" [matDatepicker]="picker2"
                   [(ngModel)]="bookingDetails.checkOutDate" (ngModelChange)="onCheckOutDateChange($event)"
-                  [matDatepickerFilter]="disablePastAndBookedDatesForCheckOut" [disabled]="!bookingDetails.checkInDate"
+                  [matDatepickerFilter]="disablePastAndBookedDatesForCheckOut" [disabled]="!bookingDetails.checkInDate || isItinerary"
                   matTooltip="Please select a check-in date first" [matTooltipDisabled]="!!bookingDetails.checkInDate"
                   required readonly />
                 <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>

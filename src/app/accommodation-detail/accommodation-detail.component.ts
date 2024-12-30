@@ -98,6 +98,7 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
         this.route.queryParams.subscribe(params => {
           if (params['planning-itinerary']) {
             this.isItinerary = true;
+            this.loadItinerariesByUser(this.currentUser.userId);
           } else {
             this.isItinerary = false;
           }
@@ -222,12 +223,17 @@ loadBookedDates(): void {
 
 // Detect room type selection change to trigger date fetch
 onRoomTypeChange(): void {
+  if (!this.isItinerary) {
+    // Clear the check-in and check-out dates only if it is not an itinerary
+    this.bookingDetails.checkInDate = '';
+    this.bookingDetails.checkOutDate = '';
+  }
+
   this.loadBookedDates(); // Fetch new dates based on selected room type
-  this.bookingDetails.checkInDate = '';
-  this.bookingDetails.checkOutDate = '';
 
   console.log(this.bookingDetails.roomTypeId);
 }
+
 
   isDateDisabled(date: string): boolean {
     return this.bookedDates.includes(date);
@@ -603,6 +609,26 @@ onCheckOutDateChange(date: Date): void {
     } else {
       console.error('Service ID is not available.');
     }
+  }
+  
+
+  loadItinerariesByUser(userId: string): void {
+    this.itineraryService.getItinerariesByUserId(userId).subscribe({
+      next: (itineraries) => {
+        const accommodationService = itineraries
+          .flatMap((itinerary: any) => itinerary.services)
+          .find((service: any) => service.serviceType === 'Accommodation');
+  
+        if (accommodationService) {
+          // Convert Date to string using toISOString or custom formatting
+          this.bookingDetails.checkInDate = new Date(accommodationService.startDate).toISOString(); // ISO format
+          this.bookingDetails.checkOutDate = new Date(accommodationService.endDate).toISOString();  // ISO format
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itineraries:', err);
+      }
+    });
   }
   
   

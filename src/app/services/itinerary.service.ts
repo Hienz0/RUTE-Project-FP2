@@ -73,6 +73,11 @@ export class ItineraryService {
     removeServiceFromItinerary(userId: string, bookingId: string): Observable<any> {
       return this.http.delete(`${this.apiUrl}/remove/${userId}/${bookingId}`);
     }
+
+    getItinerariesByUserId(userId: string): Observable<any> {
+      return this.http.get(`${this.apiUrl}/user/${userId}`);
+    }
+    
     
     
     

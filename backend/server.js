@@ -2650,7 +2650,23 @@ app.delete('/api/itinerary/remove/:userId/:bookingId', async (req, res) => {
 
 
 
+// Get itineraries by userId
+app.get('/api/itinerary/user/:userId', async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find({ userId: req.params.userId });
+    if (!itineraries.length) {
+      return res.status(404).json({ message: 'No itineraries found for this user.' });
+    }
+    res.json(itineraries);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching itineraries', error });
+  }
+});
+
+
+
 // white space
+
 
 
 //reandom services for dashboard
