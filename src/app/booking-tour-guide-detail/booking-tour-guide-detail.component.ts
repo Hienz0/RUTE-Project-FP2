@@ -63,6 +63,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
     this.route.queryParams.subscribe(params => {
       if (params['planning-itinerary']) {
         this.isItinerary = true;
+        this.loadItineraryById(this.currentUser.userId);
       } else {
         this.isItinerary = false;
       }
@@ -296,4 +297,23 @@ openModal(): void {
       console.error('Service ID is not available.');
     }
   }
+
+  loadItineraryById(userId: string): void {
+    this.itineraryService.getItineraryByUserId(userId).subscribe({
+      next: (itinerary) => {
+        const tourService = itinerary.services.find(
+          (service: any) => service.serviceType === 'Tour'
+        );
+
+        if (tourService) {
+          // Set the tour date if the service exists
+          this.bookingDetails.tourDate = new Date(tourService.singleDate).toISOString().split('T')[0];  // Date format
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itinerary by ID:', err);
+      }
+    });
+  }
+
 }

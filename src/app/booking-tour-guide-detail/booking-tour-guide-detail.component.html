@@ -160,6 +160,7 @@
               name="tourDate"
               class="form-control"
               min="{{ currentDate | date:'yyyy-MM-dd' }}"
+              [disabled]="isItinerary"
               required
             />
           </div>
