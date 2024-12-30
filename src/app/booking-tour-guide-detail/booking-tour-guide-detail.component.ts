@@ -175,22 +175,30 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
   }
 
   checkTourAvailability(): void {
+    if (!this.bookingDetails) {
+      console.error("bookingDetails is null or undefined");
+      this.isFullyBooked = false;
+      return;
+    }
+  
     const { tourDate, tourName } = this.bookingDetails;
   
     if (!tourDate || !this.serviceId) {
+      console.log("No tourDate or serviceId provided.");
       this.isFullyBooked = false; // Reset if no date is selected
       return;
-      console.log("No tourDate or serviceId provided.");
     }
-
-    console.log("Checking availability for tour:", this.serviceId, "on", tourDate);
+  
+    console.log("Checking availability for serviceId:", this.serviceId, "tourDate:", tourDate);
   
     // Call the backend to check tour availability
     this.bookingService.checkTourAvailability(this.serviceId, tourDate).subscribe(
       (response) => {
         if (response.success) {
+          console.log("Tour is available.");
           this.isFullyBooked = false; // Tour is available
         } else {
+          console.log("Tour is fully booked for the selected date.");
           this.isFullyBooked = true; // Tour is fully booked
           Swal.fire({
             icon: 'info',
@@ -201,7 +209,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
         }
       },
       (error) => {
-        console.error('Error checking tour availability', error);
+        console.error('HTTP Error:', error.message, 'URL:', error.url, 'Status:', error.status);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -211,6 +219,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
       }
     );
   }
+  
 
 
 openModal(): void {
