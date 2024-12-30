@@ -3125,13 +3125,28 @@ const bookingTourSchema = new mongoose.Schema({
     enum: ['Pending', 'Paid', 'Failed']
   },
 
-  
-
   isReviewed: { type: Boolean, default: false },
   isItinerary: { type: Boolean, default: false },
   paymentExpiration: { type: Date },
 
 }, { timestamps: true });
+
+// Schema to store unavailable dates
+const unavailableDatesSchema = new mongoose.Schema({
+  serviceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+    unique: true,
+  },
+});
+
+const UnavailableDate = mongoose.model('UnavailableDate', unavailableDatesSchema);
+
 
 // Create the Booking model
 const TourBooking = mongoose.model('TourBooking', bookingTourSchema);
@@ -3170,55 +3185,82 @@ module.exports = TourBooking;
 // });
 
 // POST route to handle booking and availability check
+// Update the booking route
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
-      const { serviceId, tourDate, userId, isItinerary, ...otherData } = req.body;
+    const { serviceId, tourDate, userId, isItinerary, ...otherData } = req.body;
 
-      // Normalize the date to ensure comparisons are consistent
-      const startOfDay = new Date(tourDate);
-      startOfDay.setUTCHours(0, 0, 0, 0);
-      const endOfDay = new Date(tourDate);
-      endOfDay.setUTCHours(23, 59, 59, 999);
+    const startOfDay = new Date(tourDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(tourDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
-      // Count bookings for the same tour on the same day
-      const bookingCount = await TourBooking.countDocuments({
-          serviceId: serviceId,
-          tourDate: { $gte: startOfDay, $lte: endOfDay },
+    // Check if the date is already blocked
+    const isDateBlocked = await UnavailableDate.findOne({
+      serviceId,
+      date: startOfDay,
+    });
+
+    if (isDateBlocked) {
+      return res.status(400).json({
+        success: false,
+        message: 'This date is fully booked and unavailable.',
       });
+    }
 
-      if (bookingCount >= 3) {
-          return res.status(400).json({
-              success: false,
-              message: 'This tour is fully booked for the selected date.',
-          });
-      }
+    // Count bookings for the same date
+    const bookingCount = await TourBooking.countDocuments({
+      serviceId,
+      tourDate: { $gte: startOfDay, $lte: endOfDay },
+    });
 
-      // Define booking status and payment expiration conditionally
-      const bookingData = {
-          ...otherData,
-          serviceId,
-          userId,
-          tourDate,
-          bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
-          ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }), // Add payment expiration if not itinerary
-      };
+    if (bookingCount >= 3) {
+      // Block the date
+      await UnavailableDate.create({ serviceId, date: startOfDay });
 
-      // Create a new tour booking
-      const booking = new TourBooking(bookingData);
-      await booking.save();
-
-      res.status(201).json({
-          success: true,
-          message: 'Tour booked successfully!',
-          bookingDetails: booking,
+      return res.status(400).json({
+        success: false,
+        message: 'This date is now fully booked.',
       });
+    }
+
+    // Create the booking
+    const bookingData = {
+      ...otherData,
+      serviceId,
+      userId,
+      tourDate,
+      bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
+      ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }),
+    };
+
+    const booking = new TourBooking(bookingData);
+    await booking.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Tour booked successfully!',
+      bookingDetails: booking,
+    });
   } catch (error) {
-      console.error('Error creating booking:', error);
-      res.status(500).json({
-          success: false,
-          message: 'Error processing booking',
-          details: error.message,
-      });
+    console.error('Error processing booking:', error);
+    res.status(500).json({ success: false, message: 'Error processing booking', details: error.message });
+  }
+});
+
+// Endpoint to fetch unavailable dates for a service
+app.get('/api/bookings/unavailable-dates/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const unavailableDates = await UnavailableDate.find({ serviceId }).select('date -_id');
+
+    res.status(200).json({
+      success: true,
+      unavailableDates: unavailableDates.map((entry) => entry.date),
+    });
+  } catch (error) {
+    console.error('Error fetching unavailable dates:', error);
+    res.status(500).json({ success: false, message: 'Error fetching unavailable dates', details: error.message });
   }
 });
 

@@ -42,6 +42,7 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
   currentDate: string = '';
 
   isItinerary: boolean = false; // Default is false
+  unavailableDates: string[] = []; // Track unavailable dates
   showBackToPlanningButton = false;
   isFullyBooked: boolean = false;
 
@@ -373,11 +374,11 @@ openModal(): void {
           );
         },
         (error) => {
-          console.error('Error checking availability', error);
+          console.error('Full Book Error checking availability', error);
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Failed to check tour availability. Please try again.',
+            text: 'Failed to check tour availability. Please try again another date.',
             confirmButtonColor: '#d33',
           });
         }
