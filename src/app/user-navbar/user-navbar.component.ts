@@ -40,9 +40,17 @@ export class UserNavbarComponent implements OnInit {
   constructor(private authService: AuthService, private weatherService: WeatherService, private router: Router,private themeService: ThemeService) { }
 
   ngOnInit(): void {
-      // Initialize NotificationAPI
+
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+            // Set weatherWidgetToggle based on the user data (if available)
+            if (this.currentUser && this.currentUser.weatherWidgetToggle !== undefined) {
+              this.weatherWidgetToggle = this.currentUser.weatherWidgetToggle;
+            }
+            console.log('Current User:', this.currentUser);
+                  // Initialize NotificationAPI
   const notificationapi = new NotificationAPI({
-    userId: "67495f0d41cdb341cccd44db", // Replace with dynamic user ID if needed
+    userId: this.currentUser.userId, // Replace with dynamic user ID if needed
     clientId: "8o9ja3sz71phsuvvmxlt8akcyn"
   });
 
@@ -51,13 +59,6 @@ export class UserNavbarComponent implements OnInit {
     root: 'bell-container', // ID of the container in the HTML template
     popupPosition: PopupPosition.BottomLeft
   });
-    this.authService.currentUser.subscribe(user => {
-      this.currentUser = user;
-            // Set weatherWidgetToggle based on the user data (if available)
-            if (this.currentUser && this.currentUser.weatherWidgetToggle !== undefined) {
-              this.weatherWidgetToggle = this.currentUser.weatherWidgetToggle;
-            }
-            console.log('Current User:', this.currentUser);
     });
     this.isDarkMode = this.themeService.getTheme() === 'dark';
 
