@@ -256,6 +256,7 @@
                       readonly
                       (focus)="openPickupCalendar()"
                       (change)="onDateChange()"
+                      [disabled]="isItinerary"
                       required
                     />
                     <span
@@ -282,6 +283,7 @@
                       readonly
                       (focus)="openDropoffCalendar()"
                       (change)="onDateChange()"
+                      [disabled]="isItinerary"
                       required
                     />
                     <span

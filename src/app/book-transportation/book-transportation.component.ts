@@ -88,6 +88,7 @@ export class BookTransportationComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['planning-itinerary']) {
         this.isItinerary = true;
+        this.loadItineraryById(this.currentUser.userId);
       } else {
         this.isItinerary = false;
       }
@@ -813,6 +814,24 @@ export class BookTransportationComponent implements OnInit {
     } else {
       console.error('Service ID is not available.');
     }
+  }
+
+  loadItineraryById(userId: string): void {
+    this.itineraryService.getItineraryByUserId(userId).subscribe({
+      next: (itinerary: any) => {
+        const vehicleService = itinerary.services.find(
+          (service: any) => service.serviceType === 'Vehicle'
+        );
+
+        if (vehicleService) {
+          this.pickupDate = new Date(vehicleService.startDate).toISOString().split('T')[0]; // Date format
+          this.dropoffDate = new Date(vehicleService.endDate).toISOString().split('T')[0];  // Date format
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itinerary by ID:', err);
+      }
+    });
   }
   
 }
