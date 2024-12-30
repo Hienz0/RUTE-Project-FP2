@@ -5,6 +5,8 @@ import { ThemeService } from '../services/theme.service';
 import { WeatherService } from '../services/weather.service';
 import { Router } from '@angular/router';  // To redirect the user after logging out
 
+import NotificationAPI from 'notificationapi-js-client-sdk';
+import { PopupPosition } from 'notificationapi-js-client-sdk/lib/interfaces';
 @Component({
   selector: 'app-user-navbar',
   templateUrl: './user-navbar.component.html',
@@ -38,6 +40,17 @@ export class UserNavbarComponent implements OnInit {
   constructor(private authService: AuthService, private weatherService: WeatherService, private router: Router,private themeService: ThemeService) { }
 
   ngOnInit(): void {
+      // Initialize NotificationAPI
+  const notificationapi = new NotificationAPI({
+    userId: "67495f0d41cdb341cccd44db", // Replace with dynamic user ID if needed
+    clientId: "8o9ja3sz71phsuvvmxlt8akcyn"
+  });
+
+  // Show in-app notifications
+  notificationapi.showInApp({
+    root: 'bell-container', // ID of the container in the HTML template
+    popupPosition: PopupPosition.BottomLeft
+  });
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
             // Set weatherWidgetToggle based on the user data (if available)
@@ -47,6 +60,10 @@ export class UserNavbarComponent implements OnInit {
             console.log('Current User:', this.currentUser);
     });
     this.isDarkMode = this.themeService.getTheme() === 'dark';
+
+    
+    
+    
   }
 
   toggleTheme(): void {

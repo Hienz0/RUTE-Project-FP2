@@ -3,6 +3,7 @@
 @import '~leaflet/dist/leaflet.css';
 
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
+@import 'node_modules/notificationapi-js-client-sdk/dist/styles.css';
 
   
 .custom-snackbar-success {

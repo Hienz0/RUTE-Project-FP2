@@ -744,6 +744,16 @@ cron.schedule('*/1 * * * *', async () => { // Runs every minute
 //   }
 // });
 
+// notification api
+
+const notificationapi = require('notificationapi-node-server-sdk').default;
+
+// Initialize the notification API
+notificationapi.init(
+  '8o9ja3sz71phsuvvmxlt8akcyn', // clientId
+  'epwx9tx8rdpdl43um8c1nvp7xzjunwgpwrvcjky8otzsjzo1r1ul3n3b9b' // clientSecret
+);
+
 app.post('/api/bookings/accommodation', async (req, res) => {
   console.log('Request body:', req.body);
 
@@ -789,6 +799,22 @@ app.post('/api/bookings/accommodation', async (req, res) => {
     if (!accommodation) {
       return res.status(404).json({ error: 'Accommodation, Room Type, or Room not found.' });
     }
+
+        // Step 3: Send notification using notificationapi
+        const notificationResponse = await notificationapi.send({
+          notificationId: 'book_successfull',
+          user: {
+            id: req.body.userId,
+            email: 'aldyanqseven4@gmail.com', // Replace with the actual user email from your database if available
+            number: '+15005550006', // Replace with the actual user phone number if available
+          },
+          mergeTags: {
+            serviceName: req.body.accommodationName, // Take serviceName from request body
+            bookingId: booking._id.toString(), // Take bookingId from the saved booking
+          },
+        });
+    
+        console.log('Notification sent:', notificationResponse);
 
     // Step 3: Return the created booking and updated accommodation
     res.status(201).json({ booking, accommodation });
