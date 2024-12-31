@@ -24,7 +24,7 @@ export class PlanningItineraryComponent implements OnInit {
   showServiceSelection = false;
 
   availableServices = [
-    { serviceType: 'Accommodation', serviceName: 'Not Available', startDate: '', endDate: '', startTime: '', endTime: '' },
+    { serviceType: 'Accommodvadvation', serviceName: 'Not Available', startDate: '', endDate: '', startTime: '14:00', endTime: '11:00' },
     { serviceType: 'Tour', serviceName: 'Not Available', singleDate: '', singleTime: '' },
     { serviceType: 'Vehicle', serviceName: 'Not Available', startDate: '', endDate: '', startTime: '', endTime: '' },
     { serviceType: 'Restaurant', serviceName: 'Not Available', singleDate: '', singleTime: '' }
@@ -51,7 +51,7 @@ export class PlanningItineraryComponent implements OnInit {
   ];
   years: number[] = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - 10 + i);
 
-
+  today: string = new Date().toISOString().split('T')[0]; // Today's date in 'yyyy-MM-dd' format
 
 
   constructor(private router: Router, private authService: AuthService, private itineraryService: ItineraryService, private bookingService: BookingService) {
@@ -70,6 +70,7 @@ export class PlanningItineraryComponent implements OnInit {
         this.loadPlanningItinerary();
       }
     });
+    
 
     // const start = startOfDay(new Date(this.vacationStartDate));
     // const end = endOfDay(new Date(this.vacationEndDate));
@@ -98,7 +99,14 @@ export class PlanningItineraryComponent implements OnInit {
     
   }
 
-  
+  initializeServices(): void {
+    this.availableServices.forEach((service) => {
+      if (service.serviceType === 'Accommodation') {
+        service.startTime = '14:00'; // Default start time for accommodation
+        service.endTime = '11:00';   // Default end time for accommodation
+      }
+    });
+  }
 
   loadItinerary(userId: string): void {
     console.log('Loading itinerary for user:', userId);
@@ -123,8 +131,8 @@ export class PlanningItineraryComponent implements OnInit {
                 serviceName: service.serviceName || 'Not Available',
                 startDate: service.startDate ? new Date(service.startDate).toISOString().split('T')[0] : '',
                 endDate: service.endDate ? new Date(service.endDate).toISOString().split('T')[0] : '',
-                startTime: service.startTime || '',
-                endTime: service.endTime || '',
+                startTime: type === 'Accommodation' && !service.startTime ? '14:00' : service.startTime,  // Only for Accommodation
+                endTime: type === 'Accommodation' && !service.endTime ? '11:00' : service.endTime,      // Only for Accommodation
                 bookingId: service.bookingId || 'Missing',
                 amount: service.amount || 0,
               };
@@ -195,6 +203,7 @@ export class PlanningItineraryComponent implements OnInit {
 
   onSubmit() {
     if (this.vacationStartDate && this.vacationEndDate) {
+      this.loadItinerary(this.currentUser.userId);
       this.showServiceSelection = true;
     }
   }

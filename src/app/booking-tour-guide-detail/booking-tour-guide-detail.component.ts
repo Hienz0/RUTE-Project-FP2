@@ -304,10 +304,23 @@ openModal(): void {
         const tourService = itinerary.services.find(
           (service: any) => service.serviceType === 'Tour'
         );
-
+  
         if (tourService) {
           // Set the tour date if the service exists
           this.bookingDetails.tourDate = new Date(tourService.singleDate).toISOString().split('T')[0];  // Date format
+  
+          // Set the tour time based on the singleTime
+          const singleTime = tourService.singleTime;
+  
+          if (singleTime === '09:00') {
+            this.bookingDetails.tourTime = '9:00-11:00';
+          } else if (singleTime === '13:00') {
+            this.bookingDetails.tourTime = '13:00-15:00';
+          } else if (singleTime === '17:00') {
+            this.bookingDetails.tourTime = '17:00-19:00';
+          } else {
+            this.bookingDetails.tourTime = '';  // Clear the tour time if no match
+          }
         }
       },
       error: (err) => {
@@ -315,5 +328,6 @@ openModal(): void {
       }
     });
   }
+  
 
 }

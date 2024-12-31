@@ -175,6 +175,7 @@
               [(ngModel)]="bookingDetails.tourTime"
               name="tourTime"
               class="form-select"
+              [disabled]="isItinerary"
               required
             >
               <option value="" disabled selected>Select a time</option>
