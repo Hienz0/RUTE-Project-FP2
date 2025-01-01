@@ -89,6 +89,7 @@ selectStartingQuestion(question: string): void {
     if (userIdFromQuery) {
       this.currentUser.userId = userIdFromQuery; // Update the userId in currentUser
       console.log(`UserId updated from query params: ${userIdFromQuery}`);
+      this.userId = userIdFromQuery;
     }
   });
 
@@ -183,6 +184,7 @@ loadMessages(): void {
   if (!this.selectedUserId) return;
 
   this.chatService.getMessages(this.userId, this.selectedUserId).subscribe((response) => {
+    console.log('user and slx ', this.userId, this.selectedUserId);
     if (response.success) {
       this.messages = response.messages;
 
@@ -232,6 +234,7 @@ loadMessages(): void {
   }
 
   // Admin: Load users list
+
   loadUsers(): void {
     const currentUserId = this.currentUser.userId; // Assuming `currentUser` holds the logged-in user details
   
@@ -246,7 +249,13 @@ loadMessages(): void {
             }))
             .sort((a: any, b: any) => (b.lastActive || 0) - (a.lastActive || 0)); // Sort items by `lastActive`
           
+          // Filter and populate users
+          this.users = response.items
+            .filter((item: any) => item.type === 'user')
+            .map((item: any) => item.data); // Extract user details from items
+  
           console.log('Sorted items:', this.items);
+          console.log('Users list:', this.users);
         } else {
           console.error('Error loading items:', response.error);
         }
@@ -264,22 +273,30 @@ loadMessages(): void {
   
 
   // Polling for new users
-pollForNewUsers(): void {
-  setInterval(() => {
-    console.log('Checking for new users...');
-    this.loadUsers(); // Call your loadUsers function periodically
-    this.selectedUserName = this.users.find((user) => user._id === this.selectedUserId)?.name || '';
-    this.selectedUserStatus = this.users.find((user) => user._id === this.selectedUserId)?.status || '';
-  }, 5000); // Poll every 5 seconds (adjust as needed)
-}
+  pollForNewUsers(): void {
+    setInterval(() => {
+      console.log('Checking for new users...');
+      this.loadUsers(); // Call your loadUsers function periodically
+  
+      const selectedUser = this.users.find((user) => user._id === this.selectedUserId);
+      if (selectedUser) {
+        this.selectedUserName = selectedUser.name;
+        this.selectedUserStatus = selectedUser.status;
+      }
+      // If no matching user, keep the previously selected values unchanged
+    }, 5000); // Poll every 5 seconds (adjust as needed)
+  }
+  
 
   adminId = '665f504a893ed90d8a930118';
   // Admin: Select a user and load messages
 // Admin: Select a user and join their chat room
 selectUser(userId: string): void {
   this.selectedUserId = userId; // Set the selected user's ID
+  console.log(this.selectedUserId);
   this.loadMessages(); // Load chat history
   this.chatService.joinChat({ userId: this.adminId, isAdmin: true }); // Admin joins the selected user's room
+  console.log('user', this.users);
   this.selectedUserName = this.users.find((user) => user._id === userId)?.name || '';
   this.selectedUserStatus = this.users.find((user) => user._id === userId)?.status || '';
   console.log('selected user status: ', this.selectedUserStatus);
