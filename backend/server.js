@@ -3184,8 +3184,8 @@ module.exports = TourBooking;
 //   }
 // });
 
-// POST route to handle booking and availability check
 // Update the booking route
+// POST route to handle booking and availability check
 app.post('/api/bookings/tour-guide', async (req, res) => {
   try {
     const { serviceId, tourDate, userId, isItinerary, ...otherData } = req.body;
