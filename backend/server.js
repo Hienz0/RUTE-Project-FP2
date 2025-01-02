@@ -149,11 +149,15 @@ const userSchema = new mongoose.Schema({
   address: String,
   contact: String,
   avatar: String,
-  userType: { type: String, default: 'user' },  // Add userType with default value 'user'
+  userType: { type: String, default: 'user' },
   resetToken: String,
   resetTokenExpiry: Date,
-  weatherWidgetToggle: { type: Boolean, default: true }
+  weatherWidgetToggle: { type: Boolean, default: true },
+  verificationToken: String,
+  verificationExpiry: Date,
+  isVerified: { type: Boolean, default: false },
 });
+
 
 const User = mongoose.model('User', userSchema);
 
@@ -3314,14 +3318,64 @@ app.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpiry = Date.now() + 3600000; // Token valid for 1 hour
 
-    const newUser = new User({ name, email, password: hashedPassword, userType: 'user' });
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      userType: 'user',
+      verificationToken,
+      verificationExpiry,
+    });
+
     await newUser.save();
-    console.log('User saved to database:', newUser);
-    res.status(201).json({ message: 'User created successfully' });
+
+    // Send verification email
+    const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+    const mailOptions = {
+      from: 'madeyudaadiwinata@gmail.com',
+      to: email,
+      subject: 'Verify Your Account',
+      text: `Please click the link below to verify your account:\n${verificationLink}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'User created successfully. Please verify your email.' });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ message: 'Error creating user', error });
+  }
+});
+
+app.get('/verify-email', async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Verification token is required' });
+  }
+
+  try {
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    user.verificationToken = undefined;
+    user.verificationExpiry = undefined;
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({ message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    res.status(500).json({ message: 'Error verifying email', error });
   }
 });
 
@@ -3332,15 +3386,25 @@ app.post('/signup', async (req, res) => {
 app.post('/signin', async (req, res) => {
   const { email, password } = req.body;
 
-  // Log the received login data
   console.log('Received login data:', { email, password });
 
   try {
     // Find the user by email
     const user = await User.findOne({ email });
 
-    // Check if the user exists and the password is correct
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    // Check if the user exists
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check if the account is verified
+    if (!user.isVerified) {
+      return res.status(403).json({ message: 'Account not verified. Please check your email to verify your account.' });
+    }
+
+    // Check if the password is correct
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -3348,14 +3412,27 @@ app.post('/signin', async (req, res) => {
     const token = generateToken(user);
 
     // Include user details in the response
-    const response = { token, user: { userId: user._id, name: user.name, email: user.email, userType: user.userType, avatar: user.avatar, contact: user.contact, address: user.address,weatherWidgetToggle: user.weatherWidgetToggle } };
-    console.log('Sending response:', response); // Debugging response from server
+    const response = { 
+      token, 
+      user: { 
+        userId: user._id, 
+        name: user.name, 
+        email: user.email, 
+        userType: user.userType, 
+        avatar: user.avatar, 
+        contact: user.contact, 
+        address: user.address, 
+        weatherWidgetToggle: user.weatherWidgetToggle 
+      } 
+    };
+    console.log('Sending response:', response);
     res.status(200).json(response);
   } catch (error) {
     console.error('Error signing in:', error);
     res.status(500).json({ message: 'Error signing in', error });
   }
 });
+
 
 
 //yuda

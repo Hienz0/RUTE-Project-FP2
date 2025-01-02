@@ -145,6 +145,16 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   
       this.bookingDetails.checkInDate = `${year}-${month}-${day}`;
       console.log('Updated Check-in date:', this.bookingDetails.checkInDate);
+      if (this.bookingDetails.roomTypeId) {
+        const selectedRoomType = this.accommodationData.find(
+          (roomType: { roomTypeId: string; price: number }) =>
+            roomType.roomTypeId === this.bookingDetails.roomTypeId
+        );
+    
+        if (selectedRoomType) {
+          this.updateAmount(selectedRoomType.price);
+        }
+      }
     } else {
       this.bookingDetails.checkInDate = '';
     }
@@ -334,6 +344,16 @@ onCheckOutDateChange(date: Date): void {
     // Store the formatted local date string
     this.bookingDetails.checkOutDate = `${year}-${month}-${day}`;
     console.log('Updated Check-out date (local time):', this.bookingDetails.checkOutDate);
+    if (this.bookingDetails.roomTypeId) {
+      const selectedRoomType = this.accommodationData.find(
+        (roomType: { roomTypeId: string; price: number }) =>
+          roomType.roomTypeId === this.bookingDetails.roomTypeId
+      );
+  
+      if (selectedRoomType) {
+        this.updateAmount(selectedRoomType.price);
+      }
+    }
   } else {
     this.bookingDetails.checkOutDate = '';
   }
@@ -427,6 +447,21 @@ onCheckOutDateChange(date: Date): void {
       }
 
       console.log
+    }
+  }
+  
+  updateAmount(roomPrice: number): void {
+    if (this.bookingDetails.checkInDate && this.bookingDetails.checkOutDate) {
+      const checkInDate = new Date(this.bookingDetails.checkInDate);
+      const checkOutDate = new Date(this.bookingDetails.checkOutDate);
+      const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+      const numberOfDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
+  
+      // Calculate amount if the number of days is valid
+      this.bookingDetails.amount = numberOfDays > 0 ? roomPrice * numberOfDays : 0;
+    } else {
+      // Reset amount if dates are not valid
+      this.bookingDetails.amount = 0;
     }
   }
   

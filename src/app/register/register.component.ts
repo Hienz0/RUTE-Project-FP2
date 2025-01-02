@@ -31,39 +31,34 @@ export class RegisterComponent {
       this.errorMessage = 'Passwords do not match';
       setTimeout(() => {
         this.errorMessage = '';
-      }, 3000); // 3 seconds delay before hiding the error message
-      console.log('Passwords do not match');
+      }, 3000);
       return;
     }
-
+  
     const formData = {
       name: this.signupForm.value.name,
       email: this.signupForm.value.email,
       password: this.signupForm.value.password,
-      userType: 'user'
+      userType: 'user',
     };
-
+  
     this.authService.register(formData).subscribe(
       (response: any) => {
-        console.log('Form submitted successfully', response);
-        this.successMessage = 'Registration successful! Redirecting to login page...'; // Set success message
+        this.successMessage = 'Registration successful! Please verify your email.';
         setTimeout(() => {
           this.router.navigate(['/login']);
-        }, 3000); // Redirect after 3 seconds
+        }, 3000);
       },
       (error) => {
         console.error('Form submission error', error);
-        if (error.status === 409) {
-          this.errorMessage = 'Email is already in use';
-        } else {
-          this.errorMessage = 'Registration failed. Please try again later.';
-        }
+        this.errorMessage = error.error.message || 'Registration failed. Please try again.';
         setTimeout(() => {
           this.errorMessage = '';
-        }, 3000); // 3 seconds delay before hiding the error message
+        }, 3000);
       }
     );
   }
+  
 
   isFormInvalid(): boolean {
     return (
