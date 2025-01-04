@@ -582,6 +582,18 @@ generateSingleReceipt(
           console.log("Saving PDF locally");
           pdf.save(`Receipt.pdf`);
           console.timeEnd("Save PDF locally");
+           // Menutup Swal setelah proses selesai
+          Swal.fire({
+            title: 'Download Successful!',
+            text: 'The receipt has been successfully downloaded.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 3000, // Auto-close after 3 seconds (3000 milliseconds)
+            timerProgressBar: true, // Show a progress bar for the timer
+            willClose: () => {
+              // Optionally, you can add a callback when the modal closes
+            }
+          });
         }
 
         console.log("PDF generation completed");
@@ -589,18 +601,7 @@ generateSingleReceipt(
         // Hapus elemen sementara setelah selesai
         clonedElement.remove();
         console.log("Temporary cloned element removed from DOM");
-        // Menutup Swal setelah proses selesai
-        Swal.fire({
-          title: 'Download Successful!',
-          text: 'The receipt has been successfully downloaded.',
-          icon: 'success',
-          confirmButtonText: 'OK',
-          timer: 3000, // Auto-close after 3 seconds (3000 milliseconds)
-          timerProgressBar: true, // Show a progress bar for the timer
-          willClose: () => {
-            // Optionally, you can add a callback when the modal closes
-          }
-        });
+       
         
       })
       .catch((error) => {
