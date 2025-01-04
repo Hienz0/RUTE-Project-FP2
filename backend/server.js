@@ -3332,14 +3332,37 @@ app.post('/signup', async (req, res) => {
 
     await newUser.save();
 
-    // Send verification email
-    const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
-    const mailOptions = {
-      from: 'madeyudaadiwinata@gmail.com',
-      to: email,
-      subject: 'Verify Your Account',
-      text: `Please click the link below to verify your account:\n${verificationLink}`,
-    };
+// Send verification email
+const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+const mailOptions = {
+  from: 'madeyudaadiwinata@gmail.com',
+  to: email,
+  subject: 'Verify Your Account',
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9;">
+      <div style="text-align: center; padding-bottom: 20px;">
+        <img src="https://drive.google.com/uc?export=view&id=1UCZ3XmRbLQhx8galWq6qw6ToLpBz4qhM" alt="Your Logo" style="max-width: 150px;">
+      </div>
+      <h2 style="color: #333; text-align: center;">Welcome to Our Platform!</h2>
+      <p style="color: #555; line-height: 1.6;">
+        Thank you for signing up! To complete your registration, please verify your email address by clicking the button below:
+      </p>
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="${verificationLink}" style="text-decoration: none; padding: 10px 20px; background-color: #4CAF50; color: #fff; border-radius: 5px; font-size: 16px;">
+          Verify My Account
+        </a>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+      <p style="color: #999; font-size: 14px; text-align: center;">
+        If you didn’t create an account, you can safely ignore this email.
+      </p>
+      <p style="color: #999; font-size: 14px; text-align: center;">
+        Need help? Contact us at <a href="mailto:madeyudaadiwinata@gmail.com" style="color: #007BFF;">madeyudaadiwinata@gmail.com</a>
+      </p>
+    </div>
+  `,
+};
+
 
     await transporter.sendMail(mailOptions);
 
@@ -3354,7 +3377,7 @@ app.get('/verify-email', async (req, res) => {
   const { token } = req.query;
 
   if (!token) {
-    return res.status(400).json({ message: 'Verification token is required' });
+    return res.redirect('http://localhost:4200/login?status=error&message=Verification token is required');
   }
 
   try {
@@ -3364,7 +3387,7 @@ app.get('/verify-email', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
+      return res.redirect('http://localhost:4200/login?status=error&message=Invalid or expired token');
     }
 
     user.verificationToken = undefined;
@@ -3372,12 +3395,14 @@ app.get('/verify-email', async (req, res) => {
     user.isVerified = true;
     await user.save();
 
-    res.status(200).json({ message: 'Email verified successfully' });
+    return res.redirect('http://localhost:4200/login?status=success&message=Email verified successfully');
   } catch (error) {
     console.error('Error verifying email:', error);
-    res.status(500).json({ message: 'Error verifying email', error });
+    return res.redirect('http://localhost:4200/login?status=error&message=Error verifying email');
   }
 });
+
+
 
 
 

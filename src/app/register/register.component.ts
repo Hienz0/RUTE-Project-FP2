@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
+declare var Swal: any;
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -26,12 +28,16 @@ export class RegisterComponent {
     });
   }
 
+ 
+
   onSubmit() {
     if (this.signupForm.value.password !== this.signupForm.value.repeatPassword) {
-      this.errorMessage = 'Passwords do not match';
-      setTimeout(() => {
-        this.errorMessage = '';
-      }, 3000);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Passwords do not match',
+        confirmButtonText: 'OK'
+      });
       return;
     }
   
@@ -42,22 +48,39 @@ export class RegisterComponent {
       userType: 'user',
     };
   
+    // Show loading animation
+    Swal.fire({
+      title: 'Processing...',
+      text: 'Please wait while we create your account.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     this.authService.register(formData).subscribe(
       (response: any) => {
-        this.successMessage = 'Registration successful! Please verify your email.';
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'Please verify your email.',
+          confirmButtonText: 'OK'
+        }).then(() => {
           this.router.navigate(['/login']);
-        }, 3000);
+        });
       },
       (error) => {
         console.error('Form submission error', error);
-        this.errorMessage = error.error.message || 'Registration failed. Please try again.';
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: error.error.message || 'Please try again.',
+          confirmButtonText: 'OK'
+        });
       }
     );
   }
+  
   
 
   isFormInvalid(): boolean {

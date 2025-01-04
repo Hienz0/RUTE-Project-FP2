@@ -968,7 +968,7 @@ margin-top: 80px;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #fbc02d;
   border-radius: 25px;
   transition: 0.4s;
   display: flex;
@@ -983,7 +983,7 @@ margin-top: 80px;
 }
 
 .custom-toggle-input:checked + .custom-toggle-slider {
-  background-color: #4caf50;
+  background-color: #1565c0; /* Warna malam */
 }
 
 .custom-toggle-slider:before {
@@ -1000,6 +1000,14 @@ margin-top: 80px;
 
 .custom-toggle-input:checked + .custom-toggle-slider:before {
   transform: translateX(24px);
+  
+}
+.icon-left {
+  transform: translateX(5px); /* Posisi di kiri */
+}
+
+.icon-right {
+  transform: translateX(25px); /* Posisi di kanan */
 }
   
   /* Mobile-specific adjustments */

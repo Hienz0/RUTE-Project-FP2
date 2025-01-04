@@ -45,7 +45,7 @@
 .backTitle {
   color: aliceblue;
   padding-bottom: 20px;
-  
+  padding-top: 40px;
 }
 .quote {
   background-color: rgba(128, 128, 128, 0.5);
@@ -99,9 +99,7 @@
   transition: 0.3s;
 }
 
-.title{
-  margin-top: 30px;
-}
+
 .subTitle{
   margin-top: 30px;
   margin-bottom: 30px;

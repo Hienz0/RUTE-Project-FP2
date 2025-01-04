@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+
+declare var Swal: any;
 
 @Component({
   selector: 'app-login',
@@ -14,9 +16,31 @@ export class LoginComponent implements OnInit {
   successMessage: string = '';
   showPassword: boolean = false; // Flag to toggle password visibility
 
-  constructor(private formBuilder: FormBuilder, private router: Router, private authService: AuthService) { }
+  constructor(private formBuilder: FormBuilder, private router: Router, private route: ActivatedRoute, private authService: AuthService) { }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const status = params['status'];
+      const message = params['message'];
+  
+      if (status && message) {
+        if (status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: message,
+            confirmButtonText: 'OK',
+          });
+        } else if (status === 'error') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: message,
+            confirmButtonText: 'OK',
+          });
+        }
+      }
+    });
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]

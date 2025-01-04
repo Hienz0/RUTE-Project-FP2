@@ -29,10 +29,6 @@
           Weather Forecast
         </a>
       </li>
-      <li>
-
-<div id="bell-container"></div>
-      </li>
       <li class="nav-item dropdown" id="navProfile">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
           aria-expanded="false">
@@ -60,19 +56,27 @@
 
           <!-- Profile and Settings -->
           <li><a class="dropdown-item" href="/customizeProfile"><i class="fas fa-user-circle me-2"></i> Profile</a></li>
-          <li><a class="dropdown-item" href="#"><i class="fas fa-brush me-2"></i> Theme Settings</a></li>
-          <li><a class="dropdown-item" href="#"><i class="fas fa-lock me-2"></i> Update Password</a></li>
+          
           <li>
             <div class="dropdown-item d-flex align-items-center">
               <i class="fas fa-adjust me-2"></i> Switch Theme
               <label class="form-switch custom-toggle d-flex align-items-center ms-auto" aria-label="Switch Theme">
-                <input type="checkbox" class="custom-toggle-input" (change)="toggleTheme()" [checked]="isDarkMode">
-                <span class="custom-toggle-slider">
-                  <i [ngClass]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
+                <input 
+                  type="checkbox" 
+                  class="custom-toggle-input" 
+                  (change)="toggleTheme()" 
+                  [checked]="isDarkMode">
+                <span class="custom-toggle-slider d-flex align-items-center">
+                  <i [ngClass]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'" 
+                     [class.icon-left]="isDarkMode" 
+                     [class.icon-right]="!isDarkMode">
+                  </i>
                 </span>
               </label>
             </div>
           </li>
+          
+          
           
 
           <!-- Provider Options -->
@@ -137,5 +141,3 @@
   [isWidgetVisible]="weatherWidgetToggle"
   (widgetClosed)="onWidgetClosed()">
 </app-floating-weather-widget>
-
-
