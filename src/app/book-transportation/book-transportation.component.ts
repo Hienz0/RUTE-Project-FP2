@@ -497,6 +497,24 @@ export class BookTransportationComponent implements OnInit {
   openModal() {
     this.isModalOpen = true;
     setTimeout(() => {
+      if (this.isItinerary){
+        this.service
+        .getRemainingQuantity(
+          this.transportID,
+          this.pickupDate,
+          this.dropoffDate
+        )
+        .subscribe(
+          (data) => {
+            this.remainingQuantity = data.availableQuantities || {}; // Memastikan data ada atau kosong
+            console.log(this.remainingQuantity);
+          },
+          (error) => {
+            console.error('Gagal mendapatkan sisa kuantitas:', error);
+          }
+        );
+    }
+      
       this.initPickupMap(); // Initialize the map after the modal opens
       this.pickupMap?.invalidateSize(); // Adjust layout to fit modal
       this.initDropoffMap(); // Initialize the map after the modal opens
