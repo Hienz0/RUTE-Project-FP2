@@ -11,6 +11,7 @@ import { ServicesService } from '../services/services.service';
 export class TransportationServicesComponent implements OnInit {
   services: any[] = [];
   Math = Math;
+  showBackToPlanningButton = false;
   constructor(private service : TransportationService, private servicesService: ServicesService, private router: Router, private route: ActivatedRoute){}
   ngOnInit(): void {
     this.service.getTransportationService().subscribe(
@@ -23,6 +24,9 @@ export class TransportationServicesComponent implements OnInit {
             reviewCount: ratingData?.reviewCount ?? 0 
           };
         }));
+        this.route.queryParams.subscribe(params => {
+          this.showBackToPlanningButton = !!params['planning-itinerary'];
+        });
       },
       (error) => {
         console.error('Error fetching transportation service:', error);
@@ -50,9 +54,11 @@ export class TransportationServicesComponent implements OnInit {
   }
 
   navigateToDetails(serviceId: string): void {
-    this.router.navigate(['/transportationDetail', serviceId]);
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/transportationDetail', serviceId], { queryParams });
   
   }
+
 
  // transportation-services.component.ts
  getUniqueSubcategories(service: any): string {

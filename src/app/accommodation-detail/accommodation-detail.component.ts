@@ -5,6 +5,7 @@ import { BookingService } from '../services/booking.service'; // Import the book
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import { ItineraryService } from '../services/itinerary.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 import * as L from 'leaflet';
@@ -48,6 +49,9 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   bookingModal: any;
   bookedDates: string[] = [];
   minCheckOutDate: Date | null = null;
+
+  isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
   
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
@@ -61,7 +65,8 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
     private renderer: Renderer2,
     private router: Router,
     private overlayContainer: OverlayContainer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private itineraryService: ItineraryService,
   ) {}
 
   ngOnInit(): void {
@@ -89,6 +94,20 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
       this.loadBookedDates();
     }
 
+        // Check for the presence of the 'planning-itinerary' query parameter
+        this.route.queryParams.subscribe(params => {
+          if (params['planning-itinerary']) {
+            this.isItinerary = true;
+            this.loadItinerariesByUser(this.currentUser.userId);
+          } else {
+            this.isItinerary = false;
+          }
+        });
+
+
+        this.route.queryParams.subscribe(params => {
+          this.showBackToPlanningButton = !!params['planning-itinerary'];
+        });
 
         // // Dynamically add Tailwind CDN script
         // const script = this.renderer.createElement('script');
@@ -126,6 +145,16 @@ export class AccommodationDetailComponent implements OnInit, AfterViewInit {
   
       this.bookingDetails.checkInDate = `${year}-${month}-${day}`;
       console.log('Updated Check-in date:', this.bookingDetails.checkInDate);
+      if (this.bookingDetails.roomTypeId) {
+        const selectedRoomType = this.accommodationData.find(
+          (roomType: { roomTypeId: string; price: number }) =>
+            roomType.roomTypeId === this.bookingDetails.roomTypeId
+        );
+    
+        if (selectedRoomType) {
+          this.updateAmount(selectedRoomType.price);
+        }
+      }
     } else {
       this.bookingDetails.checkInDate = '';
     }
@@ -204,12 +233,17 @@ loadBookedDates(): void {
 
 // Detect room type selection change to trigger date fetch
 onRoomTypeChange(): void {
+  if (!this.isItinerary) {
+    // Clear the check-in and check-out dates only if it is not an itinerary
+    this.bookingDetails.checkInDate = '';
+    this.bookingDetails.checkOutDate = '';
+  }
+
   this.loadBookedDates(); // Fetch new dates based on selected room type
-  this.bookingDetails.checkInDate = '';
-  this.bookingDetails.checkOutDate = '';
 
   console.log(this.bookingDetails.roomTypeId);
 }
+
 
   isDateDisabled(date: string): boolean {
     return this.bookedDates.includes(date);
@@ -310,6 +344,16 @@ onCheckOutDateChange(date: Date): void {
     // Store the formatted local date string
     this.bookingDetails.checkOutDate = `${year}-${month}-${day}`;
     console.log('Updated Check-out date (local time):', this.bookingDetails.checkOutDate);
+    if (this.bookingDetails.roomTypeId) {
+      const selectedRoomType = this.accommodationData.find(
+        (roomType: { roomTypeId: string; price: number }) =>
+          roomType.roomTypeId === this.bookingDetails.roomTypeId
+      );
+  
+      if (selectedRoomType) {
+        this.updateAmount(selectedRoomType.price);
+      }
+    }
   } else {
     this.bookingDetails.checkOutDate = '';
   }
@@ -406,6 +450,21 @@ onCheckOutDateChange(date: Date): void {
     }
   }
   
+  updateAmount(roomPrice: number): void {
+    if (this.bookingDetails.checkInDate && this.bookingDetails.checkOutDate) {
+      const checkInDate = new Date(this.bookingDetails.checkInDate);
+      const checkOutDate = new Date(this.bookingDetails.checkOutDate);
+      const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+      const numberOfDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
+  
+      // Calculate amount if the number of days is valid
+      this.bookingDetails.amount = numberOfDays > 0 ? roomPrice * numberOfDays : 0;
+    } else {
+      // Reset amount if dates are not valid
+      this.bookingDetails.amount = 0;
+    }
+  }
+  
   
   
   
@@ -490,7 +549,7 @@ onCheckOutDateChange(date: Date): void {
         };
   
         // Submit the booking data
-        this.bookingService.bookAccommodation(bookingData).subscribe(
+        this.bookingService.bookAccommodation(bookingData, this.isItinerary).subscribe(
           (response) => {
             console.log('Booking Response:', response);
         
@@ -510,8 +569,29 @@ onCheckOutDateChange(date: Date): void {
         
                 // Redirect to accommodation-booking-detail page with the booking ID
                 const bookingId = response.booking._id;
-                this.router.navigate([`/bookings/${bookingId}`]);
-              } else {
+                
+                          // Check if "planning-itinerary" exists in the URL
+          const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+          if (planningItineraryId) {
+            // Update the itinerary with the bookingId
+            const userId = this.currentUser.userId; // Ensure `userId` is available
+            this.itineraryService.updateItinerary(bookingId, userId, 'Accommodation', this.bookingDetails.amount).subscribe(
+              () => {
+                console.log('Itinerary updated successfully.');
+                // Navigate to the /planning-itinerary route
+                this.router.navigate([`/planning-itinerary`]);
+              },
+              (error) => {
+                console.error('Failed to update itinerary:', error);
+              }
+            );
+          } else {
+            // Default navigation to booking details page
+            this.router.navigate([`/bookings/${bookingId}`]);
+          }
+
+              } 
+              else {
                 // User chose "Check Again"
                 console.log('User chose to check the details again.');
                 // Additional logic for "Check Again" (if needed) can go here
@@ -556,6 +636,34 @@ onCheckOutDateChange(date: Date): void {
 
   get checkInDateAsDate(): Date {
     return new Date(this.bookingDetails.checkInDate);
+  }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
+  }
+  
+
+  loadItinerariesByUser(userId: string): void {
+    this.itineraryService.getItinerariesByUserId(userId).subscribe({
+      next: (itineraries) => {
+        const accommodationService = itineraries
+          .flatMap((itinerary: any) => itinerary.services)
+          .find((service: any) => service.serviceType === 'Accommodation');
+  
+        if (accommodationService) {
+          // Convert Date to string using toISOString or custom formatting
+          this.bookingDetails.checkInDate = new Date(accommodationService.startDate).toISOString(); // ISO format
+          this.bookingDetails.checkOutDate = new Date(accommodationService.endDate).toISOString();  // ISO format
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itineraries:', err);
+      }
+    });
   }
   
   

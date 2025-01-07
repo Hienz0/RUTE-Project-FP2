@@ -65,6 +65,17 @@
         </div>
       </div>
 
+      <div class="d-flex justify-content-center my-4">
+        <button 
+          class="btn btn-light border rounded-pill px-5 py-2 text-muted shadow-sm" 
+          (click)="navigateToChat()" 
+          [disabled]="!serviceId" 
+          title="Navigate to chat"
+          [style.cursor]="!serviceId ? 'not-allowed' : 'pointer'">
+          Chat with Provider
+        </button>
+      </div>
+
     
   
 <!-- Booking Modal -->
@@ -149,6 +160,7 @@
               name="tourDate"
               class="form-control"
               min="{{ currentDate | date:'yyyy-MM-dd' }}"
+              [disabled]="isItinerary"
               required
             />
           </div>
@@ -163,6 +175,7 @@
               [(ngModel)]="bookingDetails.tourTime"
               name="tourTime"
               class="form-select"
+              [disabled]="isItinerary"
               required
             >
               <option value="" disabled selected>Select a time</option>
@@ -224,3 +237,12 @@
 
 
   <app-review-list [serviceId]="serviceId ?? ''"></app-review-list>
+
+  <!-- Fixed "Back to Itineraries Planning" Button -->
+<a 
+*ngIf="showBackToPlanningButton" 
+href="/planning-itinerary" 
+class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x mb-3"
+>
+Back to Itineraries Planning
+</a>

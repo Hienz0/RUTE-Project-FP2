@@ -14,3 +14,48 @@
     color: #6c757d;
   }
   
+
+/* end of responsive navbar */
+
+
+.rating {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
+
+.star {
+  color: gold;
+  margin-right: 2px;
+}
+
+.text-muted {
+  font-size: 0.9em;
+  color: #6c757d;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 20px;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.card-text {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.badge {
+  background-color: #007bff;
+  font-size: 0.85rem;
+  color: white;
+}
+

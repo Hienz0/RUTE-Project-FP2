@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
+declare var Swal: any;
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -26,44 +28,60 @@ export class RegisterComponent {
     });
   }
 
+ 
+
   onSubmit() {
     if (this.signupForm.value.password !== this.signupForm.value.repeatPassword) {
-      this.errorMessage = 'Passwords do not match';
-      setTimeout(() => {
-        this.errorMessage = '';
-      }, 3000); // 3 seconds delay before hiding the error message
-      console.log('Passwords do not match');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Passwords do not match',
+        confirmButtonText: 'OK'
+      });
       return;
     }
-
+  
     const formData = {
       name: this.signupForm.value.name,
       email: this.signupForm.value.email,
       password: this.signupForm.value.password,
-      userType: 'user'
+      userType: 'user',
     };
-
+  
+    // Show loading animation
+    Swal.fire({
+      title: 'Processing...',
+      text: 'Please wait while we create your account.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     this.authService.register(formData).subscribe(
       (response: any) => {
-        console.log('Form submitted successfully', response);
-        this.successMessage = 'Registration successful! Redirecting to login page...'; // Set success message
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'Please verify your email.',
+          confirmButtonText: 'OK'
+        }).then(() => {
           this.router.navigate(['/login']);
-        }, 3000); // Redirect after 3 seconds
+        });
       },
       (error) => {
         console.error('Form submission error', error);
-        if (error.status === 409) {
-          this.errorMessage = 'Email is already in use';
-        } else {
-          this.errorMessage = 'Registration failed. Please try again later.';
-        }
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000); // 3 seconds delay before hiding the error message
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: error.error.message || 'Please try again.',
+          confirmButtonText: 'OK'
+        });
       }
     );
   }
+  
+  
 
   isFormInvalid(): boolean {
     return (

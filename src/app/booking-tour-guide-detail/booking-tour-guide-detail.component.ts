@@ -4,6 +4,7 @@ import { ServicesService } from '../services/services.service';
 import { BookingService } from '../services/booking.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { ItineraryService } from '../services/itinerary.service';
 
 
 declare var Swal: any;
@@ -40,13 +41,17 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
 
   currentDate: string = '';
 
+  isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
+
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService,
     private bookingService: BookingService,
     private authService: AuthService,
     private renderer: Renderer2,
-    private router: Router
+    private router: Router,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
@@ -55,6 +60,19 @@ export class BookingTourGuideDetailComponent implements OnInit, AfterViewInit {
       console.log(this.currentUser);
     });
 
+    this.route.queryParams.subscribe(params => {
+      if (params['planning-itinerary']) {
+        this.isItinerary = true;
+        this.loadItineraryById(this.currentUser.userId);
+      } else {
+        this.isItinerary = false;
+      }
+    });
+
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
+    
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0];
 
@@ -235,12 +253,30 @@ openModal(): void {
 
     console.log(bookingData)
   
-    this.bookingService.bookTourGuide(bookingData).subscribe(
+    this.bookingService.bookTourGuide(bookingData, this.isItinerary).subscribe(
       (response) => {
         console.log('Booking successful', response);
         this.closeModal();
-        const bookingId = response._id;
-        this.router.navigate([`/bookings/${bookingId}`]);
+        const bookingId = response.bookingDetails._id;
+        const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+        if (planningItineraryId) {
+          // Update the itinerary with the bookingId
+          const userId = this.currentUser.userId; // Ensure `userId` is available
+          this.itineraryService.updateItinerary(bookingId, userId, 'Tour', this.bookingDetails.amount).subscribe(
+            () => {
+              console.log('Itinerary updated successfully.');
+              // Navigate to the /planning-itinerary route
+              this.router.navigate([`/planning-itinerary`]);
+            },
+            (error) => {
+              console.error('Failed to update itinerary:', error);
+            }
+          );
+        } else {
+          // Default navigation to booking details page
+          this.router.navigate([`/bookings/${bookingId}`]);
+        }
+
       },
       (error) => {
         console.error('Error submitting booking', error);
@@ -253,4 +289,45 @@ openModal(): void {
       }
     );
   }  
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
+  }
+
+  loadItineraryById(userId: string): void {
+    this.itineraryService.getItineraryByUserId(userId).subscribe({
+      next: (itinerary) => {
+        const tourService = itinerary.services.find(
+          (service: any) => service.serviceType === 'Tour'
+        );
+  
+        if (tourService) {
+          // Set the tour date if the service exists
+          this.bookingDetails.tourDate = new Date(tourService.singleDate).toISOString().split('T')[0];  // Date format
+  
+          // Set the tour time based on the singleTime
+          const singleTime = tourService.singleTime;
+  
+          if (singleTime === '09:00') {
+            this.bookingDetails.tourTime = '9:00-11:00';
+          } else if (singleTime === '13:00') {
+            this.bookingDetails.tourTime = '13:00-15:00';
+          } else if (singleTime === '17:00') {
+            this.bookingDetails.tourTime = '17:00-19:00';
+          } else {
+            this.bookingDetails.tourTime = '';  // Clear the tour time if no match
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itinerary by ID:', err);
+      }
+    });
+  }
+  
+
 }

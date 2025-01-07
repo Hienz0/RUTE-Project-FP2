@@ -7,6 +7,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import * as L from 'leaflet'; // Import Leaflet.js
 import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-manage-transportation',
@@ -44,6 +46,7 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
   // Reverse geocoded addresses
   pickupAddress: string = '';
   dropoffAddress: string = '';
+  
 
   
 
@@ -71,10 +74,11 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
           this.productImages = this.transportationData.serviceDetails.productImages;
           console.log('foto',this.transportationData)
             // Ambil location dan pisahkan menjadi latitude dan longitude
-        const location = this.transportationData.serviceDetails.location;
-        const [lat, lng] = location.split(',').map((coord: string) => parseFloat(coord.trim())); // Tambahkan tipe string di sini
-
-        this.location = location; // Simpan lokasi asli dalam format string
+          const businessCoordinates = this.transportationData.serviceDetails.businessCoordinates;
+          const [lng, lat] = businessCoordinates.coordinates; // Asumsikan koordinat [lng, lat] diambil langsung
+            
+          this.location = `${lat}, ${lng}`; // Simpan lokasi asli dalam format string
+            
         console.log('Latitude:', lat, 'Longitude:', lng);
 
         // Panggil reverseGeocode untuk mendapatkan alamat
@@ -104,7 +108,20 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       this.checkAndInitMap();
     }
   }
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  onDrop(event: DragEvent): void {
+  event.preventDefault();
+  const files = (event.dataTransfer?.files) as FileList | null;
+  if (files) {
+    this.onImagesSelected({ target: { files } } as any);
+  }
+}
 
+  
   private checkAndInitMap(): void {
     if (this.isEditing && this.pickupMapContainer && this.pickupMapContainer.nativeElement) {
       if (!this.pickupMap) {
@@ -179,11 +196,6 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     }
   }
   
-  
-
-
-  
-
 
   saveTransportation(): void {
     // Preserve the existing serviceDetails if it already exists
@@ -195,11 +207,23 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
       productImages: this.productImages,
       location: this.location,
     };
-    
+  
     console.log('Transportation data saved to variable:', this.transportationData);
-    alert('Transportation data saved locally.');
-    this.isEditing;
+  
+    // SweetAlert notification
+    Swal.fire({
+      icon: 'success',
+      title: 'Transportation Data Saved',
+      text: 'Transportation data has been saved locally.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#3085d6',
+      background: '#f8f9fa', // Light background color
+      padding: '20px', // Add padding for a cleaner look
+    });
+  
+    this.isEditing = false; // Stop editing mode after saving
   }
+  
   
 
 
@@ -247,22 +271,48 @@ export class ManageTransportationComponent implements OnInit, AfterViewInit {
     this.service.saveTransportation(formData).subscribe(
       (response) => {
         console.log('Transportation published successfully:', response);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Transportation published successfully!',
+          timer: 2000, // Timer 2 detik
+          showConfirmButton: false,
+        }).then(() => {
+          // Arahkan ke halaman /manage-services setelah SweetAlert selesai
+          this.router.navigate(['/manage-services']);
+        });
         this.message = 'Transportation published successfully';
       },
       (error) => {
         console.error('Error publishing transportation:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to publish transportation. Please try again.',
+        });
         this.message = 'Failed to publish transportation';
       }
     );
   }
   
-  onImagesSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target.files) {
-      this.selectedFiles = Array.from(target.files);
-      console.log('Selected files:', this.selectedFiles);
-    }
+  selectedImageUrls: string[] = [];  // Untuk menyimpan URL gambar yang baru dipilih
+
+onImagesSelected(event: Event): void {
+  const target = event.target as HTMLInputElement;
+  if (target.files) {
+    this.selectedFiles = Array.from(target.files);
+
+    // Buat URL blob untuk setiap file yang dipilih
+    this.selectedImageUrls = this.selectedFiles.map(file => URL.createObjectURL(file));
+    console.log('Selected files:', this.selectedFiles);
   }
+}
+
+removeNewImage(index: number): void {
+  this.selectedFiles.splice(index, 1);
+  this.selectedImageUrls.splice(index, 1);
+}
+  
   
   
 

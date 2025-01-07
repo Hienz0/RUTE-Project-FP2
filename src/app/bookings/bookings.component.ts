@@ -4,6 +4,8 @@ import { BookingService } from '../services/booking.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
+import jsPDF from 'jspdf'; // Pastikan library ini diinstal
+import html2canvas from 'html2canvas';
 
 
 declare const Swal: any;
@@ -41,6 +43,8 @@ export class BookingsComponent implements OnInit, OnDestroy  {
   bookingId: string | null = null;
   remainingTimes: { [key: string]: number } = {}; // Track remaining times for each booking
 interval: any;
+bookingDetails: any = null;
+
 
 
 
@@ -84,13 +88,17 @@ interval: any;
     
     this.bookingService.getAccommodationBookingsByUserId(this.userId).subscribe(
       (response) => {
-        const { accommodationBookings, tourBookings, vehicleBookings } = response;
+        const { accommodationBookings, tourBookings, vehicleBookings, itineraryBookings } = response;
+
+
+        console.log('itinerary bookings: ', itineraryBookings);
     
         // Combine all booking types into one array
         this.bookings = [
           ...accommodationBookings,
           ...tourBookings,
-          ...vehicleBookings
+          ...vehicleBookings,
+          ...itineraryBookings // Include itinerary bookings
         ];
   
         // Sort combined bookings by 'updatedAt'
@@ -137,21 +145,26 @@ interval: any;
   
   startCountdown(): void {
     this.interval = setInterval(() => {
-      if (this.selectedBooking) { // Check if a booking is selected
-        if (this.selectedBooking.paymentExpiration) {
-          const remainingTime = this.getRemainingTime(this.selectedBooking.paymentExpiration);
-          this.remainingTimes[this.selectedBooking._id] = remainingTime;
+      if (this.bookings && this.bookings.length > 0) {
+        this.bookings.forEach((booking) => {
+          if (booking.paymentExpiration) {
+            const remainingTime = this.getRemainingTime(booking.paymentExpiration);
+            this.remainingTimes[booking._id] = remainingTime;
   
-          // If the selected booking has expired, update its status locally
-          if (remainingTime === 0 && this.selectedBooking.bookingStatus === 'Waiting for payment') {
-            this.selectedBooking.bookingStatus = 'Expired'; // Update status locally
-            console.log(`Booking ${this.selectedBooking._id} has expired.`);
-            this.cdr.detectChanges();
+            // If the booking has expired, update its status locally
+            if (remainingTime === 0 && booking.bookingStatus === 'Waiting for payment') {
+              booking.bookingStatus = 'Expired'; // Update status locally
+              console.log(`Booking ${booking._id} has expired.`);
+            }
           }
-        }
+        });
+  
+        // Detect changes after updating bookings
+        this.cdr.detectChanges();
       }
     }, 1000);
   }
+  
   
   
   clearCountdown(): void {
@@ -192,6 +205,8 @@ interval: any;
       this.selectedBookingType = 'Vehicle';
     } else if (this.selectedBooking.tourName) {
       this.selectedBookingType = 'Tour';
+    } else if (this.selectedBooking.services && Array.isArray(this.selectedBooking.services)) {
+      this.selectedBookingType = 'Itinerary';
     }
   
     // Open the modal using Bootstrap's API
@@ -218,6 +233,391 @@ interval: any;
         }
     }
 }
+
+
+
+ // Properti untuk menyimpan data resi
+ receiptData: any = null;
+
+ // Properti untuk mengontrol visibilitas modal resi
+ isReceiptModalOpen: boolean = false;
+
+ closeReceiptModal(): void {
+  this.isReceiptModalOpen = false; // Tutup modal
+}
+
+
+// downloadReceiptAsPDF(): void {
+//   const receiptModalElement = document.getElementById('receipt-modal');
+
+//   if (!receiptModalElement) {
+//     alert('Unable to find the receipt modal element.');
+//     return;
+//   }
+
+//   html2canvas(receiptModalElement).then((canvas) => {
+//     const imgData = canvas.toDataURL('image/png');
+//     const pdf = new jsPDF('p', 'mm', 'a4');
+
+//     const pdfWidth = pdf.internal.pageSize.getWidth();
+//     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+//     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+//     pdf.save(`Receipt-${new Date().toISOString()}.pdf`);
+//   }).catch((error) => {
+//     console.error('Error generating PDF:', error);
+//   });
+// }
+
+downloadReceiptAsPDF(): void {
+  if (!this.receiptData) {
+    console.error('Receipt data is not available.');
+    return;
+  }
+  // Menampilkan notifikasi awal saat mulai proses generate PDF
+  Swal.fire({
+    title: 'Generating Receipt...',
+    text: 'Please wait while we generate your receipt.',
+    allowOutsideClick: false, // Agar pengguna tidak bisa mengklik di luar modal
+    didOpen: () => {
+      Swal.showLoading(); // Menampilkan spinner loading
+    }
+  });
+
+  this.generateReceipt(this.receiptData.bookingId, this.receiptData.bookingType, this.receiptData.details, false);
+}
+
+getBookingDetails(bookingId: string, bookingType: string): any {
+  const booking = this.bookings.find((b) => b._id === bookingId);
+  if (!booking) return null;
+
+  console.log(`Booking`, booking);
+
+  if (bookingType === 'Accommodation') {
+    return {
+      type: 'Accommodation',
+      accommodationName: booking.accommodationName,
+      accommodationType: booking.accommodationType,
+      guestName: booking.guestName,
+      numberOfGuests: booking.numberOfGuests,
+      checkInDate: booking.checkInDate,
+      checkOutDate: booking.checkOutDate,
+      specialRequest: booking.specialRequest,
+      amount: booking.amount,
+    };
+  } else if (bookingType === 'Tour') {
+    return {
+      type: 'Tour',
+      tourName: booking.tourName,
+      customerName: booking.customerName,
+      numberOfParticipants: booking.numberOfParticipants,
+      tourDate: booking.tourDate,
+      tourTime: booking.tourTime,
+      tourguideType: booking.tourguideType,
+      pickupLocation: booking.pickupLocation,
+      specialRequest: booking.specialRequest,
+      amount: booking.amount,
+    };
+  } else if (bookingType === 'Vehicle') {
+    return {
+      type: 'Vehicle',
+      productName: booking.productName,
+      customerName: booking.customerName,
+      rentalDuration: booking.rentalDuration,
+      pickupDate: booking.pickupDate,
+      dropoffDate: booking.dropoffDate,
+      pickupStreetName: booking.pickupStreetName,
+      dropoffStreetName: booking.dropoffStreetName,
+      specialRequest: booking.specialRequest,
+      vehicleDetails: booking.vehicleBooking.map((vehicle: any) => ({
+        name: vehicle.name,
+        selectedVehicleType: vehicle.selectedVehicleType,
+        quantity: vehicle.quantity,
+        pricePerVehicle: vehicle.pricePerVehicle,
+        totalPrice: vehicle.totalPrice,
+      })),
+      totalBookingPrice: booking.totalBookingPrice,
+
+      
+    };
+    
+  }
+  else if (bookingType === 'Itinerary') {
+    return {
+      type: 'Itinerary',
+      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.bookingStatus,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      totalAmount: booking.totalAmount,
+      itineraryDetails: booking.services.map((service: any) => ({
+        serviceName: service.serviceName,
+        startDate: service.startDate,
+        endDate: service.endDate,
+        amount: service.amount,
+        serviceType: service.serviceType, // Jika diperlukan
+      })),
+    };
+  }
+  
+  
+  
+
+  return null;
+}
+
+openReceiptModal(index: number): void {
+  if (!this.filteredBookings || this.filteredBookings.length === 0) {
+    console.error('Bookings array is empty or not loaded.');
+    return;
+  }
+
+  const booking = this.filteredBookings[index];
+
+  console.log('index',booking)
+  if (!booking) {
+    console.error('Booking not found for index:', index);
+    return;
+  }
+
+  const bookingId = booking._id;
+  let bookingType = '';
+
+  // Determine booking type
+  if (booking.accommodationType) {
+    bookingType = 'Accommodation';
+  } else if (booking.vehicleBooking) {
+    bookingType = 'Vehicle';
+  } else if (booking.tourName) {
+    bookingType = 'Tour';
+  } else {
+    console.error('Unable to determine booking type for booking:', booking);
+    return;
+  }
+
+  console.log('Booking Details:', bookingType);
+  console.log('Received Booking ID:', bookingId);
+
+  // Fetch booking details
+  const details = this.getBookingDetails(bookingId, bookingType);
+  if (details) {
+    this.receiptData = { details };
+    this.isReceiptModalOpen = true;
+  } else {
+    console.error('Booking details not found for ID:', bookingId);
+  }
+
+  this.cdr.detectChanges();
+}
+
+showReceipt(bookingDetails: any) {
+  // Assign booking details to receipt data, ensuring the service type is included.
+  this.receiptData = {
+    details: {
+      type: bookingDetails.serviceType, // Explicitly include service type
+      ...bookingDetails // Spread the remaining properties of bookingDetails
+    }
+  };
+
+  // Debug log to verify booking details
+  console.log('Booking Details:', bookingDetails);
+
+  // Open the receipt modal
+  this.isReceiptModalOpen = true;
+}
+
+
+generateReceipt(
+  bookingId: string,
+  bookingType: string,
+  details: any,
+  sendToEmail: boolean = false
+): void {
+  console.log("generateReceipt started");
+  console.time("Total time");
+
+  this.cdr.detectChanges();
+  console.log("Change detection triggered");
+
+  if (bookingType === 'Itinerary') {
+    console.log("Processing Itinerary receipt generation");
+
+    const itineraryDetails = details.itineraryDetails || [];
+    if (itineraryDetails.length === 0) {
+      console.error("No services found in itineraryDetails for receipt generation.");
+      return;
+    }
+
+    // Iterate over each service in itineraryDetails and generate receipt
+    itineraryDetails.forEach((service: any, index: number) => {
+      console.log(`Generating receipt for service ${index + 1}:`, service);
+
+      
+
+      // Call the receipt generation logic for each service
+      this.generateSingleReceipt(bookingId, service.serviceType, details, sendToEmail);
+    });
+
+    console.log("All Itinerary receipts generated.");
+  } else {
+    // For other booking types, generate a single receipt
+    this.generateSingleReceipt(bookingId, bookingType, details, sendToEmail);
+  }
+
+  console.timeEnd("Total time");
+}
+
+
+generateSingleReceipt(
+  bookingId: string,
+  bookingType: string,
+  details: any,
+  sendToEmail: boolean = false
+): void {
+  console.log("generateReceipt started");
+  console.time("Total time");
+
+  this.cdr.detectChanges(); // Memaksa Angular mendeteksi perubahan
+  console.time("Change detection");
+  console.log("Change detection triggered");
+  console.timeEnd("Change detection");
+  console.log("booking receipt",details)
+
+  const receiptModalElement = document.getElementById("receipt-modal");
+
+  if (!receiptModalElement) {
+    alert("Unable to find the receipt modal element.");
+    console.error("Receipt modal element not found in DOM");
+    console.timeEnd("Total time");
+    return;
+  }
+
+  // Clone elemen modal
+  console.time("Clone element");
+  const clonedElement = receiptModalElement.cloneNode(true) as HTMLElement;
+  clonedElement.id = "receipt-modal-temp"; // Hindari konflik ID
+  clonedElement.style.position = "absolute";
+  clonedElement.style.top = "-9999px"; // Sembunyikan elemen
+  clonedElement.style.left = "-9999px";
+  document.body.appendChild(clonedElement); // Tambahkan elemen ke DOM
+  console.timeEnd("Clone element");
+
+  // Terapkan gaya khusus untuk ukuran A4
+  clonedElement.style.width = "794px"; // Lebar A4
+  clonedElement.style.minHeight = "1123px"; // Tinggi minimum A4
+  clonedElement.style.fontSize = "12px"; // Ukuran font konsisten
+  console.log("Cloned element prepared and styled for PDF generation");
+
+  setTimeout(() => {
+    console.time("html2canvas generation");
+    console.log("Starting html2canvas generation");
+
+    html2canvas(clonedElement, {
+      scale: 1.5, // Pertahankan resolusi tinggi
+      useCORS: true, // Hindari masalah dengan gambar eksternal
+      allowTaint: true, // Percepat jika tidak butuh validasi taint
+      logging: false, // Matikan logging untuk meningkatkan performa
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: clonedElement.scrollWidth,
+      windowHeight: clonedElement.scrollHeight,
+    })
+      .then((canvas: any) => {
+        console.timeEnd("html2canvas generation");
+        console.log("html2canvas finished rendering");
+
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        const imgHeight = (canvasHeight * pdfWidth) / canvasWidth;
+        let pageHeightLeft = imgHeight;
+        let position = 0;
+
+        console.time("Add image to PDF");
+        while (pageHeightLeft > 0) {
+          const canvasData = canvas.toDataURL("image/png");
+          pdf.addImage(canvasData, "PNG", 0, position, pdfWidth, imgHeight);
+          pageHeightLeft -= pdfHeight;
+          position -= pdfHeight;
+
+          if (pageHeightLeft > 0) pdf.addPage();
+        }
+        console.timeEnd("Add image to PDF");
+        console.log("Image added to PDF");
+
+        if (sendToEmail) {
+          console.time("PDF to email process");
+          console.log("Preparing to send PDF via email");
+
+          const blob = pdf.output("blob");
+          console.log("PDF Blob size (bytes):", blob.size);
+
+          if (blob.size > 5 * 1024 * 1024) {
+            console.warn("PDF size is too large, consider optimizing the content.");
+          }
+
+          const formData = new FormData();
+          formData.append("receipt", blob, `Receipt-${bookingType}.pdf`);
+          formData.append("bookingId", bookingId);
+          formData.append("bookingType", bookingType);
+          formData.append("details", JSON.stringify(details));
+
+          console.log("Sending FormData to server", formData);
+
+          this.bookingService.sendReceiptToEmail(formData).subscribe(
+            () => {
+              console.timeEnd("PDF to email process");
+              console.log("Receipt sent to email successfully");
+            },
+            (error) => {
+              console.timeEnd("PDF to email process");
+              console.error("Error sending receipt to email:", error);
+            }
+          );
+        } else {
+          console.time("Save PDF locally");
+          console.log("Saving PDF locally");
+          pdf.save(`Receipt.pdf`);
+          console.timeEnd("Save PDF locally");
+           // Menutup Swal setelah proses selesai
+          Swal.fire({
+            title: 'Download Successful!',
+            text: 'The receipt has been successfully downloaded.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 3000, // Auto-close after 3 seconds (3000 milliseconds)
+            timerProgressBar: true, // Show a progress bar for the timer
+            willClose: () => {
+              // Optionally, you can add a callback when the modal closes
+            }
+          });
+        }
+
+        console.log("PDF generation completed");
+
+        // Hapus elemen sementara setelah selesai
+        clonedElement.remove();
+        console.log("Temporary cloned element removed from DOM");
+       
+        
+      })
+      .catch((error) => {
+        console.error("Error generating canvas or PDF:", error);
+      });
+  }, 0);
+
+  console.timeEnd("Total time");
+}
+
+
+
+
+
+
+  
   
 
 payForBooking(bookingId: string, amount: number, bookingType: string): void {
@@ -249,7 +649,31 @@ payForBooking(bookingId: string, amount: number, bookingType: string): void {
               console.log(`${bookingType} booking updated successfully.`);
               this.loadAllBookings();
               this.closeBookingModal();
+              this.receiptData = {
+                bookingId,
+                details: this.getBookingDetails(bookingId, bookingType),
+              };
+              if (bookingType !== 'Itinerary') {
+                this.isReceiptModalOpen = true;
+                this.generateReceipt(bookingId, bookingType, this.receiptData.details, true);
+              }
+              else {
+                // Jika bookingType adalah "Itinerary", tampilkan notifikasi menggunakan SweetAlert
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Download Receipt',
+                  text: 'Please download your receipt from the Itinerary view.',
+                  confirmButtonText: 'OK',
+                });
+              }
+              
+              
+              // Kirimkan PDF ke email
+              
               this.cdr.detectChanges();
+
+              
+
             },
             error => {
               console.error('Failed to update booking status:', error);
@@ -311,6 +735,41 @@ navigateToReview(bookingId: string): void {
   console.log(bookingId);
 }
 
+viewItinerary(service: any): void {
+  // Extract bookingId and serviceType from the service object
+  const bookingId = service.bookingId ?? 'defaultBookingId'; // Fallback in case bookingId is missing
+
+  console.log('service: ', service);
+  const serviceType = service.serviceType ?? 'defaultServiceType'; // Fallback in case serviceType is missing
+
+  // Fetch the booking details based on bookingId and serviceType
+  this.bookingService.getBookingDetails(bookingId, serviceType).subscribe(
+    (data) => {
+      // this.bookingDetails = data; // Set the booking details to display
+      this.bookingDetails = { ...data, serviceType: serviceType }; // Set the booking details to display
+      console.log('booking details: ', this.bookingDetails);
+      const modalElement = document.getElementById('bookingModal');
+      if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      }
+    },
+    (error) => {
+      console.error('Error fetching booking details:', error);
+    }
+  );
+}
+
+closeModal(): void {
+  const modalElement = document.getElementById('bookingModal');
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal?.hide();
+  }
+}
+
+
+// 
 
 
 

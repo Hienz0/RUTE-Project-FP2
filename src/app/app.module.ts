@@ -32,6 +32,9 @@ import { SafeUrlPipe } from './safe-url.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ManageBookingsComponent } from './manage-bookings/manage-bookings.component';
@@ -43,7 +46,6 @@ import { PaymentListComponent } from './payment-list/payment-list.component';
 import { CustomizeProfileComponent } from './customize-profile/customize-profile.component';
 import { TransportationServicesComponent } from './transportation-services/transportation-services.component';
 import { BookTransportationComponent } from './book-transportation/book-transportation.component';
-
 import { ManageTransportationComponent } from './manage-transportation/manage-transportation.component';
 import { RateServicesComponent } from './rate-services/rate-services.component';
 import { UserNavbarComponent } from './user-navbar/user-navbar.component';
@@ -51,6 +53,15 @@ import { ReviewListComponent } from './review-list/review-list.component';
 import { ProviderNavbarComponent } from './provider-navbar/provider-navbar.component';
 import { TruncateLocationPipe } from './truncate-location.pipe';
 import { TruncatePipe } from './truncate.pipe';
+import { WeatherWidgetComponent } from './weather-widget/weather-widget.component';
+import { RequestResetPasswordComponent } from './request-reset-password/request-reset-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { FloatingWeatherWidgetComponent } from './floating-weather-widget/floating-weather-widget.component';
+import { AiCustomerServiceComponent } from './ai-customer-service/ai-customer-service.component';
+import { CustomerServiceComponent } from './customer-service/customer-service.component';
+import { TranslatePageComponent } from './translate-page/translate-page.component';
+import { ChatComponent } from './chat/chat.component';
+import { PlanningItineraryComponent } from './planning-itinerary/planning-itinerary.component';
 
 @NgModule({
   declarations: [
@@ -90,7 +101,16 @@ import { TruncatePipe } from './truncate.pipe';
     ReviewListComponent,
     ProviderNavbarComponent,
     TruncateLocationPipe,
-    TruncatePipe
+    TruncatePipe,
+    WeatherWidgetComponent,
+    RequestResetPasswordComponent,
+    ResetPasswordComponent,
+    FloatingWeatherWidgetComponent,
+    AiCustomerServiceComponent,
+    CustomerServiceComponent,
+    TranslatePageComponent,
+    ChatComponent,
+    PlanningItineraryComponent
   ],
   imports: [
     BrowserModule,
@@ -105,6 +125,9 @@ import { TruncatePipe } from './truncate.pipe';
     MatFormFieldModule,
     MatSnackBarModule, // Add comma here
     MatTooltipModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatGridListModule,
     RouterModule.forRoot([
       { path: 'manage-services', component: ManageServicesComponent },
       { path: 'register', component: RegisterComponent },

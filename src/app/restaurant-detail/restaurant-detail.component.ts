@@ -3,14 +3,18 @@ import { ActivatedRoute } from '@angular/router';
 import { ServicesService } from '../services/services.service';
 import { AuthService } from '../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
+import { BookingService } from '../services/booking.service';
 import * as L from 'leaflet';
 import Panzoom from '@panzoom/panzoom';
+import { ItineraryService } from '../services/itinerary.service';
 
 // Declare Swal globally
 declare var Swal: any;
 declare var bootstrap: any;
 
 const BASE_URL = 'http://localhost:3000';
+
 
 
 @Component({
@@ -32,13 +36,18 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
   selectedItem: any = null;
   @ViewChild('imagePreview') imagePreview!: ElementRef;
   panzoomInstance: any;
+  showBackToPlanningButton = false;
+  showAddToItineraryButton = false;
 
 
   constructor(
     private route: ActivatedRoute,
     private servicesService: ServicesService,
     private authService: AuthService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private router: Router,
+    private bookingService: BookingService,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +60,14 @@ export class RestaurantDetailComponent implements OnInit, AfterViewInit {
     if (this.restaurantId) {
       this.loadRestaurantDetails(this.restaurantId);
     }
+
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
+
+    this.route.queryParams.subscribe(params => {
+      this.showAddToItineraryButton = !!params['planning-itinerary'];
+    });
   }
 
 ngAfterViewInit(): void {
@@ -180,6 +197,7 @@ loadRestaurantDetails(id: string): void {
   this.servicesService.getRestaurantById(id).subscribe(
     (data) => {
       this.restaurant = data;
+      console.log(this.restaurant);
       if (this.map && this.restaurant.businessCoordinates) {
         // Update map center with restaurant coordinates
         const { coordinates } = this.restaurant.businessCoordinates;
@@ -189,6 +207,47 @@ loadRestaurantDetails(id: string): void {
     },
     (error) => {
       console.error('Error fetching restaurant details', error);
+    }
+  );
+}
+
+addToItinerary(): void {
+  const bookingDetails = {
+    productName: this.restaurant.productName,
+    serviceId: this.restaurant._id,
+    userId: this.currentUser.userId,
+    bookingStatus: 'pending'
+  };
+
+  this.bookingService.addBookingToItinerary(bookingDetails).subscribe(
+    (response) => {
+      console.log('Booking added to itinerary successfully', response);
+
+      const bookingId = response.booking._id;
+
+      console.log('Booking ID: ', bookingId);
+
+      const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+      if (planningItineraryId) {
+        // Update the itinerary with the bookingId
+        const userId = this.currentUser.userId; // Ensure `userId` is available
+        this.itineraryService.updateItinerary(bookingId, userId, 'Restaurant', 0).subscribe(
+          () => {
+            console.log('Itinerary updated successfully.');
+            // Navigate to the /planning-itinerary route
+            this.router.navigate([`/planning-itinerary`]);
+          },
+          (error) => {
+            console.error('Failed to update itinerary:', error);
+          }
+        );
+      } else {
+        // Default navigation to booking details page
+        console.log('error');
+      }
+    },
+    (error) => {
+      console.error('Error adding booking to itinerary', error);
     }
   );
 }
@@ -245,5 +304,20 @@ toggleZoom() {
   onImageClick(event: MouseEvent) {
     event.stopPropagation(); // Prevent click from propagating to the modal backdrop
   }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
+  }
+
+  navigateToReview(bookingId: string): void {
+    this.router.navigate(['rateServices/', bookingId]);
+    console.log(bookingId);
+  }
+
+
   
 }

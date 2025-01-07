@@ -82,7 +82,7 @@ export class CustomizeProfileComponent implements OnInit {
         this.showAlert(
           'error',
           'Update Failed!',
-          'There was an error while updating your profile.',
+          'The password entered is incorrect. Please try again.',
           ''
         );
       }

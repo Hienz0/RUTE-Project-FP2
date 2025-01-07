@@ -1,129 +1,206 @@
-<div class="container my-5 p-5" style="background-color: #f8f9fa; border-radius: 8px;">
-  <h1 class="text-center mb-5" style="color: #343a40;">Transportation Management</h1>
+<app-provider-navbar></app-provider-navbar>
+
+
+<div class="container my-5 p-5" style=" border-radius: 8px;">
+  <h1 class="text-center mb-5 ">Transportation Management</h1>
 
   <!-- Transportation Details Display or Edit Form -->
-  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+  <div class="card p-4 my-4" style="background-color: #ffffff; border: 1px ; border-radius: 8px;">
     <div class="card-body">
-      <div *ngIf="!isEditing">
-        <h3><i class="fas fa-bus icon"></i> {{ productName }}</h3>
-        <p class="text-muted">{{ productDescription }}</p>
-        <!-- Display Product Images in Carousel -->
-      <div id="transportationCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-          <button 
-            *ngFor="let image of productImages; let i = index" 
-            type="button" 
-            data-bs-target="#transportationCarousel" 
-            [attr.data-bs-slide-to]="i" 
-            [class.active]="i === 0" 
-            aria-current="i === 0 ? 'true' : undefined" 
-            [attr.aria-label]="'Slide ' + (i + 1)">
+       <!-- Display Mode -->
+       <div *ngIf="!isEditing" class="p-4 ">
+        <h3 class="d-flex align-items-center text-primary fw-bold mb-3">
+          <i class="fas fa-bus icon text-primary me-3" style="font-size: 2rem;"></i>
+          <span style="font-size: 1.75rem;">{{ productName }}</span>
+        </h3>
+        
+        <p class="text-muted fs-5 mb-4">{{ productDescription }}</p>
+      
+        <!-- Carousel -->
+        <div 
+          id="transportationCarousel" 
+          class="carousel slide rounded overflow-hidden shadow-sm mb-4" 
+          data-bs-ride="carousel" 
+          data-bs-interval="3000" 
+          style="max-width: 800px; margin: 0 auto;"
+        >
+          <div class="carousel-indicators">
+            <button 
+              *ngFor="let image of productImages; let i = index" 
+              type="button" 
+              data-bs-target="#transportationCarousel" 
+              [attr.data-bs-slide-to]="i" 
+              [class.active]="i === 0" 
+              aria-current="i === 0 ? 'true' : undefined" 
+              [attr.aria-label]="'Slide ' + (i + 1)">
+            </button>
+          </div>
+          <div class="carousel-inner">
+            <div 
+              *ngFor="let image of productImages; let i = index" 
+              class="carousel-item" 
+              [class.active]="i === 0">
+              <img 
+                [src]="getFullImagePath(image)"
+                class="d-block w-100 img-fluid rounded" 
+                alt="Product Image" 
+                style="height: 400px; object-fit: cover;" 
+              />
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#transportationCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#transportationCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
           </button>
         </div>
       
-        <!-- Carousel inner with images -->
-        <div class="carousel-inner">
-          <div 
-            *ngFor="let image of productImages; let i = index" 
-            class="carousel-item" 
-            [class.active]="i === 0">
-            <img 
-              [src]="getFullImagePath(image)"
-              class="d-block w-100 img-fluid rounded" 
-              alt="Product Image" 
-              style="height: 400px; object-fit: cover;" 
-            />
-          </div>
-        </div>
-      
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#transportationCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#transportationCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
-        <p>
-          <i class="fas fa-map-marker-alt icon"></i>
-          <strong> Location:</strong>
-          <span id="location-address">{{ location }}</span>
+        <p class="mt-4 fs-5">
+          <i class="fas fa-map-marker-alt text-danger me-3" style="font-size: 1.5rem;"></i>
+          <strong>Location: </strong>
+          <span id="location-address" class="fw-semibold text-secondary">{{ location }}</span>
         </p>
-        
-        <button class="btn btn-primary mt-3" (click)="toggleEdit()">
-          <i class="fas fa-edit"></i> Edit
+      
+        <button class="btn btn-warning btn-lg d-flex align-items-center gap-3 shadow mt-4" (click)="toggleEdit()">
+          <i class="fas fa-edit" style="font-size: 1.25rem;"></i>
+          <span style="font-size: 1.25rem;">Edit</span>
         </button>
       </div>
+      
 
       <!-- Edit Transportation Details Form with Existing Values in Inputs -->
-      <div *ngIf="isEditing">
-        <h3><i class="fas fa-pencil-alt icon"></i> Edit Transportation Details</h3>
-        <div class="form-group mb-3">
-          <label for="transportationName"><i class="fas fa-building icon"></i> Name</label>
-          <input type="text" class="form-control" id="transportationName" [(ngModel)]="productName" required />
-        </div>
-        <div class="form-group mb-3">
-          <label for="transportationDescription"><i class="fas fa-info-circle icon"></i> Description</label>
-          <textarea class="form-control" id="transportationDescription" [(ngModel)]="productDescription" rows="3"></textarea>
-        </div>
-        <div>
-          <label for="productImages">Product Images</label>
-          <input type="file" (change)="onImagesSelected($event)" multiple />
-        
-          <div *ngFor="let imagePath of productImages; let i = index">
-            <img [src]="getFullImagePath(imagePath)" alt="Product Image" width="100" />
-            <button type="button" (click)="removeImage(i)">Remove</button>
-          </div>
-        </div>
-        
-        
-        
-        <!-- Pickup Location -->
-        <div class="mb-3">
-          <label for="pickupLocation" class="form-label">
-            Pickup Location <span style="color: red">*</span>
-          </label>
 
-          <!-- Pickup Map -->
-          <!-- HTML File -->
-        <div #pickupMapContainer id="pickupMap" style="height: 400px;"></div>
-
-
-
-          <!-- Pickup Address Input -->
-          <input
-            type="text"
-            id="pickupAddress"
-            [(ngModel)]="pickupAddress"
-            name="pickupAddress"
-            class="form-control"
-            placeholder="Pickup address"
-            readonly
-            required
-          />
-
-          
-        </div>
-        <button class="btn btn-primary mt-3" (click)="saveTransportation()">
-          <i class="fas fa-save"></i> Save
-        </button>
-        <button class="btn btn-secondary mt-3" (click)="toggleEdit()">Cancel</button>
+    <div *ngIf="isEditing" class="p-4 border ">
+      <h3 class="mb-4 text-primary d-flex align-items-center gap-2">
+        <i class="fas fa-pencil-alt icon"></i> 
+        <span>Edit Transportation Details</span>
+      </h3>
+      
+      <!-- Transportation Name -->
+      <div class="form-group mb-4">
+        <label for="transportationName" class="form-label fs-5 fw-bold">
+          <i class="fas fa-building icon"></i> Name
+        </label>
+        <input 
+          type="text" 
+          class="form-control form-control-lg" 
+          id="transportationName" 
+          [(ngModel)]="productName" 
+          required />
       </div>
+      
+      <!-- Transportation Description -->
+      <div class="form-group mb-4">
+        <label for="transportationDescription" class="form-label fs-5 fw-bold">
+          <i class="fas fa-info-circle icon"></i> Description
+        </label>
+        <textarea 
+          class="form-control form-control-lg" 
+          id="transportationDescription" 
+          [(ngModel)]="productDescription" 
+          rows="3"></textarea>
+      </div>
+      
+      <!-- Product Images -->
+      <div class="mb-4">
+        <label for="productImages" class="form-label fs-5 fw-bold">
+          <i class="fas fa-images icon"></i> Product Images
+        </label>
+        <input type="file" id="productImages" (change)="onImagesSelected($event)" multiple hidden />
+        <label for="productImages" class="upload-label d-flex justify-content-center align-items-center p-3 border rounded bg-white shadow-sm cursor-pointer">
+          <i class="fas fa-cloud-upload-alt fs-4 me-2"></i>
+          <span>Click or Drag & Drop Images Here</span>
+        </label>
 
-      <button
-class="btn btn-primary"
-(click)="viewBookings()"
->
-View Bookings
-</button>
-    </div>
+        <!-- Image Grid -->
+<div class="image-grid mt-3 d-flex flex-wrap gap-3">
+  <!-- Gambar yang sudah ada -->
+  <div *ngFor="let imagePath of productImages; let i = index" class="image-card position-relative">
+    <img 
+      [src]="getFullImagePath(imagePath)" 
+      alt="Product Image" 
+      class="image-preview rounded shadow" />
+    <button 
+      type="button" 
+      class="btn btn-danger btn-sm remove-button position-absolute top-0 end-0 m-1" 
+      (click)="removeImage(i)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
   </div>
 
+  <!-- Gambar yang baru dipilih -->
+  <div *ngFor="let imageUrl of selectedImageUrls; let i = index" class="image-card position-relative">
+    <img 
+      [src]="imageUrl" 
+      alt="New Product Image" 
+      class="image-preview rounded shadow" />
+    <button 
+      type="button" 
+      class="btn btn-danger btn-sm remove-button position-absolute top-0 end-0 m-1" 
+      (click)="removeNewImage(i)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+</div>
+
+      </div>
+      
+      <!-- Pickup Location -->
+      <div class="mb-4">
+        <label for="pickupLocation" class="form-label fs-5 fw-bold">
+          <i class="fas fa-map-marker-alt"></i> Pickup Location <span class="text-danger">*</span>
+        </label>
+        
+        <!-- Pickup Map -->
+        <div #pickupMapContainer id="pickupMap" style="height: 400px;" class="border rounded shadow-sm"></div>
+        
+        <!-- Pickup Address Input -->
+        <input 
+          type="text" 
+          id="pickupAddress" 
+          [(ngModel)]="pickupAddress" 
+          name="pickupAddress" 
+          class="form-control form-control-lg mt-3" 
+          placeholder="Pickup address" 
+          readonly 
+          required />
+      </div>
+      
+      <!-- Buttons -->
+      <div class="d-flex justify-content-start gap-3 mt-4">
+        <button 
+          class="btn btn-success btn-lg d-flex align-items-center gap-2 shadow-sm px-4" 
+          (click)="saveTransportation()">
+          <i class="fas fa-save"></i>
+          <span>Save</span>
+        </button>
+        <button 
+          class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 shadow-sm px-4" 
+          (click)="toggleEdit()">
+          <i class="fas fa-times-circle"></i>
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+
+
+      
+    </div>
+  </div>
+  <div class="d-flex justify-content-center align-items-center my-4">
+    <button class="btn btn-primary btn-lg d-flex align-items-center gap-2 shadow-lg" (click)="viewBookings()">
+      <i class="fas fa-calendar-alt"></i>
+      <span>View Bookings</span>
+    </button>
+  </div>
+  
+  
+  
   <!-- Vehicle Types Section -->
-<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px;">
+<div class="card p-4 my-4" style="background-color: #ffffff; border: 1px ; border-radius: 8px;">
   <div class="card-body">
     <h3><i class="fas fa-car icon"></i> Vehicle Types</h3>
     

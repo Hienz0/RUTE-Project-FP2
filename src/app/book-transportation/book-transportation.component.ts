@@ -8,6 +8,7 @@ import axios from 'axios'; // Import axios for reverse geocoding
 import 'leaflet-search'; // Import Leaflet Search
 import flatpickr from 'flatpickr';
 import Swal from 'sweetalert2';
+import { ItineraryService } from '../services/itinerary.service';
 
 @Component({
   selector: 'app-book-transportation',
@@ -17,6 +18,8 @@ import Swal from 'sweetalert2';
 export class BookTransportationComponent implements OnInit {
   transportationService: any;
   currentUser: any;
+  serviceId: string | null = null;
+
 
   // Booking form fields with default values
   pickupDate: string = '';
@@ -64,17 +67,32 @@ export class BookTransportationComponent implements OnInit {
   isModalOpen = false;
   ubudCircle: any;
 
+  isItinerary: boolean = false; // Default is false
+  showBackToPlanningButton = false;
+
   constructor(
     private route: ActivatedRoute,
     private service: TransportationService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private itineraryService: ItineraryService
   ) {}
 
   ngOnInit(): void {
     // Get the logged-in user
     this.currentUser = this.authService.currentUserValue;
     console.log('Logged in user:', this.currentUser);
+
+    this.serviceId = this.route.snapshot.paramMap.get('id');
+
+    this.route.queryParams.subscribe(params => {
+      if (params['planning-itinerary']) {
+        this.isItinerary = true;
+        this.loadItineraryById(this.currentUser.userId);
+      } else {
+        this.isItinerary = false;
+      }
+    });
 
     // Get ID from route parameter
     this.transportID = this.route.snapshot.paramMap.get('id')!;
@@ -107,6 +125,9 @@ export class BookTransportationComponent implements OnInit {
     // Initialize maps
     this.initPickupMap();
     this.initDropoffMap();
+    this.route.queryParams.subscribe(params => {
+      this.showBackToPlanningButton = !!params['planning-itinerary'];
+    });
   }
 
   fetchBookedDates(transportID: string): void {
@@ -389,14 +410,30 @@ export class BookTransportationComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // If user confirms, proceed with booking
-        this.service.bookTransport(bookingData).subscribe(
+        this.service.bookTransport(bookingData, this.isItinerary).subscribe(
           (response) => {
             console.log('Transportation booked successfully:', response);
             const bookingId = response.bookingDetails._id;
             console.log(bookingId);
-    
-            // Redirect directly to booking details page
-            this.router.navigate([`/bookings/${bookingId}`]);
+
+            const planningItineraryId = this.route.snapshot.queryParamMap.get('planning-itinerary');
+            if (planningItineraryId) {
+              // Update the itinerary with the bookingId
+              const userId = this.currentUser.userId; // Ensure `userId` is available
+              this.itineraryService.updateItinerary(bookingId, userId, 'Vehicle', bookingData.totalBookingPrice).subscribe(
+                () => {
+                  console.log('Itinerary updated successfully.');
+                  // Navigate to the /planning-itinerary route
+                  this.router.navigate([`/planning-itinerary`]);
+                },
+                (error) => {
+                  console.error('Failed to update itinerary:', error);
+                }
+              );
+            } else {
+              // Default navigation to booking details page
+              this.router.navigate([`/bookings/${bookingId}`]);
+            }
           },
           (error) => {
             // Show error message
@@ -460,6 +497,24 @@ export class BookTransportationComponent implements OnInit {
   openModal() {
     this.isModalOpen = true;
     setTimeout(() => {
+      if (this.isItinerary){
+        this.service
+        .getRemainingQuantity(
+          this.transportID,
+          this.pickupDate,
+          this.dropoffDate
+        )
+        .subscribe(
+          (data) => {
+            this.remainingQuantity = data.availableQuantities || {}; // Memastikan data ada atau kosong
+            console.log(this.remainingQuantity);
+          },
+          (error) => {
+            console.error('Gagal mendapatkan sisa kuantitas:', error);
+          }
+        );
+    }
+      
       this.initPickupMap(); // Initialize the map after the modal opens
       this.pickupMap?.invalidateSize(); // Adjust layout to fit modal
       this.initDropoffMap(); // Initialize the map after the modal opens
@@ -767,6 +822,32 @@ export class BookTransportationComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed && redirectTo) {
         this.router.navigate([redirectTo]);
+      }
+    });
+  }
+
+  navigateToChat(): void {
+    if (this.serviceId) {
+      this.router.navigate(['/chat'], { queryParams: { providerId: this.serviceId } });
+    } else {
+      console.error('Service ID is not available.');
+    }
+  }
+
+  loadItineraryById(userId: string): void {
+    this.itineraryService.getItineraryByUserId(userId).subscribe({
+      next: (itinerary: any) => {
+        const vehicleService = itinerary.services.find(
+          (service: any) => service.serviceType === 'Vehicle'
+        );
+
+        if (vehicleService) {
+          this.pickupDate = new Date(vehicleService.startDate).toISOString().split('T')[0]; // Date format
+          this.dropoffDate = new Date(vehicleService.endDate).toISOString().split('T')[0];  // Date format
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching itinerary by ID:', err);
       }
     });
   }

@@ -1,5 +1,6 @@
 <app-user-navbar></app-user-navbar>
 
+
 <div *ngIf="accommodationDetail" class="container my-5">
   <!-- Accommodation Title and Description -->
   <div class="row">
@@ -226,7 +227,7 @@
                 <mat-label>Check-in Date</mat-label>
                 <input matInput class="z-index-front" [matDatepicker]="picker" [(ngModel)]="bookingDetails.checkInDate"
                   (ngModelChange)="onCheckInDateChange($event)" [matDatepickerFilter]="disableBookedDates"
-                  [disabled]="!bookingDetails.roomTypeId" matTooltip="Please select a room type first"
+                  [disabled]="!bookingDetails.roomTypeId || isItinerary" matTooltip="Please select a room type first"
                   [matTooltipDisabled]="!!bookingDetails.roomTypeId" required readonly />
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
@@ -242,7 +243,7 @@
                 <mat-label>Check-out Date</mat-label>
                 <input matInput class="z-index-front" [matDatepicker]="picker2"
                   [(ngModel)]="bookingDetails.checkOutDate" (ngModelChange)="onCheckOutDateChange($event)"
-                  [matDatepickerFilter]="disablePastAndBookedDatesForCheckOut" [disabled]="!bookingDetails.checkInDate"
+                  [matDatepickerFilter]="disablePastAndBookedDatesForCheckOut" [disabled]="!bookingDetails.checkInDate || isItinerary"
                   matTooltip="Please select a check-in date first" [matTooltipDisabled]="!!bookingDetails.checkInDate"
                   required readonly />
                 <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
@@ -262,6 +263,15 @@
             <textarea id="specialRequest" [(ngModel)]="bookingDetails.specialRequest" name="specialRequest"
               class="form-control rounded-3" rows="3" placeholder="Enter any special requests"></textarea>
           </div>
+
+          <!-- Total Amount -->
+<div class="mb-3">
+  <label for="totalAmount" class="form-label">
+    <i class="fas fa-money-bill-wave me-2"></i>Total Amount
+  </label>
+  <input id="totalAmount" type="text" [(ngModel)]="bookingDetails.amount" name="amount"
+    class="form-control rounded-3" readonly />
+</div>
 
           <!-- Modal Actions -->
           <div class="d-flex justify-content-between mt-4">
@@ -288,88 +298,16 @@
   </div>
 </div>
 
+<div class="d-flex justify-content-center my-4">
+  <button 
+    class="btn btn-light border rounded-pill px-5 py-2 text-muted shadow-sm" 
+    (click)="navigateToChat()" 
+    [disabled]="!serviceId" 
+    title="Navigate to chat"
+    [style.cursor]="!serviceId ? 'not-allowed' : 'pointer'">
+    Chat with Provider
+  </button>
+</div>
+
 <!-- Rating and Review Section -->
 <app-review-list [serviceId]="serviceId ?? ''"></app-review-list>
-<!-- FAQ Section -->
-<div class="container my-5">
-  <h2>Frequently Asked Questions</h2>
-  <div class="faq-item">
-    <h5>Q: What is your pet policy?</h5>
-    <p>A: We allow pets for an additional fee. Please contact us for details.</p>
-  </div>
-  <div class="faq-item">
-    <h5>Q: What are your cancellation policies?</h5>
-    <p>A: Cancellations made 24 hours before check-in are fully refundable.</p>
-  </div>
-  <div class="faq-item">
-    <h5>Q: What time is check-in/check-out?</h5>
-    <p>A: Check-in is at 3 PM and check-out is at 11 AM.</p>
-  </div>
-</div>
-
-<!-- Social Share Buttons -->
-<div class="container my-5">
-  <h2>Share This Accommodation</h2>
-  <div>
-    <button class="btn btn-outline-primary me-2">Share on Facebook</button>
-    <button class="btn btn-outline-info me-2">Share on Twitter</button>
-    <button class="btn btn-outline-danger">Share on Instagram</button>
-  </div>
-</div>
-
-<!-- Contact Information Section -->
-<div class="container my-5">
-  <h2>Contact Us</h2>
-  <p>If you have any questions, feel free to reach out to us:</p>
-  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-  <p><strong>Email:</strong> infoexample.com</p>
-</div>
-
-<!-- Similar Accommodations Section -->
-<div class="container my-5">
-  <h2>Similar Accommodations</h2>
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card">
-        <img src="dummy_image_url_1.jpg" class="card-img-top" alt="Accommodation 1">
-        <div class="card-body">
-          <h5 class="card-title">Accommodation 1</h5>
-          <p class="card-text">Description of accommodation 1.</p>
-          <a href="#" class="btn btn-primary">View Details</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <img src="dummy_image_url_2.jpg" class="card-img-top" alt="Accommodation 2">
-        <div class="card-body">
-          <h5 class="card-title">Accommodation 2</h5>
-          <p class="card-text">Description of accommodation 2.</p>
-          <a href="#" class="btn btn-primary">View Details</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <img src="dummy_image_url_3.jpg" class="card-img-top" alt="Accommodation 3">
-        <div class="card-body">
-          <h5 class="card-title">Accommodation 3</h5>
-          <p class="card-text">Description of accommodation 3.</p>
-          <a href="#" class="btn btn-primary">View Details</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- User Profile Section -->
-<div *ngIf="currentUser" class="container my-5">
-  <h2>Your Profile</h2>
-  <p><strong>Name:</strong> {{ currentUser.name }}</p>
-  <p><strong>Email:</strong> {{ currentUser.email }}</p>
-  <h4>Past Bookings</h4>
-  <ul class="list-group">
-    <li class="list-group-item">Booking 1 - Date: 2024-10-15</li>
-    <li class="list-group-item">Booking 2 - Date: 2024-10-20</li>
-  </ul>
-</div>

@@ -121,4 +121,21 @@ export class AuthService {
     return currentUser ? currentUser.id : null; // Assuming `id` is the identifier in the user object
   }
 
+    // Send reset password email
+    requestPasswordReset(email: string): Observable<any> {
+      return this.http.post(`${this.authUrl}/request-password-reset`, { email });
+    }
+  
+    // Reset the password using token
+    resetPassword(token: string, newPassword: string): Observable<any> {
+      return this.http.post(`${this.authUrl}/reset-password`, {
+        token,
+        newPassword,
+      });
+    }
+
+    getRandomServices(): Observable<any> {
+      return this.http.get(`${this.authUrl}/randomServices`);
+    }
+
 }

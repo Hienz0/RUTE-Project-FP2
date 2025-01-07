@@ -1,0 +1,37 @@
+.d-flex {
+    display: flex;
+  }
+  
+  .justify-content-between {
+    justify-content: space-between;
+  }
+  
+  .align-items-start {
+    align-items: flex-start;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .custom-text-primary {
+    color: #007bff !important;
+  }
+  
+  img.img-fluid {
+    max-width: 100%;
+    height: auto;
+  }
+  #receipt-modal-temp {
+    width: 794px; /* Lebar A4 */
+    min-height: 1123px; /* Tinggi minimum A4 */
+    font-size: 12px; /* Ukuran font untuk dokumen */
+    padding: 10px; /* Berikan jarak padding jika diperlukan */
+    box-sizing: border-box; /* Untuk menghitung dimensi total dengan padding */
+    overflow: hidden; /* Cegah elemen meluap */
+  }
+  .btn-close-custom {
+    color: #000 !important;     /* Warna tombol */
+    opacity: 1 !important;      /* Pastikan opasitas tidak terpengaruh */
+  }
+  

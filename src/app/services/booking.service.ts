@@ -11,13 +11,21 @@ export class BookingService {
   constructor(private http: HttpClient) {}
 
   // Send a booking request to the backend
-  bookAccommodation(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${'accommodation'}`, bookingData);
+  bookAccommodation(bookingData: any, isItinerary: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/accommodation`, {
+      ...bookingData,
+      isItinerary,
+    });
   }
+  
 
-  bookTourGuide(bookingData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${'tour-guide'}`, bookingData);
+  bookTourGuide(bookingData: any, isItinerary: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/tour-guide`, {
+      ...bookingData,
+      isItinerary,
+    });
   }
+  
 
     // Check if the room is available for the specified date range
     checkRoomAvailability(serviceId: string, roomNumber: number, checkInDate: string, checkOutDate: string): Observable<boolean> {
@@ -100,6 +108,19 @@ createTransaction(bookingId: string, amount: number, userId: string, bookingType
       return this.http.get(`${this.apiUrl}/rooms/${roomId}`);
     }
     
+    sendReceiptToEmail(formData: FormData): Observable<any> {
+      return this.http.post<any>('http://localhost:3000/api/receipts', formData);
+    }
+
+      // Add a new booking to the itinerary
+  addBookingToItinerary(bookingDetails: { productName: string, serviceId: string, userId: string, bookingStatus: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/add-to-itinerary`, bookingDetails);
+  }
+
+    // Fetch booking details by bookingId and serviceType
+    getBookingDetails(bookingId: string, serviceType: string): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/${serviceType}/${bookingId}`);
+    }
     
     
   

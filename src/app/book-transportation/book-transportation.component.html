@@ -196,6 +196,17 @@
     </button>
   </div>
 
+  <div class="d-flex justify-content-center my-4">
+    <button 
+      class="btn btn-light border rounded-pill px-5 py-2 text-muted shadow-sm" 
+      (click)="navigateToChat()" 
+      [disabled]="!serviceId" 
+      title="Navigate to chat"
+      [style.cursor]="!serviceId ? 'not-allowed' : 'pointer'">
+      Chat with Provider
+    </button>
+  </div>
+
   <app-review-list [serviceId]="transportID"></app-review-list>
 
   <div *ngIf="isModalOpen" class="modal-backdrop fade show"></div>
@@ -245,6 +256,7 @@
                       readonly
                       (focus)="openPickupCalendar()"
                       (change)="onDateChange()"
+                      [disabled]="isItinerary"
                       required
                     />
                     <span
@@ -271,6 +283,7 @@
                       readonly
                       (focus)="openDropoffCalendar()"
                       (change)="onDateChange()"
+                      [disabled]="isItinerary"
                       required
                     />
                     <span
@@ -471,3 +484,12 @@
     </div>
   </div>
 </div>
+
+<!-- Fixed "Back to Itineraries Planning" Button -->
+<a 
+  *ngIf="showBackToPlanningButton" 
+  href="/planning-itinerary" 
+  class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x mb-3"
+>
+  Back to Itineraries Planning
+</a>
