@@ -274,6 +274,15 @@ downloadReceiptAsPDF(): void {
     console.error('Receipt data is not available.');
     return;
   }
+  // Menampilkan notifikasi awal saat mulai proses generate PDF
+  Swal.fire({
+    title: 'Generating Receipt...',
+    text: 'Please wait while we generate your receipt.',
+    allowOutsideClick: false, // Agar pengguna tidak bisa mengklik di luar modal
+    didOpen: () => {
+      Swal.showLoading(); // Menampilkan spinner loading
+    }
+  });
 
   this.generateReceipt(this.receiptData.bookingId, this.receiptData.bookingType, this.receiptData.details, false);
 }
@@ -331,7 +340,28 @@ getBookingDetails(bookingId: string, bookingType: string): any {
 
       
     };
+    
   }
+  else if (bookingType === 'Itinerary') {
+    return {
+      type: 'Itinerary',
+      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.bookingStatus,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      totalAmount: booking.totalAmount,
+      itineraryDetails: booking.services.map((service: any) => ({
+        serviceName: service.serviceName,
+        startDate: service.startDate,
+        endDate: service.endDate,
+        amount: service.amount,
+        serviceType: service.serviceType, // Jika diperlukan
+      })),
+    };
+  }
+  
+  
+  
 
   return null;
 }
@@ -380,8 +410,65 @@ openReceiptModal(index: number): void {
   this.cdr.detectChanges();
 }
 
+showReceipt(bookingDetails: any) {
+  // Assign booking details to receipt data, ensuring the service type is included.
+  this.receiptData = {
+    details: {
+      type: bookingDetails.serviceType, // Explicitly include service type
+      ...bookingDetails // Spread the remaining properties of bookingDetails
+    }
+  };
+
+  // Debug log to verify booking details
+  console.log('Booking Details:', bookingDetails);
+
+  // Open the receipt modal
+  this.isReceiptModalOpen = true;
+}
+
 
 generateReceipt(
+  bookingId: string,
+  bookingType: string,
+  details: any,
+  sendToEmail: boolean = false
+): void {
+  console.log("generateReceipt started");
+  console.time("Total time");
+
+  this.cdr.detectChanges();
+  console.log("Change detection triggered");
+
+  if (bookingType === 'Itinerary') {
+    console.log("Processing Itinerary receipt generation");
+
+    const itineraryDetails = details.itineraryDetails || [];
+    if (itineraryDetails.length === 0) {
+      console.error("No services found in itineraryDetails for receipt generation.");
+      return;
+    }
+
+    // Iterate over each service in itineraryDetails and generate receipt
+    itineraryDetails.forEach((service: any, index: number) => {
+      console.log(`Generating receipt for service ${index + 1}:`, service);
+
+      
+
+      // Call the receipt generation logic for each service
+      this.generateSingleReceipt(bookingId, service.serviceType, details, sendToEmail);
+    });
+
+    console.log("All Itinerary receipts generated.");
+  } else {
+    // For other booking types, generate a single receipt
+    this.generateSingleReceipt(bookingId, bookingType, details, sendToEmail);
+  }
+
+  console.timeEnd("Total time");
+}
+
+
+generateSingleReceipt(
   bookingId: string,
   bookingType: string,
   details: any,
@@ -394,6 +481,7 @@ generateReceipt(
   console.time("Change detection");
   console.log("Change detection triggered");
   console.timeEnd("Change detection");
+  console.log("booking receipt",details)
 
   const receiptModalElement = document.getElementById("receipt-modal");
 
@@ -494,6 +582,18 @@ generateReceipt(
           console.log("Saving PDF locally");
           pdf.save(`Receipt.pdf`);
           console.timeEnd("Save PDF locally");
+           // Menutup Swal setelah proses selesai
+          Swal.fire({
+            title: 'Download Successful!',
+            text: 'The receipt has been successfully downloaded.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 3000, // Auto-close after 3 seconds (3000 milliseconds)
+            timerProgressBar: true, // Show a progress bar for the timer
+            willClose: () => {
+              // Optionally, you can add a callback when the modal closes
+            }
+          });
         }
 
         console.log("PDF generation completed");
@@ -501,6 +601,8 @@ generateReceipt(
         // Hapus elemen sementara setelah selesai
         clonedElement.remove();
         console.log("Temporary cloned element removed from DOM");
+       
+        
       })
       .catch((error) => {
         console.error("Error generating canvas or PDF:", error);
@@ -551,8 +653,20 @@ payForBooking(bookingId: string, amount: number, bookingType: string): void {
                 bookingId,
                 details: this.getBookingDetails(bookingId, bookingType),
               };
-              this.isReceiptModalOpen = true; // Open receipt modal
-              this.generateReceipt(bookingId, bookingType, this.receiptData.details, true);
+              if (bookingType !== 'Itinerary') {
+                this.isReceiptModalOpen = true;
+                this.generateReceipt(bookingId, bookingType, this.receiptData.details, true);
+              }
+              else {
+                // Jika bookingType adalah "Itinerary", tampilkan notifikasi menggunakan SweetAlert
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Download Receipt',
+                  text: 'Please download your receipt from the Itinerary view.',
+                  confirmButtonText: 'OK',
+                });
+              }
+              
               
               // Kirimkan PDF ke email
               

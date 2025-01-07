@@ -231,8 +231,9 @@
                   Details
                 </button>
                  <!-- Show Receipt Button -->
-                 <button 
-                  *ngIf="booking.bookingStatus !== 'Expired' 
+                 <button
+                  *ngIf="!booking.services 
+                          && booking.bookingStatus !== 'Expired' 
                           && booking.bookingStatus !== 'Waiting for payment' 
                           && booking.bookingStatus !== 'Canceled by Traveller'"
                   class="btn btn-outline-success btn-sm px-3 py-1 hover:bg-blue-600 hover:text-white ms-2"
@@ -241,14 +242,15 @@
                 </button>
 
 
+
                 
-                <button *ngIf="
+                <button *ngIf="!booking.services &&
                   booking.bookingStatus === 'Complete' && !booking.isReviewed
                 " class="btn btn-outline-primary btn-sm px-3 py-1 ms-2" (click)="navigateToReview(booking._id)">
                   Review
                 </button>
 
-                <button *ngIf="
+                <button *ngIf="!booking.services &&
                   booking.bookingStatus === 'Complete' && booking.isReviewed
                 " class="btn btn-outline-secondary btn-sm px-3 py-1 ms-2" disabled>
                   Reviewed
@@ -498,178 +500,7 @@
   </div>
 
 
-  <div *ngIf="isReceiptModalOpen"  class="modal fade show d-block" tabindex="-1" style="background-color: rgba(255, 255, 255, 0.5);">
-    <div class="modal-dialog modal-lg modal-dialog-centered" >
-      <div class="modal-content" style="background-color: #ffffff; color: #000000 ">
-        
   
-        <!-- Modal Body -->
-        <div id="receipt-modal" class="modal-body" style="background-color: #ffffff;">
-          <!-- Modal Header with Logo and Title -->
-          <div  class="modal-header text-dark d-flex align-items-center px-4 py-3 mb-4" style="background-color: #ffffff;">
-            <img src="../../assets/images/rute-logo-temp.png" alt="Company Logo" class="img-fluid me-3" style="height: 40px;" />
-            <h4 class="modal-title flex-grow-1 text-center fw-bold pt-2" style="font-size: 1.75rem; color:#000000 !important">
-              <i class="fas fa-receipt  custom-text-primary me-2"></i>
-              Payment Receipt
-            </h4>
-            <button type="button" class="btn-close " style="color: #000000 !important;" (click)="closeReceiptModal()" aria-label="Close"></button>
-          </div>
-          <!-- Accommodation Details -->
-          <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="d-flex justify-content-between align-items-center mb-4">
-            <div style="flex: 1;">
-              <h1 class="custom-text-primary mb-3" >
-                <i class="fas fa-bed me-2"></i> Accommodation Details
-              </h1>
-              <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-hotel me-2" style="color: #000000 !important;"></i> Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-building me-2" style="color: #000000 !important;"></i> Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-comment me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
-            </div>
-            <div>
-              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
-            </div>
-          </div>
-  
-          <!-- Accommodation Table -->
-          <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="table-responsive mt-3">
-            <table class="table table-bordered table-hover">
-              <thead class="table-light">
-                <tr>
-                  <th><i class="fas fa-users me-2"></i> Number of Guests</th>
-                  <th><i class="fas fa-calendar-check me-2"></i> Check-In Date</th>
-                  <th><i class="fas fa-calendar-times me-2"></i> Check-Out Date</th>
-                  <th><i class="fas fa-coins me-2"></i> Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfGuests }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.checkInDate | date }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.checkOutDate | date }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
-          </div>
-  
-          <!-- Tour Details -->
-          <div *ngIf="receiptData?.details?.type === 'Tour'" class="d-flex justify-content-between align-items-center mb-4">
-            <div style="flex: 1;">
-              <h1 class="custom-text-primary mb-3">
-                <i class="fas fa-map-marked-alt me-2"></i> Tour Details
-              </h1>
-              <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-route me-2" style="color: #000000 !important;"></i> Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> Ubud Palaces</p>
-            </div>
-            <div>
-              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
-            </div>
-          </div>
-  
-          <!-- Tour Table -->
-          <div *ngIf="receiptData?.details?.type === 'Tour'" class="table-responsive mt-3">
-            <table class="table table-bordered table-hover">
-              <thead class="table-light">
-                <tr>
-                  <th><i class="fas fa-users me-2"></i> Number of Participants</th>
-                  <th><i class="fas fa-calendar-day me-2"></i> Tour Date</th>
-                  <th><i class="fas fa-clock me-2"></i> Tour Time</th>
-                  <th><i class="fas fa-user-tag me-2"></i> Tour Guide Type</th>
-                  <th><i class="fas fa-coins me-2"></i> Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfParticipants }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourDate | date }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourTime }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.tourguideType }}</td>
-                  <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
-          </div>
-  
-          <!-- Vehicle Details -->
-          <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="d-flex justify-content-between align-items-center mb-4">
-            <div style="flex: 1;">
-              <h1 class="custom-text-primary mb-3">
-                <i class="fas fa-car-side me-2"></i> Vehicle Details
-              </h1>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-car me-2" style="color: #000000 !important;"></i> Product Name:</strong> {{ receiptData?.details?.productName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;">
-                <strong>
-                  <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Pickup Date:
-                </strong>
-                {{ receiptData?.details?.pickupDate | date: 'MMMM dd, yyyy' }}
-              </p>
-              
-              <p style="color: #000000 !important; text-transform: capitalize;">
-                <strong>
-                  <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Dropoff Date:
-                </strong>
-                {{ receiptData?.details?.dropoffDate | date: 'MMMM dd, yyyy' }}
-              </p>
-              
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-clock me-2" style="color: #000000 !important;"></i> Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-marker-alt me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName | truncateLocation:3 }}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName | truncateLocation:3}}</p>
-              <p style="color: #000000 !important; text-transform: capitalize;">
-                <strong>
-                  <i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:
-                </strong>
-                {{ receiptData?.details?.specialRequest || 'None' }}
-              </p>
-              
-            </div>
-            <div>
-              <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
-            </div>
-          </div>
-  
-          <!-- Vehicle Table -->
-          <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="table-responsive mt-3">
-            <table class="table table-bordered table-hover">
-              <thead class="table-light">
-                <tr>
-                  <th><i class="fas fa-car me-2"></i> Vehicle Name</th>
-                  <th><i class="fas fa-info-circle me-2"></i> Type</th>
-                  <th><i class="fas fa-list-ol me-2"></i> Quantity</th>
-                  <th><i class="fas fa-tag me-2"></i> Price/Vehicle</th>
-                  <th><i class="fas fa-coins me-2"></i> Total Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let vehicle of receiptData?.details?.vehicleDetails">
-                  <td style="text-transform: capitalize;">{{ vehicle.name }}</td>
-                  <td style="text-transform: capitalize;">{{ vehicle.selectedVehicleType }}</td>
-                  <td style="text-transform: capitalize;">{{ vehicle.quantity }}</td>
-                  <td style="text-transform: capitalize;">{{ vehicle.pricePerVehicle | currency:'IDR' }}</td>
-                  <td style="text-transform: capitalize;">{{ vehicle.totalPrice | currency:'IDR' }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.totalBookingPrice | currency:'IDR' }}</p>
-          </div>
-        </div>
-  
-        <!-- Modal Footer -->
-        <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeReceiptModal()">
-            <i class="fas fa-times me-2"></i> Close
-          </button>
-          <button class="btn btn-primary" (click)="downloadReceiptAsPDF()">
-            <i class="fas fa-download me-2"></i> Download PDF
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
       <!-- Booking Details Modal -->
 <!-- Booking Details Modal -->
@@ -805,16 +636,216 @@
         </div>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- Modal Footer -->
+    <div class="modal-footer bg-gray-100 border-t border-gray-300 py-4 flex justify-end items-center space-x-4">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary btn-sm text-white hover:bg-gray-700 rounded-lg px-4 py-2 transition"
+        data-bs-dismiss="modal">
+        Close
+      </button>
+      
+      <button 
+        class="btn btn-outline-success btn-sm px-3 py-1 hover:bg-blue-600 hover:text-white ms-2  rounded-lg px-4 py-2 transition"
+        (click)="showReceipt(bookingDetails)">
+        <span>Show Receipt</span>
+      </button>
+      
+      <div *ngIf="bookingDetails">
+        <button 
+          *ngIf="bookingDetails.bookingStatus === 'Complete' && !bookingDetails.isReviewed"
+          class="btn btn-outline-primary border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-lg px-4 py-2 transition"
+          (click)="navigateToReview(bookingDetails._id)">
+          Review
+        </button>
+        
+        <button 
+          *ngIf="bookingDetails.bookingStatus === 'Complete' && bookingDetails.isReviewed"
+          class="btn btn-outline-secondary border-gray-400 text-gray-400 cursor-not-allowed rounded-lg px-4 py-2 transition"
+          disabled>
+          Reviewed
+        </button>
       </div>
+    </div>
+
+
     </div>
   </div>
 </div>
 
 
-  
+<div *ngIf="isReceiptModalOpen"  class="modal fade show d-block" tabindex="-1" style="background-color: rgba(255, 255, 255, 0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered" >
+    <div class="modal-content" style="background-color: #ffffff; color: #000000 ">
+      
+
+      <!-- Modal Body -->
+      <div id="receipt-modal" class="modal-body" style="background-color: #ffffff;">
+        <!-- Modal Header with Logo and Title -->
+        <div  class="modal-header text-dark d-flex align-items-center px-4 py-3 mb-4" style="background-color: #ffffff;">
+          <img src="../../assets/images/rute-logo-temp.png" alt="Company Logo" class="img-fluid me-3" style="height: 40px;" />
+          <h4 class="modal-title flex-grow-1 text-center fw-bold pt-2" style="font-size: 1.75rem; color:#000000 !important">
+            <i class="fas fa-receipt  custom-text-primary me-2"></i>
+            Payment Receipt
+          </h4>
+          <button type="button" class="btn-close " style="color: #000000 !important;" (click)="closeReceiptModal()" aria-label="Close"></button>
+        </div>
+        <!-- Accommodation Details -->
+        <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="d-flex justify-content-between align-items-center mb-4">
+          <div style="flex: 1;">
+            <h1 class="custom-text-primary mb-3" >
+              <i class="fas fa-bed me-2"></i> Accommodation Details
+            </h1>
+            <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-hotel me-2" style="color: #000000 !important;"></i> Accommodation Name:</strong> {{ receiptData?.details?.accommodationName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-building me-2" style="color: #000000 !important;"></i> Accommodation Type:</strong> {{ receiptData?.details?.accommodationType }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Guest Name:</strong> {{ receiptData?.details?.guestName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-comment me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+          </div>
+          <div>
+            <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+          </div>
+        </div>
+
+        <!-- Accommodation Table -->
+        <div *ngIf="receiptData?.details?.type === 'Accommodation'" class="table-responsive mt-3">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-users me-2"></i> Number of Guests</th>
+                <th><i class="fas fa-calendar-check me-2"></i> Check-In Date</th>
+                <th><i class="fas fa-calendar-times me-2"></i> Check-Out Date</th>
+                <th><i class="fas fa-coins me-2"></i> Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfGuests }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.checkInDate | date }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.checkOutDate | date }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
+        </div>
+
+        <!-- Tour Details -->
+        <div *ngIf="receiptData?.details?.type === 'Tour'" class="d-flex justify-content-between align-items-center mb-4">
+          <div style="flex: 1;">
+            <h1 class="custom-text-primary mb-3">
+              <i class="fas fa-map-marked-alt me-2"></i> Tour Details
+            </h1>
+            <p style="color: #000000 !important; text-transform: capitalize; "><strong><i class="fas fa-route me-2" style="color: #000000 !important;"></i> Tour Name:</strong> {{ receiptData?.details?.tourName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:</strong> {{ receiptData?.details?.specialRequest || 'None' }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> Ubud Palaces</p>
+          </div>
+          <div>
+            <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+          </div>
+        </div>
+
+        <!-- Tour Table -->
+        <div *ngIf="receiptData?.details?.type === 'Tour'" class="table-responsive mt-3">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-users me-2"></i> Number of Participants</th>
+                <th><i class="fas fa-calendar-day me-2"></i> Tour Date</th>
+                <th><i class="fas fa-clock me-2"></i> Tour Time</th>
+                <th><i class="fas fa-user-tag me-2"></i> Tour Guide Type</th>
+                <th><i class="fas fa-coins me-2"></i> Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.numberOfParticipants }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.tourDate | date }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.tourTime }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.tourguideType }}</td>
+                <td style="text-transform: capitalize;">{{ receiptData?.details?.amount | currency:'IDR' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.amount | currency:'IDR' }}</p>
+        </div>
+
+        <!-- Vehicle Details -->
+        <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="d-flex justify-content-between align-items-center mb-4">
+          <div style="flex: 1;">
+            <h1 class="custom-text-primary mb-3">
+              <i class="fas fa-car-side me-2"></i> Vehicle Details
+            </h1>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-car me-2" style="color: #000000 !important;"></i> Product Name:</strong> {{ receiptData?.details?.productName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-user me-2" style="color: #000000 !important;"></i> Customer Name:</strong> {{ receiptData?.details?.customerName }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;">
+              <strong>
+                <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Pickup Date:
+              </strong>
+              {{ receiptData?.details?.pickupDate | date: 'MMMM dd, yyyy' }}
+            </p>
+            
+            <p style="color: #000000 !important; text-transform: capitalize;">
+              <strong>
+                <i class="fas fa-calendar-alt me-2" style="color: #000000 !important;"></i> Dropoff Date:
+              </strong>
+              {{ receiptData?.details?.dropoffDate | date: 'MMMM dd, yyyy' }}
+            </p>
+            
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-clock me-2" style="color: #000000 !important;"></i> Rental Duration:</strong> {{ receiptData?.details?.rentalDuration }} day(s)</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-marker-alt me-2" style="color: #000000 !important;"></i> Pickup Location:</strong> {{ receiptData?.details?.pickupStreetName | truncateLocation:3 }}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;"><strong><i class="fas fa-map-pin me-2" style="color: #000000 !important;"></i> Dropoff Location:</strong> {{ receiptData?.details?.dropoffStreetName | truncateLocation:3}}</p>
+            <p style="color: #000000 !important; text-transform: capitalize;">
+              <strong>
+                <i class="fas fa-sticky-note me-2" style="color: #000000 !important;"></i> Special Request:
+              </strong>
+              {{ receiptData?.details?.specialRequest || 'None' }}
+            </p>
+            
+          </div>
+          <div>
+            <img src="../../assets/images/lunas.png" alt="Paid Stamp" class="img-fluid" style="height: 200px;" />
+          </div>
+        </div>
+
+        <!-- Vehicle Table -->
+        <div *ngIf="receiptData?.details?.type === 'Vehicle'" class="table-responsive mt-3">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-car me-2"></i> Vehicle Name</th>
+                <th><i class="fas fa-info-circle me-2"></i> Type</th>
+                <th><i class="fas fa-list-ol me-2"></i> Quantity</th>
+                <th><i class="fas fa-tag me-2"></i> Price/Vehicle</th>
+                <th><i class="fas fa-coins me-2"></i> Total Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vehicle of receiptData?.details?.vehicleDetails || receiptData?.details?.vehicleBooking">
+                <td style="text-transform: capitalize;">{{ vehicle.name }}</td>
+                <td style="text-transform: capitalize;">{{ vehicle.selectedVehicleType }}</td>
+                <td style="text-transform: capitalize;">{{ vehicle.quantity }}</td>
+                <td style="text-transform: capitalize;">{{ vehicle.pricePerVehicle | currency:'IDR' }}</td>
+                <td style="text-transform: capitalize;">{{ vehicle.totalPrice | currency:'IDR' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="text-end" style="color: #000000 !important;"><strong>Total Booking Price:</strong> {{ receiptData?.details?.totalBookingPrice | currency:'IDR' }}</p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeReceiptModal()">
+          <i class="fas fa-times me-2"></i> Close
+        </button>
+        <button class="btn btn-primary" (click)="downloadReceiptAsPDF()">
+          <i class="fas fa-download me-2"></i> Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
   
   
   
