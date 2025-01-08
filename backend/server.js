@@ -770,7 +770,7 @@ app.post('/api/bookings/accommodation', async (req, res) => {
       serviceId: req.body.serviceId,
       userId: req.body.userId,
       bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
-      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 3600000) }), // Add paymentExpiration only if not itinerary
+      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 900000) }), // Add paymentExpiration only if not itinerary
     };
 
     // Step 1: Create the booking
@@ -2547,7 +2547,7 @@ app.post('/api/itinerary/confirm', async (req, res) => {
 
     // Calculate payment expiration (15 minutes from now)
     const now = new Date();
-    const paymentExpiration = new Date(now.getTime() + 3600000); // 15 minutes from now
+    const paymentExpiration = new Date(now.getTime() + 900000); // 15 minutes from now
 
     // Create a new itinerary booking with payment expiration
     const itineraryBooking = new ItineraryBooking({
@@ -3078,7 +3078,7 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
       serviceId,
       userId,
       bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
-      ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 3600000) }), // Add payment expiration if not itinerary
+      ...(isItinerary ? {} : { paymentExpiration: new Date(new Date().getTime() + 900000) }), // Add payment expiration if not itinerary
     };
 
     // Create a new tour booking
@@ -4255,7 +4255,7 @@ app.post('/api/bookTransports', async (req, res) => {
       dropoffDate: end,
       specialRequest,
       bookingStatus: isItinerary ? 'Waiting for Itinerary Confirmation' : 'Waiting for payment',
-      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 3600000) }),
+      ...(isItinerary ? {} : { paymentExpiration: new Date(now.getTime() + 900000) }),
       totalBookingPrice,
       pickupStreetName,
       dropoffStreetName,
