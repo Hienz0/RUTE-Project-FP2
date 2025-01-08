@@ -160,8 +160,8 @@
               name="tourDate"
               class="form-control"
               min="{{ currentDate | date:'yyyy-MM-dd' }}"
-              [disabled]="isItinerary"
               required
+              (change)="checkTourAvailability()"
             />
           </div>
 
@@ -175,7 +175,6 @@
               [(ngModel)]="bookingDetails.tourTime"
               name="tourTime"
               class="form-select"
-              [disabled]="isItinerary"
               required
             >
               <option value="" disabled selected>Select a time</option>

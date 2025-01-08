@@ -3096,6 +3096,48 @@ app.post('/api/bookings/tour-guide', async (req, res) => {
   }
 });
 
+// POST route to check tour availability
+app.post('/api/bookings/check-tour-availability', async (req, res) => {
+
+  console.log("Received request on /api/bookings/check-tour-availability", req.body);
+
+  try {
+    const { serviceId, tourDate } = req.body;
+
+    // Normalize the date to ensure comparisons are consistent
+    const startOfDay = new Date(tourDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(tourDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    // Count bookings for the same tour on the same day
+    const bookingCount = await TourBooking.countDocuments({
+      serviceId: serviceId,
+      tourDate: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    // Respond with availability status
+    if (bookingCount >= 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'This tour is fully booked for the selected date.',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Tour is available.',
+    });
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking availability',
+      details: error.message,
+    });
+  }
+});
+
 
 // GET route to fetch bookings by userId
 app.get('/api/services/bookings/user/:userId', async (req, res) => {

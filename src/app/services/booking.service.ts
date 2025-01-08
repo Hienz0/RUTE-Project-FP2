@@ -34,6 +34,13 @@ export class BookingService {
       });
     }
 
+    checkTourAvailability(serviceId: string, tourDate: string): Observable<any> {
+      return this.http.post<any>(
+        `${this.apiUrl}/check-tour-availability`, // Correct endpoint path
+        { serviceId, tourDate }
+      );
+    }
+
 
     getBookingById(bookingId: string): Observable<any> {
       return this.http.get(`${this.apiUrl}/accommodationBooking/${bookingId}`);
