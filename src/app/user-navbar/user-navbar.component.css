@@ -1081,3 +1081,9 @@ margin-top: 80px;
     height: 100vh;
   }
   
+  .dropdown-item i {
+    display: inline-block !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important; /* For solid icons */
+  }
+  

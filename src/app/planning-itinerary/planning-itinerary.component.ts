@@ -244,10 +244,23 @@ export class PlanningItineraryComponent implements OnInit {
     this.itineraryService.savePlanningItinerary(this.currentUser.userId, this.selectedServices).subscribe({
       next: (response) => {
         if (response.success) {
-          alert('Service added and planning itinerary saved successfully!');
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Service added and planning itinerary saved successfully!',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+          });
         } else {
-          alert('Failed to save planning itinerary.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to save planning itinerary.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Retry'
+          });
         }
+        
       },
       error: (err) => {
         console.error('Error saving planning itinerary:', err);
@@ -398,15 +411,28 @@ export class PlanningItineraryComponent implements OnInit {
       next: (response) => {
         console.log('Itinerary confirmed:', response);
         if (response.itineraryBooking) {
-          alert('Itinerary confirmed successfully!');
-          this.selectedServices = []; // Clear the services after confirmation
-          this.totalAmount = 0; // Reset the total amount
-          const bookingId = response.itineraryBooking._id;
-          this.router.navigate([`/bookings/${bookingId}`]);
-
+          Swal.fire({
+            icon: 'success',
+            title: 'Confirmed!',
+            text: 'Itinerary confirmed successfully!',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Go to Booking',
+          }).then(() => {
+            this.selectedServices = []; // Clear the services after confirmation
+            this.totalAmount = 0; // Reset the total amount
+            const bookingId = response.itineraryBooking._id;
+            this.router.navigate([`/bookings/${bookingId}`]);
+          });
         } else {
-          alert('Failed to confirm itinerary.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to confirm itinerary.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Retry'
+          });
         }
+        
       },
       error: (err) => {
         console.error('Error confirming itinerary:', err);

@@ -187,7 +187,7 @@ loadMessages(): void {
   loadUsers(): void {
     this.chatService.getUsers().subscribe((response) => {
       if (response.success) {
-        this.users = response.users;
+        this.users = response.users.reverse(); // Reverse the users list
         console.log('Users loaded:', this.users);
       }
     });
